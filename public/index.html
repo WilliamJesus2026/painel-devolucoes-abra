@@ -1,0 +1,1899 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>
+  // Config pública do app Firebase (não é segredo — a segurança fica nas regras do Firestore/Storage,
+  // que só liberam leitura/escrita para contas @abracadabra.com.br).
+  const FIREBASE_CONFIG = {
+    projectId: "abra-devolucoes",
+    appId: "1:819471855789:web:f72c9bde0e9a4e17715624",
+    storageBucket: "abra-devolucoes.firebasestorage.app",
+    apiKey: "AIzaSyBJcmEPTx1xdl5vzpUZFA5y3Q4P8FmFPfg",
+    authDomain: "abra-devolucoes.firebaseapp.com",
+    messagingSenderId: "819471855789",
+  };
+</script>
+</head>
+<body>
+<title>Controle de Devoluções</title>
+<style>
+  :root{
+    /* Paleta azul/neutra — identidade principal em azul, fundos neutros, cores de alerta reservadas
+       para significado operacional real (atraso/risco de SLA). Nomes de variável preservados por
+       compatibilidade (--vinho/--ouro), valores atualizados para a nova identidade. */
+    --bg0:#F1F4F8; --bg1:#FFFFFF; --bg2:#F6F8FA; --bd:#DBE3EC; --bd2:#C4D0DC;
+    --tx1:#182430; --tx2:#4C5B6B; --tx3:#889199;
+    --vinho:#1D5A9E; --vinho-dark:#123E70; --ouro:#FFFFFF;
+    --grn:#1E7A4C; --amb:#A66A0C; --red:#B3261E; --blu:#3A6EA5; --gry:#6B7785;
+    --grn-bg:#E7F3EC; --amb-bg:#FAF0DC; --red-bg:#FBEAE8; --vinho-bg:#EAF1FA; --gray-bg:#EDF0F3; --blu-bg:#E9F0F8;
+    --shadow:0 2px 10px rgba(20,30,45,.07), 0 10px 28px -14px rgba(20,30,45,.16);
+    --font-display:'Georgia','Iowan Old Style',serif; --font-body:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; --font-mono:ui-monospace,'SFMono-Regular',Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{ background:var(--bg0); color:var(--tx1); font-family:var(--font-body); font-size:13.5px; }
+  h1,h2,h3{ font-family:var(--font-display); text-wrap:balance; margin:0; }
+
+  .masthead-wrap{ max-width:1360px; margin:0 auto; padding:0 20px; }
+  .app{ max-width:1360px; margin:0 auto; padding:0 20px 60px; display:flex; gap:20px; align-items:flex-start; }
+  .side{ position:sticky; top:20px; width:222px; flex:0 0 222px; background:var(--vinho); background-image:linear-gradient(160deg,var(--vinho),var(--vinho-dark)); color:#fff; border-radius:16px; padding:16px 12px; max-height:calc(100vh - 40px); overflow-y:auto; }
+  .nav-item{ display:flex; align-items:center; gap:9px; width:100%; text-align:left; background:transparent; border:0; color:#f0d9dd; font-family:inherit; font-size:12.5px; font-weight:500; padding:9px 11px; border-radius:9px; cursor:pointer; margin-bottom:3px; transition:.12s; }
+  .nav-item:hover{ background:rgba(255,255,255,.12); color:#fff; }
+  .nav-item.on{ background:var(--ouro); color:var(--vinho); font-weight:700; }
+  .nav-item .tag2{ margin-left:auto; background:rgba(255,255,255,.22); color:#fff; font-size:10px; padding:1px 7px; border-radius:10px; font-weight:700; }
+  .nav-item.on .tag2{ background:var(--vinho); color:#fff; }
+  .side-sep{ font-size:9.5px; color:#e7b9c1; text-transform:uppercase; letter-spacing:.08em; margin:12px 8px 4px; }
+  .side-note{ font-size:10px; color:#e7b9c1; line-height:1.5; padding:10px 8px 2px; border-top:1px solid rgba(255,255,255,.18); margin-top:10px; }
+  @media (max-width:900px){ .app{ flex-direction:column; } .side{ position:static; width:100%; flex:none; display:flex; flex-wrap:wrap; gap:4px; max-height:none; } .nav-item{ width:auto; } }
+  .content{ flex:1; min-width:0; }
+  .sec{ display:none; }
+  .sec.on{ display:block; }
+
+  .masthead{ background:var(--vinho); background-image:linear-gradient(155deg,var(--vinho),var(--vinho-dark)); border-radius:16px; padding:22px 26px; color:#fff; margin:20px 0; }
+  .masthead .brand{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .masthead .brand .b{ background:var(--ouro); color:var(--vinho); font-weight:800; letter-spacing:.06em; padding:6px 11px; border-radius:8px; font-size:13px; }
+  .masthead .brand .t{ font-size:11.5px; font-weight:600; color:#f4dde1; text-transform:uppercase; letter-spacing:.08em; }
+  .masthead h1{ font-size:22px; font-weight:700; color:#fff; line-height:1.25; }
+  .masthead .sub{ font-size:12.5px; color:#f0d9dd; margin-top:4px; }
+  .masthead-meta{ display:flex; gap:18px; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,.18); flex-wrap:wrap; }
+  .masthead-meta .mi{ font-size:11px; color:#e7c3cb; }
+  .masthead-meta .mi b{ color:#fff; font-weight:600; }
+
+  .section-label{ font-size:11px; font-weight:700; color:var(--tx3); text-transform:uppercase; letter-spacing:.09em; margin:0 0 12px; display:flex; align-items:center; gap:10px; }
+  .section-label .cnt{ font-family:var(--font-mono); font-weight:500; color:var(--tx3); text-transform:none; letter-spacing:0; font-size:10.5px; }
+  .divider{ border:none; border-top:1px solid var(--bd); margin:2rem 0; }
+
+  .pg-h{ display:flex; justify-content:space-between; align-items:flex-end; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+  .pg-h h2{ font-size:19px; font-weight:700; color:var(--tx1); }
+  .pg-h p{ font-size:12px; color:var(--tx3); margin-top:3px; }
+  .datepill{ font-family:var(--font-mono); font-size:11.5px; color:var(--tx2); background:var(--bg2); border:1px solid var(--bd); padding:5px 11px; border-radius:99px; white-space:nowrap; }
+
+  .info{ background:var(--vinho-bg); border-left:3px solid var(--vinho); border-radius:8px; padding:11px 14px; font-size:11.5px; color:var(--tx2); line-height:1.55; margin-bottom:16px; }
+  .info b{ color:var(--tx1); }
+  .info.muted{ background:var(--gray-bg); border-left-color:var(--tx3); }
+
+  .card{ background:var(--bg1); border:1px solid var(--bd); border-radius:14px; padding:18px 20px; margin-top:16px; }
+  .card:first-of-type{ margin-top:0; }
+  .ct{ font-size:11px; font-weight:700; color:var(--tx3); text-transform:uppercase; letter-spacing:.06em; margin:0 0 12px; }
+
+  .filterbar{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .chip{ font-family:inherit; font-size:12px; font-weight:600; color:var(--tx2); background:var(--bg1); border:1px solid var(--bd); border-radius:99px; padding:7px 14px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:.12s; }
+  .chip:hover{ border-color:var(--vinho); }
+  .chip.active{ background:var(--vinho); border-color:var(--vinho); color:#fff; }
+  .chip .n{ font-family:var(--font-mono); opacity:.85; }
+
+  .krow{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
+  .kpi{ text-align:left; font-family:inherit; background:var(--bg1); border:1px solid var(--bd); border-radius:12px; padding:13px 15px; position:relative; cursor:pointer; transition:.12s; }
+  .kpi:hover{ border-color:var(--vinho); box-shadow:var(--shadow); transform:translateY(-1px); }
+  .kpi.active{ border-color:var(--vinho); box-shadow:0 0 0 1px var(--vinho) inset; }
+  .kl{ font-size:10.5px; color:var(--tx3); text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px; line-height:1.3; }
+  .kv{ font-family:var(--font-mono); font-size:22px; font-weight:700; line-height:1; color:var(--tx1); }
+  .kt{ font-size:10px; color:var(--tx3); margin-top:6px; }
+  .bdg{ position:absolute; top:12px; right:12px; font-size:9px; font-weight:700; letter-spacing:.02em; padding:2px 7px; border-radius:99px; }
+  .b-grn{ background:var(--grn-bg); color:var(--grn); } .b-amb{ background:var(--amb-bg); color:var(--amb); } .b-red{ background:var(--red-bg); color:var(--red); } .b-acc{ background:var(--vinho-bg); color:var(--vinho); } .b-blu{ background:var(--blu-bg); color:var(--blu); } .b-gry{ background:var(--gray-bg); color:var(--gry); }
+
+  .prio-pill{ display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; }
+  .prio-critico{ background:var(--red-bg); color:var(--red); } .prio-atencao{ background:var(--amb-bg); color:var(--amb); } .prio-no_prazo{ background:var(--grn-bg); color:var(--grn); } .prio-semdado{ background:var(--bd); color:var(--tx2); } .prio-cancelado{ background:var(--gray-bg); color:var(--tx2); } .prio-semsla{ background:var(--blu-bg); color:var(--blu); } .prio-concluido{ background:var(--gray-bg); color:var(--gry); }
+
+  .task-row{ width:100%; text-align:left; font-family:inherit; background:none; border:none; display:flex; align-items:flex-start; gap:10px; padding:10px 6px; border-bottom:1px solid var(--bg2); cursor:pointer; border-radius:8px; }
+  .task-row:last-child{ border-bottom:none; }
+  .task-row:hover{ background:var(--bg2); }
+  .task-body{ flex:1; min-width:0; }
+  .task-title{ font-size:12.5px; font-weight:600; color:var(--tx1); }
+  .task-sub{ font-size:11.5px; color:var(--tx2); margin-top:2px; }
+  .task-dias{ font-family:var(--font-mono); font-size:12px; font-weight:700; flex-shrink:0; white-space:nowrap; }
+
+  .transp-row{ width:100%; text-align:left; font-family:inherit; background:none; border:none; padding:7px 4px; display:flex; align-items:center; gap:10px; cursor:pointer; border-radius:8px; }
+  .transp-row:hover{ background:var(--bg2); }
+  .transp-name{ font-size:12px; color:var(--tx1); font-weight:600; width:150px; flex-shrink:0; }
+  .transp-name small{ display:block; color:var(--tx3); font-size:10px; font-weight:500; }
+  .bar-track{ flex:1; background:var(--bg2); border:1px solid var(--bd); border-radius:99px; height:8px; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:99px; }
+  .bar-pct{ font-family:var(--font-mono); font-size:11.5px; font-weight:700; width:74px; text-align:right; flex-shrink:0; }
+
+  .caso-row{ width:100%; text-align:left; font-family:inherit; background:none; border:none; display:flex; align-items:flex-start; gap:10px; padding:11px 6px; border-bottom:1px solid var(--bg2); cursor:pointer; border-radius:8px; }
+  .caso-row:last-child{ border-bottom:none; }
+  .caso-row:hover{ background:var(--bg2); }
+  .caso-nf{ font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--vinho); width:78px; flex-shrink:0; padding-top:1px; }
+  .caso-info{ flex:1; min-width:0; }
+  .caso-nome{ font-size:12.5px; font-weight:700; color:var(--tx1); }
+  .caso-det{ font-size:11.5px; color:var(--tx2); margin-top:2px; line-height:1.45; }
+  .caso-dias{ font-family:var(--font-mono); font-size:12px; font-weight:700; flex-shrink:0; white-space:nowrap; padding-top:1px; }
+  .tag{ display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:5px; margin-top:5px; }
+  .tag-danger{ background:var(--red-bg); color:var(--red); } .tag-warn{ background:var(--amb-bg); color:var(--amb); } .tag-ok{ background:var(--grn-bg); color:var(--grn); } .tag-muted{ background:var(--gray-bg); color:var(--tx3); } .tag-info{ background:var(--blu-bg); color:var(--blu); } .tag-acc{ background:var(--vinho-bg); color:var(--vinho); }
+
+  .estado-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(105px,1fr)); gap:8px; }
+  .estado-card{ text-align:center; font-family:inherit; border-radius:10px; padding:11px 8px; cursor:pointer; border:1px solid; transition:.12s; }
+  .estado-card:hover{ box-shadow:var(--shadow); }
+  .estado-uf{ font-family:var(--font-mono); font-size:15px; font-weight:800; }
+  .estado-count{ font-size:10px; color:var(--tx3); margin-top:2px; }
+
+  .list-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px; gap:12px; flex-wrap:wrap; }
+  .list-head h3{ font-size:14px; font-weight:700; color:var(--tx1); }
+  .list-count{ font-family:var(--font-mono); font-size:11px; color:var(--tx3); }
+  .empty-note{ font-size:12px; color:var(--tx2); background:var(--bg2); border-radius:8px; padding:14px; text-align:center; line-height:1.5; }
+  .gap-note{ font-size:11px; color:var(--tx3); background:var(--bg2); border-radius:8px; padding:10px 12px; margin-top:6px; line-height:1.5; }
+
+  table.tbl{ border-collapse:collapse; width:100%; font-size:11.5px; }
+  .tw{ overflow:auto; max-height:600px; border:1px solid var(--bd); border-radius:10px; }
+  .tbl th{ position:sticky; top:0; background:var(--bg2); padding:8px 9px; text-align:left; font-weight:700; color:var(--tx3); border-bottom:1px solid var(--bd); white-space:nowrap; font-size:10px; text-transform:uppercase; letter-spacing:.02em; }
+  .tbl td{ padding:7px 9px; border-bottom:1px solid var(--bg2); vertical-align:top; white-space:nowrap; }
+  .tbl td.wrap{ white-space:normal; }
+  .tbl td.desc{ max-width:280px; color:var(--tx2); font-size:11px; white-space:normal; }
+  .tbl tr{ cursor:pointer; }
+  .tbl tr:hover td{ background:var(--bg2); }
+  .subbar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  .srch{ border:1px solid var(--bd); border-radius:8px; padding:7px 10px; font-size:12px; font-family:inherit; background:var(--bg1); color:var(--tx1); }
+  select.srch{ cursor:pointer; }
+
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .three-col{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+  @media (max-width:760px){ .two-col,.three-col{ grid-template-columns:1fr; } }
+
+  .overlay{ position:fixed; inset:0; background:rgba(43,35,32,.4); opacity:0; pointer-events:none; transition:opacity .18s; z-index:40; }
+  .overlay.open{ opacity:1; pointer-events:auto; }
+  .panel{ position:fixed; top:0; right:0; height:100%; width:min(420px,92vw); background:var(--bg1); border-left:1px solid var(--bd); box-shadow:var(--shadow); transform:translateX(100%); transition:transform .2s ease; z-index:41; padding:20px; overflow-y:auto; }
+  .panel.open{ transform:translateX(0); }
+  .panel-close{ position:absolute; top:14px; right:14px; background:var(--bg2); border:1px solid var(--bd); border-radius:8px; width:28px; height:28px; cursor:pointer; color:var(--tx2); font-size:14px; }
+  .panel-close:hover{ color:var(--tx1); border-color:var(--vinho); }
+  .panel dl{ margin:18px 0 0; }
+  .panel dt{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--tx3); margin-top:12px; }
+  .panel dd{ margin:3px 0 0; font-size:13px; color:var(--tx1); line-height:1.5; }
+  .panel dd.mono{ font-family:var(--font-mono); }
+  .caso-nf-big{ font-family:var(--font-mono); font-size:19px; font-weight:800; color:var(--vinho); }
+
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
+</style>
+
+<div class="masthead-wrap">
+  <div class="masthead">
+    <div class="brand"><span class="b">ABRA</span><span class="t">Devoluções &amp; Transporte</span></div>
+    <h1>Controle de Devoluções — Protocolo de Coleta &amp; Tratativas Transportadora</h1>
+    <div class="sub">Kesya Coelho · atualização automática a cada nova planilha importada</div>
+    <div class="masthead-meta">
+      <div class="mi"><b>Referência</b> — <span id="refDate"></span></div>
+      <div class="mi"><b>Fluxo 1</b> — Cliente → Protocolo de Coleta → transportadora recolhe → retorno ao CD</div>
+      <div class="mi"><b>Fluxo 2</b> — Pedido barrado/cancelado → tratativa com transportadora → devolução ao CD</div>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="side">
+    <button class="nav-item on" data-sec="sec-dashboard">📊 Dashboard</button>
+    <button class="nav-item" data-sec="sec-coleta">🚚 Protocolo de Coleta</button>
+    <button class="nav-item" data-sec="sec-atrasos">⚖️ Atrasos — Região/Transp.</button>
+    <button class="nav-item" data-sec="sec-tratativas">🔁 Tratativas Transportadora</button>
+    <button class="nav-item" data-sec="sec-historico">📜 Histórico Realizados</button>
+    <div class="side-sep">Operacional</div>
+    <button class="nav-item" data-sec="sec-tarefas">✅ Tarefas do Dia</button>
+    <button class="nav-item" data-sec="sec-base">🗄️ Importar / Base</button>
+    <div class="side-note">Toque em qualquer número, barra ou linha para filtrar e ver o detalhe.</div>
+  </aside>
+
+  <main class="content">
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section class="sec on" id="sec-dashboard">
+      <p class="section-label">Visão geral</p>
+      <div class="krow" id="resumoKpis"></div>
+
+      <div class="card">
+        <div class="ct">Índice de SLA e produtividade</div>
+        <div class="info" style="margin-bottom:12px">Clique em qualquer indicador para ver direto os casos por trás do número.</div>
+        <div class="krow" id="slaIndex"></div>
+      </div>
+
+      <div class="two-col" style="margin-top:16px">
+        <div class="card" style="margin-top:0">
+          <div class="ct">Prioridade — todos os casos em aberto</div>
+          <div style="position:relative;height:170px"><canvas id="chartPrio"></canvas></div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="ct">Fluxo — quantos casos em cada etapa</div>
+          <div id="fluxoView"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PROTOCOLO DE COLETA ===================== -->
+    <section class="sec" id="sec-coleta">
+      <p class="section-label">Protocolo de Coleta <span class="cnt">recolhimento na casa do cliente → retorno ao CD</span></p>
+      <div class="info">O SLA de 20 dias é <b>único e contínuo</b>, do protocolo de coleta até o recebimento no CD — a "coleta realizada" (retirada na casa do cliente) é só um evento no meio do caminho, não encerra nem reinicia o prazo. "Recebido no CD" é identificado pelo nº de romaneio de entrada, mas sem data exata de recebimento — por isso casos recebidos aparecem como concluídos sem classificação de "no prazo" ou "com atraso" (ver pendência de dados). Um caso pode estar com a coleta feita há dias e ainda dentro do relógio do SLA, aguardando confirmação da Logística.</div>
+      <div class="krow" id="coletaKpis"></div>
+      <div class="two-col" style="margin-top:16px">
+        <div class="card" style="margin-top:0">
+          <div class="ct">Por transportadora</div>
+          <div id="coletaTransp"></div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="ct">Por estado</div>
+          <div class="estado-grid" id="coletaEstados"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="list-head"><h3 id="coletaListTitle">Casos</h3><span class="list-count" id="coletaListCount"></span></div>
+        <div class="filterbar" id="coletaFilterbar" style="margin-top:10px"></div>
+        <div class="subbar" id="coletaDateWrap"></div>
+        <div id="coletaList"></div>
+      </div>
+      <div class="card">
+        <div class="ct">Estrutura logística — como cada transportadora opera</div>
+        <div class="two-col" id="transpLegenda"></div>
+      </div>
+    </section>
+
+    <!-- ===================== ATRASOS - REGIAO/TRANSPORTADORA ===================== -->
+    <section class="sec" id="sec-atrasos">
+      <p class="section-label">Atrasos — Região e Transportadora <span class="cnt">cobrança de SLA · só prazo de coleta</span></p>
+      <div class="info">
+        <b>Regra de SLA:</b> 20 dias corridos entre o protocolo de coleta e o recebimento confirmado no CD.
+        A coleta realizada <b>não</b> encerra nem reinicia esse prazo — só o recebimento no CD (ou o cancelamento) param a contagem.
+        Por isso esta aba inclui tanto quem ainda não foi coletado quanto quem já foi coletado e aguarda confirmação da Logística.
+        <br><b>Pendências não confirmadas</b> (ver Configuração no código): (1) a janela de risco de 5 dias antes do vencimento é um padrão ajustável, não uma regra validada — a planilha "Sistema – Devolução" não foi disponibilizada para confirmar esse número; (2) não está confirmado se a contagem é em dias corridos ou úteis — assumimos corridos; (3) o campo usado como "data do protocolo" é uma aproximação (PROGRAMACAO/abertura) — os arquivos não têm um campo identificado explicitamente como confirmação do protocolo pela transportadora.
+      </div>
+
+      <div class="card" style="margin-top:0">
+        <div class="ct">Por transportadora — ranking de desempenho e SLA</div>
+        <div style="position:relative;height:190px;margin-bottom:14px"><canvas id="chartAtrasoTransp"></canvas></div>
+        <div class="tw"><table class="tbl" id="tblAtrasoTransp"></table></div>
+      </div>
+      <div class="two-col">
+        <div class="card" style="margin-top:0">
+          <div class="ct">Por região</div>
+          <div class="tw"><table class="tbl" id="tblAtrasoRegiao"></table></div>
+        </div>
+        <div class="card" style="margin-top:0">
+          <div class="ct">Por UF</div>
+          <div class="tw"><table class="tbl" id="tblAtrasoUf"></table></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ct">Por responsabilidade</div>
+        <div class="info" style="margin-bottom:12px">
+          <b>Abra</b> — falta de mercadoria (estoque indisponível para troca/reposição). <b>Cliente</b> — postergações via loja ou relacionamento (arrependimento, item vendido errado, cliente pediu para adiar). <b>Transportadora</b> — todo o restante; idealmente validado contra os dados de eficiência da transportadora (arquivo separado, ainda não recebido) — por ora é a categoria residual quando não há indício de falta de estoque nem de pedido do cliente/loja no texto do caso.
+        </div>
+        <div class="tw"><table class="tbl" id="tblAtrasoResp"></table></div>
+      </div>
+      <div class="card">
+        <div class="list-head"><h3>Atrasos Abra — falta de mercadoria <span style="color:var(--vinho)">(análise manual)</span></h3><span class="list-count" id="countAtrasoAbra"></span></div>
+        <div class="tw" style="margin-top:10px"><table class="tbl" id="tblAtrasoAbra"></table></div>
+      </div>
+
+      <div class="card">
+        <div class="list-head"><h3>Lista de cobrança — pronta para acionar a transportadora</h3></div>
+        <div class="subbar" id="cobrancaDateWrap" style="margin-top:10px"></div>
+        <div class="tw"><table class="tbl" id="tblCobranca"></table></div>
+      </div>
+    </section>
+
+    <!-- ===================== TRATATIVAS TRANSPORTADORA ===================== -->
+    <section class="sec" id="sec-tratativas">
+      <p class="section-label">Tratativas Transportadora <span class="cnt">não chegou ao cliente: barradas, canceladas, perdas, financeiro</span></p>
+      <div class="krow" id="tratKpis"></div>
+      <div class="card">
+        <div class="ct">Filtrar tratativas</div>
+        <div class="subbar">
+          <input class="srch" id="tratBusca" placeholder="Buscar cliente, NF, descrição..." style="min-width:220px;flex:1">
+          <select class="srch" id="tratFiltroTipo"><option value="">Todos os tipos</option></select>
+          <select class="srch" id="tratFiltroTransp"><option value="">Todas as transportadoras</option></select>
+          <select class="srch" id="tratFiltroUf"><option value="">Todas as UF</option></select>
+          <select class="srch" id="tratFiltroEnc"><option value="">Encaminhamento (todos)</option><option value="pendente">Pendentes de encaminhar</option><option value="feito">Já encaminhados</option></select>
+          <select class="srch" id="tratFiltroResp"><option value="">Toda responsabilidade</option><option value="abra">Abra (estoque)</option><option value="cliente">Cliente (loja/relacionamento)</option><option value="transporte">Transportadora</option></select>
+        </div>
+        <div class="subbar" id="tratDateWrap"></div>
+        <div class="subbar">
+          <button class="chip" id="tratLimpar">Limpar filtros</button>
+          <span class="list-count" id="tratCont"></span>
+        </div>
+        <div class="tw"><table class="tbl" id="tblTratativas"></table></div>
+      </div>
+
+      <div class="card">
+        <div class="list-head"><h3>Barrados / devolvidos pela transportadora</h3></div>
+        <div class="info" style="margin-top:10px">Casos classificados como <b>Barrar Entrega Seguir Recolhimento</b>: o pedido não chegou a ser entregue e está retornando por cancelamento ou impossibilidade de entrega.</div>
+        <div class="subbar" id="barradosDateWrap"></div>
+        <div class="tw"><table class="tbl" id="tblBarrados"></table></div>
+      </div>
+    </section>
+
+    <!-- ===================== HISTORICO REALIZADOS ===================== -->
+    <section class="sec" id="sec-historico">
+      <p class="section-label">Histórico — Realizados e Cancelados <span class="cnt">casos concluídos, removidos do controle ativo</span></p>
+      <div class="krow" id="historicoKpis"></div>
+      <div class="card">
+        <div class="subbar">
+          <input class="srch" id="historicoBusca" placeholder="Buscar cliente, NF..." style="min-width:220px;flex:1">
+          <select class="srch" id="historicoFiltroOrigem"><option value="">Coleta + Tratativas</option><option value="coleta">Só Protocolo de Coleta</option><option value="tratativa">Só Tratativas</option></select>
+        </div>
+        <div class="tw"><table class="tbl" id="tblHistorico"></table></div>
+      </div>
+    </section>
+
+    <!-- ===================== TAREFAS DO DIA ===================== -->
+    <section class="sec" id="sec-tarefas">
+      <p class="section-label">Tarefas do dia <span class="cnt">coleta + tratativas, cruzadas e priorizadas</span></p>
+      <div class="filterbar" id="tarefasFilterbar"></div>
+      <div class="card">
+        <div class="subbar">
+          <input class="srch" id="tarefasBusca" placeholder="Buscar cliente, NF..." style="min-width:200px;flex:1">
+          <label class="chip" style="cursor:pointer"><input type="checkbox" id="tarefasMostrarConcluidos" style="margin-right:6px">Mostrar concluídos</label>
+        </div>
+        <div class="subbar" id="tarefasDateWrap"></div>
+        <div class="subbar"><span class="list-count" id="tarefasCont"></span></div>
+        <div class="tw"><table class="tbl" id="tblTarefas"></table></div>
+      </div>
+    </section>
+
+    <!-- ===================== IMPORTAR / BASE DE DADOS ===================== -->
+    <section class="sec" id="sec-base">
+      <p class="section-label">Importar planilha do Innovaro <span class="cnt">atualiza o painel sozinho, sem perder histórico</span></p>
+      <div class="card" style="margin-top:0">
+        <div id="dbStatus" style="margin-bottom:12px"></div>
+        <div id="importDrop" style="border:2px dashed var(--bd2); border-radius:12px; padding:26px; text-align:center; cursor:pointer; background:var(--bg2)">
+          <div style="font-size:13.5px;font-weight:600;color:var(--tx1)">Arraste o arquivo aqui ou clique para escolher</div>
+          <div style="font-size:11.5px;color:var(--tx3);margin-top:6px">Protocolo de Coleta (.csv) ou Tratativas Transportadora (.xlsx/.xlsm) — o painel identifica o tipo sozinho e atualiza os casos automaticamente</div>
+          <input type="file" id="importFile" accept=".csv,.xlsx,.xlsm,.xls" style="display:none">
+        </div>
+        <div id="importPreview" style="display:none;margin-top:14px">
+          <div class="subbar">
+            <span style="font-size:12.5px">Tipo detectado:</span>
+            <select class="srch" id="importTipo"><option value="coleta">Protocolo de Coleta</option><option value="tratativa">Tratativas Transportadora</option></select>
+            <span class="list-count" id="importSummary"></span>
+          </div>
+          <div class="gap-note" id="importNote" style="margin-bottom:10px"></div>
+          <div class="btnrow" style="display:flex;gap:10px">
+            <button class="chip" id="importConfirm" style="background:var(--vinho);color:#fff;border-color:var(--vinho)">Confirmar importação</button>
+            <button class="chip" id="importCancel">Cancelar</button>
+          </div>
+          <div id="importProgress" style="display:none;margin-top:10px;font-size:12px;color:var(--tx2)"></div>
+        </div>
+      </div>
+
+      <div class="card import-only">
+        <div class="ct">Histórico de importações</div>
+        <div id="importsLog"></div>
+      </div>
+
+      <div class="card">
+        <div class="ct">Bases atuais</div>
+        <div class="two-col">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--tx1);margin-bottom:6px">Protocolo de Coleta</div>
+            <div style="font-size:11.5px;color:var(--tx2)">Linhas: <b id="baseColetaCount" style="font-family:var(--font-mono)"></b></div>
+            <div style="font-size:11.5px;color:var(--tx2)">Ref.: <b id="baseRef1" style="font-family:var(--font-mono)"></b></div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--tx1);margin-bottom:6px">Tratativas Transportadora</div>
+            <div style="font-size:11.5px;color:var(--tx2)">Linhas: <b id="baseTratCount" style="font-family:var(--font-mono)"></b></div>
+            <div style="font-size:11.5px;color:var(--tx2)">Ref.: <b id="baseRef2" style="font-family:var(--font-mono)"></b></div>
+          </div>
+        </div>
+        <div class="gap-note" style="margin-top:12px">Os dois arquivos são tratados de forma independente nesta versão — a funcionalidade de cruzamento entre bases foi removida.</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="panel" id="panel" aria-hidden="true">
+  <button class="panel-close" id="panelClose" aria-label="Fechar detalhe">✕</button>
+  <div id="panelBody"></div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// Nenhum dado de cliente fica embutido no código (repositório público) — tudo vem ao vivo do Firestore.
+const SEED_COLETA = [];
+const SEED_TRATATIVAS = [];
+const REF = new Date().toISOString().slice(0,10);
+const REF_BR = REF.split('-').reverse().join('/');
+function nowBR(){ const d=new Date(); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
+function isoNow(){ return new Date().toISOString(); }
+
+// ---------- Data ao vivo: SEED (embutido) + overrides do banco (importações) ----------
+let COLETA = [];
+let TRATATIVAS = [];
+let TASKS = [];
+let DB_CASES = {}; // chave-do-doc -> dados do banco (por cima do seed)
+let IMPORTS_LOG = []; // histórico de importações (do banco)
+
+// ============================================================
+// CONFIGURAÇÃO CENTRAL DE PRAZOS, CALENDÁRIO E RISCO
+// Fonte única de verdade do processo — qualquer ajuste de regra deve ser feito aqui, em nenhum outro lugar.
+// ============================================================
+const CONFIG = {
+  // SLA do Protocolo de Coleta: da confirmação do protocolo pela transportadora até o recebimento no CD.
+  // A "coleta realizada" (retirada na casa do cliente) NÃO reinicia nem congela essa contagem — só o
+  // recebimento confirmado no CD (ou o cancelamento) encerram o prazo.
+  SLA_COLETA_DIAS: 20,
+  // PENDÊNCIA NÃO CONFIRMADA: faixa de risco (dias antes do vencimento). A planilha de referência
+  // "Sistema – Devolução" não foi disponibilizada nesta sessão para validar esse número — o valor abaixo
+  // é um padrão ajustável, não uma regra validada. Mude aqui quando houver confirmação.
+  RISCO_JANELA_DIAS: 5,
+  RISCO_JANELA_CONFIRMADA: false,
+  // PENDÊNCIA NÃO CONFIRMADA: a contagem usa dias corridos ou dias úteis? Assumimos corridos até
+  // confirmação em contrário.
+  CALENDARIO: 'corridos',
+  CALENDARIO_CONFIRMADO: false,
+  // PENDÊNCIA NÃO CONFIRMADA: os arquivos de origem não têm um campo identificado explicitamente como
+  // "data do protocolo confirmado pela transportadora" (distinta do cadastro/abertura do recolhimento).
+  // Hoje usamos o campo PROGRAMACAO, com fallback para a data de abertura, como aproximação — isso pode
+  // estar medindo o agendamento/cadastro, não a confirmação do protocolo em si.
+  CAMPO_DATA_PROTOCOLO_CONFIRMADO: false,
+};
+const SLA = CONFIG.SLA_COLETA_DIAS; // alias usado nos textos/tabelas já existentes
+
+function parseBR(s){
+  if (!s) return null;
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);
+  if (!m) return null;
+  return new Date(+m[3], +m[2]-1, +m[1]);
+}
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+function classifyStatusColeta(status){
+  const s = (status||'').toLowerCase();
+  if (s.includes('cancelada')) return 'cancelada';
+  if (s.includes('realizada')) return 'realizada';
+  if (s.includes('vence')) return 'risco';
+  if (s.includes('no prazo')) return 'no_prazo';
+  return 'atencao';
+}
+
+// ---------- Tipos de tratativa: grupo + ação esperada (SEM prazo/SLA — não há regra explícita de tempo) ----------
+const TIPO_GROUP_MAP = {
+  'Recol P/ Acomp Cliente':'recolhimento','Recol P/Acomp Transportad':'recolhimento','Recol Acomp C/Reenvio Tra':'recolhimento','Prod Entreg Cli Seg Rec':'recolhimento',
+  'Barrar Entrega Seguir Rec':'barrar',
+  'Perdas Cliente':'perdas','Perdas Cliente C/ Reenvio':'perdas','Perdas Transportadora':'perdas','Produto Não Retornou 2':'perdas','Produto Não Retornou':'perdas',
+  'Transportadora a pagar':'financeiro','Transportadora a pagar 2':'financeiro','Reenvio S Recol Transp Pg':'financeiro','Cli Canc Ped - Transp Pag':'financeiro',
+  'Criada':'nova',
+};
+function groupOf(tipo){
+  if (TIPO_GROUP_MAP[tipo]) return TIPO_GROUP_MAP[tipo];
+  const semNumero = (tipo||'').trim().replace(/\s+\d+$/,'');
+  if (TIPO_GROUP_MAP[semNumero]) return TIPO_GROUP_MAP[semNumero];
+  return 'outros';
+}
+// Ação esperada por grupo — nenhuma depende de dias em aberto (não existe SLA de tratativa definido).
+const ACAO_GRUPO = {
+  recolhimento: { label:'Encaminhar para Logística', desc:'A Logística conduz e finaliza a tarefa — o papel aqui é repassar/encaminhar o caso para a Logística atualizar e concluir.', encaminhavel:true },
+  barrar: { label:'Contatar transportadora', desc:'Tarefa criada pelo Relacionamento: contatar a transportadora para interromper a entrega e solicitar o retorno da mercadoria ao CD antes da entrega.', encaminhavel:false },
+  financeiro: { label:'Responsabilização', desc:'A transportadora extraviou a mercadoria ou causou avaria de sua responsabilidade — tratativa de responsabilização/cobrança, sem SLA de coleta automaticamente aplicável.', encaminhavel:false },
+  perdas: { label:'Sem ação necessária', desc:'Mercadoria considerada perdida com o cliente, conforme regra operacional informada. Não há ação de acompanhamento a executar neste painel.', encaminhavel:false },
+  nova: { label:'A triar', desc:'Tipo de tratativa novo, ainda sem classificação de ação.', encaminhavel:false },
+  outros: { label:'A triar', desc:'Tipo de tratativa sem regra de ação definida explicitamente — não presumir prazo ou prioridade.', encaminhavel:false },
+};
+function acaoOf(grupo){ return ACAO_GRUPO[grupo] || ACAO_GRUPO.outros; }
+
+const REGIAO_MAP = {};
+[['Norte',['AC','AP','AM','PA','RO','RR','TO']],['Nordeste',['AL','BA','CE','MA','PB','PE','PI','RN','SE']],['Centro-Oeste',['DF','GO','MT','MS']],['Sudeste',['ES','MG','RJ','SP']],['Sul',['PR','RS','SC']]]
+  .forEach(([r,ufs])=>ufs.forEach(uf=>REGIAO_MAP[uf]=r));
+function regiaoOf(uf){ return REGIAO_MAP[uf] || 'Não informado'; }
+
+// ---------- Identidade da transportadora, tipo de operação e modalidade — três campos independentes ----------
+// I9 e Hello são a MESMA empresa (mudança de nome) — consolidada aqui como "Hello (antiga I9)" para não
+// duplicar totais/rankings. O nome original é preservado em transportadoraOriginal para rastreabilidade.
+// "Sofá"/"Encomenda" não têm regra de prazo ou tarifa diferenciada nos dados/regras existentes — por isso
+// viram MODALIDADE (informativa), não uma transportadora à parte.
+// Goback só existe identificado nos dados da Total — não se aplica a nenhuma outra transportadora, e não
+// impede que outras tenham suas próprias operações de troca (seria só não identificado como tal hoje).
+function deriveTipoOperacao(transportadoraRaw){
+  const t = transportadoraRaw || '';
+  let modalidade = null;
+  if (/sof[aá]/i.test(t)) modalidade = 'Sofá';
+  if (/encomenda/i.test(t)) modalidade = modalidade ? modalidade+' / Encomenda' : 'Encomenda';
+
+  let transportadora, tipoOperacao = 'Recolhimento padrão';
+  if (/goback/i.test(t)) { transportadora = 'Transportadora Total'; tipoOperacao = 'Goback (troca)'; }
+  else if (/\bi9\b|hello/i.test(t)) transportadora = 'Hello (antiga I9)';
+  else if (/movvi/i.test(t)) transportadora = 'Transportadora Movvi';
+  else if (/translovato/i.test(t)) transportadora = 'Transp. Translovato';
+  else if (/generoso/i.test(t)) transportadora = 'Transportadora Generoso';
+  else if (/\btotal\b/i.test(t)) transportadora = 'Transportadora Total';
+  else if (/fedex/i.test(t)) transportadora = 'Transportadora Fedex';
+  else transportadora = t || null;
+  if (!t) tipoOperacao = 'Não informado';
+
+  return { transportadora, transportadoraOriginal: t || null, tipoOperacao, modalidade };
+}
+
+// Recalcula "ao vivo" (hoje) a etapa e o status de prazo do Protocolo de Coleta.
+// SLA único e contínuo: da data do protocolo (aproximada — ver CONFIG.CAMPO_DATA_PROTOCOLO_CONFIRMADO) até
+// o recebimento confirmado no CD. A coleta realizada não para nem reinicia essa contagem.
+function deriveColeta(c){
+  const { transportadora, transportadoraOriginal, tipoOperacao, modalidade } = deriveTipoOperacao(c.transportadora);
+  const dataProtocolo = parseBR(c.data_programacao) || parseBR(c.data_solicitacao);
+  const temData = !!dataProtocolo;
+  const diasDesdeProtocolo = temData ? daysBetween(dataProtocolo, new Date()) : null;
+
+  const bucket = classifyStatusColeta(c.status);
+  const cancelada = bucket==='cancelada';
+  const coletaRealizada = bucket==='realizada' || !!c.coleta_realizada;
+  const recebidoCD = !!c.recebido_cd; // indicador binário (romaneio) — sem data exata de recebimento
+
+  let etapa;
+  if (cancelada) etapa = 'cancelada';
+  else if (recebidoCD) etapa = 'recebido_cd';
+  else if (coletaRealizada) etapa = 'coletado_aguardando_cd'; // coleta feita, aguardando confirmação de recebimento no CD
+  else etapa = 'aguardando_coleta';
+
+  // O relógio do SLA corre continuamente por aguardando_coleta E coletado_aguardando_cd — só para em
+  // recebido_cd ou cancelada.
+  const slaEmAndamento = (etapa==='aguardando_coleta' || etapa==='coletado_aguardando_cd') && temData;
+  const diasAtraso = slaEmAndamento ? Math.max(0, diasDesdeProtocolo - CONFIG.SLA_COLETA_DIAS) : 0;
+
+  let statusPrazo; // granularidade real, usada nos indicadores de SLA/ranking
+  if (cancelada) statusPrazo = 'cancelado';
+  else if (etapa==='recebido_cd') statusPrazo = 'concluido_indeterminado'; // falta data real de recebimento (pendência)
+  else if (!temData) statusPrazo = 'sem_data';
+  else if (diasAtraso > 0) statusPrazo = 'atrasado';
+  else if (diasDesdeProtocolo > (CONFIG.SLA_COLETA_DIAS - CONFIG.RISCO_JANELA_DIAS)) statusPrazo = 'risco';
+  else statusPrazo = 'no_prazo';
+
+  if (c.concluido_auto && etapa!=='recebido_cd' && etapa!=='cancelada') statusPrazo = 'concluido_indeterminado';
+
+  // "prioridade" = categorias exclusivas de exibição (situação operacional × resultado do SLA nunca se
+  // misturam): sem_data e cancelado são categorias PRÓPRIAS, nunca dobradas com risco/concluído — essa
+  // mistura era a origem da confusão relatada.
+  const PRIO_POR_STATUS = { atrasado:'critico', risco:'atencao', no_prazo:'no_prazo', sem_data:'sem_data', cancelado:'cancelado', concluido_indeterminado:'concluido' };
+  const prioridade = PRIO_POR_STATUS[statusPrazo] || 'atencao';
+  // Detalhe do concluído: hoje SEMPRE "sem_data" porque a base não traz a data real de recebimento no CD.
+  // 'no_prazo'/'com_atraso' só passam a ocorrer quando esse campo existir na origem — não é presumido.
+  const concluidoDetalhe = statusPrazo==='concluido_indeterminado' ? 'sem_data' : null;
+
+  const responsabilidade = classifyResponsabilidade(c);
+  return { ...c, transportadora, transportadoraOriginal, tipoOperacao, modalidade,
+    dias_aberto:diasDesdeProtocolo, dias_atraso:diasAtraso, temDataProtocolo:temData,
+    etapa, statusPrazo, concluidoDetalhe, coleta_realizada:coletaRealizada, bucket, prioridade, responsabilidade,
+    regiao: c.regiao||regiaoOf(c.uf) };
+}
+
+// Tratativas Transportadora — SEM SLA/prazo automático (regra explícita: tipo de tratativa não gera prazo).
+// dias_aberto é mantido apenas como informação de contexto, nunca como gatilho de alerta/prioridade.
+function deriveTratativa(t){
+  const { transportadora, transportadoraOriginal, tipoOperacao, modalidade } = deriveTipoOperacao(t.transportadora);
+  const dprog = parseBR(t.data_programacao) || parseBR(t.data_solicitacao);
+  const dias = dprog ? daysBetween(dprog, new Date()) : null;
+  const g = t.grupo || groupOf(t.tipo_devolucao);
+  const acao = acaoOf(g);
+  const responsabilidade = classifyResponsabilidade(t);
+  // 'concluido_auto' vem de um caso ter deixado de aparecer numa reimportação (mecanismo diferente do
+  // encaminhamento — encaminhar NUNCA fecha a tarefa). Fora isso, tratativa nunca tem prioridade por tempo.
+  const prioridade = t.concluido_auto ? 'concluido' : 'sem_sla';
+  return { ...t, transportadora, transportadoraOriginal, tipoOperacao, modalidade,
+    dias_aberto:dias, grupo:g, prioridade,
+    acaoGrupo:acao.label, acaoDesc:acao.desc, encaminhavel:acao.encaminhavel,
+    encaminhado: !!t.encaminhado, encaminhadoEm: t.encaminhadoEm || null,
+    responsabilidade, regiao: t.regiao||regiaoOf(t.uf) };
+}
+function coletaKey(chave){ return 'coleta_'+chave; }
+function tratKey(chave){ return 'trat_'+chave; }
+
+// ---------- Filtro de data (programação, com fallback para solicitação) — usado em todas as listas/tabelas ----------
+function dateOfItem(item){ return parseBR(item.data_programacao) || parseBR(item.data_solicitacao); }
+let dateFilters = { tarefas:{from:'',to:''}, coleta:{from:'',to:''}, trat:{from:'',to:''}, cobranca:{from:'',to:''}, barrados:{from:'',to:''} };
+let dateFilterRenderers = {};
+function inDateRangeKey(item, key){
+  const {from,to} = dateFilters[key] || {};
+  if (!from && !to) return true;
+  const d = dateOfItem(item);
+  if (!d) return false;
+  if (from && d < new Date(from+'T00:00:00')) return false;
+  if (to && d > new Date(to+'T23:59:59')) return false;
+  return true;
+}
+function dateRangeHtml(idPrefix){
+  return `<span class="pill" style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--tx2)">📅 De <input type="date" class="srch" id="${idPrefix}From" style="padding:5px 7px"> até <input type="date" class="srch" id="${idPrefix}To" style="padding:5px 7px"></span>
+    <button class="chip" onclick='clearDateRange(${JSON.stringify(idPrefix)})'>Limpar data</button>`;
+}
+function clearDateRange(idPrefix){
+  const key = idPrefix.replace(/Date$/,'');
+  document.getElementById(idPrefix+'From').value='';
+  document.getElementById(idPrefix+'To').value='';
+  dateFilters[key] = { from:'', to:'' };
+  if (dateFilterRenderers[key]) dateFilterRenderers[key]();
+}
+function initDateRangeFilters(){
+  const specs = [
+    ['tarefasDateWrap','tarefas', ()=>renderTarefas()],
+    ['coletaDateWrap','coleta', ()=>renderColetaList()],
+    ['tratDateWrap','trat', ()=>renderTratTable()],
+    ['cobrancaDateWrap','cobranca', ()=>renderCobranca()],
+    ['barradosDateWrap','barrados', ()=>renderBarrados()],
+  ];
+  specs.forEach(([wrapId, key, renderFn]) => {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap || wrap.dataset.init) return;
+    wrap.dataset.init = '1';
+    const idPrefix = key+'Date';
+    wrap.innerHTML = dateRangeHtml(idPrefix);
+    dateFilterRenderers[key] = renderFn;
+    document.getElementById(idPrefix+'From').addEventListener('change', e=>{ dateFilters[key].from = e.target.value; renderFn(); });
+    document.getElementById(idPrefix+'To').addEventListener('change', e=>{ dateFilters[key].to = e.target.value; renderFn(); });
+  });
+}
+
+// Reconstrói COLETA/TRATATIVAS/TASKS a partir do SEED + overrides do banco, e recalcula tudo "ao vivo".
+function normStr(s){ return (s||'').trim().toLowerCase(); }
+function rebuildData(){
+  const coletaMap = {};
+  SEED_COLETA.forEach(c => coletaMap[coletaKey(c.chave)] = c);
+  const tratMap = {};
+  SEED_TRATATIVAS.forEach(t => tratMap[tratKey(t.chave)] = t);
+  Object.entries(DB_CASES).forEach(([id, data]) => {
+    if (id.startsWith('coleta_')) coletaMap[id] = { ...(coletaMap[id]||{}), ...data };
+    else if (id.startsWith('trat_')) tratMap[id] = { ...(tratMap[id]||{}), ...data };
+  });
+  COLETA = Object.values(coletaMap).map(deriveColeta);
+  TRATATIVAS = Object.values(tratMap).map(deriveTratativa);
+
+  TASKS = [];
+  COLETA.forEach(c => TASKS.push(c));
+  TRATATIVAS.forEach(t => TASKS.push(t));
+}
+
+// "sem_sla" = Tratativas Transportadora (sem prazo definido — nunca deve levar cor de alerta de atraso).
+// Categorias exclusivas — nunca misturam situação operacional com resultado do SLA:
+// sem_data (falta a data do protocolo) e cancelado são grupos PRÓPRIOS, não caem em risco/concluído.
+const PRIO_LABEL = { critico:'🔴 Atrasado (SLA)', atencao:'🟠 Em risco', no_prazo:'🟢 Em andamento, no prazo', sem_data:'⬜ Pendente de dados', cancelado:'⚫ Cancelado', sem_sla:'⚪ Sem SLA — ver ação', concluido:'✔️ Concluído' };
+const PRIO_CLASS = { critico:'prio-critico', atencao:'prio-atencao', no_prazo:'prio-no_prazo', sem_data:'prio-semdado', cancelado:'prio-cancelado', sem_sla:'prio-semsla', concluido:'prio-concluido' };
+const PRIO_COLOR = { critico:'#B3261E', atencao:'#A66A0C', no_prazo:'#1E7A4C', sem_data:'#8B98A6', cancelado:'#51606F', sem_sla:'#3A6EA5', concluido:'#6B7785' };
+const PRIO_ORDER = { critico:0, atencao:1, no_prazo:2, sem_data:3, sem_sla:4, concluido:5, cancelado:6 };
+// Texto do detalhe de conclusão — hoje só "sem_data" ocorre de fato (ver pendência de dados no CD).
+const CONCLUIDO_DETALHE_LABEL = { no_prazo:'Concluído no prazo', com_atraso:'Concluído com atraso', sem_data:'Concluído — data de recebimento no CD indisponível' };
+const STATUS_PRAZO_LABEL = {
+  atrasado:'Atrasado — passou de '+ '20' +' dias',
+  risco:'Em risco — perto do limite',
+  no_prazo:'Em andamento, dentro do prazo',
+  sem_data:'Sem data de protocolo — não classificável',
+  cancelado:'Cancelado',
+  concluido_indeterminado:'Recebido no CD (data exata não disponível — não classificado como no prazo ou atrasado)',
+};
+
+const ETAPA_LABEL = { aguardando_coleta:'Aguardando coleta', coletado_aguardando_cd:'Coleta realizada — aguardando confirmação de recebimento no CD', recebido_cd:'Recebido no CD (confirmado, sem data exata)', cancelada:'Cancelada' };
+
+const GROUP_LABEL = { recolhimento:'Recolhimento pendente', barrar:'Barrar (bloqueada antes da entrega)', perdas:'Perdas', financeiro:'Financeiro / cobrança', nova:'Novo / sem classificação', outros:'Outros' };
+const GROUP_TAG = { recolhimento:'tag-info', barrar:'tag-danger', perdas:'tag-warn', financeiro:'tag-acc', nova:'tag-muted', outros:'tag-muted' };
+
+// ---------- Status da tratativa (Protocolo de Coleta) — extraído do texto de status já existente na base ----------
+const TRATATIVA_LABEL = { cobrado:'Cobrado', em_acompanhamento:'Em acompanhamento', verificando:'Verificando', concluido:'Concluído', cancelado:'Cancelado' };
+const TRATATIVA_TAG = { cobrado:'tag-danger', em_acompanhamento:'tag-danger', verificando:'tag-warn', concluido:'tag-ok', cancelado:'tag-muted' };
+function classifyTratativaColeta(status){
+  const s = (status||'').toLowerCase();
+  if (s.includes('cancelada')) return 'cancelado';
+  if (s.includes('realizada')) return 'concluido';
+  if (s.includes('cobrado')) return 'cobrado';
+  if (s.includes('verificando')) return 'verificando';
+  if (s.includes('nova tentativa') || s.includes('devolv') || s.includes('devolu') || s.includes('vence')) return 'em_acompanhamento';
+  return null; // "No prazo" — ainda não precisa de tratativa/cobrança
+}
+
+// ---------- Responsabilidade do atraso: Abra (estoque) / Cliente (loja e relacionamento) / Transporte ----------
+// Regra combinada (status + observação). Abra e Cliente são detectados por palavra-chave no texto já
+// existente na base; Transporte é o residual — idealmente cruzado com os dados de eficiência da
+// transportadora (arquivo separado, ainda não recebido), por isso fica marcado como "a validar".
+const RESP_LABEL = { abra:'Abra (falta de mercadoria)', cliente:'Cliente (loja/relacionamento)', transporte:'Transportadora' };
+const RESP_TAG = { abra:'tag-acc', cliente:'tag-info', transporte:'tag-warn' };
+const RESP_COLOR = { abra:'var(--vinho)', cliente:'var(--blu)', transporte:'var(--amb)' };
+const RESP_ABRA_RE = /sem estoque|n[aã]o temos o produto|n[aã]o temos mais o produto|falta de mercadoria|0\s*disp\b|zero disp|sem produto para|indispon[ií]vel|n[aã]o h[aá] disponibilidade|sem disponibilidade/i;
+const RESP_CLIENTE_RE = /abra resolve|loja vendeu errado|loja informou|relacionamento|arrependimento|desist[êe]ncia|comprou (o )?tamanho errado|cliente solicitou cancelamento|cliente deseja cancelamento|postergar|adiar a? ?sa[íi]da|n[aã]o gostou/i;
+function classifyResponsabilidade(item){
+  const text = ((item.descricao||'') + ' ' + (item.status||'')).toLowerCase();
+  if (RESP_ABRA_RE.test(text)) return 'abra';
+  if (RESP_CLIENTE_RE.test(text)) return 'cliente';
+  return 'transporte';
+}
+
+// ---------- Estrutura logística por transportadora (referência operacional, fornecida pela área) ----------
+// Estrutura padronizada por transportadora: nome atual, área de atuação, serviços, parceiros e
+// particularidades — só informações confirmadas pela operação. Nunca apresentadas como cobertura
+// nacional/contratual universal da empresa fora do que foi informado para o nosso uso.
+const TRANSP_INFO = {
+  'Hello (antiga I9)': {
+    nome: 'Hello (antiga I9)',
+    atuacao: 'Frota própria em São Paulo.',
+    servicos: 'Coleta/recolhimento na casa do cliente. Modalidades "Sofá" e "Encomenda" aparecem nos registros como categoria do pedido, não como outra transportadora ou operação com regra própria.',
+    parceiros: 'Nenhuma parceria de terceiros identificada nos dados.',
+    particularidades: 'A empresa mudou de nome de I9 para Hello. Nos arquivos, os nomes "I9", "I9 Sofá" e "I9 Encomenda" ainda aparecem — todos consolidados aqui como a mesma transportadora, com o nome original preservado por caso (campo "nome original") para rastreabilidade.',
+  },
+  'Transportadora Movvi': {
+    nome: 'Movvi',
+    atuacao: 'Regiões Sul e Sudeste, diretamente.',
+    servicos: 'Coleta/recolhimento na casa do cliente.',
+    parceiros: 'Fora do Sul/Sudeste, aciona a Translovato como parceira executora — a Movvi continua sendo a transportadora responsável pelo caso; a Translovato executa fisicamente o recolhimento nessas regiões.',
+    particularidades: '—',
+  },
+  'Transp. Translovato': {
+    nome: 'Translovato',
+    atuacao: 'Regiões fora do Sul e Sudeste, onde a Movvi não realiza o serviço diretamente.',
+    servicos: 'Recolhimentos e devoluções, como parceira executora da Movvi.',
+    parceiros: 'Parceira operacional da Movvi para essas regiões.',
+    particularidades: 'Aparece nos dados vinculada a casos de responsabilidade da Movvi.',
+  },
+  'Transportadora Total': {
+    nome: 'Total',
+    atuacao: 'Todo o Brasil, com itens menores — não opera com sofás e volumes grandes.',
+    servicos: 'Duas operações distintas: Goback (troca — leva um produto novo e retorna com o antigo) e Recolhimento padrão (retirada simples, sem entrega de outro produto).',
+    parceiros: 'Parceiros regionais contratados em MG, GO e outros estados fora do eixo principal.',
+    particularidades: 'Aplicabilidade do SLA de 20 dias ao Goback não está confirmada nas regras existentes — pendência sinalizada, não presumida.',
+  },
+  'Transportadora Generoso': {
+    nome: 'Generoso',
+    atuacao: 'Interior do Rio de Janeiro — Região Serrana, Baixada e outras localidades conforme a cobertura cadastrada.',
+    servicos: 'Coletas e devoluções regionais.',
+    parceiros: 'Nenhuma identificada nos dados.',
+    particularidades: '—',
+  },
+  'Transportadora Fedex': {
+    nome: 'Fedex',
+    atuacao: 'Não confirmado — descrição operacional ainda não fornecida.',
+    servicos: 'Não confirmado.',
+    parceiros: 'Não confirmado.',
+    particularidades: 'Aparece nos dados de Tratativas Transportadora (maior volume de casos entre as transportadoras nesse arquivo), mas sem descrição operacional recebida ainda — adicionar quando disponível.',
+  },
+};
+
+function fmtMoney(v){ if (v===null||v===undefined) return '—'; const n = Math.abs(v); return (v<0?'-':'') + 'R$' + n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function esc(s){ return (s===null||s===undefined) ? '' : String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function ni(v){ return (v===null||v===undefined||v==='') ? 'Não informado' : v; }
+
+// ---------- Próxima ação sugerida (regra determinística, não é dado do arquivo) ----------
+function suggestAction(item){
+  if (item.origem==='coleta'){
+    if (item.etapa==='cancelada') return 'Nenhuma ação';
+    if (item.etapa==='recebido_cd') return 'Nenhuma ação — recebido no CD';
+    if (item.etapa==='coletado_aguardando_cd') return 'Confirmar recebimento no CD com a Logística';
+    if (item.statusPrazo==='sem_data') return 'Verificar data do protocolo — dado ausente';
+    if (item.prioridade==='critico'||item.prioridade==='atencao') return 'Cobrar transportadora pelo retorno ao CD';
+    return 'Acompanhar prazo';
+  }
+  // Tratativas: ação vem da regra por grupo (sem SLA/prioridade por tempo).
+  return item.acaoGrupo || 'Triar caso';
+}
+
+// ---------- Cruzamento: rótulo de origem (conjuntos calculados em rebuildData) ----------
+function origemLabel(item){
+  return item.origem==='coleta' ? 'Protocolo de Coleta' : 'Tratativa Transportadora';
+}
+
+function taskFields(item){
+  const isColeta = item.origem==='coleta';
+  return {
+    nf: item.nf || null,
+    chave: item.chave,
+    cliente: item.cliente,
+    transportadora: item.transportadora,
+    uf: item.uf, cidade: item.cidade,
+    tipo: isColeta ? 'Protocolo de Coleta' : item.tipo_devolucao,
+    origem: origemLabel(item),
+    data_solicitacao: item.data_solicitacao || 'Não informado',
+    data_programacao: item.data_programacao || 'Não informado',
+    data_coleta: isColeta ? (item.coleta_realizada ? 'Realizada (data exata não registrada)' : 'Não informado') : 'Não informado',
+    data_retorno_cd: isColeta ? (item.recebido_cd ? 'Confirmado — romaneio nº '+item.chave+' (data exata de recebimento não disponível)' : 'Não informado') : 'Não informado',
+    dias_aberto: item.dias_aberto,
+    prazo_previsto: isColeta ? SLA+' dias corridos (protocolo → recebimento no CD; risco a partir do dia '+(SLA-CONFIG.RISCO_JANELA_DIAS)+' — janela não confirmada)' : 'Sem prazo definido (tipo de tratativa não gera SLA)',
+    dias_atraso: isColeta ? item.dias_atraso : 'Não informado',
+    status: item.status || 'Não informado',
+    prioridade: item.prioridade,
+    responsabilidade: item.responsabilidade,
+    ultima_atualizacao: 'Não informado',
+    responsavel: item.usuario || 'Não informado',
+    proxima_acao: suggestAction(item),
+    observacao: item.descricao || 'Não informado',
+    raw: item,
+  };
+}
+
+// ---------- Nav (abas na barra lateral) ----------
+document.querySelectorAll('.nav-item[data-sec]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item[data-sec]').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById(btn.dataset.sec).classList.add('on');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+});
+function goto(id){
+  const btn = document.querySelector(`.nav-item[data-sec="${id}"]`);
+  if (btn) btn.click();
+}
+
+// ---------- Slide-over ----------
+function openPanel(html){
+  document.getElementById('panelBody').innerHTML = html;
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('panel').setAttribute('aria-hidden','false');
+  document.getElementById('overlay').classList.add('open');
+}
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('panel').setAttribute('aria-hidden','true');
+  document.getElementById('overlay').classList.remove('open');
+}
+document.getElementById('panelClose').addEventListener('click', closePanel);
+document.getElementById('overlay').addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key==='Escape') closePanel(); });
+
+async function marcarEncaminhado(item){
+  const id = item.origem==='coleta' ? coletaKey(item.chave) : tratKey(item.chave);
+  const body = { ...item, encaminhado:true, encaminhadoEm: isoNow(), updatedAt: isoNow() };
+  delete body.raw;
+  if (!DB){
+    alert('Banco de dados indisponível nesta visualização — não é possível salvar o encaminhamento agora.');
+    return;
+  }
+  try {
+    await DB.doc('cases/'+id).set(body);
+    // onSnapshot de 'cases' já vai atualizar DB_CASES/rebuildData/renderAll automaticamente.
+  } catch(e){ alert('Erro ao salvar encaminhamento: '+(e.message||e)); }
+}
+
+function openDetail(item){
+  const f = taskFields(item);
+  const isColeta = item.origem==='coleta';
+  const tratKey = isColeta ? classifyTratativaColeta(item.status) : null;
+  const transpInfo = TRANSP_INFO[item.transportadora];
+  const encaminharBtn = (!isColeta && item.encaminhavel)
+    ? (item.encaminhado
+        ? `<div class="gap-note" style="margin-top:14px">Encaminhado para a Logística em ${item.encaminhadoEm ? new Date(item.encaminhadoEm).toLocaleString('pt-BR') : '—'}. O encaminhamento não fecha a tarefa — a conclusão é feita pela Logística.</div>`
+        : `<button class="chip" style="margin-top:14px;background:var(--vinho);color:#fff;border-color:var(--vinho)" onclick='marcarEncaminhado(${JSON.stringify(item)})'>Encaminhar para Logística</button>`)
+    : '';
+  openPanel(`
+    <div class="caso-nf-big">${f.nf ? 'NF '+esc(f.nf) : 'Sem NF'}</div>
+    <span class="prio-pill ${PRIO_CLASS[f.prioridade]}" style="margin-top:8px">${PRIO_LABEL[f.prioridade]}</span>
+    ${tratKey ? `<span class="tag ${TRATATIVA_TAG[tratKey]}" style="margin-left:6px">${TRATATIVA_LABEL[tratKey]}</span>` : ''}
+    <span class="tag ${RESP_TAG[item.responsabilidade]}" style="margin-left:6px">${RESP_LABEL[item.responsabilidade]}</span>
+    ${!isColeta && item.tipoOperacao==='Goback (troca)' ? `<span class="tag tag-info" style="margin-left:6px">Goback</span>` : ''}
+    <dl>
+      <dt>Cliente</dt><dd>${esc(f.cliente)}</dd>
+      <dt>CPF</dt><dd class="mono">${esc(item.cpf) || 'Não informado'}</dd>
+      <dt>Transportadora</dt><dd>${esc(f.transportadora)||'Não informado'}${transpInfo?` <span style="color:var(--tx3);font-size:11.5px">— ${esc(transpInfo.atuacao)}</span>`:''}</dd>
+      ${item.transportadoraOriginal && item.transportadoraOriginal!==item.transportadora ? `<dt>Nome original no arquivo</dt><dd class="mono">${esc(item.transportadoraOriginal)}</dd>` : ''}
+      ${item.modalidade ? `<dt>Modalidade</dt><dd>${esc(item.modalidade)}</dd>` : ''}
+      <dt>Tipo de operação</dt><dd>${esc(item.tipoOperacao)||'Não informado'}${item.tipoOperacao==='Goback (troca)' ? ' <span style="color:var(--tx3);font-size:11.5px">— aplicabilidade do SLA de coleta ao Goback não está confirmada nas regras existentes</span>' : ''}</dd>
+      <dt>Estado / cidade</dt><dd>${esc(f.uf)||'—'} · ${esc(f.cidade)||'—'}</dd>
+      <dt>Tipo de devolução</dt><dd>${esc(f.tipo)}</dd>
+      <dt>Origem</dt><dd>${esc(f.origem)}</dd>
+      <dt>Data da solicitação</dt><dd class="mono">${esc(f.data_solicitacao)}</dd>
+      <dt>Data do protocolo (aproximada)</dt><dd class="mono">${esc(f.data_programacao)} <span style="color:var(--tx3);font-size:11px">— campo exato de "protocolo confirmado pela transportadora" não identificado na base; ver pendência</span></dd>
+      ${isColeta ? `<dt>Data da coleta realizada</dt><dd>${esc(f.data_coleta)}</dd>` : ''}
+      ${isColeta ? `<dt>Recebimento no CD</dt><dd>${esc(f.data_retorno_cd)}</dd>` : ''}
+      ${isColeta ? `<dt>Situação do prazo</dt><dd>${esc(STATUS_PRAZO_LABEL[item.statusPrazo] || item.statusPrazo)}</dd>` : ''}
+      <dt>Dias em aberto (hoje, ${nowBR()})</dt><dd class="mono">${f.dias_aberto ?? '—'} dias${!isColeta ? ' — informativo, sem SLA aplicável' : ''}</dd>
+      <dt>Prazo previsto</dt><dd>${esc(f.prazo_previsto)}</dd>
+      ${isColeta ? `<dt>Dias de atraso</dt><dd class="mono">${f.dias_atraso}</dd>` : ''}
+      <dt>Status atual (sistema)</dt><dd>${esc(f.status)}</dd>
+      ${isColeta ? `<dt>Motivo do atraso</dt><dd>${esc(f.observacao)}</dd>` : ''}
+      ${!isColeta ? `<dt>O que fazer</dt><dd>${esc(item.acaoDesc||'')}</dd>` : ''}
+      ${tratKey ? `<dt>Tratativa realizada / status da cobrança</dt><dd>${TRATATIVA_LABEL[tratKey]} — com base no status "${esc(item.status)}" registrado no sistema. Datas específicas de cada cobrança não constam nesta base; ver Innovaro para histórico detalhado.</dd>` : ''}
+      <dt>Responsável</dt><dd>${esc(f.responsavel)}</dd>
+      <dt>Próxima ação</dt><dd>${esc(f.proxima_acao)}</dd>
+      ${!isColeta ? `<dt>Observação</dt><dd>${esc(f.observacao)}</dd>` : ''}
+    </dl>
+    ${encaminharBtn}
+  `);
+}
+
+// ================= RESUMO =================
+function renderResumo(){
+  const abertosColeta = COLETA.filter(c=>c.etapa!=='cancelada' && c.etapa!=='recebido_cd');
+  const aguardandoColeta = COLETA.filter(c=>c.etapa==='aguardando_coleta');
+  const coletaRealizada = COLETA.filter(c=>c.coleta_realizada);
+  const aguardandoCD = COLETA.filter(c=>c.etapa==='coletado_aguardando_cd');
+  const recebidoCD = COLETA.filter(c=>c.etapa==='recebido_cd');
+
+  const all = [...COLETA, ...TRATATIVAS];
+  const noPrazo = all.filter(x=>x.prioridade==='no_prazo').length;
+  const atencao = all.filter(x=>x.prioridade==='atencao').length;
+  const critico = all.filter(x=>x.prioridade==='critico').length;
+  const semData = all.filter(x=>x.prioridade==='sem_data').length;
+  const cancelado = all.filter(x=>x.prioridade==='cancelado').length;
+  const semSla = all.filter(x=>x.prioridade==='sem_sla').length;
+  const concluido = all.filter(x=>x.prioridade==='concluido').length;
+
+  const cobranca = COLETA.filter(c=>(c.etapa==='aguardando_coleta'||c.etapa==='coletado_aguardando_cd') && (c.prioridade==='atencao'||c.prioridade==='critico'));
+  const financeiro = TRATATIVAS.filter(t=>t.grupo==='financeiro');
+  const barrados = TRATATIVAS.filter(t=>t.grupo==='barrar');
+  const naoFinalizado = x => x.prioridade!=='concluido' && x.prioridade!=='cancelado';
+  const semAtualizacao = all.filter(x=>naoFinalizado(x) && (x.dias_aberto||0) > 60);
+  const totalDiasAberto = all.filter(naoFinalizado).reduce((s,x)=>s+(x.dias_aberto||0),0);
+  const totalDevolucoes = COLETA.length + TRATATIVAS.length;
+
+  const kpis = [
+    { sec:'sec-dashboard', label:'Total de devoluções', value:totalDevolucoes, sub:COLETA.length+' coleta + '+TRATATIVAS.length+' tratativa (arquivos independentes)' },
+    { sec:'sec-coleta', label:'Protocolos de coleta', value:COLETA.length, sub:'arquivo 1' },
+    { sec:'sec-tratativas', label:'Tratativas transportadora', value:TRATATIVAS.length, sub:'arquivo 2' },
+    { sec:'sec-coleta', label:'Coletas realizadas', value:coletaRealizada.length, sub:'retirado pela transportadora' },
+    { sec:'sec-coleta', label:'Coletas pendentes', value:aguardandoColeta.length, sub:'ainda não retirado' },
+    { sec:'sec-tarefas', label:'Dentro do prazo', value:noPrazo, sub:'🟢', badge:['ok','b-grn'], color:'var(--grn)' },
+    { sec:'sec-tarefas', label:'Em atenção', value:atencao, sub:'🟠', badge:['atenção','b-amb'], color:'var(--amb)' },
+    { sec:'sec-tarefas', label:'Atrasadas', value:critico, sub:'🔴', badge:['crítico','b-red'], color:'var(--red)' },
+    { sec:'sec-tarefas', label:'Pendente de dados', value:semData, sub:'sem data de protocolo — não classificável', color:'var(--tx3)' },
+    { sec:'sec-atrasos', label:'Para cobrar transportadora', value:cobranca.length+financeiro.length, sub:cobranca.length+' coleta + '+financeiro.length+' financeiro' },
+    { sec:'sec-tratativas', label:'Casos barrados', value:barrados.length, sub:'bloqueados antes da entrega' },
+    { sec:'sec-coleta', label:'Aguardando retorno ao CD', value:aguardandoCD.length, sub:'coleta feita, sem romaneio' },
+    { sec:'sec-tarefas', label:'Sem atualização recente', value:semAtualizacao.length, sub:'> 60 dias em aberto (estimado)' },
+    { sec:'sec-tarefas', label:'Total de dias em aberto', value:totalDiasAberto, sub:'soma de todos os casos ativos' },
+  ];
+  document.getElementById('resumoKpis').innerHTML = kpis.map(k => `
+    <button class="kpi" onclick="goto('${k.sec}')">
+      ${k.badge?`<span class="bdg ${k.badge[1]}">${k.badge[0]}</span>`:''}
+      <div class="kl">${k.label}</div>
+      <div class="kv" style="${k.color?`color:${k.color}`:''}">${k.value}</div>
+      <div class="kt">${k.sub}</div>
+    </button>
+  `).join('');
+
+  if (window.__chartPrio) { window.__chartPrio.destroy(); window.__chartPrio = null; }
+  const prioOrderChart = ['critico','atencao','no_prazo','sem_data','sem_sla','concluido','cancelado'];
+  const prioValuesChart = { critico, atencao, no_prazo:noPrazo, sem_data:semData, sem_sla:semSla, concluido, cancelado };
+  window.__chartPrio = new Chart(document.getElementById('chartPrio'), {
+    type:'doughnut',
+    data:{ labels:prioOrderChart.map(k=>PRIO_LABEL[k]), datasets:[{ data:prioOrderChart.map(k=>prioValuesChart[k]), backgroundColor:prioOrderChart.map(k=>PRIO_COLOR[k]), borderColor:'#FFFFFF', borderWidth:2 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+      onClick:(evt,els)=>{ if(!els.length) return; goToTarefasPrio(prioOrderChart[els[0].index]); },
+      onHover:(evt,els)=>{ evt.native.target.style.cursor = els.length?'pointer':'default'; },
+      plugins:{ legend:{ position:'right', labels:{ boxWidth:10, font:{size:10.5} } } } }
+  });
+
+  const fluxo1 = [
+    ['Cadastrado (protocolo criado)', COLETA.length, ()=>setColetaFilter({type:'all'})],
+    ['Coleta realizada pela transportadora', coletaRealizada.length, ()=>setColetaFilter({type:'etapa',value:'coletado_aguardando_cd'})],
+    ['Recebido no CD', recebidoCD.length, ()=>setColetaFilter({type:'etapa',value:'recebido_cd'})],
+  ];
+  const fluxo2 = [
+    ['Tratativas em aberto', TRATATIVAS.length, ()=>goto('sec-tratativas')],
+    ['Barrados (aguardando retorno)', barrados.length, ()=>goto('sec-tratativas')],
+    ['Financeiro (a cobrar)', financeiro.length, ()=>{ filterTratByGroup('financeiro'); goto('sec-tratativas'); }],
+  ];
+  window.__fluxoHandlers = [...fluxo1, ...fluxo2].map(f=>f[2]);
+  let __fi = 0;
+  document.getElementById('fluxoView').innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Fluxo 1 — Protocolo de Coleta</div>
+    ${fluxo1.map(([l,v])=>{ const i=__fi++; return `<button onclick='window.__fluxoHandlers[${i}]()' style="all:unset;cursor:pointer;display:flex;justify-content:space-between;padding:5px 0;font-size:12.5px;border-bottom:1px solid var(--bg2);width:100%" onmouseover="this.style.color='var(--vinho)'" onmouseout="this.style.color=''"><span>${l}</span><b style="font-family:var(--font-mono)">${v}</b></button>`; }).join('')}
+    <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 6px">Fluxo 2 — Tratativas Transportadora</div>
+    ${fluxo2.map(([l,v])=>{ const i=__fi++; return `<button onclick='window.__fluxoHandlers[${i}]()' style="all:unset;cursor:pointer;display:flex;justify-content:space-between;padding:5px 0;font-size:12.5px;border-bottom:1px solid var(--bg2);width:100%" onmouseover="this.style.color='var(--vinho)'" onmouseout="this.style.color=''"><span>${l}</span><b style="font-family:var(--font-mono)">${v}</b></button>`; }).join('')}
+  `;
+}
+
+// ================= TAREFAS DO DIA =================
+let tarefasPrioFilter = '';
+function renderTarefasFilterbar(){
+  const chips = [
+    { v:'', label:'Todas' }, { v:'critico', label:'🔴 Atrasado (SLA)' }, { v:'atencao', label:'🟠 Em risco' }, { v:'no_prazo', label:'🟢 No prazo' }, { v:'sem_data', label:'⬜ Pendente de dados' }, { v:'sem_sla', label:'⚪ Sem SLA (tratativas)' }, { v:'cancelado', label:'⚫ Cancelado' },
+  ];
+  document.getElementById('tarefasFilterbar').innerHTML = chips.map(c=>`<button class="chip" data-tp="${c.v}" onclick='setTarefasPrio(${JSON.stringify(c.v)})'>${c.label}</button>`).join('');
+}
+function setTarefasPrio(v){ tarefasPrioFilter = v; renderTarefas(); }
+function goToTarefasPrio(v){
+  goto('sec-tarefas');
+  document.getElementById('tarefasMostrarConcluidos').checked = (v==='concluido');
+  setTarefasPrio(v);
+}
+function renderTarefas(){
+  document.querySelectorAll('#tarefasFilterbar [data-tp]').forEach(el=>el.classList.toggle('active', el.dataset.tp===tarefasPrioFilter));
+  const mostrarConcluidos = document.getElementById('tarefasMostrarConcluidos').checked;
+  const q = document.getElementById('tarefasBusca').value.toLowerCase();
+  let list = TASKS.map(taskFields);
+  if (!mostrarConcluidos) list = list.filter(f=>f.prioridade!=='concluido');
+  if (tarefasPrioFilter) list = list.filter(f=>f.prioridade===tarefasPrioFilter);
+  if (q) list = list.filter(f => (f.cliente||'').toLowerCase().includes(q) || String(f.nf||'').includes(q));
+  list = list.filter(f => inDateRangeKey(f.raw, 'tarefas'));
+  list.sort((a,b)=> PRIO_ORDER[a.prioridade]-PRIO_ORDER[b.prioridade] || (b.dias_aberto||0)-(a.dias_aberto||0));
+
+  document.getElementById('tarefasCont').textContent = list.length + ' caso(s)';
+  const rows = list.map(f => `
+    <tr onclick='openDetail(${JSON.stringify(f.raw)})'>
+      <td>${f.nf?esc(f.nf):'—'}</td>
+      <td>${esc(f.chave)}</td>
+      <td class="wrap">${esc(f.cliente)}</td>
+      <td>${esc(f.transportadora)||'—'}</td>
+      <td>${esc(f.uf)||'—'}</td>
+      <td>${esc(f.cidade)||'—'}</td>
+      <td>${esc(f.tipo)}</td>
+      <td>${esc(f.origem)}</td>
+      <td>${esc(f.data_solicitacao)}</td>
+      <td>${esc(f.data_programacao)}</td>
+      <td class="wrap">${esc(f.data_coleta)}</td>
+      <td class="wrap">${esc(f.data_retorno_cd)}</td>
+      <td>${f.dias_aberto ?? '—'}</td>
+      <td class="wrap">${esc(f.prazo_previsto)}</td>
+      <td>${f.dias_atraso}</td>
+      <td class="wrap">${esc(f.status)}</td>
+      <td><span class="prio-pill ${PRIO_CLASS[f.prioridade]}">${PRIO_LABEL[f.prioridade]}</span></td>
+      <td><span class="tag ${RESP_TAG[f.responsabilidade]}">${RESP_LABEL[f.responsabilidade]}</span></td>
+      <td>${esc(f.ultima_atualizacao)}</td>
+      <td>${esc(f.responsavel)}</td>
+      <td class="wrap">${esc(f.proxima_acao)}</td>
+      <td class="desc">${esc((f.observacao||'').slice(0,100))}</td>
+    </tr>`).join('');
+  document.getElementById('tblTarefas').innerHTML = `<thead><tr>
+    <th>NF</th><th>Chave</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Cidade</th><th>Tipo</th><th>Origem</th>
+    <th>Solicitação</th><th>Programação</th><th>Data coleta</th><th>Retorno ao CD</th><th>Dias aberto</th><th>Prazo previsto</th>
+    <th>Dias atraso</th><th>Status</th><th>Prioridade</th><th>Responsabilidade</th><th>Últ. atualização</th><th>Responsável</th><th>Próxima ação</th><th>Observação</th>
+  </tr></thead><tbody>${rows}</tbody>`;
+
+}
+document.getElementById('tarefasBusca').addEventListener('input', renderTarefas);
+document.getElementById('tarefasMostrarConcluidos').addEventListener('change', renderTarefas);
+
+// ================= PROTOCOLO DE COLETA =================
+let coletaFilter = { type:'aberto', value:'aberto' };
+function coletaMatches(c, f){
+  if (f.type==='all') return true;
+  if (f.type==='aberto') return c.etapa!=='cancelada' && c.etapa!=='recebido_cd';
+  if (f.type==='etapa') return c.etapa===f.value;
+  if (f.type==='prioridade') return c.prioridade===f.value;
+  if (f.type==='transp') return c.transportadora===f.value;
+  if (f.type==='uf') return c.uf===f.value;
+  if (f.type==='regiao') return c.regiao===f.value;
+  if (f.type==='responsabilidade') return c.responsabilidade===f.value;
+  return false;
+}
+function setColetaFilter(f){
+  coletaFilter=f;
+  renderColetaList();
+  goto('sec-coleta');
+  document.getElementById('coletaListTitle').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function renderColetaKpis(){
+  const pendente = COLETA.filter(c=>c.etapa==='aguardando_coleta');
+  const realizada = COLETA.filter(c=>c.coleta_realizada);
+  const aguardandoCD = COLETA.filter(c=>c.etapa==='coletado_aguardando_cd');
+  const recebidoCD = COLETA.filter(c=>c.etapa==='recebido_cd');
+  const cancelada = COLETA.filter(c=>c.etapa==='cancelada');
+  // Aberto = dentro do relógio do SLA (aguardando coleta OU já coletado aguardando CD) — mesmo universo
+  // usado pelo filtro "prioridade=critico", para não divergir do que a lista mostra ao clicar.
+  const abertos = COLETA.filter(c=>c.etapa==='aguardando_coleta' || c.etapa==='coletado_aguardando_cd');
+  const abertosComData = abertos.filter(c=>c.temDataProtocolo);
+  const foraPrazo = abertos.filter(c=>c.prioridade==='critico');
+  const diasMediosAbertos = abertosComData.length ? Math.round(abertosComData.reduce((s,c)=>s+(c.dias_aberto||0),0)/abertosComData.length) : 0;
+  const maiorAtraso = Math.max(0, ...abertos.map(c=>c.dias_atraso||0));
+  const kpis = [
+    { f:{type:'all'}, label:'Total de protocolos', value:COLETA.length },
+    { f:{type:'etapa',value:'aguardando_coleta'}, label:'Coleta pendente', value:pendente.length, color:'var(--amb)' },
+    { f:{type:'all'}, label:'Coleta realizada', value:realizada.length, color:'var(--blu)' },
+    { f:{type:'etapa',value:'coletado_aguardando_cd'}, label:'Aguardando confirmação do CD', value:aguardandoCD.length, color:'var(--amb)' },
+    { f:{type:'etapa',value:'recebido_cd'}, label:'Recebido no CD', value:recebidoCD.length, color:'var(--grn)' },
+    { f:{type:'etapa',value:'cancelada'}, label:'Coleta cancelada', value:cancelada.length, color:'var(--tx3)' },
+    { f:{type:'prioridade',value:'critico'}, label:'Fora do prazo (SLA)', value:foraPrazo.length, color:'var(--red)', badge:['cobrar','b-red'] },
+    { f:{type:'all'}, label:'Dias médios (abertos, com data)', value:diasMediosAbertos, color:'var(--tx1)' },
+    { f:{type:'all'}, label:'Maior atraso', value:maiorAtraso, color:'var(--red)' },
+    { f:{type:'prioridade',value:'critico'}, label:'Casos p/ cobrança', value:foraPrazo.length, color:'var(--red)' },
+  ];
+  document.getElementById('coletaKpis').innerHTML = kpis.map(k => `
+    <button class="kpi" onclick='setColetaFilter(${JSON.stringify(k.f)})'>
+      ${k.badge?`<span class="bdg ${k.badge[1]}">${k.badge[0]}</span>`:''}
+      <div class="kl">${k.label}</div>
+      <div class="kv" style="color:${k.color||'var(--tx1)'}">${k.value}</div>
+    </button>
+  `).join('');
+}
+function renderColetaTransp(){
+  const map = {};
+  COLETA.forEach(c => {
+    map[c.transportadora] = map[c.transportadora] || { total:0, atrasado:0 };
+    map[c.transportadora].total++;
+    if ((c.etapa==='aguardando_coleta'||c.etapa==='coletado_aguardando_cd') && c.prioridade==='critico') map[c.transportadora].atrasado++;
+  });
+  const rows = Object.entries(map).sort((a,b)=>b[1].atrasado-a[1].atrasado || b[1].total-a[1].total);
+  document.getElementById('coletaTransp').innerHTML = rows.map(([name,v]) => {
+    const pct = Math.round(v.atrasado/v.total*100);
+    const color = pct>=50?'var(--red)':pct>0?'var(--amb)':'var(--grn)';
+    return `<button class="transp-row" onclick='setColetaFilter({"type":"transp","value":${JSON.stringify(name)}})'>
+      <div class="transp-name">${esc(name)}<small>${v.total} caso${v.total>1?'s':''}</small></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="bar-pct" style="color:${color}">${pct}% (${v.atrasado}/${v.total})</div>
+    </button>`;
+  }).join('');
+}
+function renderColetaEstados(){
+  const map = {};
+  COLETA.forEach(c => {
+    map[c.uf] = map[c.uf] || { total:0, atrasado:0 };
+    map[c.uf].total++;
+    if ((c.etapa==='aguardando_coleta'||c.etapa==='coletado_aguardando_cd') && c.prioridade==='critico') map[c.uf].atrasado++;
+  });
+  const rows = Object.entries(map).sort((a,b)=>b[1].total-a[1].total);
+  document.getElementById('coletaEstados').innerHTML = rows.map(([uf,v]) => {
+    const tone = v.atrasado>0 ? 'danger' : 'ok';
+    return `<button class="estado-card" style="background:${tone==='danger'?'var(--red-bg)':'var(--grn-bg)'};border-color:${tone==='danger'?'#f0cac5':'#bfe0c9'}" onclick='setColetaFilter({"type":"uf","value":${JSON.stringify(uf)}})'>
+      <div class="estado-uf" style="color:${tone==='danger'?'var(--red)':'var(--grn)'}">${esc(uf)}</div>
+      <div class="estado-count">${v.total} · ${v.atrasado} atrasada${v.atrasado!==1?'s':''}</div>
+    </button>`;
+  }).join('');
+}
+function renderColetaFilterbar(){
+  const chips = [
+    { f:{type:'all'}, label:'Todas' },
+    { f:{type:'aberto'}, label:'Em aberto' },
+    { f:{type:'etapa',value:'aguardando_coleta'}, label:'Aguardando coleta' },
+    { f:{type:'etapa',value:'coletado_aguardando_cd'}, label:'Aguardando retorno ao CD' },
+    { f:{type:'etapa',value:'recebido_cd'}, label:'Recebido no CD' },
+    { f:{type:'etapa',value:'cancelada'}, label:'Canceladas' },
+  ];
+  document.getElementById('coletaFilterbar').innerHTML = chips.map(c => `<button class="chip" data-cf='${JSON.stringify(c.f)}' onclick='setColetaFilter(${JSON.stringify(c.f)})'>${c.label}</button>`).join('');
+}
+function renderColetaList(){
+  document.querySelectorAll('#coletaFilterbar [data-cf]').forEach(el => el.classList.toggle('active', el.dataset.cf === JSON.stringify(coletaFilter)));
+  const list = COLETA.filter(c => coletaMatches(c, coletaFilter) && inDateRangeKey(c,'coleta')).sort((a,b)=>(b.dias_aberto||0)-(a.dias_aberto||0));
+  document.getElementById('coletaListCount').textContent = list.length + ' caso(s)';
+  if (!list.length){ document.getElementById('coletaList').innerHTML = '<div class="empty-note">Nenhum caso nesta categoria.</div>'; return; }
+  document.getElementById('coletaList').innerHTML = list.map(c => {
+    const tratKey = classifyTratativaColeta(c.status);
+    return `
+    <button class="caso-row" onclick='openDetail(${JSON.stringify(c)})'>
+      <div class="caso-nf">NF ${esc(c.nf)}</div>
+      <div class="caso-info">
+        <div class="caso-nome">${esc(c.cliente)}</div>
+        <div class="caso-det">${esc(c.transportadora)}${c.tipoOperacao==='Goback (troca)'?' <span class="tag tag-info" style="margin:0">Goback</span>':''} · ${esc(c.uf)} · ${ETAPA_LABEL[c.etapa]}</div>
+        <div class="caso-det" style="margin-top:3px">${esc((c.descricao||'').slice(0,100))}${(c.descricao||'').length>100?'…':''}</div>
+        <span class="prio-pill ${PRIO_CLASS[c.prioridade]}">${PRIO_LABEL[c.prioridade]}</span>
+        ${tratKey ? `<span class="tag ${TRATATIVA_TAG[tratKey]}" style="margin-left:5px">${TRATATIVA_LABEL[tratKey]}</span>` : ''}
+        ${!c.temDataProtocolo ? `<span class="tag tag-muted" style="margin-left:5px">Sem data de protocolo</span>` : ''}
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="caso-dias" style="color:${PRIO_COLOR[c.prioridade]}">${c.dias_aberto ?? '—'} dias</div>
+        <div style="font-size:10px;color:var(--tx3)">desde o protocolo</div>
+      </div>
+    </button>
+  `;
+  }).join('');
+}
+
+// ================= ATRASOS - COBRANÇA =================
+function renderAtrasos(){
+  // Base = todos os casos com o SLA de 20 dias ainda em andamento (aguardando coleta OU já coletados
+  // aguardando confirmação de recebimento no CD) — a coleta realizada não encerra o prazo.
+  // "% atraso" aqui mede só os casos ABERTOS com data de protocolo válida — nunca inclui casos concluídos
+  // (não há data de recebimento no CD para saber se terminaram no prazo) nem casos sem data (mostrados à parte).
+  const base = COLETA.filter(c=>c.etapa==='aguardando_coleta' || c.etapa==='coletado_aguardando_cd');
+  function agg(keyFn){
+    const map = {};
+    base.forEach(c => {
+      const k = keyFn(c);
+      map[k] = map[k] || { total:0, noPrazo:0, atencao:0, atrasado:0, semData:0, diasSum:0, diasN:0 };
+      map[k].total++;
+      if (!c.temDataProtocolo){ map[k].semData++; return; }
+      map[k].diasSum += (c.dias_aberto||0); map[k].diasN++;
+      if (c.statusPrazo==='no_prazo') map[k].noPrazo++;
+      else if (c.statusPrazo==='risco') map[k].atencao++;
+      else if (c.statusPrazo==='atrasado') map[k].atrasado++;
+    });
+    return map;
+  }
+  function cobrarTag(pct){
+    if (pct==null) return '<span class="tag tag-muted">Sem dados suficientes</span>';
+    if (pct >= 100) return '<span class="tag tag-danger">URGENTE — COBRAR</span>';
+    if (pct > 0) return '<span class="tag tag-warn">VERIFICAR</span>';
+    return '<span class="tag tag-ok">OK</span>';
+  }
+  function toRows(map, filterType){
+    const rows = Object.entries(map).sort((a,b)=>b[1].atrasado-a[1].atrasado || b[1].total-a[1].total);
+    if (!rows.length) return '';
+    return rows.map(([k,v]) => {
+      const pct = v.diasN ? Math.round(v.atrasado/v.diasN*100) : null;
+      const media = v.diasN ? Math.round(v.diasSum/v.diasN)+' dias' : '—';
+      return `<tr onclick='setColetaFilter({"type":${JSON.stringify(filterType)},"value":${JSON.stringify(k)}})'>
+        <td>${esc(k)}</td><td>${v.total}</td>
+        <td style="color:var(--grn)">${v.noPrazo}</td>
+        <td style="color:var(--amb)">${v.atencao}</td>
+        <td style="color:var(--red);font-weight:700">${v.atrasado}</td>
+        <td>${v.semData||0}</td>
+        <td>${pct==null?'—':pct+'%'}</td><td>${media}</td><td>${cobrarTag(pct)}</td></tr>`;
+    }).join('');
+  }
+  const head = (n) => `<thead><tr><th>${n}</th><th>Total</th><th>No prazo</th><th>Em risco</th><th>Atrasados</th><th>Dados insuf.</th><th>% Atraso (abertos)</th><th>Média de dias</th><th>Cobrar?</th></tr></thead>`;
+  const emptyRow = (n) => `<tbody><tr><td style="padding:16px;text-align:center;color:var(--tx3)">Nenhum caso aberto de Protocolo de Coleta no momento para agrupar por ${n}.</td></tr></tbody>`;
+  function setTable(id, body, label){
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = body ? (head(label) + '<tbody>' + body + '</tbody>') : (head(label) + emptyRow(label.toLowerCase()));
+  }
+  const mapTransp = agg(c=>c.transportadora||'Não informado');
+  setTable('tblAtrasoTransp', toRows(mapTransp,'transp'), 'Transportadora');
+  setTable('tblAtrasoUf', toRows(agg(c=>c.uf||'Não informado'),'uf'), 'UF');
+  setTable('tblAtrasoRegiao', toRows(agg(c=>c.regiao),'regiao'), 'Região');
+
+  const respLabelToKey = Object.fromEntries(Object.entries(RESP_LABEL).map(([k,v])=>[v,k]));
+  const mapResp = agg(c=>RESP_LABEL[c.responsabilidade]);
+  const bodyResp = toRows(mapResp,'__resp__').replace(/setColetaFilter\(\{"type":"__resp__","value":"([^"]+)"\}\)/g, (m,label)=>
+    `setColetaFilter({"type":"responsabilidade","value":${JSON.stringify(respLabelToKey[label])}})`);
+  setTable('tblAtrasoResp', bodyResp, 'Responsabilidade');
+
+  // Casos "Abra" (falta de mercadoria) — coleta + tratativas, destacados para análise manual
+  const abraColeta = COLETA.filter(c => c.responsabilidade==='abra' && c.prioridade!=='concluido');
+  const abraTrat = TRATATIVAS.filter(t => t.responsabilidade==='abra');
+  const tblAbra = document.getElementById('tblAtrasoAbra');
+  if (tblAbra){
+    const abraAll = [...abraColeta.map(c=>({...c,__origemLabel:'Protocolo de Coleta'})), ...abraTrat.map(t=>({...t,__origemLabel:'Tratativa'}))]
+      .sort((a,b)=>(b.dias_aberto||0)-(a.dias_aberto||0));
+    document.getElementById('countAtrasoAbra').textContent = abraAll.length + ' caso(s)';
+    tblAbra.innerHTML = `<thead><tr><th>Origem</th><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Dias</th><th>Observação</th></tr></thead><tbody>${
+      abraAll.length ? abraAll.map(x => `<tr onclick='openDetail(${JSON.stringify(x)})'>
+        <td>${esc(x.__origemLabel)}</td><td>${x.nf?esc(x.nf):'—'}</td><td class="wrap">${esc(x.cliente)}</td>
+        <td>${esc(x.transportadora)||'—'}</td><td>${esc(x.uf)||'—'}</td><td>${x.dias_aberto??'—'}</td>
+        <td class="desc">${esc((x.descricao||'').slice(0,140))}</td></tr>`).join('')
+      : '<tr><td colspan="7" style="text-align:center;padding:16px;color:var(--tx3)">Nenhum caso identificado como falta de mercadoria no momento.</td></tr>'
+    }</tbody>`;
+  }
+
+  const entries = Object.entries(mapTransp).sort((a,b)=>b[1].atrasado-a[1].atrasado);
+  const chartEl = document.getElementById('chartAtrasoTransp');
+  if (window.__chartAtrasoTransp) { window.__chartAtrasoTransp.destroy(); window.__chartAtrasoTransp = null; }
+  if (chartEl){
+    if (!entries.length){
+      const ctx = chartEl.getContext('2d');
+      ctx.clearRect(0,0,chartEl.width,chartEl.height);
+    } else {
+      window.__chartAtrasoTransp = new Chart(chartEl, {
+        type:'bar',
+        data:{ labels:entries.map(e=>e[0]), datasets:[
+          { label:'No prazo', data:entries.map(e=>e[1].noPrazo), backgroundColor:'#1E7A4C' },
+          { label:'Em risco', data:entries.map(e=>e[1].atencao), backgroundColor:'#A66A0C' },
+          { label:'Atrasado', data:entries.map(e=>e[1].atrasado), backgroundColor:'#B3261E' },
+          { label:'Dados insuficientes', data:entries.map(e=>e[1].semData), backgroundColor:'#C4D0DC' },
+        ]},
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+          onClick:(evt,els)=>{ if(!els.length) return; const name = entries[els[0].index][0]; setColetaFilter({type:'transp',value:name}); },
+          onHover:(evt,els)=>{ evt.native.target.style.cursor = els.length?'pointer':'default'; },
+          scales:{ x:{ stacked:true, ticks:{ precision:0 } }, y:{ stacked:true } },
+          plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:11} } } } }
+      });
+    }
+  }
+}
+
+// ================= LISTA DE COBRANÇA =================
+function renderCobranca(){
+  const list = COLETA.filter(c=>(c.etapa==='aguardando_coleta'||c.etapa==='coletado_aguardando_cd') && (c.prioridade==='atencao'||c.prioridade==='critico') && inDateRangeKey(c,'cobranca'))
+    .sort((a,b)=>(b.dias_atraso||0)-(a.dias_atraso||0));
+  const rows = list.map(c => {
+    const tratKey = classifyTratativaColeta(c.status);
+    return `
+    <tr onclick='openDetail(${JSON.stringify(c)})'>
+      <td>${esc(c.nf)}</td><td class="wrap">${esc(c.cliente)}</td><td>${esc(c.transportadora)}</td><td>${esc(c.uf)}</td><td>${esc(c.cidade)}</td>
+      <td>${esc(c.data_solicitacao)||'—'}</td><td>${esc(c.data_programacao)||'—'}</td><td>Não informado</td>
+      <td>${SLA} dias</td><td>${c.dias_aberto??'—'}</td><td style="color:var(--red);font-weight:700">${c.dias_atraso}</td>
+      <td class="desc">${esc((c.descricao||'').slice(0,110))}</td>
+      <td>${tratKey ? `<span class="tag ${TRATATIVA_TAG[tratKey]}">${TRATATIVA_LABEL[tratKey]}</span>` : 'Não informado'}</td>
+      <td><span class="tag ${RESP_TAG[c.responsabilidade]}">${RESP_LABEL[c.responsabilidade]}</span></td>
+      <td class="wrap">${esc(suggestAction(c))}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tblCobranca').innerHTML = `<thead><tr>
+    <th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Cidade</th><th>Data protocolo</th><th>Data programação</th><th>Data coleta</th>
+    <th>Prazo</th><th>Dias aberto</th><th>Dias atraso</th><th>Motivo do atraso</th><th>Status da cobrança</th><th>Responsabilidade</th><th>Próxima ação</th>
+  </tr></thead><tbody>${rows.length?rows:'<tr><td colspan="15" style="text-align:center;padding:20px;color:var(--tx3)">Nenhum caso para cobrança no momento.</td></tr>'}</tbody>`;
+}
+
+function renderTranspLegenda(){
+  const usados = new Set([...COLETA.map(c=>c.transportadora), ...TRATATIVAS.map(t=>t.transportadora)].filter(Boolean));
+  const entries = Object.entries(TRANSP_INFO).filter(([k])=>usados.has(k));
+  const faltando = [...usados].filter(k=>!TRANSP_INFO[k]);
+  document.getElementById('transpLegenda').innerHTML = entries.map(([k,v]) => `
+    <div style="background:var(--bg2);border-radius:10px;padding:13px 15px">
+      <div style="font-weight:700;font-size:13px;color:var(--tx1);margin-bottom:8px">🚚 ${esc(v.nome)}</div>
+      <dl style="margin:0">
+        <dt style="font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--tx3)">Área de atuação</dt>
+        <dd style="margin:2px 0 8px;font-size:11.5px;color:var(--tx2);line-height:1.5">${esc(v.atuacao)}</dd>
+        <dt style="font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--tx3)">Serviços realizados</dt>
+        <dd style="margin:2px 0 8px;font-size:11.5px;color:var(--tx2);line-height:1.5">${esc(v.servicos)}</dd>
+        <dt style="font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--tx3)">Parceiros envolvidos</dt>
+        <dd style="margin:2px 0 8px;font-size:11.5px;color:var(--tx2);line-height:1.5">${esc(v.parceiros)}</dd>
+        ${v.particularidades && v.particularidades!=='—' ? `<dt style="font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--tx3)">Particularidades</dt>
+        <dd style="margin:2px 0 0;font-size:11.5px;color:var(--tx2);line-height:1.5">${esc(v.particularidades)}</dd>` : ''}
+      </dl>
+    </div>`).join('') + (faltando.length ? `<div class="gap-note" style="grid-column:1/-1">Transportadora(s) sem ficha cadastrada ainda: ${faltando.map(esc).join(', ')}.</div>` : '');
+}
+
+// ================= TRATATIVAS TRANSPORTADORA =================
+let tratState = { busca:'', tipo:'', transp:'', uf:'', enc:'', resp:'' };
+function populateTratFilters(){
+  const tipos = [...new Set(TRATATIVAS.map(t=>t.tipo_devolucao).filter(Boolean))].sort();
+  const transps = [...new Set(TRATATIVAS.map(t=>t.transportadora).filter(Boolean))].sort();
+  const ufs = [...new Set(TRATATIVAS.map(t=>t.uf).filter(Boolean))].sort();
+  document.getElementById('tratFiltroTipo').innerHTML = '<option value="">Todos os tipos</option>' + tipos.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  document.getElementById('tratFiltroTransp').innerHTML = '<option value="">Todas as transportadoras</option>' + transps.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  document.getElementById('tratFiltroUf').innerHTML = '<option value="">Todas as UF</option>' + ufs.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+}
+function renderTratKpis(){
+  const byGroup = {};
+  TRATATIVAS.forEach(t => { byGroup[t.grupo] = (byGroup[t.grupo]||0)+1; });
+  const pendentesLogistica = TRATATIVAS.filter(t=>t.encaminhavel && !t.encaminhado).length;
+  const jaEncaminhados = TRATATIVAS.filter(t=>t.encaminhavel && t.encaminhado).length;
+  const kpis = [
+    { grp:'', label:'Total (sem SLA definido)', value:TRATATIVAS.length },
+    { grp:'recolhimento', label:GROUP_LABEL.recolhimento, value:byGroup.recolhimento||0, color:'var(--blu)', sub:'Logística conduz' },
+    { grp:null, label:'Pendentes de encaminhar', value:pendentesLogistica, color:'var(--amb)', sub:'ainda não repassados', enc:'pendente' },
+    { grp:null, label:'Já encaminhados', value:jaEncaminhados, color:'var(--grn)', sub:'aguardando Logística', enc:'feito' },
+    { grp:'barrar', label:'Barrar', value:byGroup.barrar||0, color:'var(--vinho)', sub:'contatar transportadora' },
+    { grp:'financeiro', label:'Financeiro', value:byGroup.financeiro||0, color:'var(--red)', sub:'responsabilização' },
+    { grp:'perdas', label:'Perdas (sem ação)', value:byGroup.perdas||0, color:'var(--tx3)' },
+    { grp:'nova', label:'Novo / a triar', value:byGroup.nova||0, color:'var(--tx3)' },
+  ];
+  document.getElementById('tratKpis').innerHTML = kpis.map(k => `
+    <button class="kpi" onclick='${k.enc ? `filterTratByEnc(${JSON.stringify(k.enc)})` : `filterTratByGroup(${JSON.stringify(k.grp)})`}'>
+      <div class="kl">${k.label}</div>
+      <div class="kv" style="color:${k.color||'var(--tx1)'}">${k.value}</div>
+      ${k.sub?`<div class="kt">${k.sub}</div>`:''}
+    </button>
+  `).join('');
+}
+function filterTratByEnc(v){
+  tratState.enc = v;
+  document.getElementById('tratFiltroEnc').value = v;
+  renderTratTable();
+  goto('sec-tratativas');
+}
+function filterTratByGroup(g){
+  tratState.tipo = '__group__'+g;
+  document.getElementById('tratFiltroTipo').value = '';
+  renderTratTable();
+  goto('sec-tratativas');
+}
+function renderTratTable(){
+  let list = TRATATIVAS;
+  if (tratState.busca){
+    const q = tratState.busca.toLowerCase();
+    list = list.filter(t => (t.cliente||'').toLowerCase().includes(q) || String(t.nf||'').includes(q) || (t.descricao||'').toLowerCase().includes(q));
+  }
+  if (tratState.tipo){
+    if (tratState.tipo.startsWith('__group__')){
+      const g = tratState.tipo.replace('__group__','');
+      if (g) list = list.filter(t => t.grupo===g);
+    } else list = list.filter(t => t.tipo_devolucao===tratState.tipo);
+  }
+  if (tratState.transp) list = list.filter(t => t.transportadora===tratState.transp);
+  if (tratState.uf) list = list.filter(t => t.uf===tratState.uf);
+  if (tratState.enc==='pendente') list = list.filter(t => t.encaminhavel && !t.encaminhado);
+  if (tratState.enc==='feito') list = list.filter(t => t.encaminhado);
+  if (tratState.resp) list = list.filter(t => t.responsabilidade===tratState.resp);
+  list = list.filter(t => inDateRangeKey(t,'trat'));
+  list = list.slice().sort((a,b)=>(b.dias_aberto||0)-(a.dias_aberto||0));
+
+  document.getElementById('tratCont').textContent = list.length + ' de ' + TRATATIVAS.length;
+  const rows = list.map(t => `
+    <tr onclick='openDetail(${JSON.stringify(t)})'>
+      <td><span class="tag ${GROUP_TAG[t.grupo]}">${esc(t.tipo_devolucao)}</span></td>
+      <td class="wrap">${esc(t.cliente)}</td>
+      <td>${t.nf?esc(t.nf):'—'}</td>
+      <td>${esc(t.transportadora)||'—'}</td>
+      <td>${esc(t.tipoOperacao)||'—'}</td>
+      <td>${esc(t.uf)||'—'}</td>
+      <td>${t.dias_aberto??'—'} <span style="color:var(--tx3);font-size:10px">(informativo)</span></td>
+      <td>${esc(t.acaoGrupo)}</td>
+      <td>${t.encaminhavel ? (t.encaminhado ? '<span class="tag tag-ok">Encaminhado</span>' : '<span class="tag tag-warn">Pendente</span>') : '<span class="tag tag-muted">—</span>'}</td>
+      <td><span class="tag ${RESP_TAG[t.responsabilidade]}">${RESP_LABEL[t.responsabilidade]}</span></td>
+      <td class="desc">${esc((t.descricao||'').slice(0,110))}${(t.descricao||'').length>110?'…':''}</td>
+    </tr>`).join('');
+  document.getElementById('tblTratativas').innerHTML = `<thead><tr><th>Tipo</th><th>Cliente</th><th>NF</th><th>Transportadora</th><th>Tipo operação</th><th>UF</th><th>Dias (informativo)</th><th>Ação esperada</th><th>Encaminhamento</th><th>Responsabilidade</th><th>Observação</th></tr></thead><tbody>${rows}</tbody>`;
+}
+document.getElementById('tratBusca').addEventListener('input', e => { tratState.busca = e.target.value; renderTratTable(); });
+document.getElementById('tratFiltroTipo').addEventListener('change', e => { tratState.tipo = e.target.value; renderTratTable(); });
+document.getElementById('tratFiltroTransp').addEventListener('change', e => { tratState.transp = e.target.value; renderTratTable(); });
+document.getElementById('tratFiltroUf').addEventListener('change', e => { tratState.uf = e.target.value; renderTratTable(); });
+document.getElementById('tratFiltroEnc').addEventListener('change', e => { tratState.enc = e.target.value; renderTratTable(); });
+document.getElementById('tratFiltroResp').addEventListener('change', e => { tratState.resp = e.target.value; renderTratTable(); });
+document.getElementById('tratLimpar').addEventListener('click', () => {
+  tratState = { busca:'', tipo:'', transp:'', uf:'', enc:'', resp:'' };
+  ['tratBusca'].forEach(id=>document.getElementById(id).value='');
+  ['tratFiltroTipo','tratFiltroTransp','tratFiltroUf','tratFiltroEnc','tratFiltroResp'].forEach(id=>document.getElementById(id).value='');
+  renderTratTable();
+});
+
+// ================= BARRADOS =================
+function renderBarrados(){
+  const list = TRATATIVAS.filter(t=>t.grupo==='barrar' && inDateRangeKey(t,'barrados')).sort((a,b)=>(b.dias_aberto||0)-(a.dias_aberto||0));
+  const rows = list.map(t => `
+    <tr onclick='openDetail(${JSON.stringify(t)})'>
+      <td>${t.nf?esc(t.nf):'—'}</td><td class="wrap">${esc(t.cliente)}</td><td>${esc(t.transportadora)||'—'}</td>
+      <td>${esc(t.data_solicitacao)||'Não informado'}</td><td class="desc">${esc((t.descricao||'').slice(0,140))}</td>
+      <td>${esc(t.data_programacao)||'Não informado'}</td><td>${esc(t.status)||'Não informado'}</td><td>Não informado</td>
+      <td>${t.dias_aberto??'—'} <span style="color:var(--tx3);font-size:10px">(informativo)</span></td>
+      <td>${esc(t.usuario)||'Não informado'}</td><td class="wrap">${esc(suggestAction(t))}</td>
+    </tr>`).join('');
+  document.getElementById('tblBarrados').innerHTML = `<thead><tr>
+    <th>NF</th><th>Cliente</th><th>Transportadora</th><th>Data ocorrência</th><th>Motivo</th><th>Data barramento</th><th>Status retorno</th><th>Retorno ao CD</th><th>Dias aberto</th><th>Responsável</th><th>Próxima ação</th>
+  </tr></thead><tbody>${rows.length?rows:'<tr><td colspan="11" style="text-align:center;padding:20px;color:var(--tx3)">Nenhum caso barrado no momento.</td></tr>'}</tbody>`;
+}
+
+// ================= ÍNDICE DE SLA E PRODUTIVIDADE =================
+// Só o Protocolo de Coleta tem SLA (20 dias, do protocolo ao recebimento no CD). Tratativas Transportadora
+// não entram aqui — não há prazo definido para elas (ver regra centralizada em ACAO_GRUPO/CONFIG).
+function renderSlaIndex(){
+  const abertos = COLETA.filter(c=>c.etapa==='aguardando_coleta' || c.etapa==='coletado_aguardando_cd');
+  const semData = abertos.filter(c=>!c.temDataProtocolo).length;
+  const elegiveis = abertos.filter(c=>c.temDataProtocolo);
+  const dentroPrazo = elegiveis.filter(c=>c.statusPrazo==='no_prazo' || c.statusPrazo==='risco').length;
+  const pctAberto = elegiveis.length ? Math.round(dentroPrazo/elegiveis.length*100) : null;
+
+  const concluidosIndeterminado = COLETA.filter(c=>c.statusPrazo==='concluido_indeterminado').length;
+
+  const tone = v => v==null?'var(--tx3)':(v>=80?'var(--grn)':(v>=50?'var(--amb)':'var(--red)'));
+  const kpis = [
+    { label:'Casos abertos dentro do prazo', value: pctAberto==null?'—':pctAberto+'%', sub: pctAberto==null?'sem casos elegíveis (com data de protocolo)':dentroPrazo+' de '+elegiveis.length+' abertos com data válida', color:tone(pctAberto), go:'sec-atrasos' },
+    { label:'Concluídos no prazo (indicador)', value:'Indisponível', sub:'faltam datas exatas de recebimento no CD — '+concluidosIndeterminado+' recebidos sem data — ver pendência de dados', color:'var(--tx3)', go:'sec-historico' },
+    { label:'Sem data de protocolo', value:String(semData), sub:'não é possível classificar prazo sem essa data', color: semData>0?'var(--amb)':'var(--grn)', go:'sec-coleta' },
+  ];
+  document.getElementById('slaIndex').innerHTML = kpis.map(k => `
+    <button class="kpi" onclick="goto('${k.go}')">
+      <div class="kl">${k.label}</div>
+      <div class="kv" style="color:${k.color}">${k.value}</div>
+      <div class="kt">${k.sub}</div>
+    </button>`).join('');
+}
+
+// ================= HISTÓRICO REALIZADOS =================
+let historicoState = { busca:'', origem:'' };
+function renderHistorico(){
+  const concluidosColeta = COLETA.filter(c=>c.prioridade==='concluido');
+  const concluidosTrat = TRATATIVAS.filter(t=>t.prioridade==='concluido');
+  const kpis = [
+    { label:'Total concluídos', value:concluidosColeta.length + concluidosTrat.length },
+    { label:'Protocolo de Coleta', value:concluidosColeta.length },
+    { label:'Tratativas', value:concluidosTrat.length },
+  ];
+  document.getElementById('historicoKpis').innerHTML = kpis.map(k => `
+    <div class="kpi" style="cursor:default"><div class="kl">${k.label}</div><div class="kv">${k.value}</div></div>`).join('');
+
+  let all = [
+    ...concluidosColeta.map(c=>({ ...c, __origemLabel:'Protocolo', __situacao:ETAPA_LABEL[c.etapa] })),
+    ...concluidosTrat.map(t=>({ ...t, __origemLabel:'Tratativas', __situacao:t.tipo_devolucao })),
+  ];
+  if (historicoState.origem) all = all.filter(x=>x.origem===historicoState.origem);
+  if (historicoState.busca){
+    const q = historicoState.busca.toLowerCase();
+    all = all.filter(x => (x.cliente||'').toLowerCase().includes(q) || String(x.nf||'').includes(q));
+  }
+  all.sort((a,b)=>(b.dias_aberto||0)-(a.dias_aberto||0));
+  document.getElementById('tblHistorico').innerHTML = `<thead><tr><th>Fonte</th><th>Cliente</th><th>NF</th><th>Transportadora</th><th>UF</th><th>Situação</th><th>Descrição</th></tr></thead><tbody>${
+    all.length ? all.map(x => `<tr onclick='openDetail(${JSON.stringify(x)})'>
+      <td>${esc(x.__origemLabel)}</td><td class="wrap">${esc(x.cliente)}</td><td>${x.nf?esc(x.nf):'—'}</td>
+      <td>${esc(x.transportadora)||'—'}</td><td>${esc(x.uf)||'—'}</td><td>${esc(x.__situacao)}</td>
+      <td class="desc">${esc((x.descricao||'').slice(0,120))}</td></tr>`).join('')
+    : '<tr><td colspan="7" style="text-align:center;padding:16px;color:var(--tx3)">Nenhum caso concluído no momento.</td></tr>'
+  }</tbody>`;
+}
+document.getElementById('historicoBusca').addEventListener('input', e => { historicoState.busca = e.target.value; renderHistorico(); });
+document.getElementById('historicoFiltroOrigem').addEventListener('change', e => { historicoState.origem = e.target.value; renderHistorico(); });
+
+function renderBase(){
+  document.getElementById('baseColetaCount').textContent = COLETA.length + ' linhas';
+  document.getElementById('baseTratCount').textContent = TRATATIVAS.length + ' linhas';
+  document.getElementById('baseRef1').textContent = REF_BR;
+  document.getElementById('baseRef2').textContent = REF_BR + ' (aprox., ver nome do arquivo original)';
+}
+
+// ================= IMPORTAÇÃO DE NOVOS ARQUIVOS =================
+function renderImportsLog(){
+  const el = document.getElementById('importsLog');
+  if (!el) return;
+  if (!IMPORTS_LOG.length){ el.innerHTML = '<div class="empty-note">Nenhuma importação registrada ainda além dos dois arquivos originais.</div>'; return; }
+  el.innerHTML = IMPORTS_LOG.map(imp => {
+    const d = imp.importedAt ? new Date(imp.importedAt) : null;
+    const dstr = d ? d.toLocaleString('pt-BR') : '—';
+    const tipoLabel = imp.tipo==='coleta' ? 'Protocolo de Coleta' : 'Tratativas Transportadora';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bg2);font-size:12.5px">
+      <div><b>${esc(imp.filename||'arquivo')}</b><div style="color:var(--tx3);font-size:11px">${tipoLabel} · ${imp.rowCount||0} linhas · ${dstr}</div></div>
+      ${imp.assetUrl ? `<a href="${imp.assetUrl}" target="_blank" rel="noopener" class="chip" style="text-decoration:none">Ver dados salvos</a>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// -- parsing --
+function parseCsvSemicolon(text){
+  // parser simples com suporte a campos entre aspas (padrão Excel pt-BR, delimitador ";")
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for (let i=0; i<text.length; i++){
+    const c = text[i];
+    if (inQuotes){
+      if (c === '"'){ if (text[i+1]==='"'){ field+='"'; i++; } else inQuotes=false; }
+      else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ';'){ row.push(field); field=''; }
+      else if (c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if (c === '\r'){ /* ignore */ }
+      else field += c;
+    }
+  }
+  if (field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.some(c => c && c.trim()!==''));
+}
+async function readFileRows(file){
+  const isCsv = /\.csv$/i.test(file.name);
+  if (isCsv){
+    const buf = await file.arrayBuffer();
+    let text;
+    try { text = new TextDecoder('windows-1252').decode(buf); }
+    catch(e){ text = new TextDecoder('utf-8').decode(buf); }
+    return parseCsvSemicolon(text);
+  }
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type:'array', cellDates:true });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(ws, { header:1, raw:false, dateNF:'dd/mm/yyyy' });
+}
+
+function toFloatBR(s){
+  if (s===null || s===undefined || s==='') return null;
+  if (typeof s === 'number') return s;
+  const cleaned = String(s).replace(/\./g,'').replace(',', '.');
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? null : n;
+}
+function splitCliente(s){
+  if (!s) return s;
+  const i = s.indexOf(' - ');
+  return i>=0 ? s.slice(i+3).trim() : s;
+}
+function splitCpf(s){
+  const m = /^\s*(\d{3}\.\d{3}\.\d{3}-\d{2})/.exec(s||'');
+  return m ? m[1] : null;
+}
+
+// mapeamento posicional — mesmo layout de colunas dos dois arquivos de origem
+// 0 tag/NUMERO · 1 CHAVE · 2 DATA · 3 PROGRAMACAO · 4 SOLICITANTE · 5 CASOS · 6 SITUACAO/TIPO
+// 7 NUMERO_NOTA · 8 VALOR_NOTA · 9 ROMANEIO_ENTRADA · 14 TIPOSAIDA · 15 UF · 16 CIDADE · 26 USUARIO · 28 DESCRICAO
+// Localiza colunas pelo NOME do cabeçalho, não pela posição — a Innovaro já mudou a ordem
+// das colunas entre exports (ex: inseriu uma coluna "Nº" antes de SITUACAO em 15/09/2026).
+function findCol(header, ...namesOrPattern){
+  for (let i=0;i<header.length;i++){
+    for (const n of namesOrPattern){
+      if (typeof n === 'string' && header[i] === n.toUpperCase()) return i;
+    }
+  }
+  for (let i=0;i<header.length;i++){
+    for (const n of namesOrPattern){
+      if (n instanceof RegExp && n.test(header[i])) return i;
+    }
+  }
+  return -1;
+}
+function cellAt(r, i){ return (i>=0 && i<r.length && r[i]!=null) ? String(r[i]).trim() : ''; }
+
+function detectAndNormalize(rows){
+  if (!rows.length || rows.length < 2) return { error:'Arquivo vazio ou sem linhas de dados.' };
+  const header = rows[0].map(h=>String(h||'').trim().toUpperCase());
+  const col = {
+    chave: findCol(header,'CHAVE'),
+    data: findCol(header,'DATA'),
+    prog: findCol(header,'PROGRAMACAO'),
+    solicitante: findCol(header,'SOLICITANTE'),
+    casos: findCol(header,/^CASOS/),
+    situacao: findCol(header,'SITUACAO'),
+    nf: findCol(header,'NUMERO DA NOTA'),
+    valor: findCol(header,'VALOR DA NOTA'),
+    romaneio: findCol(header,'ROMANEIO_ENTRADA'),
+    tiposaida: findCol(header,'TIPOSAIDA'),
+    uf: findCol(header,'UF'),
+    cidade: findCol(header,'CIDADE'),
+    usuario: findCol(header,'USUARIO'),
+    descricao: findCol(header,'DESCRICAO'),
+  };
+  if (col.chave===-1 || col.situacao===-1){
+    return { error:'Não reconheci a estrutura de colunas deste arquivo (faltam as colunas CHAVE e/ou SITUACAO). Confirme se é um export do Innovaro.' };
+  }
+  const data = rows.slice(1).filter(r => r && cellAt(r, col.chave));
+  let coletaVotes = 0, tratVotes = 0;
+  data.forEach(r => {
+    const tipo = cellAt(r, col.situacao);
+    if (/protocolo de coleta/i.test(tipo)) coletaVotes++;
+    else if (groupOf(tipo) !== 'outros') tratVotes++;
+  });
+  const tipoDetectado = coletaVotes >= tratVotes ? 'coleta' : 'tratativa';
+
+  const normalized = data.map(r => {
+    const chave = cellAt(r, col.chave);
+    const dt = cellAt(r, col.data) || null;
+    const prog = cellAt(r, col.prog) || null;
+    const solicitanteRaw = cellAt(r, col.solicitante);
+    const cliente = splitCliente(solicitanteRaw);
+    const cpf = splitCpf(solicitanteRaw);
+    const casos = cellAt(r, col.casos);
+    const tipoRaw = cellAt(r, col.situacao);
+    const nf = cellAt(r, col.nf) || null;
+    const valor = toFloatBR(cellAt(r, col.valor));
+    const romaneio = cellAt(r, col.romaneio);
+    const transportadora = cellAt(r, col.tiposaida) || null;
+    const uf = cellAt(r, col.uf) || null;
+    const cidade = cellAt(r, col.cidade) || null;
+    const usuario = cellAt(r, col.usuario) || null;
+    const descricao = cellAt(r, col.descricao) || null;
+    if (tipoDetectado === 'coleta'){
+      return { id:coletaKey(chave), origem:'coleta', chave, nf, cpf, cliente, status:casos,
+        transportadora, uf, cidade, tipo_devolucao:'Protocolo de Coleta',
+        data_solicitacao:dt, data_programacao:prog, recebido_cd: !!romaneio,
+        valor, usuario, descricao };
+    }
+    return { id:tratKey(chave), origem:'tratativa', chave, nf, cpf, cliente, status:casos,
+      tipo_devolucao:tipoRaw, grupo:groupOf(tipoRaw), transportadora, uf, cidade,
+      data_solicitacao:dt, data_programacao:prog, valor, usuario, descricao };
+  });
+  return { tipo:tipoDetectado, rows:normalized };
+}
+
+let pendingImport = null;
+function setupImportUI(){
+  const drop = document.getElementById('importDrop');
+  const input = document.getElementById('importFile');
+  const preview = document.getElementById('importPreview');
+  if (!drop) return;
+  drop.addEventListener('click', ()=>input.click());
+  drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.style.borderColor='var(--vinho)'; });
+  drop.addEventListener('dragleave', ()=>{ drop.style.borderColor=''; });
+  drop.addEventListener('drop', e=>{ e.preventDefault(); drop.style.borderColor=''; if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+  input.addEventListener('change', e=>{ if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+  async function handleFile(file){
+    document.getElementById('importSummary').textContent = 'Lendo arquivo...';
+    preview.style.display = 'block';
+    try{
+      const rows = await readFileRows(file);
+      const result = detectAndNormalize(rows);
+      if (result.error){
+        document.getElementById('importSummary').textContent = '';
+        document.getElementById('importNote').innerHTML = `<span style="color:var(--red)">${esc(result.error)}</span>`;
+        pendingImport = null;
+        return;
+      }
+      pendingImport = { file, ...result };
+      document.getElementById('importTipo').value = result.tipo;
+      document.getElementById('importSummary').textContent = result.rows.length + ' linhas reconhecidas';
+      document.getElementById('importNote').textContent = 'Confira o tipo detectado acima antes de confirmar. Nada é alterado até você clicar em "Confirmar importação".';
+    } catch(err){
+      document.getElementById('importSummary').textContent = '';
+      document.getElementById('importNote').innerHTML = `<span style="color:var(--red)">Erro ao ler o arquivo: ${esc(err.message||String(err))}</span>`;
+      pendingImport = null;
+    }
+  }
+
+  document.getElementById('importCancel').addEventListener('click', ()=>{
+    pendingImport = null;
+    preview.style.display = 'none';
+    input.value = '';
+  });
+
+  document.getElementById('importConfirm').addEventListener('click', async ()=>{
+    if (!pendingImport){ return; }
+    if (!DB){
+      document.getElementById('importNote').innerHTML = '<span style="color:var(--red)">Banco de dados indisponível nesta visualização — não é possível salvar a importação agora.</span>';
+      return;
+    }
+    const tipo = document.getElementById('importTipo').value;
+    const rows = pendingImport.rows.map(r => tipo==='coleta'
+      ? { ...r, origem:'coleta', id:coletaKey(r.chave), tipo_devolucao:'Protocolo de Coleta' }
+      : { ...r, origem:'tratativa', id:tratKey(r.chave), grupo: r.grupo || groupOf(r.tipo_devolucao) });
+
+    const progressEl = document.getElementById('importProgress');
+    progressEl.style.display = 'block';
+    document.getElementById('importConfirm').disabled = true;
+
+    try{
+      // 1) salvar o arquivo normalizado como asset (histórico / "arquivos anteriores")
+      let assetId=null, assetUrl=null;
+      if (ASSETS){
+        try{
+          const blob = new Blob([JSON.stringify({ tipo, filename:pendingImport.file.name, rows }, null, 1)], { type:'application/json' });
+          const up = await ASSETS.upload(blob, { type:'application/json' });
+          assetId = up.id; assetUrl = up.url;
+        } catch(e){ console.warn('upload asset falhou', e); }
+      }
+
+      // 2) upsert de cada caso (mantendo histórico curto por doc)
+      const importId = 'imp_' + Date.now();
+      const seenIds = new Set();
+      for (let i=0; i<rows.length; i++){
+        const r = rows[i];
+        seenIds.add(r.id);
+        progressEl.textContent = `Salvando ${i+1} de ${rows.length}...`;
+        const ref = DB.doc('cases/'+r.id);
+        let prevHistory = [];
+        try{
+          const snap = await ref.get();
+          if (snap.exists){ const d = snap.data(); prevHistory = Array.isArray(d.history) ? d.history : []; }
+        } catch(e){ /* segue sem histórico anterior */ }
+        const history = [...prevHistory, { importId, at: isoNow(), status:r.status||null }].slice(-8);
+        const body = { ...r, history, concluido_auto:false, updatedAt: isoNow(), lastImportId: importId };
+        delete body.file;
+        await ref.set(body);
+      }
+
+      // 3) casos que já estavam no banco (importações anteriores) e não vieram nesta — concluídos automaticamente
+      const prefix = tipo==='coleta' ? 'coleta_' : 'trat_';
+      const existing = await DB.collection('cases').get();
+      const toClose = existing.docs.filter(d => d.exists && d.id.startsWith(prefix) && !seenIds.has(d.id) && !(d.data().concluido_auto));
+      for (let i=0; i<toClose.length; i++){
+        progressEl.textContent = `Marcando concluídos automaticamente ${i+1} de ${toClose.length}...`;
+        await DB.doc('cases/'+toClose[i].id).update({ concluido_auto:true, concluidoEm: isoNow(), concluidoPorImport: importId });
+      }
+
+      // 4) registrar a importação no histórico
+      await DB.collection('imports').doc(importId).set({
+        tipo, filename: pendingImport.file.name, rowCount: rows.length,
+        importedAt: isoNow(), assetId, assetUrl, autoConcluidos: toClose.length,
+      });
+
+      progressEl.textContent = `Importação concluída: ${rows.length} linhas salvas, ${toClose.length} caso(s) marcado(s) como concluído automaticamente.`;
+      pendingImport = null;
+      setTimeout(()=>{ preview.style.display='none'; input.value=''; progressEl.style.display='none'; document.getElementById('importConfirm').disabled=false; }, 2500);
+    } catch(err){
+      progressEl.textContent = '';
+      document.getElementById('importNote').innerHTML = `<span style="color:var(--red)">Erro ao salvar: ${esc(err.message||String(err))}</span>`;
+      document.getElementById('importConfirm').disabled = false;
+    }
+  });
+}
+setupImportUI();
+
+// ---------- render tudo (chamado no load e sempre que o banco mudar) ----------
+function renderAll(){
+  document.getElementById('refDate').textContent = 'Atualizado agora · ' + nowBR();
+  renderResumo();
+  renderSlaIndex();
+  renderTarefasFilterbar(); renderTarefas();
+  renderColetaKpis(); renderColetaTransp(); renderColetaEstados(); renderColetaFilterbar(); renderColetaList(); renderTranspLegenda();
+  renderAtrasos();
+  renderCobranca();
+  populateTratFilters(); renderTratKpis(); renderTratTable();
+  renderBarrados();
+  renderHistorico();
+  renderBase();
+}
+
+rebuildData();
+renderAll();
+initDateRangeFilters();
+
+// ================= BANCO DE DADOS (Firebase Firestore + Storage) =================
+// DB/ASSETS aqui são um wrapper fino sobre o SDK real do Firebase, mantendo a mesma interface
+// (.doc().set/get/update, .collection().onSnapshot(), .collection().orderBy().limit().onSnapshot())
+// usada no resto do arquivo — só a implementação por baixo mudou.
+let DB = null;
+let ASSETS = null;
+let dbReady = false;
+
+function makeFirestoreShim(db, fs){
+  function docRef(path){
+    const ref = fs.doc(db, path);
+    return {
+      async get(){ const snap = await fs.getDoc(ref); return { exists: snap.exists(), data: () => snap.data() }; },
+      async set(data){ return fs.setDoc(ref, data); },
+      async update(data){ return fs.updateDoc(ref, data); },
+    };
+  }
+  function collectionRef(path, constraints){
+    return {
+      doc(id){ return docRef(path + '/' + id); },
+      orderBy(field, dir){ return collectionRef(path, [...(constraints||[]), fs.orderBy(field, dir||'asc')]); },
+      limit(n){ return collectionRef(path, [...(constraints||[]), fs.limit(n)]); },
+      async get(){
+        const q = fs.query(fs.collection(db, path), ...(constraints||[]));
+        const snap = await fs.getDocs(q);
+        return { docs: snap.docs.map(d => ({ id:d.id, exists:true, data:()=>d.data() })) };
+      },
+      onSnapshot(onNext, onErr){
+        const q = fs.query(fs.collection(db, path), ...(constraints||[]));
+        return fs.onSnapshot(q, snap => {
+          onNext({ docs: snap.docs.map(d => ({ id:d.id, exists:true, data:()=>d.data() })) });
+        }, onErr);
+      },
+    };
+  }
+  return {
+    doc: (path) => docRef(path),
+    collection: (path) => collectionRef(path, []),
+  };
+}
+
+function makeStorageShim(storage, st){
+  return {
+    async upload(blob, options){
+      const id = 'imp_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+      const path = 'imports/' + id + '.json';
+      const sref = st.ref(storage, path);
+      await st.uploadBytes(sref, blob, { contentType: (options&&options.type)||blob.type });
+      const url = await st.getDownloadURL(sref);
+      return { id, url };
+    },
+  };
+}
+
+async function initDb(){
+  const statusEl = document.getElementById('dbStatus');
+  try{
+    const [{ initializeApp }, fsMod, authMod, stMod] = await Promise.all([
+      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js'),
+      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),
+      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js'),
+    ]);
+    const app = initializeApp(FIREBASE_CONFIG);
+    const db = fsMod.getFirestore(app);
+    const storage = stMod.getStorage(app);
+
+    // Autenticação: só usuários @abracadabra.com.br conseguem ler/gravar (aplicado também nas regras
+    // do Firestore/Storage — a checagem aqui é só para liberar a UI, a segurança real é no servidor).
+    const auth = authMod.getAuth(app);
+    const user = await new Promise(resolve => {
+      const unsub = authMod.onAuthStateChanged(auth, u => { unsub(); resolve(u); });
+    });
+    let currentUser = user;
+    if (!currentUser){
+      const provider = new authMod.GoogleAuthProvider();
+      provider.setCustomParameters({ hd: 'abracadabra.com.br' });
+      try{
+        const cred = await authMod.signInWithPopup(auth, provider);
+        currentUser = cred.user;
+      } catch(e){
+        if (statusEl) statusEl.innerHTML = '<span class="tag tag-danger">Login necessário — clique em "Entrar" para acessar o banco.</span> <button class="chip" onclick="initDb()" style="margin-left:8px">Entrar</button>';
+        document.querySelectorAll('.import-only').forEach(el=>el.style.display='none');
+        return;
+      }
+    }
+    if (!currentUser.email || !currentUser.email.endsWith('@abracadabra.com.br')){
+      await authMod.signOut(auth);
+      if (statusEl) statusEl.innerHTML = '<span class="tag tag-danger">Acesso restrito a contas @abracadabra.com.br.</span>';
+      document.querySelectorAll('.import-only').forEach(el=>el.style.display='none');
+      return;
+    }
+
+    DB = makeFirestoreShim(db, fsMod);
+    ASSETS = makeStorageShim(storage, stMod);
+  } catch(e){
+    console.warn('initDb falhou', e);
+    DB = null; ASSETS = null;
+  }
+
+  if (!DB){
+    if (statusEl) statusEl.innerHTML = '<span class="tag tag-muted">Sem conexão com o banco — mostrando apenas dados locais desta sessão.</span>';
+    document.querySelectorAll('.import-only').forEach(el=>el.style.display='none');
+    return;
+  }
+  dbReady = true;
+  if (statusEl) statusEl.innerHTML = '<span class="tag tag-ok">Banco conectado — importações ficam salvas e atualizam o painel automaticamente para todos.</span>';
+
+  DB.collection('cases').onSnapshot(snap => {
+    const map = {};
+    snap.docs.forEach(d => { if (d.exists) map[d.id] = d.data(); });
+    DB_CASES = map;
+    rebuildData();
+    renderAll();
+  }, err => { console.warn('cases onSnapshot error', err); });
+
+  DB.collection('imports').orderBy('importedAt','desc').limit(30).onSnapshot(snap => {
+    IMPORTS_LOG = snap.docs.filter(d=>d.exists).map(d => ({ id:d.id, ...d.data() }));
+    renderImportsLog();
+  }, err => { console.warn('imports onSnapshot error', err); });
+}
+initDb();
+</script>
+
+</body>
+</html>

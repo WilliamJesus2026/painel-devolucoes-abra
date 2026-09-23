@@ -1,0 +1,18 @@
+rules_version = '2';
+
+function isAbraUser() {
+  return request.auth != null
+    && request.auth.token.email != null
+    && request.auth.token.email.matches('.*@abracadabra[.]com[.]br$');
+}
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /cases/{caseId} {
+      allow read, write: if isAbraUser();
+    }
+    match /imports/{importId} {
+      allow read, write: if isAbraUser();
+    }
+  }
+}
