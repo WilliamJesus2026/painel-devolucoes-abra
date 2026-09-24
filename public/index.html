@@ -1847,12 +1847,12 @@ async function initDb(){
     let currentUser = user;
     if (!currentUser){
       const provider = new authMod.GoogleAuthProvider();
-      provider.setCustomParameters({ hd: 'abracadabra.com.br' });
       try{
         const cred = await authMod.signInWithPopup(auth, provider);
         currentUser = cred.user;
       } catch(e){
-        if (statusEl) statusEl.innerHTML = '<span class="tag tag-danger">Login necessário — clique em "Entrar" para acessar o banco.</span> <button class="chip" onclick="initDb()" style="margin-left:8px">Entrar</button>';
+        console.warn('signIn falhou', e);
+        if (statusEl) statusEl.innerHTML = '<span class="tag tag-danger">Login necessário (' + esc(e.code||e.message||'erro') + ').</span> <button class="chip" onclick="initDb()" style="margin-left:8px">Entrar</button>';
         document.querySelectorAll('.import-only').forEach(el=>el.style.display='none');
         return;
       }
