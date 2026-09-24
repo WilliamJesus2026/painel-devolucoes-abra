@@ -40,7 +40,33 @@
   --r:      6px;
   --sh:     0 1px 3px rgba(10,35,66,.07), 0 4px 12px rgba(10,35,66,.05);
 }
-body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--tx);font-size:13px;line-height:1.5}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --dark:#050B14; --dark2:#0D1B2E; --mid:#5B9BE8; --acc:#3B82F6; --acc-lt:#132238; --acc-bd:#2E86DE;
+    --red:#F97066; --red-bg:#2A1315; --red-bd:#5C2323;
+    --amb:#FBBF24; --amb-bg:#2A2110; --amb-bd:#5C4A1E;
+    --grn:#34D399; --grn-bg:#0F241C; --grn-bd:#1E4636;
+    --pur:#C084FC; --pur-bg:#231334; --pur-bd:#4A2C6B;
+    --bg:#0B121D; --srf:#111A29; --srf1:#0E1622; --bd:#22314A; --bd2:#2E4162;
+    --tx:#E7EDF6; --tx2:#A9B8CC; --tx3:#7488A3;
+    --sh:0 1px 3px rgba(0,0,0,.35), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --dark:#050B14; --dark2:#0D1B2E; --mid:#5B9BE8; --acc:#3B82F6; --acc-lt:#132238; --acc-bd:#2E86DE;
+  --red:#F97066; --red-bg:#2A1315; --red-bd:#5C2323;
+  --amb:#FBBF24; --amb-bg:#2A2110; --amb-bd:#5C4A1E;
+  --grn:#34D399; --grn-bg:#0F241C; --grn-bd:#1E4636;
+  --pur:#C084FC; --pur-bg:#231334; --pur-bd:#4A2C6B;
+  --bg:#0B121D; --srf:#111A29; --srf1:#0E1622; --bd:#22314A; --bd2:#2E4162;
+  --tx:#E7EDF6; --tx2:#A9B8CC; --tx3:#7488A3;
+  --sh:0 1px 3px rgba(0,0,0,.35), 0 4px 14px rgba(0,0,0,.3);
+}
+body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--tx);font-size:13px;line-height:1.5;transition:background .2s,color .2s}
+.card,.kpi,.tbl-wrap,.topbar,.ft,th{transition:background .2s,border-color .2s,color .2s}
+.theme-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding:6px 8px;border-radius:var(--r);background:rgba(255,255,255,.05);cursor:pointer;border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:11px}
+.theme-toggle:hover{background:rgba(255,255,255,.09);color:#fff}
+.theme-toggle .tt-ic{width:14px;height:14px;flex-shrink:0}
 
 /* LAYOUT */
 .layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
@@ -85,6 +111,13 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 /* KPI STRIP */
 .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
 .kpi{background:var(--srf);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;box-shadow:var(--sh)}
+.kpi-click{cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s}
+.kpi-click:hover{transform:translateY(-2px);border-color:var(--acc-bd);box-shadow:0 4px 16px rgba(46,134,222,.18)}
+.kpi-click:active{transform:translateY(0)}
+.kpi-click:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.rank-item{cursor:pointer;border-radius:6px;transition:background .12s}
+.rank-item:hover{background:var(--srf1)}
+.card canvas{cursor:pointer}
 .kpi-v{font-size:26px;font-weight:600;line-height:1;margin-bottom:4px}
 .kpi-l{font-size:11px;color:var(--tx3);margin-bottom:4px}
 .kpi-s{font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;display:inline-block}
@@ -200,6 +233,31 @@ canvas{display:block}
 .btn-exp{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;border:1.5px solid var(--acc-bd);background:var(--acc-lt);color:var(--mid);transition:.12s;text-decoration:none}
 .btn-exp:hover{background:var(--acc);color:#fff;border-color:var(--acc)}
 .btn-exp svg{width:13px;height:13px}
+
+/* LINHAS CLICAVEIS */
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:var(--srf1)}
+
+/* MINI-ABAS (grupo de tratativa) */
+.minitabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;border-bottom:1px solid var(--bd);padding-bottom:0}
+.minitab{padding:7px 13px;font-size:11.5px;font-weight:600;color:var(--tx3);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.12s}
+.minitab:hover{color:var(--tx)}
+.minitab.on{color:var(--acc);border-bottom-color:var(--acc)}
+.minitab .mt-n{font-family:monospace;font-size:10px;color:var(--tx3);margin-left:4px}
+.minitab.on .mt-n{color:var(--acc)}
+
+/* PAINEL DE DETALHE (slide-over) */
+.ov{position:fixed;inset:0;background:rgba(5,11,20,.5);opacity:0;pointer-events:none;transition:opacity .18s;z-index:40}
+.ov.on{opacity:1;pointer-events:auto}
+.dpanel{position:fixed;top:0;right:0;height:100%;width:min(420px,92vw);background:var(--srf);border-left:1px solid var(--bd);box-shadow:var(--sh);transform:translateX(100%);transition:transform .2s ease;z-index:41;padding:20px;overflow-y:auto}
+.dpanel.on{transform:translateX(0)}
+.dpanel-close{position:absolute;top:14px;right:14px;background:var(--srf1);border:1px solid var(--bd);border-radius:8px;width:28px;height:28px;cursor:pointer;color:var(--tx2);font-size:14px}
+.dpanel-close:hover{color:var(--tx);border-color:var(--acc)}
+.dpanel dl{margin:16px 0 0}
+.dpanel dt{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-top:11px}
+.dpanel dd{margin:2px 0 0;font-size:12.5px;color:var(--tx);line-height:1.5}
+.dpanel dd.mono{font-family:monospace}
+.dpanel-nf{font-family:monospace;font-size:18px;font-weight:800;color:var(--acc)}
 </style>
 </head>
 <body>
@@ -210,6 +268,10 @@ canvas{display:block}
   <div class="sb-top">
     <div class="sb-brand">Abracadabra<span>Devoluções & Recolhimentos</span></div>
     <div class="sb-ref" id="sb-ref">—</div>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" type="button">
+      <span id="tt-label">Modo escuro</span>
+      <svg class="tt-ic" id="tt-ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    </button>
   </div>
 
   <nav class="sb-nav">
@@ -287,11 +349,11 @@ canvas{display:block}
     <!-- DASHBOARD -->
     <div class="panel on" id="panel-dash">
       <div class="kpi-row">
-        <div class="kpi k-acc"><div class="kpi-v" id="k-col">—</div><div class="kpi-l">Coletas ativas</div><div class="kpi-s">Protocolo de Coleta</div></div>
-        <div class="kpi k-red"><div class="kpi-v" id="k-at">—</div><div class="kpi-l">Atrasadas</div><div class="kpi-s" id="ks-at">Prazo &gt; 20 dias</div></div>
-        <div class="kpi k-amb"><div class="kpi-v" id="k-ri">—</div><div class="kpi-l">Em risco</div><div class="kpi-s">Entram em atraso em breve</div></div>
-        <div class="kpi k-grn"><div class="kpi-v" id="k-em">—</div><div class="kpi-l">No prazo</div><div class="kpi-s">Dentro dos 20 dias</div></div>
-        <div class="kpi k-acc"><div class="kpi-v" id="k-trat">—</div><div class="kpi-l">Tratativas ativas</div><div class="kpi-s">Devoluções transportadora</div></div>
+        <div class="kpi k-acc kpi-click" onclick="ir('col-all')" role="button" tabindex="0"><div class="kpi-v" id="k-col">—</div><div class="kpi-l">Coletas ativas</div><div class="kpi-s">Protocolo de Coleta</div></div>
+        <div class="kpi k-red kpi-click" onclick="ir('at')" role="button" tabindex="0"><div class="kpi-v" id="k-at">—</div><div class="kpi-l">Atrasadas</div><div class="kpi-s" id="ks-at">Prazo &gt; 20 dias</div></div>
+        <div class="kpi k-amb kpi-click" onclick="ir('ri')" role="button" tabindex="0"><div class="kpi-v" id="k-ri">—</div><div class="kpi-l">Em risco</div><div class="kpi-s">Entram em atraso em breve</div></div>
+        <div class="kpi k-grn kpi-click" onclick="ir('em')" role="button" tabindex="0"><div class="kpi-v" id="k-em">—</div><div class="kpi-l">No prazo</div><div class="kpi-s">Dentro dos 20 dias</div></div>
+        <div class="kpi k-acc kpi-click" onclick="ir('trat')" role="button" tabindex="0"><div class="kpi-v" id="k-trat">—</div><div class="kpi-l">Tratativas ativas</div><div class="kpi-s">Devoluções transportadora</div></div>
       </div>
       <div id="alertas-dash" style="margin-bottom:14px"></div>
       <div class="g2">
@@ -377,6 +439,15 @@ canvas{display:block}
     <!-- TRATATIVAS -->
     <div class="panel" id="panel-trat">
       <div class="dica"><strong>Sobre as tratativas:</strong> Os casos abaixo são acompanhados por tipo — Barrar, Perdas, Transportadora a pagar, Recolhimento, etc. Não há prazo específico nesta seção. Use os filtros para localizar casos e cobrar ações junto às transportadoras.</div>
+      <div class="minitabs" id="minitabs-trat">
+        <button class="minitab on" onclick="setGrupoTab('')">Todos <span class="mt-n" id="mtn-todos"></span></button>
+        <button class="minitab" onclick="setGrupoTab('recolhimento')">Recolhimento <span class="mt-n" id="mtn-recolhimento"></span></button>
+        <button class="minitab" onclick="setGrupoTab('barrar')">Barrar <span class="mt-n" id="mtn-barrar"></span></button>
+        <button class="minitab" onclick="setGrupoTab('financeiro')">Financeiro <span class="mt-n" id="mtn-financeiro"></span></button>
+        <button class="minitab" onclick="setGrupoTab('perdas')">Perdas <span class="mt-n" id="mtn-perdas"></span></button>
+        <button class="minitab" onclick="setGrupoTab('nova')">Novo / a triar <span class="mt-n" id="mtn-nova"></span></button>
+        <button class="minitab" onclick="setGrupoTab('outros')">Outros <span class="mt-n" id="mtn-outros"></span></button>
+      </div>
       <div class="chips" id="chips-trat">
         <span class="chip ch-all on" onclick="setGrupo('')">Todos</span>
         <span class="chip ch-i9" onclick="setGrupo('I9')">I9 <span id="ct-i9"></span></span>
@@ -481,6 +552,12 @@ canvas{display:block}
   </div>
 </div>
 </div>
+
+<div class="ov" id="ov" onclick="closeDetail()"></div>
+<aside class="dpanel" id="dpanel" aria-hidden="true">
+  <button class="dpanel-close" id="dpanel-close" aria-label="Fechar detalhe" onclick="closeDetail()">✕</button>
+  <div id="dpanel-body"></div>
+</aside>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -622,6 +699,23 @@ function rebuildData(){
   D.tags = tags;
 }
 
+// ================= MODO ESCURO =================
+function applyTheme(mode){
+  const root = document.documentElement;
+  if (mode === 'dark' || mode === 'light') root.setAttribute('data-theme', mode);
+  else root.removeAttribute('data-theme');
+  const label = document.getElementById('tt-label');
+  const isDark = mode === 'dark' || (mode !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (label) label.textContent = isDark ? 'Modo claro' : 'Modo escuro';
+  Object.values(charts).forEach(c => c && c.update && c.update());
+}
+function toggleTheme(){
+  const current = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const next = current === 'dark' ? 'light' : 'dark';
+  try{ localStorage.setItem('theme', next); } catch(e){}
+  applyTheme(next);
+}
+
 // ================= NAVEGACAO / HELPERS (visual mantido do arquivo enviado) =================
 let GRP = '';
 let charts = {};
@@ -720,7 +814,7 @@ function renderCol(tipo){
   if(cnt) cnt.textContent=data.length+' resultado'+(data.length!==1?'s':'');
 
   if(tipo==='at'){
-    rows=data.map(c=>`<tr>
+    rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente)}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -732,7 +826,7 @@ function renderCol(tipo){
     </tr>`);
     document.getElementById('tb-at').innerHTML=rows.join('');
   } else if(tipo==='ri'){
-    rows=data.map(c=>`<tr>
+    rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente)}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -744,7 +838,7 @@ function renderCol(tipo){
     </tr>`);
     document.getElementById('tb-ri').innerHTML=rows.join('');
   } else if(tipo==='em'){
-    rows=data.map(c=>`<tr>
+    rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente)}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -755,7 +849,7 @@ function renderCol(tipo){
     </tr>`);
     document.getElementById('tb-em').innerHTML=rows.join('');
   } else {
-    rows=data.map(c=>`<tr>
+    rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente)}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -775,12 +869,20 @@ function setGrupo(g){
   if (typeof event!=='undefined' && event.target) event.target.classList.add('on');
   renderTrat();
 }
+let GRUPOTAB = '';
+function setGrupoTab(g){
+  GRUPOTAB = g;
+  document.querySelectorAll('#minitabs-trat .minitab').forEach(b=>b.classList.remove('on'));
+  if (typeof event!=='undefined' && event.target) event.target.closest('.minitab').classList.add('on');
+  renderTrat();
+}
 const OUTROS_TAGS=['TOTAL EXPRESS','TRANSLOVATO','FEDEX OR','SHOPEE','ROTEIRO','OUTROS'];
 function renderTrat(){
   let data=[...TRAT];
   if(GRP==='OUTROS') data=data.filter(t=>OUTROS_TAGS.includes(t.tag));
   else if(GRP==='I9') data=data.filter(t=>t.tag==='HELLO');
   else if(GRP)       data=data.filter(t=>t.tag===GRP);
+  if(GRUPOTAB) data=data.filter(t=>(t.grupo||'outros')===GRUPOTAB);
   const tipo=(document.getElementById('ftrat-tipo')?.value||'');
   const uf  =(document.getElementById('ftrat-uf')?.value||'');
   const q   =(document.getElementById('ftrat-q')?.value||'').toLowerCase();
@@ -789,7 +891,19 @@ function renderTrat(){
   if(q)    data=data.filter(t=>(t.cliente||'').toLowerCase().includes(q)||(t.nf||'').includes(q)||(t.cpf||'').includes(q));
   const cnt=document.getElementById('cnt-trat');
   if(cnt) cnt.textContent=data.length+' resultado'+(data.length!==1?'s':'');
-  const rows=data.map(t=>`<tr>
+
+  // Contadores das mini-abas (respeitam o filtro de transportadora/carrier, mas nao o proprio grupo)
+  let baseGrupo=[...TRAT];
+  if(GRP==='OUTROS') baseGrupo=baseGrupo.filter(t=>OUTROS_TAGS.includes(t.tag));
+  else if(GRP==='I9') baseGrupo=baseGrupo.filter(t=>t.tag==='HELLO');
+  else if(GRP)       baseGrupo=baseGrupo.filter(t=>t.tag===GRP);
+  const mtn=document.getElementById('mtn-todos'); if(mtn) mtn.textContent=baseGrupo.length;
+  ['recolhimento','barrar','financeiro','perdas','nova','outros'].forEach(g=>{
+    const el=document.getElementById('mtn-'+g);
+    if(el) el.textContent=baseGrupo.filter(t=>(t.grupo||'outros')===g).length;
+  });
+
+  const rows=data.map(t=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...t,__tipo:'tratativa'})})">
     <td>${grpBdg(t.tag)}</td>
     <td class="td-nome">${esc(t.cliente)}</td>
     <td style="font-family:monospace;font-size:11px;color:var(--tx3)">${esc(t.cpf)}</td>
@@ -803,6 +917,63 @@ function renderTrat(){
   document.getElementById('tb-trat').innerHTML=rows;
 }
 
+// ================= PAINEL DE DETALHE (slide-over, clicavel a partir de qualquer linha) =================
+const GRUPO_ACAO = {
+  recolhimento: 'A Logística conduz e finaliza a tarefa — repassar/encaminhar o caso para a Logística atualizar e concluir.',
+  barrar: 'Contatar a transportadora para interromper a entrega e solicitar o retorno da mercadoria ao CD antes da entrega.',
+  financeiro: 'A transportadora extraviou a mercadoria ou causou avaria de sua responsabilidade — abrir tratativa de responsabilização/cobrança.',
+  perdas: 'Mercadoria considerada perdida com o cliente — sem ação de acompanhamento necessária neste painel.',
+  nova: 'Tipo de tratativa novo, ainda sem classificação de ação.',
+  outros: 'Tipo de tratativa sem regra de ação definida explicitamente.',
+};
+// Registro de linhas clicaveis: evita colocar JSON bruto dentro de atributo onclick (quebraria com
+// aspas simples em nomes/descricoes reais de clientes) - guarda o objeto e passa so o indice.
+let __rowData = [];
+function regDetail(item){ __rowData.push(item); return __rowData.length-1; }
+function openDetailIdx(i){ const item = __rowData[i]; if (item) openDetail(item); }
+function openDetail(item){
+  const isColeta = item.__tipo === 'coleta';
+  document.getElementById('dpanel-body').innerHTML = `
+    <div class="dpanel-nf">${item.nf ? 'NF '+esc(item.nf) : 'Sem NF'}</div>
+    ${isColeta ? stBdg(item.prazo_status) : grpBdg(item.tag)}
+    ${isColeta && item.cancelada ? '<span class="bdg b-dk" style="margin-left:5px">Cancelada</span>' : ''}
+    ${isColeta && item.realizada ? '<span class="bdg b-grn" style="margin-left:5px">Realizada</span>' : ''}
+    <dl>
+      <dt>Cliente</dt><dd>${esc(item.cliente)}</dd>
+      <dt>CPF</dt><dd class="mono">${esc(item.cpf)||'Não informado'}</dd>
+      <dt>Transportadora</dt><dd>${esc(item.transportadora)||'Não informado'}</dd>
+      ${item.transportadoraOriginal && item.transportadoraOriginal!==item.transportadora ? `<dt>Nome original no arquivo</dt><dd class="mono">${esc(item.transportadoraOriginal)}</dd>` : ''}
+      ${item.modalidade ? `<dt>Modalidade</dt><dd>${esc(item.modalidade)}</dd>` : ''}
+      <dt>Estado / cidade</dt><dd>${esc(item.uf)||'—'} · ${esc(item.cidade)||'—'}</dd>
+      <dt>Tipo de devolução</dt><dd>${esc(item.tipo_devolucao)||(isColeta?'Protocolo de Coleta':'—')}</dd>
+      <dt>Data da solicitação</dt><dd class="mono">${esc(item.data_solicitacao)||'Não informado'}</dd>
+      <dt>Data do protocolo</dt><dd class="mono">${esc(item.data_programacao)||'Não informado'}</dd>
+      ${isColeta ? `<dt>Dias em aberto (hoje)</dt><dd class="mono">${item.temData ? item.dias+' dias' : '—'}</dd>` : ''}
+      ${isColeta ? `<dt>Prazo</dt><dd>20 dias corridos (protocolo → recebimento no CD)</dd>` : `<dt>Prazo</dt><dd>Sem SLA definido para tratativas</dd>`}
+      <dt>Status atual (sistema)</dt><dd>${esc(item.status)||'Não informado'}</dd>
+      ${!isColeta && item.grupo ? `<dt>O que fazer</dt><dd>${esc(GRUPO_ACAO[item.grupo]||GRUPO_ACAO.outros)}</dd>` : ''}
+      <dt>Responsável</dt><dd>${esc(item.usuario)||'Não informado'}</dd>
+      <dt>Valor</dt><dd class="mono">${item.valor!=null ? 'R$ '+Math.abs(item.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '—'}</dd>
+      <dt>Descrição</dt><dd>${esc(item.descricao)||'Não informado'}</dd>
+    </dl>
+  `;
+  document.getElementById('dpanel').classList.add('on');
+  document.getElementById('dpanel').setAttribute('aria-hidden','false');
+  document.getElementById('ov').classList.add('on');
+}
+function closeDetail(){
+  document.getElementById('dpanel').classList.remove('on');
+  document.getElementById('dpanel').setAttribute('aria-hidden','true');
+  document.getElementById('ov').classList.remove('on');
+}
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeDetail(); });
+
+function goToTranspFilter(transp){
+  ir('col-all');
+  const sel = document.getElementById('fall-tr');
+  if (sel) sel.value = transp;
+  renderCol('all');
+}
 function buildRank(divId){
   const div=document.getElementById(divId);
   if(!div) return;
@@ -815,7 +986,7 @@ function buildRank(divId){
     const fillPct=pct/Math.max(maxPct,20)*100;
     const col=pct>40?'var(--red)':pct>20?'var(--amb)':'var(--grn)';
     const pcls=pct>40?'b-red':pct>20?'b-amb':'b-grn';
-    return `<div class="rank-item">
+    return `<div class="rank-item" onclick='goToTranspFilter(${JSON.stringify(r.transp)})' role="button" tabindex="0">
       <div class="rank-name" title="${esc(r.transp)}">${esc(r.transp)}</div>
       <div class="rank-track">
         <div class="rank-fill" style="width:${fillPct}%;background:${col}"></div>
@@ -891,6 +1062,8 @@ function renderDash(){
     labels:['Atrasadas','Em risco','No prazo'],
     datasets:[{data:[K.at,K.ri,K.em],backgroundColor:['#C0392B','#B45309','#1A6B3C'],borderColor:'#fff',borderWidth:2,hoverOffset:4}]
   },options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+    onClick:(evt,els)=>{ if(!els.length) return; ir(['at','ri','em'][els[0].index]); },
+    onHover:(evt,els)=>{ evt.native.target.style.cursor = els.length?'pointer':'default'; },
     plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed} (${K.col_total?Math.round(c.parsed/K.col_total*100):0}%)`}}}}});
 
   document.getElementById('leg-donut').innerHTML=[
@@ -909,6 +1082,8 @@ function renderDash(){
     labels:gKeys,
     datasets:[{data:gVals,backgroundColor:gCols,borderRadius:4,barThickness:32}]
   },options:{responsive:true,maintainAspectRatio:false,
+    onClick:(evt,els)=>{ if(!els.length) return; const g=gKeys[els[0].index]; setGrupo(g); document.querySelectorAll('.chips .chip').forEach(c=>c.classList.remove('on')); const chip=document.querySelector(`.ch-${g.toLowerCase()}`); if(chip) chip.classList.add('on'); ir('trat'); },
+    onHover:(evt,els)=>{ evt.native.target.style.cursor = els.length?'pointer':'default'; },
     plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed} casos`}}},
     scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},stepSize:20}}}}});
 
@@ -928,7 +1103,7 @@ function renderDash(){
   if(tbReg){
     tbReg.innerHTML=AT.map(c=>{
       const fora=c.uf&&c.uf.toUpperCase()!=='SP';
-      return `<tr>
+      return `<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
         <td class="td-nf">${esc(c.nf||'—')}</td>
         <td class="td-nome">${esc(c.cliente)}</td>
         <td>${esc(c.transportadora||'—')}</td>
@@ -943,7 +1118,7 @@ function renderDash(){
 
   const tbHist=document.getElementById('tb-hist');
   if(tbHist){
-    tbHist.innerHTML=HIST.map(c=>`<tr>
+    tbHist.innerHTML=HIST.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente||'—')}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -955,6 +1130,7 @@ function renderDash(){
 }
 
 function renderAll(){
+  __rowData = [];
   rebuildData();
   renderDash();
   renderCol('at'); renderCol('ri'); renderCol('em'); renderCol('all');
@@ -1254,32 +1430,58 @@ function makeStorageShim(storage, st){
   };
 }
 
-async function initDb(){
+let _fb = null; // { authMod, auth, db, fsMod, storage, stMod } - carregado uma unica vez
+let _casesSub = false; // evita assinar o snapshot de 'cases' mais de uma vez
+async function loadFirebase(){
+  if (_fb) return _fb;
+  const [{ initializeApp }, fsMod, authMod, stMod] = await Promise.all([
+    import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+    import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js'),
+    import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),
+    import('https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js'),
+  ]);
+  const app = initializeApp(FIREBASE_CONFIG);
+  _fb = { authMod, auth: authMod.getAuth(app), db: fsMod.getFirestore(app), fsMod, storage: stMod.getStorage(app), stMod };
+  return _fb;
+}
+
+// interactive=false (chamada automatica ao carregar a pagina): so verifica se ja existe sessao,
+// NUNCA abre popup/redirect sozinho (todo navegador bloqueia popup sem clique do usuario, e um
+// redirect automatico no load seria uma experiencia ruim). interactive=true (clique no botao
+// "Entrar"): af tenta popup e cai para redirect se o navegador bloquear.
+async function initDb(interactive){
   const statusEl = document.getElementById('dbStatus');
   try{
-    const [{ initializeApp }, fsMod, authMod, stMod] = await Promise.all([
-      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
-      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js'),
-      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),
-      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js'),
-    ]);
-    const app = initializeApp(FIREBASE_CONFIG);
-    const db = fsMod.getFirestore(app);
-    const storage = stMod.getStorage(app);
+    const { authMod, auth, db, fsMod, storage, stMod } = await loadFirebase();
 
-    const auth = authMod.getAuth(app);
-    const user = await new Promise(resolve => {
+    let redirectUser = null;
+    try{
+      const redirectCred = await authMod.getRedirectResult(auth);
+      if (redirectCred) redirectUser = redirectCred.user;
+    } catch(e){ console.warn('getRedirectResult falhou', e); }
+
+    const user = redirectUser || await new Promise(resolve => {
       const unsub = authMod.onAuthStateChanged(auth, u => { unsub(); resolve(u); });
     });
     let currentUser = user;
     if (!currentUser){
+      if (!interactive){
+        if (statusEl) statusEl.innerHTML = 'Não conectado. <button class="btn-exp" onclick="initDb(true)" style="margin-top:4px">Entrar</button>';
+        return;
+      }
       const provider = new authMod.GoogleAuthProvider();
       try{
         const cred = await authMod.signInWithPopup(auth, provider);
         currentUser = cred.user;
       } catch(e){
-        console.warn('signIn falhou', e);
-        if (statusEl) statusEl.innerHTML = 'Login necessário (' + esc(e.code||e.message||'erro') + '). <button class="btn-exp" onclick="initDb()" style="margin-top:4px">Entrar</button>';
+        console.warn('signInWithPopup falhou, tentando redirect', e);
+        const popupBlocked = ['auth/popup-blocked','auth/popup-closed-by-user','auth/cancelled-popup-request'].includes(e.code);
+        if (popupBlocked){
+          if (statusEl) statusEl.innerHTML = 'Abrindo tela de login do Google...';
+          try{ await authMod.signInWithRedirect(auth, provider); return; }
+          catch(e2){ console.warn('signInWithRedirect também falhou', e2); }
+        }
+        if (statusEl) statusEl.innerHTML = 'Login necessário (' + esc(e.code||e.message||'erro') + '). <button class="btn-exp" onclick="initDb(true)" style="margin-top:4px">Entrar</button>';
         return;
       }
     }
@@ -1301,6 +1503,8 @@ async function initDb(){
     return;
   }
   if (statusEl) statusEl.innerHTML = 'Conectado — importações ficam salvas para todos.';
+  if (_casesSub) return;
+  _casesSub = true;
 
   DB.collection('cases').onSnapshot(snap => {
     const map = {};
@@ -1311,8 +1515,9 @@ async function initDb(){
 }
 
 // ================= INIT =================
+try{ applyTheme(localStorage.getItem('theme')); } catch(e){ applyTheme(null); }
 renderAll();
-initDb();
+initDb(false);
 
 </script>
 </body>
