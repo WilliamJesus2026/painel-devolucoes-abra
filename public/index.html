@@ -112,7 +112,7 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 .panel.on{display:block}
 
 /* KPI STRIP */
-.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}
 .kpi{background:var(--srf);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;box-shadow:var(--sh)}
 .kpi-click{cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s}
 .kpi-click:hover{transform:translateY(-2px);border-color:var(--acc-bd);box-shadow:0 4px 16px rgba(46,134,222,.18)}
@@ -189,7 +189,7 @@ tr:hover td{background:#F9FBFE}
 .b-grn{background:var(--grn-bg);color:var(--grn);border-color:var(--grn-bd)}
 .b-acc{background:var(--acc-lt);color:var(--mid);border-color:var(--acc-bd)}
 .b-pur{background:var(--pur-bg);color:var(--pur);border-color:var(--pur-bd)}
-.b-dk{background:rgba(10,35,66,.08);color:var(--dark2)}
+.b-dk{background:rgba(127,140,160,.16);color:var(--tx2)}
 
 /* PRAZO BAR */
 .prazo-bar{display:flex;align-items:center;gap:6px;white-space:nowrap}
@@ -300,6 +300,11 @@ tr.clickable:hover td{background:var(--srf1)}
       No prazo
       <span class="bdg" id="bdg-em">0</span>
     </button>
+    <button class="nav" onclick="ir('rea')" id="nav-rea">
+      <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke-width="1.5"/><polyline points="8 12 11 15 16 9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Coleta realizada
+      <span class="bdg" id="bdg-rea">0</span>
+    </button>
     <button class="nav" onclick="ir('col-all')" id="nav-col-all">
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="12" x2="21" y2="12" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="18" x2="21" y2="18" stroke-width="1.5" stroke-linecap="round"/><circle cx="3" cy="6" r="1.5" fill="currentColor"/><circle cx="3" cy="12" r="1.5" fill="currentColor"/><circle cx="3" cy="18" r="1.5" fill="currentColor"/></svg>
       Todos
@@ -358,10 +363,11 @@ tr.clickable:hover td{background:var(--srf1)}
     <!-- DASHBOARD -->
     <div class="panel on" id="panel-dash">
       <div class="kpi-row">
-        <div class="kpi k-acc kpi-click" onclick="ir('col-all')" role="button" tabindex="0"><div class="kpi-v" id="k-col">—</div><div class="kpi-l">Coletas ativas</div><div class="kpi-s">Protocolo de Coleta</div></div>
+        <div class="kpi k-acc kpi-click" onclick="ir('col-all')" role="button" tabindex="0"><div class="kpi-v" id="k-col">—</div><div class="kpi-l">Coletas pendentes</div><div class="kpi-s">Ainda não coletadas</div></div>
         <div class="kpi k-red kpi-click" onclick="ir('at')" role="button" tabindex="0"><div class="kpi-v" id="k-at">—</div><div class="kpi-l">Atrasadas</div><div class="kpi-s" id="ks-at">Prazo &gt; 20 dias</div></div>
         <div class="kpi k-amb kpi-click" onclick="ir('ri')" role="button" tabindex="0"><div class="kpi-v" id="k-ri">—</div><div class="kpi-l">Em risco</div><div class="kpi-s">Entram em atraso em breve</div></div>
         <div class="kpi k-grn kpi-click" onclick="ir('em')" role="button" tabindex="0"><div class="kpi-v" id="k-em">—</div><div class="kpi-l">No prazo</div><div class="kpi-s">Dentro dos 20 dias</div></div>
+        <div class="kpi k-pur kpi-click" onclick="ir('rea')" role="button" tabindex="0"><div class="kpi-v" id="k-rea">—</div><div class="kpi-l">Coleta realizada</div><div class="kpi-s">Aguardando chegada no CD</div></div>
         <div class="kpi k-acc kpi-click" onclick="ir('trat')" role="button" tabindex="0"><div class="kpi-v" id="k-trat">—</div><div class="kpi-l">Tratativas ativas</div><div class="kpi-s">Devoluções transportadora</div></div>
       </div>
       <div id="alertas-dash" style="margin-bottom:14px"></div>
@@ -425,6 +431,21 @@ tr.clickable:hover td{background:var(--srf1)}
       </div></div>
     </div>
 
+    <!-- COLETA REALIZADA (aguardando CD) -->
+    <div class="panel" id="panel-rea">
+      <div class="dica"><strong>Coleta realizada:</strong> a transportadora já retirou o produto na casa do cliente. Estes casos saíram de Atrasados/Em risco/No prazo e ficam aqui até a chegada no CD (romaneio de entrada) — aí vão para o Histórico. A coluna "Dias" mostra há quanto tempo o protocolo foi aberto, para você cobrar o retorno ao CD se demorar.</div>
+      <div class="filterbar">
+        <select class="fsel" id="frea-uf" onchange="renderCol('rea')"><option value="">Todas as UFs</option></select>
+        <select class="fsel" id="frea-tr" onchange="renderCol('rea')"><option value="">Todas as transportadoras</option></select>
+        <input class="fsearch" id="frea-q" placeholder="Buscar nome ou NF..." oninput="renderCol('rea')">
+        <span class="fcnt" id="cnt-rea"></span><button class="btn-exp" onclick="exportColetas('rea')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
+      </div>
+      <div class="tbl-wrap"><div class="tbl-scroll">
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Dias</th><th>Prazo</th><th>CD</th><th>Situação</th><th>Descrição</th></tr></thead>
+        <tbody id="tb-rea"></tbody></table>
+      </div></div>
+    </div>
+
     <!-- TODOS PROTOCOLO -->
     <div class="panel" id="panel-col-all">
       <div class="filterbar">
@@ -433,6 +454,7 @@ tr.clickable:hover td{background:var(--srf1)}
           <option value="ATRASADO">Atrasado</option>
           <option value="RISCO">Em risco</option>
           <option value="NO PRAZO">No prazo</option>
+          <option value="REALIZADA">Coleta realizada</option>
         </select>
         <select class="fsel" id="fall-col" onchange="renderCol('all')">
           <option value="">Coleta: todas</option>
@@ -511,7 +533,7 @@ tr.clickable:hover td{background:var(--srf1)}
 
     <!-- HISTÓRICO -->
     <div class="panel" id="panel-hist">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn-exp" onclick="exportColetas('hist')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV histórico</button></div><div class="dica"><strong>Histórico:</strong> Coletas já recebidas no CD ou canceladas — removidas do controle ativo e mantidas aqui para auditoria. Coleta realizada na casa do cliente <em>sem</em> chegada no CD ainda continua no controle ativo (o prazo de 20 dias só fecha no recebimento).</div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn-exp" onclick="exportColetas('hist')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV histórico</button></div><div class="dica"><strong>Histórico:</strong> Coletas já recebidas no CD ou canceladas — removidas do controle ativo e mantidas aqui para auditoria. Coletas realizadas que ainda não chegaram ao CD ficam na aba "Coleta realizada".</div>
       <div class="tbl-wrap"><div class="tbl-scroll">
         <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Situação</th><th>Descrição</th></tr></thead>
         <tbody id="tb-hist"></tbody></table>
@@ -636,7 +658,8 @@ let SEED_TRATATIVAS = [];
 let DB_CASES = {};
 let REF = new Date().toLocaleDateString('pt-BR');
 
-let COL = [];       // coletas ativas (nao canceladas/realizadas)
+let COL = [];       // coletas pendentes de coleta (nao realizadas, nao canceladas, nao recebidas no CD)
+let REA = [];       // coleta realizada na casa do cliente, aguardando chegada no CD
 let HIST = [];       // coletas historico (canceladas ou realizadas)
 let TRAT = [];       // tratativas
 let AT = [], RI = [], EM = [], AT_FORA = [];
@@ -654,7 +677,9 @@ function deriveColetaLive(c){
   const realizada = recebidoCD; // concluido = recebido no CD (a coleta na casa do cliente NAO encerra o SLA de 20 dias)
 
   let prazo_status = null, prazo_pct = null;
-  if (temData && !cancelada && !realizada){
+  if (temData && coletaRealizada && !cancelada && !realizada){
+    prazo_status = 'REALIZADA';
+  } else if (temData && !cancelada && !realizada){
     if (dias > SLA) prazo_status = 'ATRASADO';
     else if (dias >= SLA - CONFIG.RISCO_JANELA_DIAS) prazo_status = 'RISCO';
     else prazo_status = 'NO PRAZO';
@@ -682,7 +707,8 @@ function rebuildData(){
   });
 
   const allColetas = Object.values(coletaMap).map(deriveColetaLive);
-  COL = allColetas.filter(c => !c.cancelada && !c.realizada);
+  COL = allColetas.filter(c => !c.cancelada && !c.recebidoCD && !c.coletaRealizada);
+  REA = allColetas.filter(c => !c.cancelada && !c.recebidoCD && c.coletaRealizada);
   HIST = allColetas.filter(c => c.cancelada || c.realizada);
   TRAT = Object.values(tratMap).map(deriveTratativaLive);
 
@@ -692,7 +718,7 @@ function rebuildData(){
   AT_FORA = AT.filter(c=>c.uf && c.uf.toUpperCase()!=='SP');
 
   D.kpis = {
-    col_total: COL.length, at: AT.length, ri: RI.length, em: EM.length,
+    col_total: COL.length, rea: REA.length, at: AT.length, ri: RI.length, em: EM.length,
     hist: HIST.length, trat_total: TRAT.length,
     valor_at: AT.reduce((s,c)=>s+Math.abs(c.valor||0),0),
   };
@@ -741,7 +767,7 @@ function toggleTheme(){
 let GRP = '';
 let charts = {};
 const TITLES = {
-  dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo',
+  dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Protocolo de Coleta — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução'
 };
@@ -765,6 +791,7 @@ function stBdg(st){
   if(st==='ATRASADO') return '<span class="bdg b-red">Atrasado</span>';
   if(st==='RISCO')    return '<span class="bdg b-amb">Em risco</span>';
   if(st==='NO PRAZO') return '<span class="bdg b-grn">No prazo</span>';
+  if(st==='REALIZADA') return '<span class="bdg b-acc">Coleta realizada</span>';
   return `<span class="bdg b-dk">${esc(st)}</span>`;
 }
 function grpBdg(g){
@@ -772,6 +799,7 @@ function grpBdg(g){
   return `<span class="bdg ${cls}">${esc(g||'—')}</span>`;
 }
 function prazoBar(c){
+  if (c.prazo_status==='REALIZADA') return `<span class="bdg b-acc" title="Coleta feita — aguardando CD">${c.temData ? c.dias+'d' : '—'} · coletada</span>`;
   const pct = c.prazo_pct||0;
   const dias = c.dias||0;
   const col = dias>SLA?'var(--red)':dias>=(SLA-CONFIG.RISCO_JANELA_DIAS)?'var(--amb)':'var(--acc)';
@@ -788,16 +816,16 @@ function atrasoEm(c){
 }
 
 function initFiltros(){
-  const ufs = [...new Set(COL.map(c=>c.uf).filter(Boolean))].sort();
-  const trs = [...new Set(COL.map(c=>c.transportadora).filter(Boolean))].sort();
+  const ufs = [...new Set([...COL,...REA].map(c=>c.uf).filter(Boolean))].sort();
+  const trs = [...new Set([...COL,...REA].map(c=>c.transportadora).filter(Boolean))].sort();
   const ufsTrat = [...new Set(TRAT.map(t=>t.uf).filter(Boolean))].sort();
   const tiposTrat = [...new Set(TRAT.map(t=>t.tipo_devolucao).filter(Boolean))].sort();
 
-  ['fat-uf','fri-uf','fall-uf'].forEach(id=>{
+  ['fat-uf','fri-uf','fall-uf','frea-uf'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){ el.innerHTML = el.firstElementChild.outerHTML; ufs.forEach(v=>{ const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o); }); }
   });
-  ['fat-tr','fall-tr'].forEach(id=>{
+  ['fat-tr','fall-tr','frea-tr'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){ el.innerHTML = el.firstElementChild.outerHTML; trs.forEach(v=>{ const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o); }); }
   });
@@ -816,12 +844,20 @@ function renderCol(tipo){
   if(tipo==='at')       data=[...AT];
   else if(tipo==='ri')  data=[...RI];
   else if(tipo==='em')  data=[...EM];
-  else                  data=[...COL];
+  else if(tipo==='rea') data=[...REA];
+  else                  data=[...COL, ...REA];
 
   if(tipo==='at'||tipo==='all'){
     const uf=document.getElementById(`f${tipo}-uf`)?.value;
     const tr=document.getElementById(`f${tipo}-tr`)?.value;
     const q=(document.getElementById(`f${tipo}-q`)?.value||'').toLowerCase();
+    if(uf) data=data.filter(c=>c.uf===uf);
+    if(tr) data=data.filter(c=>c.transportadora===tr);
+    if(q)  data=data.filter(c=>(c.cliente||'').toLowerCase().includes(q)||(c.nf||'').includes(q));
+  } else if(tipo==='rea'){
+    const uf=document.getElementById('frea-uf')?.value;
+    const tr=document.getElementById('frea-tr')?.value;
+    const q=(document.getElementById('frea-q')?.value||'').toLowerCase();
     if(uf) data=data.filter(c=>c.uf===uf);
     if(tr) data=data.filter(c=>c.transportadora===tr);
     if(q)  data=data.filter(c=>(c.cliente||'').toLowerCase().includes(q)||(c.nf||'').includes(q));
@@ -843,7 +879,21 @@ function renderCol(tipo){
   const cnt = document.getElementById(`cnt-${tipo==='col-all'?'all':tipo}`);
   if(cnt) cnt.textContent=data.length+' resultado'+(data.length!==1?'s':'');
 
-  if(tipo==='at'){
+  if(tipo==='rea'){
+    data.sort((a,b)=>(b.dias||0)-(a.dias||0));
+    rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
+      <td class="td-nf">${esc(c.nf||'—')}</td>
+      <td class="td-nome">${esc(c.cliente)}</td>
+      <td>${esc(c.transportadora||'—')}</td>
+      <td><span class="bdg b-acc">${esc(c.uf)}</span></td>
+      <td><span class="bdg b-dk">${c.temData ? c.dias+'d' : '—'}</span></td>
+      <td>${stBdg(c.prazo_status)}</td>
+      <td><span class="bdg b-amb" title="Coleta feita, ainda sem romaneio de entrada no CD">Aguardando CD</span></td>
+      <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
+      <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
+    </tr>`);
+    document.getElementById('tb-rea').innerHTML=rows.join('');
+  } else if(tipo==='at'){
     rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente)}</td>
@@ -1040,6 +1090,8 @@ function renderDash(){
   document.getElementById('k-at').textContent=K.at;
   document.getElementById('k-ri').textContent=K.ri;
   document.getElementById('k-em').textContent=K.em;
+  document.getElementById('k-rea').textContent=K.rea;
+  document.getElementById('bdg-rea').textContent=K.rea;
   document.getElementById('k-trat').textContent=K.trat_total;
   document.getElementById('bdg-at').textContent=K.at;
   document.getElementById('bdg-ri').textContent=K.ri;
@@ -1168,7 +1220,7 @@ function renderAll(){
   __rowData = [];
   rebuildData();
   renderDash();
-  renderCol('at'); renderCol('ri'); renderCol('em'); renderCol('all');
+  renderCol('at'); renderCol('ri'); renderCol('em'); renderCol('rea'); renderCol('all');
   renderTrat();
   initFiltros();
 }
@@ -1197,8 +1249,9 @@ function exportColetas(tipo) {
   if(tipo==='at')      { dados=AT;  nome=`Coletas_Atrasadas_${hoje}.csv`; }
   else if(tipo==='ri') { dados=RI;  nome=`Coletas_Risco_${hoje}.csv`; }
   else if(tipo==='em') { dados=EM;  nome=`Coletas_NoPrazo_${hoje}.csv`; }
+  else if(tipo==='rea'){ dados=REA; nome=`Coletas_Realizadas_${hoje}.csv`; }
   else if(tipo==='hist'){ dados=HIST; nome=`Coletas_Historico_${hoje}.csv`; }
-  else                 { dados=COL; nome=`Coletas_Todas_${hoje}.csv`; }
+  else                 { dados=[...COL,...REA]; nome=`Coletas_Todas_${hoje}.csv`; }
 
   const exp = dados.map(c=>({
     'NF': c.nf||'', 'Cliente': c.cliente||'', 'CPF': c.cpf||'', 'Transportadora': c.transportadora||'',
