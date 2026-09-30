@@ -67,6 +67,9 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 .theme-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding:6px 8px;border-radius:var(--r);background:rgba(255,255,255,.05);cursor:pointer;border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:11px}
 .theme-toggle:hover{background:rgba(255,255,255,.09);color:#fff}
 .theme-toggle .tt-ic{width:14px;height:14px;flex-shrink:0}
+.login-input{width:100%;padding:7px 9px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font-size:11.5px;outline:none}
+.login-input::placeholder{color:rgba(255,255,255,.35)}
+.login-input:focus{border-color:var(--acc)}
 
 /* LAYOUT */
 .layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
@@ -334,6 +337,12 @@ tr.clickable:hover td{background:var(--srf1)}
     </label>
     <div class="up-msg" id="up-msg"></div>
     <div id="dbStatus" style="font-size:10px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.5"></div>
+    <div id="loginBox" style="display:none;margin-top:8px">
+      <input type="email" id="login-email" placeholder="seu.email@abracadabra.com.br" class="login-input" autocomplete="username">
+      <input type="password" id="login-pass" placeholder="Senha" class="login-input" autocomplete="current-password" style="margin-top:6px">
+      <button class="btn-exp" style="width:100%;justify-content:center;margin-top:6px" onclick="doLogin()" type="button">Entrar</button>
+      <div id="login-err" style="font-size:10px;color:var(--red);margin-top:5px;display:none"></div>
+    </div>
   </div>
 </aside>
 
@@ -386,7 +395,7 @@ tr.clickable:hover td{background:var(--srf1)}
         <span class="fcnt" id="cnt-at"></span><button class="btn-exp" onclick="exportColetas('at')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Dias</th><th>Status</th><th>Situação</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Situação</th><th>Descrição</th></tr></thead>
         <tbody id="tb-at"></tbody></table>
       </div></div>
     </div>
@@ -399,7 +408,7 @@ tr.clickable:hover td{background:var(--srf1)}
         <span class="fcnt" id="cnt-ri"></span><button class="btn-exp" onclick="exportColetas('ri')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Dias</th><th>Atrasa em</th><th>Situação</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Atrasa em</th><th>Coleta</th><th>Situação</th><th>Descrição</th></tr></thead>
         <tbody id="tb-ri"></tbody></table>
       </div></div>
     </div>
@@ -411,7 +420,7 @@ tr.clickable:hover td{background:var(--srf1)}
         <span class="fcnt" id="cnt-em"></span><button class="btn-exp" onclick="exportColetas('em')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Dias</th><th>Situação</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Coleta</th><th>Situação</th><th>Descrição</th></tr></thead>
         <tbody id="tb-em"></tbody></table>
       </div></div>
     </div>
@@ -425,13 +434,19 @@ tr.clickable:hover td{background:var(--srf1)}
           <option value="RISCO">Em risco</option>
           <option value="NO PRAZO">No prazo</option>
         </select>
+        <select class="fsel" id="fall-col" onchange="renderCol('all')">
+          <option value="">Coleta: todas</option>
+          <option value="pendente">Coleta pendente</option>
+          <option value="realizada">Coleta realizada (aguardando CD)</option>
+          <option value="cd">Recebido no CD</option>
+        </select>
         <select class="fsel" id="fall-uf" onchange="renderCol('all')"><option value="">Todas as UFs</option></select>
         <select class="fsel" id="fall-tr" onchange="renderCol('all')"><option value="">Todas as transportadoras</option></select>
         <input class="fsearch" id="fall-q" placeholder="Buscar..." oninput="renderCol('all')">
         <span class="fcnt" id="cnt-all"></span><button class="btn-exp" onclick="exportColetas('col')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Dias</th><th>Status</th><th>Situação</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Situação</th><th>Descrição</th></tr></thead>
         <tbody id="tb-all"></tbody></table>
       </div></div>
     </div>
@@ -496,7 +511,7 @@ tr.clickable:hover td{background:var(--srf1)}
 
     <!-- HISTÓRICO -->
     <div class="panel" id="panel-hist">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn-exp" onclick="exportColetas('hist')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV histórico</button></div><div class="dica"><strong>Histórico:</strong> Coletas realizadas ou canceladas — removidas do controle ativo e mantidas aqui para auditoria.</div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn-exp" onclick="exportColetas('hist')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV histórico</button></div><div class="dica"><strong>Histórico:</strong> Coletas já recebidas no CD ou canceladas — removidas do controle ativo e mantidas aqui para auditoria. Coleta realizada na casa do cliente <em>sem</em> chegada no CD ainda continua no controle ativo (o prazo de 20 dias só fecha no recebimento).</div>
       <div class="tbl-wrap"><div class="tbl-scroll">
         <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Situação</th><th>Descrição</th></tr></thead>
         <tbody id="tb-hist"></tbody></table>
@@ -576,10 +591,14 @@ function parseBR(s){
   return new Date(+m[3], +m[2]-1, +m[1]);
 }
 function daysBetween(a,b){ return Math.round((b-a)/86400000); }
-function classifyStatusColeta(status){
+const RE_COLETA_STATUS = /realizad|coletad|coleta feita|coleta ok|recolhid|retirad|coleta efetuad/i;
+const RE_COLETA_DESC = /(coleta|recolhimento|retirada)\s+(foi\s+)?(realizad|efetuad|feit)|(retirad|coletad|recolhid)[oa]s?\s+(no dia|em|dia)\s*\d/i;
+function classifyStatusColeta(status, descricao){
   const s = (status||'').toLowerCase();
-  if (s.includes('cancelada')) return 'cancelada';
-  if (s.includes('realizada')) return 'realizada';
+  if (s.includes('cancelad')) return 'cancelada';
+  const duvida = /confirmando|se foi|verificar se|aguardando|n[aã]o (foi )?(coletad|recolhid|retirad|realizad)/i.test(s);
+  if (!duvida && RE_COLETA_STATUS.test(s)) return 'realizada';
+  if (RE_COLETA_DESC.test(descricao||'')) return 'realizada';
   return 'ativa';
 }
 const REGIAO_MAP = {};
@@ -628,9 +647,11 @@ function deriveColetaLive(c){
   const dataProtocolo = parseBR(c.data_programacao) || parseBR(c.data_solicitacao);
   const temData = !!dataProtocolo;
   const dias = temData ? daysBetween(dataProtocolo, new Date()) : null;
-  const bucket = classifyStatusColeta(c.status);
+  const bucket = classifyStatusColeta(c.status, c.descricao);
   const cancelada = bucket==='cancelada';
-  const realizada = bucket==='realizada' || !!c.recebido_cd;
+  const coletaRealizada = bucket==='realizada' || !!c.recebido_cd;
+  const recebidoCD = !!c.recebido_cd;
+  const realizada = recebidoCD; // concluido = recebido no CD (a coleta na casa do cliente NAO encerra o SLA de 20 dias)
 
   let prazo_status = null, prazo_pct = null;
   if (temData && !cancelada && !realizada){
@@ -641,7 +662,7 @@ function deriveColetaLive(c){
   }
 
   return { ...c, transportadora, transportadoraOriginal: c.transportadora, tag, modalidade,
-    dias, prazo_status, prazo_pct, cancelada, realizada, temData,
+    dias, prazo_status, prazo_pct, cancelada, realizada, coletaRealizada, recebidoCD, temData,
     regiao: c.regiao || regiaoOf(c.uf) };
 }
 
@@ -734,6 +755,11 @@ function ir(id){
   document.getElementById('tb-title').textContent = TITLES[id]||id;
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function colBdg(c){
+  if (c.recebidoCD) return '<span class="bdg b-grn" title="Recebido no CD">No CD</span>';
+  if (c.coletaRealizada) return '<span class="bdg b-acc" title="Coleta feita na casa do cliente — aguardando chegada no CD">Coleta realizada</span>';
+  return '<span class="bdg b-dk" title="Ainda nao coletado">Pendente</span>';
+}
 function stBdg(st){
   if(!st) return '<span class="bdg b-dk">Sem data</span>';
   if(st==='ATRASADO') return '<span class="bdg b-red">Atrasado</span>';
@@ -808,6 +834,10 @@ function renderCol(tipo){
   if(tipo==='all'){
     const st=document.getElementById('fall-st')?.value;
     if(st) data=data.filter(c=>c.prazo_status===st);
+    const cf=document.getElementById('fall-col')?.value;
+    if(cf==='pendente') data=data.filter(c=>!c.coletaRealizada);
+    else if(cf==='realizada') data=data.filter(c=>c.coletaRealizada && !c.recebidoCD);
+    else if(cf==='cd') data=data.filter(c=>c.recebidoCD);
   }
 
   const cnt = document.getElementById(`cnt-${tipo==='col-all'?'all':tipo}`);
@@ -821,6 +851,7 @@ function renderCol(tipo){
       <td><span class="bdg b-acc">${esc(c.uf)}</span></td>
       <td>${prazoBar(c)}</td>
       <td>${stBdg(c.prazo_status)}</td>
+      <td>${colBdg(c)}</td>
       <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
@@ -833,6 +864,7 @@ function renderCol(tipo){
       <td><span class="bdg b-acc">${esc(c.uf)}</span></td>
       <td>${prazoBar(c)}</td>
       <td>${atrasoEm(c)}</td>
+      <td>${colBdg(c)}</td>
       <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
@@ -844,6 +876,7 @@ function renderCol(tipo){
       <td>${esc(c.transportadora||'—')}</td>
       <td><span class="bdg b-acc">${esc(c.uf)}</span></td>
       <td>${prazoBar(c)}</td>
+      <td>${colBdg(c)}</td>
       <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
@@ -856,6 +889,7 @@ function renderCol(tipo){
       <td><span class="bdg b-acc">${esc(c.uf)}</span></td>
       <td>${prazoBar(c)}</td>
       <td>${stBdg(c.prazo_status)}</td>
+      <td>${colBdg(c)}</td>
       <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
@@ -937,7 +971,7 @@ function openDetail(item){
     <div class="dpanel-nf">${item.nf ? 'NF '+esc(item.nf) : 'Sem NF'}</div>
     ${isColeta ? stBdg(item.prazo_status) : grpBdg(item.tag)}
     ${isColeta && item.cancelada ? '<span class="bdg b-dk" style="margin-left:5px">Cancelada</span>' : ''}
-    ${isColeta && item.realizada ? '<span class="bdg b-grn" style="margin-left:5px">Realizada</span>' : ''}
+    ${isColeta ? '<span style="margin-left:5px">'+colBdg(item)+'</span>' : ''}
     <dl>
       <dt>Cliente</dt><dd>${esc(item.cliente)}</dd>
       <dt>CPF</dt><dd class="mono">${esc(item.cpf)||'Não informado'}</dd>
@@ -949,6 +983,7 @@ function openDetail(item){
       <dt>Data da solicitação</dt><dd class="mono">${esc(item.data_solicitacao)||'Não informado'}</dd>
       <dt>Data do protocolo</dt><dd class="mono">${esc(item.data_programacao)||'Não informado'}</dd>
       ${isColeta ? `<dt>Dias em aberto (hoje)</dt><dd class="mono">${item.temData ? item.dias+' dias' : '—'}</dd>` : ''}
+      ${isColeta ? `<dt>Coleta na casa do cliente</dt><dd>${item.coletaRealizada ? 'Realizada (data exata não registrada na base)' : 'Ainda não realizada'}</dd><dt>Recebimento no CD</dt><dd>${item.recebidoCD ? 'Confirmado (romaneio de entrada)' : 'Não confirmado'}</dd>` : ''}
       ${isColeta ? `<dt>Prazo</dt><dd>20 dias corridos (protocolo → recebimento no CD)</dd>` : `<dt>Prazo</dt><dd>Sem SLA definido para tratativas</dd>`}
       <dt>Status atual (sistema)</dt><dd>${esc(item.status)||'Não informado'}</dd>
       ${!isColeta && item.grupo ? `<dt>O que fazer</dt><dd>${esc(GRUPO_ACAO[item.grupo]||GRUPO_ACAO.outros)}</dd>` : ''}
@@ -1449,48 +1484,61 @@ async function loadFirebase(){
 // NUNCA abre popup/redirect sozinho (todo navegador bloqueia popup sem clique do usuario, e um
 // redirect automatico no load seria uma experiencia ruim). interactive=true (clique no botao
 // "Entrar"): af tenta popup e cai para redirect se o navegador bloquear.
+function showLoginBox(msg){
+  const statusEl = document.getElementById('dbStatus');
+  const box = document.getElementById('loginBox');
+  if (statusEl) statusEl.textContent = msg || 'Não conectado.';
+  if (box) box.style.display = 'block';
+}
+function hideLoginBox(){
+  const box = document.getElementById('loginBox');
+  if (box) box.style.display = 'none';
+}
+async function doLogin(){
+  const errEl = document.getElementById('login-err');
+  const email = (document.getElementById('login-email').value||'').trim();
+  const pass = document.getElementById('login-pass').value||'';
+  errEl.style.display='none';
+  if (!email || !pass){ errEl.textContent='Preencha e-mail e senha.'; errEl.style.display='block'; return; }
+  try{
+    const { authMod, auth } = await loadFirebase();
+    await authMod.signInWithEmailAndPassword(auth, email, pass);
+    document.getElementById('login-pass').value = '';
+    await initDb(false);
+  } catch(e){
+    console.warn('login falhou', e);
+    const msgs = {
+      'auth/invalid-credential':'E-mail ou senha incorretos.',
+      'auth/wrong-password':'E-mail ou senha incorretos.',
+      'auth/user-not-found':'Essa conta ainda não foi criada — fale com quem administra o painel.',
+      'auth/too-many-requests':'Muitas tentativas — aguarde um pouco e tente de novo.',
+      'auth/invalid-email':'E-mail inválido.',
+    };
+    errEl.textContent = msgs[e.code] || ('Erro ao entrar (' + (e.code||e.message) + ').');
+    errEl.style.display='block';
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+
 async function initDb(interactive){
   const statusEl = document.getElementById('dbStatus');
   try{
     const { authMod, auth, db, fsMod, storage, stMod } = await loadFirebase();
 
-    let redirectUser = null;
-    try{
-      const redirectCred = await authMod.getRedirectResult(auth);
-      if (redirectCred) redirectUser = redirectCred.user;
-    } catch(e){ console.warn('getRedirectResult falhou', e); }
-
-    const user = redirectUser || await new Promise(resolve => {
+    const currentUser = await new Promise(resolve => {
       const unsub = authMod.onAuthStateChanged(auth, u => { unsub(); resolve(u); });
     });
-    let currentUser = user;
     if (!currentUser){
-      if (!interactive){
-        if (statusEl) statusEl.innerHTML = 'Não conectado. <button class="btn-exp" onclick="initDb(true)" style="margin-top:4px">Entrar</button>';
-        return;
-      }
-      const provider = new authMod.GoogleAuthProvider();
-      try{
-        const cred = await authMod.signInWithPopup(auth, provider);
-        currentUser = cred.user;
-      } catch(e){
-        console.warn('signInWithPopup falhou, tentando redirect', e);
-        const popupBlocked = ['auth/popup-blocked','auth/popup-closed-by-user','auth/cancelled-popup-request'].includes(e.code);
-        if (popupBlocked){
-          if (statusEl) statusEl.innerHTML = 'Abrindo tela de login do Google...';
-          try{ await authMod.signInWithRedirect(auth, provider); return; }
-          catch(e2){ console.warn('signInWithRedirect também falhou', e2); }
-        }
-        if (statusEl) statusEl.innerHTML = 'Login necessário (' + esc(e.code||e.message||'erro') + '). <button class="btn-exp" onclick="initDb(true)" style="margin-top:4px">Entrar</button>';
-        return;
-      }
+      showLoginBox('Faça login para acessar o banco.');
+      return;
     }
     if (!currentUser.email || !currentUser.email.endsWith('@abracadabra.com.br')){
       await authMod.signOut(auth);
-      if (statusEl) statusEl.innerHTML = 'Acesso restrito a contas @abracadabra.com.br.';
+      showLoginBox('Acesso restrito a contas @abracadabra.com.br.');
       return;
     }
 
+    hideLoginBox();
     DB = makeFirestoreShim(db, fsMod);
     ASSETS = makeStorageShim(storage, stMod);
   } catch(e){
