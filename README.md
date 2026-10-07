@@ -35,3 +35,12 @@ Use a aba **"Importar / Base"** dentro do próprio painel (depois de logado com 
 
 - `firestore.rules` e `storage.rules` restringem leitura/escrita a contas Google do domínio `@abracadabra.com.br`.
 - O `FIREBASE_CONFIG` embutido no HTML não é segredo — é a configuração pública do SDK cliente; a segurança de fato está nas regras acima.
+
+## Aba Perdas
+
+Menu **Perdas** (Panorama · Perdas Cliente · Perdas Transportadora). Alimentada automaticamente pela importação do arquivo de **Tratativas Transportadora** do Innovaro: casos com tipo `Perdas Cliente`, `Perdas Cliente C/ Reenvio` e `Perdas Transportadora`.
+
+- Motivo classificado por palavras-chave na descrição (ajustável por caso, no detalhe, e gravado como `motivo_manual`).
+- Valor registrado = `VALOR_TITULO`; transportadora = `TIPO_SAIDA_NOVA_SAIDA` (fallback `TIPOSAIDA`, `NUMERO`).
+- Perdas não saem do controle quando somem de um arquivo novo (são histórico mensal).
+- "Gerar relatório" abre a impressão (PDF) só da aba atual; "Copiar resumo" gera texto para e-mail.
