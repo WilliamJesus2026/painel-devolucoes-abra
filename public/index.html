@@ -2339,18 +2339,19 @@ function renderInd(){
   document.getElementById('bdg-ind').textContent = IND_ALL.filter(x=>!x.fin).length;
 
   // ---- barra de filtros ----
-  const chip = (on, onclick, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${onclick}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
-  const mesCont = m => doAno.filter(x=>x.mes===m && f(x,['mes'])).length;
+  const chip = (on, onclick, label, n, ab) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${onclick}">${label}${n==null?'':`<small>${n}${ab!=null?` · ${ab} em aberto`:''}</small>`}</button>`;
+  const cnt = (arr, ign) => [arr.filter(x=>f(x,ign.concat(['status','motivo']))).length, arr.filter(x=>!x.fin && f(x,ign.concat(['status','motivo']))).length];
+  const mesCont = m => cnt(doAno.filter(x=>x.mes===m),['mes']);
   const meses12 = Array.from({length:12},(_,i)=>i+1).filter(m => m>=IND_CORTE && doAno.some(x=>x.mes===m));
   const antigos = indAntigos().filter(m => doAno.some(x=>x.mes===m));
-  const antChip = antigos.length ? chip(antigos.every(m=>IND.meses.has(m)), "indSet('mes',0)", `${MESES[antigos[0]-1]}–${MESES[antigos[antigos.length-1]-1]} · finalizados`, doAno.filter(x=>x.mes<IND_CORTE && f(x,['mes'])).length) : '';
-  const carrs = [...new Set(doAno.map(x=>x.carr))].map(c=>({c, n:doAno.filter(x=>x.carr===c && f(x,['carr'])).length})).sort((a,b)=>b.n-a.n);
+  const antChip = antigos.length ? chip(antigos.every(m=>IND.meses.has(m)), "indSet('mes',0)", `${MESES[antigos[0]-1]}–${MESES[antigos[antigos.length-1]-1]} · finalizados`, cnt(doAno.filter(x=>x.mes<IND_CORTE),['mes'])[0], cnt(doAno.filter(x=>x.mes<IND_CORTE),['mes'])[1]) : '';
+  const carrs = [...new Set(doAno.map(x=>x.carr))].map(c=>{ const k = cnt(doAno.filter(x=>x.carr===c),['carr']); return {c, n:k[0], ab:k[1]}; }).sort((a,b)=>b.n-a.n);
   const nFin = doAno.filter(x=>x.fin && f(x,['status','motivo'])).length, nAb = doAno.filter(x=>!x.fin && f(x,['status','motivo'])).length;
   const motCont = m => doAno.filter(x=>!x.fin && x.motivo===m && f(x,['status','motivo'])).length;
   const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q;
   document.getElementById('ind-fbody').innerHTML =
-    `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${antChip}${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m))).join('')}</div></div>
-     <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>
+    `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${antChip}${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join('')}</div></div>
+     <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join('')}</div></div>
      <div class="ind-fr"><b>Situação</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
      ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Motivo da pendência</b><div>${['No prazo','Relacionamento','Transporte','Cliente','A classificar'].map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${m}`, m, motCont(m))).join('')}</div></div>`}`;
   document.getElementById('ind-fres').innerHTML = `${IND.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${IND.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio aparece conforme as finalizações forem registradas nas próximas importações</i>');
@@ -2409,10 +2410,10 @@ function renderInd(){
 
   // ---- lista de casos ----
   const verFin = IND.status==='fin';
-  const lista = doAno.filter(x => verFin ? (x.fin && f(x)) : (!x.fin && f(x,['status']))).sort((a,b)=>(b.dias||0)-(a.dias||0));
+  const lista = doAno.filter(x => f(x)).sort((a,b)=>(b.dias||0)-(a.dias||0));
   IND_ABERTOS = lista;
-  document.getElementById('ind-lista-t').textContent = verFin ? 'Tarefas atendidas' : 'Casos em aberto — defina o motivo';
-  document.getElementById('cnt-ind').textContent = lista.length + (verFin ? ' atendidas' : ' em aberto');
+  document.getElementById('ind-lista-t').textContent = verFin ? 'Tarefas atendidas' : IND.status==='' ? 'Todas as tarefas (atendidas e em aberto)' : 'Casos em aberto — defina o motivo';
+  document.getElementById('cnt-ind').textContent = lista.length + (verFin ? ' atendidas' : IND.status==='' ? ' tarefas' : ' em aberto');
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind');
   if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td>
     <td onclick="event.stopPropagation()">${x.fin ? '<span class="bdg b-grn">Atendida</span>' : `<select data-id="${esc(x.id||'')}" onchange="indSetMotivo(this.dataset.id,this.value)" style="padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">${x.motivo==='A classificar'?'<option value="" selected>A classificar…</option>':''}${IND_MOTIVOS.map(m=>`<option${m===x.motivo?' selected':''}>${m}</option>`).join('')}</select>`}</td></tr>`).join('')
