@@ -443,6 +443,17 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .ind-k b{font-size:34px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .ind-k b i{font-style:normal;font-size:15px;font-weight:600;color:var(--tx3);margin-left:4px}
 .ind-k.g{border-top-color:#16A34A}.ind-k.b{border-top-color:#2563EB}.ind-k.a{border-top-color:#D97706}.ind-k.r{border-top-color:#DC2626}
+.ind-f{background:var(--srf);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;margin-bottom:16px;box-shadow:var(--sh)}
+.ind-f-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.ind-f-top input{flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--srf1,var(--srf));color:var(--tx);font-size:13px}
+.ind-fr{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-top:1px dashed var(--bd)}
+.ind-fr>b{flex:0 0 112px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3);padding-top:7px}
+.ind-fr>div{display:flex;flex-wrap:wrap;gap:6px}
+.ind-ch{border:1px solid var(--bd);background:none;color:var(--tx2);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.12s}
+.ind-ch:hover{border-color:var(--acc)}.ind-ch.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.ind-ch small{opacity:.65;margin-left:5px;font-weight:700}.ind-ch.zero{opacity:.4}
+.ind-f-res{font-size:12px;color:var(--tx3);margin-top:8px}.ind-f-res b{color:var(--tx)}
+@media(max-width:700px){.ind-fr{flex-direction:column}.ind-fr>b{padding-top:0}}
 .ind-h{font-size:17px;font-weight:700;margin:6px 0 4px}.ind-sub{font-size:12px;color:var(--tx3);margin-bottom:12px}
 .ind-cars{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:18px}
 .ind-c{background:var(--srf);border:1px solid var(--bd);border-top:4px solid #16A34A;border-radius:14px;padding:14px 16px;cursor:pointer;box-shadow:var(--sh);transition:.15s}
@@ -763,7 +774,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     </div>
 
     <div class="panel" id="panel-ind">
-      <div class="filters" style="margin-bottom:12px"><select class="fsel" id="ind-ano" onchange="indSet('ano',this.value)"></select><span class="chip no-print" onclick="indSet('limpar')">Limpar filtros</span><span class="chip" id="ind-pill" style="display:none" onclick="indSet('limpar')"></span><span class="fcnt" id="ind-info"></span></div>
+      <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
       <div class="ind-kpis" id="ind-kpis"></div>
       <div class="ind-h">Indicadores por transportadora</div><div class="ind-sub" id="ind-sub"></div>
       <div class="ind-cars" id="ind-cars"></div>
@@ -773,7 +784,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
           <div class="tbl-scroll" style="max-height:380px"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Motivo</th><th>Qtd.</th></tr></thead><tbody id="tb-ind-pend"></tbody></table></div></div>
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
-      <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
+      <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Motivo da pendência</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
     </div>
 
@@ -2262,7 +2273,7 @@ async function _initDb(interactive){
 // ================= INDICADORES POR TRANSPORTADORA =================
 const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente'];
 const IND_COR = { 'No prazo':'#16A34A', 'Relacionamento':'#2563EB', 'Transporte':'#D97706', 'Cliente':'#7C3AED', 'A classificar':'#DC2626' };
-const IND = { ano:null, carrier:null, mes:null, motivo:null };
+const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'', q:'' };
 let IND_ALL = [], IND_ABERTOS = [];
 function indNome(n){
   n = String(n||'').trim(); if (!n) return 'Sem transportadora';
@@ -2293,9 +2304,14 @@ function indAgg(arr){
 }
 const fmt1 = n => n==null ? '—' : n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
 function indSet(k,v){
-  if (k==='ano') IND.ano = +v;
-  else if (k==='limpar'){ IND.carrier=null; IND.mes=null; IND.motivo=null; }
-  else IND[k] = (IND[k]===v ? null : v);
+  const tg = (set,x) => set.has(x) ? set.delete(x) : set.add(x);
+  if (k==='ano'){ IND.ano = +v; IND.meses.clear(); }
+  else if (k==='mes') tg(IND.meses, +v);
+  else if (k==='carr') tg(IND.carrs, v);
+  else if (k==='motivo'){ tg(IND.motivos, v); if (IND.motivos.size) IND.status = 'aberto'; }
+  else if (k==='status'){ IND.status = v; if (v==='fin') IND.motivos.clear(); }
+  else if (k==='q') IND.q = norm(v).trim();
+  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status=''; IND.q=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
   renderInd();
 }
 function indSetMotivo(id, v){
@@ -2308,39 +2324,60 @@ function renderInd(){
   indCalcula();
   const anos = [...new Set(IND_ALL.map(x=>x.ano))].sort((a,b)=>b-a);
   if (!anos.includes(IND.ano)) IND.ano = anos[0] || new Date().getFullYear();
-  const sel = document.getElementById('ind-ano'); sel.innerHTML = anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('') || '<option>—</option>';
   const doAno = IND_ALL.filter(x=>x.ano===IND.ano);
-  const base = doAno.filter(x => (!IND.carrier || x.carr===IND.carrier) && (!IND.mes || x.mes===IND.mes));
+  // um unico filtro para a aba inteira; "ign" libera um grupo para contar as opcoes dele
+  const f = (x, ign) => { ign = ign||[];
+    return (ign.includes('mes') || !IND.meses.size || IND.meses.has(x.mes)) &&
+      (ign.includes('carr') || !IND.carrs.size || IND.carrs.has(x.carr)) &&
+      (ign.includes('status') || !IND.status || (IND.status==='fin') === x.fin) &&
+      (ign.includes('motivo') || !IND.motivos.size || (!x.fin && IND.motivos.has(x.motivo))) &&
+      (!IND.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(IND.q)); };
+  const base = doAno.filter(x=>f(x));
   const A = indAgg(base);
   document.getElementById('bdg-ind').textContent = IND_ALL.filter(x=>!x.fin).length;
+
+  // ---- barra de filtros ----
+  const chip = (on, onclick, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${onclick}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
+  const mesCont = m => doAno.filter(x=>x.mes===m && f(x,['mes'])).length;
+  const meses12 = Array.from({length:12},(_,i)=>i+1).filter(m => doAno.some(x=>x.mes===m));
+  const carrs = [...new Set(doAno.map(x=>x.carr))].map(c=>({c, n:doAno.filter(x=>x.carr===c && f(x,['carr'])).length})).sort((a,b)=>b.n-a.n);
+  const nFin = doAno.filter(x=>x.fin && f(x,['status','motivo'])).length, nAb = doAno.filter(x=>!x.fin && f(x,['status','motivo'])).length;
+  const motCont = m => doAno.filter(x=>!x.fin && x.motivo===m && f(x,['status','motivo'])).length;
+  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status || IND.q;
+  document.getElementById('ind-fbody').innerHTML =
+    `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m))).join('')}</div></div>
+     <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>
+     <div class="ind-fr"><b>Situação</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
+     ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Motivo da pendência</b><div>${['No prazo','Relacionamento','Transporte','Cliente','A classificar'].map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${m}`, m, motCont(m))).join('')}</div></div>`}`;
+  document.getElementById('ind-fres').innerHTML = `Mostrando <b>${base.length}</b> de ${doAno.length} tarefas de ${IND.ano}` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio aparece conforme as finalizações forem registradas nas próximas importações</i>');
+  document.getElementById('ind-limpar').style.visibility = temFiltro ? 'visible' : 'hidden';
+
+  // ---- KPIs ----
   const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
   document.getElementById('ind-kpis').innerHTML =
     `<div class="ind-k b"><small>Tarefas no período</small><b>${A.total}</b></div>
      <div class="ind-k ${tc||'g'}"><small>Taxa de atendimento</small><b>${fmt1(A.taxa)}<i>%</i></b></div>
      <div class="ind-k b" title="${A.nsla} tarefas com data de finalização registrada"><small>SLA médio (finalizadas)</small><b>${fmt1(A.sla)}<i>dias</i></b></div>
      <div class="ind-k a"><small>Em aberto hoje</small><b>${A.aberto}</b></div>`;
-  const pills = [IND.carrier&&'Transportadora: '+IND.carrier, IND.mes&&'Mês: '+MESES[IND.mes-1], IND.motivo&&'Motivo: '+IND.motivo].filter(Boolean);
-  const pill = document.getElementById('ind-pill'); pill.style.display = pills.length ? '' : 'none'; pill.textContent = pills.join(' · ') + ' ✕';
-  document.getElementById('ind-info').textContent = A.nsla ? '' : 'SLA médio aparece conforme as finalizações forem sendo registradas nas próximas importações.';
 
-  // cards por transportadora
+  // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
-  document.getElementById('ind-sub').textContent = `Total acumulado, % de atendimento, SLA médio e tarefas em aberto — ${isFinite(mi)?MESES[mi-1].toLowerCase()+' a '+MESES[ma-1].toLowerCase()+'/'+IND.ano:'sem dados'}.`;
-  const por = new Map(); doAno.filter(x=>!IND.mes||x.mes===IND.mes).forEach(x => { if(!por.has(x.carr)) por.set(x.carr,[]); por.get(x.carr).push(x); });
+  document.getElementById('ind-sub').textContent = `Total, % de atendimento, SLA médio e tarefas em aberto — ${isFinite(mi)?MESES[mi-1].toLowerCase()+' a '+MESES[ma-1].toLowerCase()+'/'+IND.ano:'sem dados'}. Clique num card para filtrar.`;
+  const por = new Map(); doAno.filter(x=>f(x,['carr'])).forEach(x => { if(!por.has(x.carr)) por.set(x.carr,[]); por.get(x.carr).push(x); });
   document.getElementById('ind-cars').innerHTML = [...por.entries()].map(([c,arr])=>({c, a:indAgg(arr)})).sort((x,y)=>y.a.total-x.a.total).map(({c,a}) => {
     const cl = a.taxa>=90 ? '' : a.taxa>=75 ? ' am' : ' rd', tcl = a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
-    return `<div class="ind-c${cl}${IND.carrier===c?' on':''}" onclick="indSet('carrier',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}</h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div></div>`; }).join('') || '<div class="ind-sub">Importe um arquivo para ver os indicadores.</div>';
+    return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}</h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div></div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
 
-  // grafico mensal (respeita transportadora)
-  const doCar = doAno.filter(x=>!IND.carrier||x.carr===IND.carrier);
-  const meses = Array.from({length:12},(_,i)=>i+1).filter(m => doCar.some(x=>x.mes===m) || m<=ma);
+  // ---- grafico mensal (ignora mes/situacao/motivo para mostrar a serie inteira; meses filtrados ficam destacados) ----
+  const doCar = doAno.filter(x=>f(x,['mes','status','motivo']));
+  const meses = Array.from({length:12},(_,i)=>i+1).filter(m => doAno.some(x=>x.mes===m));
   const vol = meses.map(m=>doCar.filter(x=>x.mes===m).length), pct = meses.map(m=>{ const a=doCar.filter(x=>x.mes===m); return a.length ? Math.round(a.filter(x=>x.fin).length/a.length*100) : null; });
   const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
   const vis = document.getElementById('panel-ind').classList.contains('on') && window.Chart;
   if (vis){
     if (charts.ind) charts.ind.destroy();
     charts.ind = new Chart(document.getElementById('ch-ind'), { data:{ labels:meses.map(m=>MESES[m-1]), datasets:[
-      { type:'bar', label:'Tarefas criadas', data:vol, backgroundColor:meses.map(m=>m===IND.mes?'#2563EB':'#1E3A5F'), borderRadius:6, yAxisID:'y', order:2 },
+      { type:'bar', label:'Tarefas criadas', data:vol, backgroundColor:meses.map(m=>!IND.meses.size||IND.meses.has(m)?'#2563EB':'#1E3A5F55'), borderRadius:6, yAxisID:'y', order:2 },
       { type:'line', label:'% atendimento', data:pct, borderColor:'#E8704F', backgroundColor:'#E8704F', tension:.25, pointRadius:4, yAxisID:'y1', order:1 } ] },
       options:{ responsive:true, maintainAspectRatio:false, animation:{duration:450},
         onClick:(e,els)=>{ if (els.length) indSet('mes', meses[els[0].index]); },
@@ -2349,26 +2386,28 @@ function renderInd(){
                  y1:{ position:'right', min:0, max:100, ticks:{color:'#E8704F', callback:v=>v+'%'}, grid:{display:false}, title:{display:true,text:'% Atendimento',color:'#E8704F'} } } } });
   }
 
-  // quadro de pendencias (mes x transportadora x motivo)
-  const ab = doAno.filter(x=>!x.fin && (!IND.carrier||x.carr===IND.carrier));
-  const g = new Map(); ab.forEach(x => { const k = x.mes+'|'+x.carr+'|'+x.motivo; g.set(k, (g.get(k)||0)+1); });
+  // ---- quadro de pendencias (mes x transportadora x motivo) ----
+  const ab = doAno.filter(x=>!x.fin && f(x,['status','motivo']));
+  const g = new Map(); ab.filter(x=>!IND.motivos.size||IND.motivos.has(x.motivo)).forEach(x => { const k = x.mes+'|'+x.carr+'|'+x.motivo; g.set(k, (g.get(k)||0)+1); });
   const linhas = [...g.entries()].map(([k,n]) => { const [m,c,mo] = k.split('|'); return { m:+m, c, mo, n }; }).sort((a,b)=>a.m-b.m || a.c.localeCompare(b.c) || a.mo.localeCompare(b.mo));
-  document.getElementById('tb-ind-pend').innerHTML = linhas.map(l => `<tr class="clickable${IND.mes===l.m&&IND.motivo===l.mo&&IND.carrier===l.c?' sel':''}" onclick="IND.mes=${l.m};IND.carrier=this.dataset.c;IND.motivo=this.dataset.mo;renderInd()" data-c="${esc(l.c)}" data-mo="${esc(l.mo)}"><td>${MESES[l.m-1]}/${IND.ano}</td><td>${esc(l.c)}</td><td><span class="bdg" style="background:${IND_COR[l.mo]}22;color:${IND_COR[l.mo]}">${l.mo}</span></td><td><b>${l.n}</b></td></tr>`).join('') || '<tr><td colspan="4" style="color:var(--tx3);padding:14px">Nenhuma pendência em aberto neste período.</td></tr>';
+  document.getElementById('tb-ind-pend').innerHTML = linhas.map(l => `<tr class="clickable" onclick="IND.meses=new Set([${l.m}]);IND.carrs=new Set([this.dataset.c]);IND.motivos=new Set([this.dataset.mo]);IND.status='aberto';renderInd()" data-c="${esc(l.c)}" data-mo="${esc(l.mo)}"><td>${MESES[l.m-1]}/${IND.ano}</td><td>${esc(l.c)}</td><td><span class="bdg" style="background:${IND_COR[l.mo]}22;color:${IND_COR[l.mo]}">${l.mo}</span></td><td><b>${l.n}</b></td></tr>`).join('') || '<tr><td colspan="4" style="color:var(--tx3);padding:14px">Nenhuma pendência em aberto com esses filtros.</td></tr>';
 
   if (vis){
     const mo = ['No prazo','Relacionamento','Transporte','Cliente','A classificar'].map(m=>[m, ab.filter(x=>x.motivo===m).length]).filter(a=>a[1]);
     if (charts.indMot) charts.indMot.destroy();
-    charts.indMot = new Chart(document.getElementById('ch-ind-mot'), { type:'doughnut', data:{ labels:mo.map(a=>a[0]), datasets:[{ data:mo.map(a=>a[1]), backgroundColor:mo.map(a=>IND_COR[a[0]]), borderWidth:0 }] },
+    charts.indMot = new Chart(document.getElementById('ch-ind-mot'), { type:'doughnut', data:{ labels:mo.map(a=>a[0]), datasets:[{ data:mo.map(a=>a[1]), backgroundColor:mo.map(a=>IND_COR[a[0]] + (!IND.motivos.size||IND.motivos.has(a[0])?'':'55')), borderWidth:0 }] },
       options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', onClick:(e,els)=>{ if (els.length) indSet('motivo', mo[els[0].index][0]); }, plugins:{ legend:{ position:'right', labels:{ color:tick, boxWidth:10 } } } } });
   }
 
-  // casos em aberto com seletor de motivo
-  const lista = doAno.filter(x=>!x.fin && (!IND.carrier||x.carr===IND.carrier) && (!IND.mes||x.mes===IND.mes) && (!IND.motivo||x.motivo===IND.motivo)).sort((a,b)=>(b.dias||0)-(a.dias||0));
+  // ---- lista de casos ----
+  const verFin = IND.status==='fin';
+  const lista = doAno.filter(x => verFin ? (x.fin && f(x)) : (!x.fin && f(x,['status']))).sort((a,b)=>(b.dias||0)-(a.dias||0));
   IND_ABERTOS = lista;
-  document.getElementById('cnt-ind').textContent = lista.length + ' em aberto';
+  document.getElementById('ind-lista-t').textContent = verFin ? 'Tarefas atendidas' : 'Casos em aberto — defina o motivo';
+  document.getElementById('cnt-ind').textContent = lista.length + (verFin ? ' atendidas' : ' em aberto');
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind');
   if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td>
-    <td onclick="event.stopPropagation()"><select data-id="${esc(x.id||'')}" onchange="indSetMotivo(this.dataset.id,this.value)" style="padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">${x.motivo==='A classificar'?'<option value="" selected>A classificar…</option>':''}${IND_MOTIVOS.map(m=>`<option${m===x.motivo?' selected':''}>${m}</option>`).join('')}</select></td></tr>`).join('')
+    <td onclick="event.stopPropagation()">${x.fin ? '<span class="bdg b-grn">Atendida</span>' : `<select data-id="${esc(x.id||'')}" onchange="indSetMotivo(this.dataset.id,this.value)" style="padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">${x.motivo==='A classificar'?'<option value="" selected>A classificar…</option>':''}${IND_MOTIVOS.map(m=>`<option${m===x.motivo?' selected':''}>${m}</option>`).join('')}</select>`}</td></tr>`).join('')
     + (lista.length>300 ? `<tr><td colspan="7" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
 }
 function indExport(){
