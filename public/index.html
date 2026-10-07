@@ -436,6 +436,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .pw-sel-motivo{width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--bd);background:var(--srf);color:var(--tx);font-size:12.5px}
 .pw-seg{display:inline-flex;border:1px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--srf)}
 .pw-seg button{border:none;background:none;padding:7px 13px;font-size:11.5px;font-weight:700;color:var(--tx2);cursor:pointer;transition:.14s}
+.pw-seg button small{opacity:.7;font-weight:600;margin-left:3px}
 .pw-seg button.on{background:linear-gradient(135deg,#7C3AED,#DB2777);color:#fff}
 @media print{
   @page{size:A4 landscape;margin:9mm}
@@ -505,6 +506,13 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke-width="1.5"/></svg>
       Por grupo
       <span class="bdg" id="bdg-trat">0</span>
+    </button>
+
+    <div class="sb-grp">Controle</div>
+    <button class="nav" onclick="ir('sit')" id="nav-sit">
+      <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><polyline points="12 7 12 12 15.5 14" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Controle de Situações
+      <span class="bdg" id="bdg-sit">0</span>
     </button>
 
     <div class="sb-grp">Perdas</div>
@@ -590,6 +598,8 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="kpi k-grn kpi-click" onclick="ir('em')" role="button" tabindex="0"><div class="kpi-v" id="k-em">—</div><div class="kpi-l">No prazo</div><div class="kpi-s">Dentro dos 20 dias</div></div>
         <div class="kpi k-pur kpi-click" onclick="ir('rea')" role="button" tabindex="0"><div class="kpi-v" id="k-rea">—</div><div class="kpi-l">Coleta realizada</div><div class="kpi-s">Aguardando chegada no CD</div></div>
         <div class="kpi k-rose kpi-click" onclick="ir('perdas')" role="button" tabindex="0"><div class="kpi-v" id="k-prd">—</div><div class="kpi-l" id="k-prd-l">Perdas</div><div class="kpi-s">Abrir análise de perdas</div></div>
+        <div class="kpi k-pur kpi-click" onclick="ir('perdas');pwSet('metric','valor')" role="button" tabindex="0"><div class="kpi-v" id="k-vest" style="font-size:22px">—</div><div class="kpi-l">Valor total estimado</div><div class="kpi-s" id="k-vest-s">Perdas em R$</div></div>
+        <div class="kpi k-red kpi-click" onclick="ir('sit')" role="button" tabindex="0"><div class="kpi-v" id="k-sit">—</div><div class="kpi-l">Atrasos por situação</div><div class="kpi-s">SLA do Controle de Situações</div></div>
         <div class="kpi k-acc kpi-click" onclick="ir('trat')" role="button" tabindex="0"><div class="kpi-v" id="k-trat">—</div><div class="kpi-l">Tratativas ativas</div><div class="kpi-s">Devoluções transportadora</div></div>
       </div>
       <div id="alertas-dash" style="margin-bottom:14px"></div>
@@ -697,6 +707,39 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     </div>
 
     <!-- TRATATIVAS -->
+    <div class="panel" id="panel-sit">
+      <div class="dica"><strong>Controle de Situações:</strong> cada situação do Innovaro tem seu próprio prazo (SLA, em dias). O caso conta a partir da data de programação (ou da solicitação, se não houver). <b>Atrasado</b> = dias acima do SLA · <b>Em risco</b> = nos últimos 30% do prazo. Cada situação tem uma <b>classe</b>: <b>Pendente</b> conta prazo · <b>Finalizada</b> não gera atraso · <b>Desconsiderar</b> sai do controle (ex.: Cancelada 1–4). Edite classe e dias direto na tabela, ou importe a planilha. As regras ficam salvas para toda a equipe.</div>
+      <div class="kpi-row" id="sit-kpis"></div>
+      <div class="filters" style="margin-bottom:10px">
+        <select class="fsel" id="sit-base" onchange="sitSetBase(this.value)" title="Data usada para contar os dias"><option value="prog">Contar desde a programação</option><option value="solic">Contar desde a solicitação</option></select>
+        <button class="btn-exp" type="button" onclick="sitExportModelo()">Baixar modelo de SLA (.csv)</button>
+        <button class="btn-exp" type="button" onclick="document.getElementById('sit-file').click()">Importar SLAs da planilha</button>
+        <input type="file" id="sit-file" accept=".csv,.xlsx,.xls" style="display:none" onchange="sitImportFile(this)">
+        <span class="fcnt" id="sit-msg"></span>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="card-title">Situação × prazo</div><div class="card-sub">Top situações por volume · clique numa barra para filtrar</div><div style="height:300px"><canvas id="ch-sit"></canvas></div></div>
+        <div class="tbl-wrap"><div class="tbl-scroll" style="max-height:340px">
+          <table id="tb-sit-reg"><thead><tr><th>Situação</th><th>Casos</th><th>Classe</th><th>SLA (dias)</th><th>No prazo</th><th>Risco</th><th>Atrasados</th><th>Maior atraso</th></tr></thead><tbody id="tb-sit-reg-b"></tbody></table>
+        </div></div>
+      </div>
+      <div class="filters" style="margin:14px 0 8px">
+        <span class="chip ch-all on" data-sit-st="" onclick="sitSetEstado('')">Todos</span>
+        <span class="chip" data-sit-st="ATRASADO" onclick="sitSetEstado('ATRASADO')">Atrasados</span>
+        <span class="chip" data-sit-st="RISCO" onclick="sitSetEstado('RISCO')">Em risco</span>
+        <span class="chip" data-sit-st="NO PRAZO" onclick="sitSetEstado('NO PRAZO')">No prazo</span>
+        <span class="chip" data-sit-st="SEM SLA" onclick="sitSetEstado('SEM SLA')">Sem SLA</span>
+        <span class="chip" data-sit-st="FINALIZADA" onclick="sitSetEstado('FINALIZADA')">Finalizadas</span>
+        <input class="fsearch" id="sit-q" placeholder="Buscar cliente, NF ou CPF..." oninput="renderSitCasos()">
+        <span class="chip" id="sit-pill" style="display:none" onclick="sitSetFiltro(null)"></span>
+        <span class="fcnt" id="cnt-sit"></span><button class="btn-exp" onclick="sitExportCasos()">Exportar CSV</button>
+      </div>
+      <div class="tbl-wrap"><div class="tbl-scroll">
+        <table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>UF</th><th>Dias</th><th>SLA</th><th>Atraso</th><th>Estado</th><th>Responsável</th></tr></thead>
+        <tbody id="tb-sit"></tbody></table>
+      </div></div>
+    </div>
+
     <div class="panel" id="panel-trat">
       <div class="dica"><strong>Sobre as tratativas:</strong> Os casos abaixo são acompanhados por tipo — Barrar, Transportadora a pagar, Recolhimento, Não retornou, etc. (as Perdas agora têm aba própria, no menu Perdas). Não há prazo específico nesta seção. Use os filtros para localizar casos e cobrar ações junto às transportadoras.</div>
       <div class="minitabs" id="minitabs-trat">
@@ -1026,7 +1069,7 @@ const TITLES = {
   dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Protocolo de Coleta — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
-  perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
+  sit:'Controle de Situações', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
 };
 function ir(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
@@ -1037,6 +1080,7 @@ function ir(id){
   if(nav)   nav.classList.add('on');
   document.getElementById('tb-title').textContent = TITLES[id]||id;
   renderPerdasActive();
+  if (id==='sit') renderSit();
   window.scrollTo({top:0});
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1501,6 +1545,7 @@ function renderAll(){
   renderCrit();
   renderPerdasBadges();
   renderPerdasActive();
+  renderSit();
   renderOcultos();
   renderBanner();
   document.querySelectorAll('.tbl-wrap table').forEach(applySort);
@@ -1843,7 +1888,8 @@ function detectAndNormalize(rows){
     const cidade = cellAt(r, col.cidade) || null;
     const usuario = cellAt(r, col.usuario) || null;
     const descricao = cellAt(r, col.descricao) || null;
-    if (tipoDetectado === 'coleta'){
+    const ehColeta = /protocolo de coleta/i.test(tipoRaw) || (tipoDetectado === 'coleta' && groupOf(tipoRaw) === 'outros');
+    if (ehColeta){
       return { id:coletaKey(chave), origem:'coleta', chave, nf, cpf, cliente, status:casos,
         transportadora, uf, cidade, tipo_devolucao:'Protocolo de Coleta',
         data_solicitacao:dt, data_programacao:prog, recebido_cd: !!romaneio,
@@ -2160,12 +2206,184 @@ async function _initDb(interactive){
     scheduleRender();
   }, err => { console.warn('cases onSnapshot error', err); toast('Falha ao ler o banco: ' + (err.code||err.message), {type:'err'}); });
 
+  DB.collection('config').onSnapshot(snap => {
+    const d = snap.docs.find(x => x.id==='sla_situacoes');
+    if (d){ const v = d.data(); SIT_CFG = { base: v.base==='solic'?'solic':'prog', regras: v.regras||{} }; try { localStorage.setItem('sit_cfg', JSON.stringify(SIT_CFG)); } catch(e){} scheduleRender(); }
+  }, err => console.warn('config onSnapshot error', err));
+
   DB.collection('imports').orderBy('importedAt','desc').limit(1).onSnapshot(snap => {
     LAST_IMPORT = snap.docs.length ? snap.docs[0].data() : null;
     scheduleRender();
   }, err => console.warn('imports onSnapshot error', err));
 }
 
+
+// ================= CONTROLE DE SITUACOES (SLA por situacao) =================
+let SIT_CFG = { base:'prog', regras:{} };   // regras[chave] = { nome, sla }
+let SIT_ESTADO = '', SIT_FILTRO = null, SIT_ROWS = [], SIT_LINHAS = [], SIT_VISIVEL = [], SIT_IGNORADOS = 0;
+const sitKey = nome => norm(nome).replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'') || 'sem_situacao';
+try { const c = JSON.parse(localStorage.getItem('sit_cfg')||'null'); if (c && c.regras) SIT_CFG = c; } catch(e){}
+// classe padrao de cada situacao (planilha enviada pela equipe): Pendente conta SLA; Finalizada e Desconsiderar nao geram atraso
+const SIT_CLASSES = ['Pendente','Finalizada','Desconsiderar'];
+const SIT_CLASSE_PADRAO = {
+  prod_recolhido_no_cliente:'Finalizada', criada:'Pendente', cancelada:'Desconsiderar', cancelada_2:'Desconsiderar', cancelada_3:'Desconsiderar', cancelada_4:'Desconsiderar',
+  financeiro_ok:'Finalizada', perdas_cliente:'Finalizada', recolhimento_p_cancelamen:'Pendente', recol_p_troca_simples:'Pendente', recol_p_troca_divergente:'Pendente',
+  perdas_cliente_c_reenvio:'Finalizada', protocolo_de_coleta:'Pendente', nf_e_emitida:'Pendente' };
+function sitClasseDe(nome){
+  const k = sitKey(nome), r = SIT_CFG.regras[k];
+  if (r && SIT_CLASSES.includes(r.classe)) return r.classe;
+  if (SIT_CLASSE_PADRAO[k]) return SIT_CLASSE_PADRAO[k];
+  return /^perdas/.test(k) ? 'Finalizada' : /^cancel/.test(k) ? 'Desconsiderar' : 'Pendente';
+}
+function sitSlaDe(nome){
+  const r = SIT_CFG.regras[sitKey(nome)];
+  if (r) return r.sla>0 ? r.sla : null;
+  return sitKey(nome)==='protocolo_de_coleta' ? CONFIG.SLA_COLETA_DIAS : null;
+}
+function sitFonte(){
+  const out = [];
+  COL.forEach(c => out.push({ ...c, __tipo:'coleta', sit:'Protocolo de Coleta' }));
+  TRAT.forEach(t => out.push({ ...t, __tipo:'tratativa', sit:t.tipo_devolucao || '(sem situação)' }));
+  PERDAS.forEach(p => out.push({ ...p, sit:p.tipo_devolucao || '(sem situação)' }));
+  return out;
+}
+function sitCalcula(){
+  const hoje = new Date();
+  SIT_IGNORADOS = 0;
+  SIT_ROWS = sitFonte().filter(x => { if (sitClasseDe(x.sit)==='Desconsiderar'){ SIT_IGNORADOS++; return false; } return true; }).map(x => {
+    const d = SIT_CFG.base==='solic' ? (parseBR(x.data_solicitacao) || parseBR(x.data_programacao)) : (parseBR(x.data_programacao) || parseBR(x.data_solicitacao));
+    const dias = d ? daysBetween(d, hoje) : null, sla = sitSlaDe(x.sit);
+    let estado = 'SEM SLA';
+    if (sitClasseDe(x.sit)==='Finalizada') estado = 'FINALIZADA';
+    else if (sla){ if (dias==null) estado = 'SEM DATA'; else if (dias > sla) estado = 'ATRASADO'; else if (dias >= sla - Math.max(1, Math.round(sla*0.3))) estado = 'RISCO'; else estado = 'NO PRAZO'; }
+    return { ...x, dias, sla, estado, atraso: (sla && dias!=null && dias>sla) ? dias-sla : 0 };
+  });
+  const m = new Map();
+  SIT_ROWS.forEach(r => {
+    const k = sitKey(r.sit); if (!m.has(k)) m.set(k,{ key:k, nome:r.sit, sla:r.sla, n:0, ok:0, risco:0, at:0, max:0 });
+    const g = m.get(k); g.n++;
+    if (r.estado==='FINALIZADA') g.fin = (g.fin||0)+1;
+    else if (r.estado==='NO PRAZO') g.ok++; else if (r.estado==='RISCO') g.risco++; else if (r.estado==='ATRASADO'){ g.at++; g.max = Math.max(g.max, r.atraso); }
+  });
+  Object.entries(SIT_CFG.regras).forEach(([k,r]) => { if (!m.has(k)) m.set(k,{ key:k, nome:r.nome, sla:r.sla>0?r.sla:null, n:0, ok:0, risco:0, at:0, max:0 }); });
+  sitFonte().forEach(x => { if (sitClasseDe(x.sit)==='Desconsiderar'){ const k=sitKey(x.sit); if(!m.has(k)) m.set(k,{ key:k, nome:x.sit, sla:null, n:0, ok:0, risco:0, at:0, max:0 }); m.get(k).ign=(m.get(k).ign||0)+1; } });
+  SIT_LINHAS = [...m.values()].sort((a,b)=> b.at-a.at || b.n-a.n);
+}
+function renderSit(){
+  if (!document.getElementById('panel-sit')) return;
+  sitCalcula();
+  const cnt = e => SIT_ROWS.filter(r=>r.estado===e).length;
+  const at = cnt('ATRASADO'), ri = cnt('RISCO'), ok = cnt('NO PRAZO'), fin = cnt('FINALIZADA'), sem = SIT_ROWS.length - at - ri - ok - fin;
+  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('bdg-sit', at); set('k-sit', at);
+  const kp = (cls, v, l, st) => `<div class="kpi ${cls} kpi-click" onclick="sitSetEstado('${st}')" role="button" tabindex="0"><div class="kpi-v">${v}</div><div class="kpi-l">${l}</div></div>`;
+  document.getElementById('sit-kpis').innerHTML = kp('k-acc', SIT_ROWS.length, 'Em controle', '') + kp('k-red', at, 'Atrasados', 'ATRASADO') + kp('k-amb', ri, 'Em risco', 'RISCO') + kp('k-grn', ok, 'No prazo', 'NO PRAZO') + kp('k-pur', sem, 'Pendentes sem SLA', 'SEM SLA') + kp('k-acc', fin, 'Finalizadas', 'FINALIZADA');
+  const sel = document.getElementById('sit-base'); if (sel) sel.value = SIT_CFG.base;
+
+  const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-sit-reg-b');
+  if (!ativo) document.getElementById('tb-sit-reg-b').innerHTML = SIT_LINHAS.map(g => `<tr class="clickable${SIT_FILTRO===g.key?' sel':''}" onclick="sitSetFiltro('${g.key}')">
+    <td class="td-nome">${esc(g.nome)}</td><td>${g.n||g.ign||0}</td>
+    <td onclick="event.stopPropagation()"><select onchange="sitSetClasse('${g.key}',this)" data-nome="${esc(g.nome)}" style="padding:3px 4px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11px">${SIT_CLASSES.map(c=>`<option${c===sitClasseDe(g.nome)?' selected':''}>${c}</option>`).join('')}</select></td>
+    <td onclick="event.stopPropagation()"><input type="number" min="0" max="999" value="${g.sla||''}" placeholder="—" style="width:64px;padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx)" onchange="sitSetSla('${g.key}',this)" data-nome="${esc(g.nome)}"></td>
+    <td>${g.ok}</td><td>${g.risco?`<span class="bdg b-amb">${g.risco}</span>`:0}</td><td>${g.at?`<span class="bdg b-red">${g.at}</span>`:0}</td><td>${g.max?g.max+' d':'—'}</td></tr>`).join('') || '<tr><td colspan="8" style="color:var(--tx3);padding:14px">Importe um arquivo para ver as situações.</td></tr>';
+
+  if (document.getElementById('panel-sit').classList.contains('on') && window.Chart){
+    const top = SIT_LINHAS.filter(g=>g.n).slice(0,12), cs = getComputedStyle(document.documentElement);
+    const tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
+    if (charts.sit) charts.sit.destroy();
+    charts.sit = new Chart(document.getElementById('ch-sit'), { type:'bar',
+      data:{ labels: top.map(g=>g.nome.length>26?g.nome.slice(0,25)+'…':g.nome), datasets:[
+        { label:'Atrasados', data:top.map(g=>g.at), backgroundColor:'#DC2626' },
+        { label:'Em risco', data:top.map(g=>g.risco), backgroundColor:'#F59E0B' },
+        { label:'No prazo', data:top.map(g=>g.ok), backgroundColor:'#16A34A' },
+        { label:'Sem SLA', data:top.map(g=>g.n-g.ok-g.risco-g.at-(g.fin||0)), backgroundColor:'#94A3B8' },
+        { label:'Finalizadas', data:top.map(g=>g.fin||0), backgroundColor:'#7C3AED55' } ] },
+      options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, animation:{duration:400},
+        onClick:(e,els)=>{ if (els.length) sitSetFiltro(top[els[0].index].key); },
+        plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } },
+        scales:{ x:{ stacked:true, ticks:{color:tick}, grid:{color:grid} }, y:{ stacked:true, ticks:{color:tick}, grid:{display:false} } } } });
+  }
+  renderSitCasos();
+}
+function renderSitCasos(){
+  const q = norm((document.getElementById('sit-q')||{}).value||'');
+  const data = SIT_ROWS.filter(r => (!SIT_FILTRO || sitKey(r.sit)===SIT_FILTRO) && (!SIT_ESTADO || r.estado===SIT_ESTADO || (SIT_ESTADO==='SEM SLA' && r.estado==='SEM DATA')) &&
+    (!q || norm(r.cliente).includes(q) || (r.nf||'').includes(q) || (r.cpf||'').includes(q)));
+  data.sort((a,b)=> b.atraso-a.atraso || (b.dias||0)-(a.dias||0));
+  document.getElementById('cnt-sit').textContent = data.length + ' resultado' + (data.length!==1?'s':'');
+  SIT_VISIVEL = data;
+  const bdg = e => ({ATRASADO:'<span class="bdg b-red">Atrasado</span>', RISCO:'<span class="bdg b-amb">Em risco</span>', 'NO PRAZO':'<span class="bdg b-grn">No prazo</span>', 'SEM DATA':'<span class="bdg b-dk">Sem data</span>', FINALIZADA:'<span class="bdg b-grn" style="opacity:.75">Finalizada</span>'})[e] || '<span class="bdg b-dk">Sem SLA</span>';
+  document.getElementById('tb-sit').innerHTML = data.slice(0,300).map(r => `<tr class="clickable" onclick="openDetailIdx(${regDetail(r)})">
+    <td><span class="bdg b-dk" style="font-size:10px">${esc(r.sit)}</span></td><td class="td-nome">${esc(r.cliente)}</td><td class="td-nf">${esc(r.nf||'—')}</td>
+    <td><span class="bdg b-acc">${esc(r.uf||'—')}</span></td><td>${r.dias==null?'—':r.dias+' d'}</td><td>${r.sla?r.sla+' d':'—'}</td>
+    <td>${r.atraso?'<b style="color:var(--red)">+'+r.atraso+' d</b>':'—'}</td><td>${bdg(r.estado)}</td><td style="font-size:11px;color:var(--tx3)">${esc(r.usuario||'—')}</td></tr>`).join('')
+    + (data.length>300 ? `<tr><td colspan="9" style="color:var(--tx3);padding:10px">Mostrando 300 de ${data.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '');
+  document.querySelectorAll('[data-sit-st]').forEach(c => c.classList.toggle('on', c.getAttribute('data-sit-st')===SIT_ESTADO));
+  const pill = document.getElementById('sit-pill'), g = SIT_FILTRO && SIT_LINHAS.find(x=>x.key===SIT_FILTRO);
+  pill.style.display = g ? '' : 'none'; if (g) pill.textContent = g.nome + ' ✕';
+}
+function sitSetEstado(e){ SIT_ESTADO = e; if (!document.getElementById('panel-sit').classList.contains('on')) ir('sit'); else renderSitCasos(); }
+function sitSetFiltro(k){ SIT_FILTRO = (!k || SIT_FILTRO===k) ? null : k; renderSit(); }
+let _sitSave;
+function sitPersist(){
+  try { localStorage.setItem('sit_cfg', JSON.stringify(SIT_CFG)); } catch(e){}
+  clearTimeout(_sitSave);
+  _sitSave = setTimeout(async () => {
+    if (!DB) return;
+    try { await DB.doc('config/sla_situacoes').set({ base:SIT_CFG.base, regras:SIT_CFG.regras, updatedAt:isoNow() }); }
+    catch(err){ console.warn('sla save', err); toast('Não consegui salvar o SLA no banco: ' + (err.code||err.message), {type:'err'}); }
+  }, 500);
+}
+function sitSetSla(key, inp){
+  const nome = inp.getAttribute('data-nome'), n = Math.round(+String(inp.value).replace(',','.'));
+  SIT_CFG.regras[key] = { ...(SIT_CFG.regras[key]||{}), nome, sla: n>0 ? n : 0 };
+  sitPersist(); inp.blur(); renderSit();
+  toast(n>0 ? `SLA de "${nome}": ${n} dias` : `SLA de "${nome}" removido`, {type:'ok', ms:2500});
+}
+function sitSetClasse(key, sel){
+  const nome = sel.getAttribute('data-nome');
+  SIT_CFG.regras[key] = { ...(SIT_CFG.regras[key]||{ sla:0 }), nome, classe: sel.value };
+  sitPersist(); renderSit(); toast(`"${nome}" agora é ${sel.value}`, {type:'ok', ms:2500});
+}
+function sitSetBase(b){ SIT_CFG.base = b==='solic' ? 'solic' : 'prog'; sitPersist(); renderSit(); }
+function sitExportModelo(){
+  const dados = SIT_LINHAS.map(g => ({ 'Situação': g.nome, 'Classe': sitClasseDe(g.nome), 'SLA (dias)': g.sla || '' }));
+  if (!dados.length){ toast('Importe um arquivo do Innovaro primeiro para listar as situações.', {type:'warn'}); return; }
+  exportCSV(dados, 'modelo_sla_situacoes');
+}
+async function sitImportFile(inp){
+  const f = inp.files[0]; inp.value = ''; if (!f) return;
+  const msg = document.getElementById('sit-msg');
+  try{
+    let rows;
+    if (/\.csv$/i.test(f.name)){
+      const buf = await f.arrayBuffer(); let t;
+      try { t = new TextDecoder('utf-8', {fatal:true}).decode(buf); } catch(e){ t = new TextDecoder('windows-1252').decode(buf); }
+      rows = parseCsvSemicolon(t.replace(/^\uFEFF/,''));
+    } else {
+      const wb = XLSX.read(await f.arrayBuffer(), {type:'array'});
+      rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
+    }
+    if (!rows || rows.length < 2) throw new Error('Planilha vazia.');
+    const h = rows[0].map(x => norm(x).trim());
+    const ci = h.findIndex(x => /situa/.test(x)), cs = h.findIndex(x => /sla|prazo|dias/.test(x)), cc = h.findIndex(x => /classe|status|class/.test(x));
+    if (ci<0 || (cs<0 && cc<0)) throw new Error('Preciso da coluna "Situação" e de "Classe" (Pendente/Finalizada/Desconsiderar) e/ou "SLA (dias)".');
+    let n = 0;
+    rows.slice(1).forEach(r => {
+      const nome = String(r[ci]||'').trim(); if (!nome) return;
+      const k = sitKey(nome), cur = SIT_CFG.regras[k] || { sla:0 }, novo = { ...cur, nome };
+      if (cs>=0){ const sla = Math.round(parseFloat(String(r[cs]||'').replace(',','.'))); novo.sla = sla>0 ? sla : 0; }
+      if (cc>=0){ const c = SIT_CLASSES.find(x => norm(x)===norm(String(r[cc]||'')).trim()); if (c) novo.classe = c; }
+      SIT_CFG.regras[k] = novo; n++;
+    });
+    sitPersist(); renderSit();
+    msg.textContent = n + ' situações atualizadas.'; toast(n + ' SLAs importados de ' + f.name, {type:'ok'});
+  } catch(err){ msg.textContent = err.message; toast('Falha ao importar SLAs: ' + err.message, {type:'err'}); }
+}
+function sitExportCasos(){
+  if (!SIT_VISIVEL.length){ toast('Nada para exportar.', {type:'warn'}); return; }
+  exportCSV(SIT_VISIVEL.map(r => ({ 'Situação':r.sit, 'Cliente':r.cliente||'', 'CPF':r.cpf||'', 'NF':r.nf||'', 'UF':r.uf||'', 'Dias':r.dias==null?'':r.dias, 'SLA':r.sla||'', 'Classe':sitClasseDe(r.sit), 'Atraso (dias)':r.atraso||'', 'Estado':r.estado, 'Responsável':r.usuario||'', 'Descrição':r.descricao||'' })), 'controle_situacoes');
+}
 
 // ================= MUNDO PERDAS =================
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -2219,6 +2437,8 @@ function custoCitado(desc){
   const m = /pre[cç]o de custo[^0-9]{0,25}(\d{1,3}(?:\.\d{3})*,\d{2}|\d+(?:,\d{1,2})?)/i.exec(desc||'');
   return m ? parseMoney(m[1]) : null;
 }
+const MKT_USERS = ['thairiny','joao'];
+function canalOf(u){ const n = norm(u||'').trim(); return MKT_USERS.some(k => n.startsWith(k)) ? 'Marketplace' : 'Relacionamento'; }
 function derivePerda(t){
   const tipoRaw = t.tipo_devolucao || '';
   const tipo = /transportadora/i.test(tipoRaw) ? 'transportadora' : 'cliente';
@@ -2228,10 +2448,11 @@ function derivePerda(t){
     data:d, ano: d ? d.getFullYear() : null, mes: d ? d.getMonth()+1 : null,
     mesKey: d ? d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') : null,
     motivoAuto, motivo: t.motivo_manual || motivoAuto, manual: !!t.motivo_manual,
-    carrier: carrierOf(t), ...pwValores(t), custo: custoCitado(t.descricao) };
+    carrier: carrierOf(t), canal: canalOf(t.usuario), ...pwValores(t), custo: custoCitado(t.descricao) };
 }
 let PERDAS = [];
-const PF = { ano:null, mes:'all', motivo:null, carrier:null, uf:null, metric:'qtd' };
+const PF = { ano:null, mes:'all', motivo:null, carrier:null, uf:null, canal:null, metric:'qtd' };
+const canalOk = p => !PF.canal || p.canal===PF.canal;
 const pcharts = {};
 const brl = v => 'R$ ' + (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const mesLabel = k => { if(!k) return '—'; const [y,m]=k.split('-'); return MESES[+m-1]+'/'+y; };
@@ -2248,7 +2469,8 @@ function pwBase(scope, ignore){
     (ignore.includes('mes') || PF.mes==='all' || p.mes===PF.mes) &&
     (ignore.includes('motivo') || !PF.motivo || p.motivo===PF.motivo) &&
     (ignore.includes('carrier') || !PF.carrier || p.carrier===PF.carrier) &&
-    (ignore.includes('uf') || !PF.uf || p.uf===PF.uf));
+    (ignore.includes('uf') || !PF.uf || p.uf===PF.uf) &&
+    (ignore.includes('canal') || canalOk(p)));
 }
 function pwMonthsRange(scope){
   const ano = pwAnoEfetivo();
@@ -2269,7 +2491,7 @@ function pwSet(k, v){
   else PF[k] = (PF[k]===v ? null : v);
   renderPerdasActive();
 }
-function pwClear(){ PF.mes='all'; PF.motivo=null; PF.carrier=null; PF.uf=null; renderPerdasActive(); }
+function pwClear(){ PF.mes='all'; PF.motivo=null; PF.carrier=null; PF.uf=null; PF.canal=null; renderPerdasActive(); }
 
 function pwDelta(cur, prev){
   if (prev==null) return '';
@@ -2342,8 +2564,9 @@ function renderPerdas(scope){
   const root = document.getElementById('pw-'+scope); if (!root) return;
   const ano = pwAnoEfetivo(), anos = pwAnos();
   const items = pwBase(scope);
+  const canalBase = pwBase(scope,['canal']);
   const pk = prevMesKey();
-  const prevItems = pk ? PERDAS.filter(p => (scope==='all'||p.ptipo===scope) && p.ano===pk.ano && p.mes===pk.mes && (!PF.motivo||p.motivo===PF.motivo) && (!PF.carrier||p.carrier===PF.carrier) && (!PF.uf||p.uf===PF.uf)) : null;
+  const prevItems = pk ? PERDAS.filter(p => (scope==='all'||p.ptipo===scope) && p.ano===pk.ano && p.mes===pk.mes && (!PF.motivo||p.motivo===PF.motivo) && (!PF.carrier||p.carrier===PF.carrier) && (!PF.uf||p.uf===PF.uf) && canalOk(p)) : null;
   const periodo = (ano==='all' ? 'Todos os períodos' : (PF.mes==='all' ? 'Ano '+ano : MESES[PF.mes-1]+'/'+ano));
   const cli = items.filter(p=>p.ptipo==='cliente'), trp = items.filter(p=>p.ptipo==='transportadora');
   const reenv = cli.filter(p=>p.reenvio).length;
@@ -2371,10 +2594,10 @@ function renderPerdas(scope){
 
   const baseScope = PERDAS.filter(p=>(scope==='all'||p.ptipo===scope) && (ano==='all'||p.ano===ano));
   const monthChips = Array.from({length:12},(_,i)=>{
-    const n = baseScope.filter(p=>p.mes===i+1 && (!PF.motivo||p.motivo===PF.motivo) && (!PF.carrier||p.carrier===PF.carrier) && (!PF.uf||p.uf===PF.uf)).length;
+    const n = baseScope.filter(p=>p.mes===i+1 && (!PF.motivo||p.motivo===PF.motivo) && (!PF.carrier||p.carrier===PF.carrier) && (!PF.uf||p.uf===PF.uf) && canalOk(p)).length;
     return `<button class="pw-m${PF.mes===i+1?' on':''}${n?'':' zero'}" onclick="pwSet('mes',${i+1})" type="button">${MESES[i]}<small>${n}</small></button>`;
   }).join('');
-  const pills = [PF.motivo&&['motivo','Motivo: '+PF.motivo], PF.carrier&&['carrier','Transp.: '+shortCarr(PF.carrier)], PF.uf&&['uf','UF: '+PF.uf]].filter(Boolean)
+  const pills = [PF.motivo&&['motivo','Motivo: '+PF.motivo], PF.carrier&&['carrier','Transp.: '+shortCarr(PF.carrier)], PF.uf&&['uf','UF: '+PF.uf], PF.canal&&['canal','Canal: '+PF.canal]].filter(Boolean)
     .map(([k,t])=>`<span class="pw-pill" onclick="pwSet('${k}',PF.${k})" title="Remover filtro">${esc(t)} ✕</span>`).join('');
 
   const motivos = groupSum(pwBase(scope,['motivo']), p=>p.motivo, PW), maxM = motivos.length?(motivos[0][1]||1):1, totM = pwBase(scope,['motivo']).reduce((s,p)=>s+PW(p),0)||1;
@@ -2387,7 +2610,7 @@ function renderPerdas(scope){
   }).join('') : '<div class="pw-empty">Sem dados.</div>';
 
   // heatmap motivo x mes
-  const range = pwMonthsRange(scope), hmBase = PERDAS.filter(p=>(scope==='all'||p.ptipo===scope) && (!PF.carrier||p.carrier===PF.carrier) && (!PF.uf||p.uf===PF.uf));
+  const range = pwMonthsRange(scope), hmBase = PERDAS.filter(p=>(scope==='all'||p.ptipo===scope) && (!PF.carrier||p.carrier===PF.carrier) && (!PF.uf||p.uf===PF.uf) && canalOk(p));
   const hmMot = MOTIVOS.filter(m=>hmBase.some(p=>p.motivo===m && range.includes(p.mesKey)));
   let hmMax = 1; const hmCell = {};
   hmBase.forEach(p=>{ if(range.includes(p.mesKey)){ const k=p.motivo+'|'+p.mesKey; hmCell[k]=(hmCell[k]||0)+1; hmMax=Math.max(hmMax,hmCell[k]); } });
@@ -2431,6 +2654,7 @@ function renderPerdas(scope){
     <div class="pw-filters">
       <select class="pw-sel" onchange="pwSet('ano',this.value)" aria-label="Ano"><option value="all"${ano==='all'?' selected':''}>Todos os anos</option>${anos.map(a=>`<option value="${a}"${a===ano?' selected':''}>${a}</option>`).join('')}</select>
       <div class="pw-seg no-print" role="group" aria-label="Métrica"><button type="button" class="${PF.metric!=='valor'?'on':''}" onclick="pwSet('metric','qtd')">Quantidade</button><button type="button" class="${PF.metric==='valor'?'on':''}" onclick="pwSet('metric','valor')">Valor R$</button></div>
+      <div class="pw-seg no-print" role="group" aria-label="Canal"><button type="button" class="${!PF.canal?'on':''}" onclick="pwSet('canal',PF.canal)">Todos os canais <small>${canalBase.length}</small></button><button type="button" class="${PF.canal==='Marketplace'?'on':''}" onclick="pwSet('canal','Marketplace')" title="Usuários: Thairiny e João">Marketplace <small>${canalBase.filter(p=>p.canal==='Marketplace').length}</small></button><button type="button" class="${PF.canal==='Relacionamento'?'on':''}" onclick="pwSet('canal','Relacionamento')" title="Demais usuários">Relacionamento <small>${canalBase.filter(p=>p.canal==='Relacionamento').length}</small></button></div>
       <div class="pw-months">${monthChips}</div>
       <button class="chip no-print" type="button" onclick="pwClear()">Limpar filtros</button>
       ${pills?`<div class="pw-pills">${pills}</div>`:''}
@@ -2460,7 +2684,7 @@ function renderPerdas(scope){
   const css = getComputedStyle(document.documentElement);
   Chart.defaults.color = css.getPropertyValue('--tx3').trim() || '#7A8FA0';
   Chart.defaults.font.family = '-apple-system,"Segoe UI",sans-serif';
-  const evKeys = range, evBase = PERDAS.filter(p=>(scope==='all'||p.ptipo===scope) && (!PF.motivo||p.motivo===PF.motivo) && (!PF.carrier||p.carrier===PF.carrier) && (!PF.uf||p.uf===PF.uf));
+  const evKeys = range, evBase = PERDAS.filter(p=>(scope==='all'||p.ptipo===scope) && (!PF.motivo||p.motivo===PF.motivo) && (!PF.carrier||p.carrier===PF.carrier) && (!PF.uf||p.uf===PF.uf) && canalOk(p));
   const cnt = (k,f)=>evBase.filter(p=>p.mesKey===k && f(p)).reduce((s,p)=>s+PW(p),0);
   const series = scope==='all' ? [['Cliente','#7C3AED',p=>p.ptipo==='cliente'],['Transportadora','#F43F5E',p=>p.ptipo==='transportadora']]
     : scope==='cliente' ? [['Com reenvio','#06B6D4',p=>p.reenvio],['Sem reenvio','#7C3AED',p=>!p.reenvio]] : [['Transportadora','#F43F5E',()=>true]];
@@ -2515,6 +2739,11 @@ function renderPerdasBadges(){
   const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
   set('bdg-perdas', f('all')); set('bdg-p-cli', f('cliente')); set('bdg-p-trp', f('transportadora'));
   set('k-prd', f('all')); set('k-prd-l', 'Perdas ' + (ano==='all'?'(total)':ano));
+  const per = PERDAS.filter(p=>ano==='all'||p.ano===ano);
+  const vEst = per.reduce((s,p)=>s+(p.valorEst||0),0), vReg = per.reduce((s,p)=>s+(p.valorReg||0),0);
+  set('k-vest', brl(vEst)); set('k-vest-s', `${ano==='all'?'Todos os anos':ano} · títulos ${brl(vReg)}`);
+  const mk = per.filter(p=>p.canal==='Marketplace').reduce((s,p)=>s+(p.valorEst||0),0);
+  const el = document.getElementById('k-vest-s'); if (el) el.title = `Marketplace ${brl(mk)} · Relacionamento ${brl(vEst-mk)}`;
 }
 
 // ---------- relatorio / resumo / exportacao ----------
@@ -2533,7 +2762,7 @@ async function pwCopy(scope){
 }
 function pwExport(scope){
   const items = pwBase(scope), hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
-  exportCSV(items.map(p=>({ 'Data':p.data?p.data.toLocaleDateString('pt-BR'):'', 'Tipo':p.ptipo==='cliente'?'Perdas Cliente':'Perdas Transportadora', 'Reenvio':p.reenvio?'Sim':'Não', 'Motivo':p.motivo, 'Cliente':p.cliente||'', 'CPF':p.cpf||'', 'NF':p.nf||'', 'Transportadora':p.carrier, 'UF':p.uf||'', 'Cidade':p.cidade||'', 'Valor título':p.valorReg||'', 'Valor estimado':p.valorEst||'', 'Origem do valor':p.valorOrigem||'', 'Custo citado':p.custo||'', 'Responsável':p.usuario||'', 'Descrição':p.descricao||'' })), `Perdas_${scope}_${hoje}.csv`);
+  exportCSV(items.map(p=>({ 'Data':p.data?p.data.toLocaleDateString('pt-BR'):'', 'Canal':p.canal, 'Usuário':p.usuario||'', 'Tipo':p.ptipo==='cliente'?'Perdas Cliente':'Perdas Transportadora', 'Reenvio':p.reenvio?'Sim':'Não', 'Motivo':p.motivo, 'Cliente':p.cliente||'', 'CPF':p.cpf||'', 'NF':p.nf||'', 'Transportadora':p.carrier, 'UF':p.uf||'', 'Cidade':p.cidade||'', 'Valor título':p.valorReg||'', 'Valor estimado':p.valorEst||'', 'Origem do valor':p.valorOrigem||'', 'Custo citado':p.custo||'', 'Responsável':p.usuario||'', 'Descrição':p.descricao||'' })), `Perdas_${scope}_${hoje}.csv`);
 }
 
 // ---------- detalhe da perda + reclassificacao manual ----------
@@ -2558,7 +2787,7 @@ function openPerdaDetail(item){
       <dt>Valor estimado usado no painel</dt><dd class="mono"><b>${item.valorEst?brl(item.valorEst):'—'}</b> ${item.valorOrigem?'<span style="color:var(--tx3);font-size:11px">('+({titulo:'do título',nota:'da nota de saída',unitario:'do valor unitário'}[item.valorOrigem])+')</span>':''}</dd>
       <dt>Custo citado na descrição</dt><dd class="mono">${item.custo?brl(item.custo):'—'}</dd>
       <dt>Status</dt><dd>${esc(item.status)||'—'}</dd>
-      <dt>Responsável</dt><dd>${esc(item.usuario)||'—'}</dd>
+      <dt>Responsável</dt><dd>${esc(item.usuario)||'—'}${item.canal?` <span class="bdg b-dk" style="margin-left:4px">${esc(item.canal)}</span>`:''}</dd>
       <dt>Descrição</dt><dd>${esc(item.descricao)||'—'}</dd>
     </dl>`;
   document.getElementById('dpanel').classList.add('on');

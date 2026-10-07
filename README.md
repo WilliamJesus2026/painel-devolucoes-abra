@@ -44,3 +44,12 @@ Menu **Perdas** (Panorama · Perdas Cliente · Perdas Transportadora). Alimentad
 - Valor registrado = `VALOR_TITULO`; transportadora = `TIPO_SAIDA_NOVA_SAIDA` (fallback `TIPOSAIDA`, `NUMERO`).
 - Perdas não saem do controle quando somem de um arquivo novo (são histórico mensal).
 - "Gerar relatório" abre a impressão (PDF) só da aba atual; "Copiar resumo" gera texto para e-mail.
+
+## Perdas por canal e valor estimado
+
+- Canal **Marketplace** = usuários `Thairiny` e `João` (coluna USUARIO); **Relacionamento** = todos os demais. Seletor no topo da aba Perdas.
+- O dashboard mostra o **Valor total estimado** das perdas (título → nota de saída → unitário × qtd).
+
+## Controle de Situações
+
+Menu **Controle → Controle de Situações**. Cada situação do Innovaro tem uma classe — **Pendente** (conta SLA), **Finalizada** (não gera atraso) ou **Desconsiderar** (fora do controle, ex.: Cancelada 1–4) — e um SLA em dias, editáveis na tabela ou por planilha (`Situação; Classe; SLA (dias)`). As regras ficam no Firestore (`config/sla_situacoes`). Protocolo de Coleta começa com 20 dias.

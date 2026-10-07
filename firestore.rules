@@ -14,5 +14,8 @@ service cloud.firestore {
     match /imports/{importId} {
       allow read, write: if isAbraUser();
     }
+    match /config/{configId} {
+      allow read, write: if isAbraUser();
+    }
   }
 }
