@@ -2273,7 +2273,9 @@ async function _initDb(interactive){
 // ================= INDICADORES POR TRANSPORTADORA =================
 const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente'];
 const IND_COR = { 'No prazo':'#16A34A', 'Relacionamento':'#2563EB', 'Transporte':'#D97706', 'Cliente':'#7C3AED', 'A classificar':'#DC2626' };
-const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'', q:'' };
+const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'' };
+const IND_CORTE = 7;   // a partir de julho o detalhe mes a mes; antes disso os meses entram como um bloco ja finalizado
+const indAntigos = () => Array.from({length:IND_CORTE-1},(_,i)=>i+1);
 let IND_ALL = [], IND_ABERTOS = [];
 function indNome(n){
   n = String(n||'').trim(); if (!n) return 'Sem transportadora';
@@ -2306,12 +2308,12 @@ const fmt1 = n => n==null ? '—' : n.toLocaleString('pt-BR',{minimumFractionDig
 function indSet(k,v){
   const tg = (set,x) => set.has(x) ? set.delete(x) : set.add(x);
   if (k==='ano'){ IND.ano = +v; IND.meses.clear(); }
-  else if (k==='mes') tg(IND.meses, +v);
+  else if (k==='mes'){ if (+v===0){ const a = indAntigos(), todos = a.every(m=>IND.meses.has(m)); a.forEach(m => todos ? IND.meses.delete(m) : IND.meses.add(m)); } else tg(IND.meses, +v); }
   else if (k==='carr') tg(IND.carrs, v);
   else if (k==='motivo'){ tg(IND.motivos, v); if (IND.motivos.size) IND.status = 'aberto'; }
   else if (k==='status'){ IND.status = v; if (v==='fin') IND.motivos.clear(); }
   else if (k==='q') IND.q = norm(v).trim();
-  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status=''; IND.q=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
+  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
   renderInd();
 }
 function indSetMotivo(id, v){
@@ -2332,24 +2334,26 @@ function renderInd(){
       (ign.includes('status') || !IND.status || (IND.status==='fin') === x.fin) &&
       (ign.includes('motivo') || !IND.motivos.size || (!x.fin && IND.motivos.has(x.motivo))) &&
       (!IND.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(IND.q)); };
-  const base = doAno.filter(x=>f(x));
+  const base = doAno.filter(x=>f(x,['status','motivo']));
   const A = indAgg(base);
   document.getElementById('bdg-ind').textContent = IND_ALL.filter(x=>!x.fin).length;
 
   // ---- barra de filtros ----
   const chip = (on, onclick, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${onclick}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
   const mesCont = m => doAno.filter(x=>x.mes===m && f(x,['mes'])).length;
-  const meses12 = Array.from({length:12},(_,i)=>i+1).filter(m => doAno.some(x=>x.mes===m));
+  const meses12 = Array.from({length:12},(_,i)=>i+1).filter(m => m>=IND_CORTE && doAno.some(x=>x.mes===m));
+  const antigos = indAntigos().filter(m => doAno.some(x=>x.mes===m));
+  const antChip = antigos.length ? chip(antigos.every(m=>IND.meses.has(m)), "indSet('mes',0)", `${MESES[antigos[0]-1]}–${MESES[antigos[antigos.length-1]-1]} · finalizados`, doAno.filter(x=>x.mes<IND_CORTE && f(x,['mes'])).length) : '';
   const carrs = [...new Set(doAno.map(x=>x.carr))].map(c=>({c, n:doAno.filter(x=>x.carr===c && f(x,['carr'])).length})).sort((a,b)=>b.n-a.n);
   const nFin = doAno.filter(x=>x.fin && f(x,['status','motivo'])).length, nAb = doAno.filter(x=>!x.fin && f(x,['status','motivo'])).length;
   const motCont = m => doAno.filter(x=>!x.fin && x.motivo===m && f(x,['status','motivo'])).length;
-  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status || IND.q;
+  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q;
   document.getElementById('ind-fbody').innerHTML =
-    `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m))).join('')}</div></div>
+    `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${antChip}${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m))).join('')}</div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>
      <div class="ind-fr"><b>Situação</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
      ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Motivo da pendência</b><div>${['No prazo','Relacionamento','Transporte','Cliente','A classificar'].map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${m}`, m, motCont(m))).join('')}</div></div>`}`;
-  document.getElementById('ind-fres').innerHTML = `Mostrando <b>${base.length}</b> de ${doAno.length} tarefas de ${IND.ano}` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio aparece conforme as finalizações forem registradas nas próximas importações</i>');
+  document.getElementById('ind-fres').innerHTML = `${IND.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${IND.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio aparece conforme as finalizações forem registradas nas próximas importações</i>');
   document.getElementById('ind-limpar').style.visibility = temFiltro ? 'visible' : 'hidden';
 
   // ---- KPIs ----
@@ -2363,21 +2367,25 @@ function renderInd(){
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
   document.getElementById('ind-sub').textContent = `Total, % de atendimento, SLA médio e tarefas em aberto — ${isFinite(mi)?MESES[mi-1].toLowerCase()+' a '+MESES[ma-1].toLowerCase()+'/'+IND.ano:'sem dados'}. Clique num card para filtrar.`;
-  const por = new Map(); doAno.filter(x=>f(x,['carr'])).forEach(x => { if(!por.has(x.carr)) por.set(x.carr,[]); por.get(x.carr).push(x); });
+  const por = new Map(); doAno.filter(x=>f(x,['carr','status','motivo'])).forEach(x => { if(!por.has(x.carr)) por.set(x.carr,[]); por.get(x.carr).push(x); });
   document.getElementById('ind-cars').innerHTML = [...por.entries()].map(([c,arr])=>({c, a:indAgg(arr)})).sort((x,y)=>y.a.total-x.a.total).map(({c,a}) => {
     const cl = a.taxa>=90 ? '' : a.taxa>=75 ? ' am' : ' rd', tcl = a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
     return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}</h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div></div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
 
   // ---- grafico mensal (ignora mes/situacao/motivo para mostrar a serie inteira; meses filtrados ficam destacados) ----
   const doCar = doAno.filter(x=>f(x,['mes','status','motivo']));
-  const meses = Array.from({length:12},(_,i)=>i+1).filter(m => doAno.some(x=>x.mes===m));
-  const vol = meses.map(m=>doCar.filter(x=>x.mes===m).length), pct = meses.map(m=>{ const a=doCar.filter(x=>x.mes===m); return a.length ? Math.round(a.filter(x=>x.fin).length/a.length*100) : null; });
+  const temAnt = doAno.some(x=>x.mes<IND_CORTE);
+  const meses = (temAnt ? [0] : []).concat(Array.from({length:12},(_,i)=>i+1).filter(m => m>=IND_CORTE && doAno.some(x=>x.mes===m)));
+  const noGrupo = m => x => m===0 ? x.mes<IND_CORTE : x.mes===m;
+  const vol = meses.map(m=>doCar.filter(noGrupo(m)).length), pct = meses.map(m=>{ const a=doCar.filter(noGrupo(m)); return a.length ? Math.round(a.filter(x=>x.fin).length/a.length*100) : null; });
+  const mesLbl = m => m===0 ? MESES[0]+'–'+MESES[IND_CORTE-2]+' (finalizados)' : MESES[m-1];
+  const mesOn = m => m===0 ? indAntigos().every(k=>IND.meses.has(k)) : IND.meses.has(m);
   const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
   const vis = document.getElementById('panel-ind').classList.contains('on') && window.Chart;
   if (vis){
     if (charts.ind) charts.ind.destroy();
-    charts.ind = new Chart(document.getElementById('ch-ind'), { data:{ labels:meses.map(m=>MESES[m-1]), datasets:[
-      { type:'bar', label:'Tarefas criadas', data:vol, backgroundColor:meses.map(m=>!IND.meses.size||IND.meses.has(m)?'#2563EB':'#1E3A5F55'), borderRadius:6, yAxisID:'y', order:2 },
+    charts.ind = new Chart(document.getElementById('ch-ind'), { data:{ labels:meses.map(mesLbl), datasets:[
+      { type:'bar', label:'Tarefas criadas', data:vol, backgroundColor:meses.map(m=>!IND.meses.size||mesOn(m)?(m===0?'#64748B':'#2563EB'):'#1E3A5F55'), borderRadius:6, yAxisID:'y', order:2 },
       { type:'line', label:'% atendimento', data:pct, borderColor:'#E8704F', backgroundColor:'#E8704F', tension:.25, pointRadius:4, yAxisID:'y1', order:1 } ] },
       options:{ responsive:true, maintainAspectRatio:false, animation:{duration:450},
         onClick:(e,els)=>{ if (els.length) indSet('mes', meses[els[0].index]); },
