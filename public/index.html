@@ -454,6 +454,14 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .ind-ch small{opacity:.65;margin-left:5px;font-weight:700}.ind-ch.zero{opacity:.4}
 .ind-f-res{font-size:12px;color:var(--tx3);margin-top:8px}.ind-f-res b{color:var(--tx)}
 @media(max-width:700px){.ind-fr{flex-direction:column}.ind-fr>b{padding-top:0}}
+.hero-chips .hchip{display:none!important}
+.ind-ch.on,.ind-f .minitab.on{background:linear-gradient(135deg,#7C3AED,#DB2777);border-color:transparent;color:#fff}
+.ind-f .minitabs{border:none;display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0}
+.ind-f .minitab{border:1px solid var(--bd);border-radius:999px;padding:5px 12px;margin:0;background:none;font-size:12px}
+.ind-f .minitab.on .mt-n{color:#fff}
+.ind-f .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.ind-f .filterbar{margin:0;padding:0;background:none;border:none;box-shadow:none}
+.pw-stat[onclick]:hover{box-shadow:0 10px 24px -10px rgba(0,0,0,.5)}
 .ind-h{font-size:17px;font-weight:700;margin:6px 0 4px}.ind-sub{font-size:12px;color:var(--tx3);margin-bottom:12px}
 .ind-cars{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:18px}
 .ind-c{background:var(--srf);border:1px solid var(--bd);border-top:4px solid #16A34A;border-radius:14px;padding:14px 16px;cursor:pointer;box-shadow:var(--sh);transition:.15s}
@@ -536,15 +544,9 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     </button>
 
     <div class="sb-grp">Controle</div>
-    <button class="nav" onclick="ir('sit')" id="nav-sit">
-      <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><polyline points="12 7 12 12 15.5 14" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Controle de Situações
-      <span class="bdg" id="bdg-sit">0</span>
-    </button>
-
     <button class="nav" onclick="ir('ind')" id="nav-ind">
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="9" stroke-width="1.5"/><rect x="10" y="7" width="4" height="14" stroke-width="1.5"/><rect x="17" y="3" width="4" height="18" stroke-width="1.5"/></svg>
-      Indicadores por transportadora
+      Controle de Situações
       <span class="bdg" id="bdg-ind">0</span>
     </button>
 
@@ -632,7 +634,6 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="kpi k-pur kpi-click" onclick="ir('rea')" role="button" tabindex="0"><div class="kpi-v" id="k-rea">—</div><div class="kpi-l">Coleta realizada</div><div class="kpi-s">Aguardando chegada no CD</div></div>
         <div class="kpi k-rose kpi-click" onclick="ir('perdas')" role="button" tabindex="0"><div class="kpi-v" id="k-prd">—</div><div class="kpi-l" id="k-prd-l">Perdas</div><div class="kpi-s">Abrir análise de perdas</div></div>
         <div class="kpi k-pur kpi-click" onclick="ir('perdas');pwSet('metric','valor')" role="button" tabindex="0"><div class="kpi-v" id="k-vest" style="font-size:22px">—</div><div class="kpi-l">Valor total estimado</div><div class="kpi-s" id="k-vest-s">Perdas em R$</div></div>
-        <div class="kpi k-red kpi-click" onclick="ir('sit')" role="button" tabindex="0"><div class="kpi-v" id="k-sit">—</div><div class="kpi-l">Atrasos por situação</div><div class="kpi-s">SLA do Controle de Situações</div></div>
         <div class="kpi k-acc kpi-click" onclick="ir('trat')" role="button" tabindex="0"><div class="kpi-v" id="k-trat">—</div><div class="kpi-l">Tratativas ativas</div><div class="kpi-s">Devoluções transportadora</div></div>
       </div>
       <div id="alertas-dash" style="margin-bottom:14px"></div>
@@ -659,6 +660,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
     <!-- ATRASADAS -->
     <div class="panel" id="panel-at">
+      <div class="pworld" data-ph="at"></div>
       <div id="alert-at-box"></div>
       <div class="filterbar">
         <select class="fsel" id="fat-uf" onchange="renderCol('at')"><option value="">Todas as UFs</option></select>
@@ -674,6 +676,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
     <!-- EM RISCO -->
     <div class="panel" id="panel-ri">
+      <div class="pworld" data-ph="ri"></div>
       <div class="filterbar">
         <select class="fsel" id="fri-uf" onchange="renderCol('ri')"><option value="">Todas as UFs</option></select>
         <input class="fsearch" id="fri-q" placeholder="Buscar..." oninput="renderCol('ri')">
@@ -687,6 +690,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
     <!-- NO PRAZO -->
     <div class="panel" id="panel-em">
+      <div class="pworld" data-ph="em"></div>
       <div class="filterbar">
         <input class="fsearch" id="fem-q" placeholder="Buscar..." oninput="renderCol('em')">
         <span class="fcnt" id="cnt-em"></span><button class="btn-exp" onclick="exportColetas('em')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
@@ -699,6 +703,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
     <!-- COLETA REALIZADA (aguardando CD) -->
     <div class="panel" id="panel-rea">
+      <div class="pworld" data-ph="rea"></div>
       <div class="dica"><strong>Coleta realizada:</strong> a transportadora já retirou o produto na casa do cliente. Estes casos saíram de Atrasados/Em risco/No prazo e ficam aqui até a chegada no CD (romaneio de entrada) — aí vão para o Histórico. A coluna "Dias" mostra há quanto tempo o protocolo foi aberto, para você cobrar o retorno ao CD se demorar.</div>
       <div class="filterbar">
         <select class="fsel" id="frea-uf" onchange="renderCol('rea')"><option value="">Todas as UFs</option></select>
@@ -714,6 +719,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
     <!-- TODOS PROTOCOLO -->
     <div class="panel" id="panel-col-all">
+      <div class="pworld" data-ph="col-all"></div>
       <div class="filterbar">
         <select class="fsel" id="fall-st" onchange="renderCol('all')">
           <option value="">Todos os status</option>
@@ -740,42 +746,9 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     </div>
 
     <!-- TRATATIVAS -->
-    <div class="panel" id="panel-sit">
-      <div class="dica"><strong>Controle de Situações:</strong> cada situação do Innovaro tem seu próprio prazo (SLA, em dias). O caso conta a partir da data de programação (ou da solicitação, se não houver). <b>Atrasado</b> = dias acima do SLA · <b>Em risco</b> = nos últimos 30% do prazo. Cada situação tem uma <b>classe</b>: <b>Pendente</b> conta prazo · <b>Finalizada</b> não gera atraso · <b>Desconsiderar</b> sai do controle (ex.: Cancelada 1–4). Edite classe e dias direto na tabela, ou importe a planilha. As regras ficam salvas para toda a equipe.</div>
-      <div class="kpi-row" id="sit-kpis"></div>
-      <div class="filters" style="margin-bottom:10px">
-        <select class="fsel" id="sit-base" onchange="sitSetBase(this.value)" title="Data usada para contar os dias"><option value="prog">Contar desde a programação</option><option value="solic">Contar desde a solicitação</option></select>
-        <button class="btn-exp" type="button" onclick="sitExportModelo()">Baixar modelo de SLA (.csv)</button>
-        <button class="btn-exp" type="button" onclick="document.getElementById('sit-file').click()">Importar SLAs da planilha</button>
-        <input type="file" id="sit-file" accept=".csv,.xlsx,.xls" style="display:none" onchange="sitImportFile(this)">
-        <span class="fcnt" id="sit-msg"></span>
-      </div>
-      <div class="g2">
-        <div class="card"><div class="card-title">Situação × prazo</div><div class="card-sub">Top situações por volume · clique numa barra para filtrar</div><div style="height:300px"><canvas id="ch-sit"></canvas></div></div>
-        <div class="tbl-wrap"><div class="tbl-scroll" style="max-height:340px">
-          <table id="tb-sit-reg"><thead><tr><th>Situação</th><th>Casos</th><th>Classe</th><th>SLA (dias)</th><th>No prazo</th><th>Risco</th><th>Atrasados</th><th>Maior atraso</th></tr></thead><tbody id="tb-sit-reg-b"></tbody></table>
-        </div></div>
-      </div>
-      <div class="filters" style="margin:14px 0 8px">
-        <span class="chip ch-all on" data-sit-st="" onclick="sitSetEstado('')">Todos</span>
-        <span class="chip" data-sit-st="ATRASADO" onclick="sitSetEstado('ATRASADO')">Atrasados</span>
-        <span class="chip" data-sit-st="RISCO" onclick="sitSetEstado('RISCO')">Em risco</span>
-        <span class="chip" data-sit-st="NO PRAZO" onclick="sitSetEstado('NO PRAZO')">No prazo</span>
-        <span class="chip" data-sit-st="SEM SLA" onclick="sitSetEstado('SEM SLA')">Sem SLA</span>
-        <span class="chip" data-sit-st="FINALIZADA" onclick="sitSetEstado('FINALIZADA')">Finalizadas</span>
-        <input class="fsearch" id="sit-q" placeholder="Buscar cliente, NF ou CPF..." oninput="renderSitCasos()">
-        <span class="chip" id="sit-pill" style="display:none" onclick="sitSetFiltro(null)"></span>
-        <span class="fcnt" id="cnt-sit"></span><button class="btn-exp" onclick="sitExportCasos()">Exportar CSV</button>
-      </div>
-      <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>UF</th><th>Dias</th><th>SLA</th><th>Atraso</th><th>Estado</th><th>Responsável</th></tr></thead>
-        <tbody id="tb-sit"></tbody></table>
-      </div></div>
-    </div>
-
     <div class="panel" id="panel-ind">
+      <div class="pworld" id="ph-ind"></div>
       <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
-      <div class="ind-kpis" id="ind-kpis"></div>
       <div class="ind-h">Indicadores por transportadora</div><div class="ind-sub" id="ind-sub"></div>
       <div class="ind-cars" id="ind-cars"></div>
       <div class="card" style="margin-bottom:14px"><div class="card-title">Volume de tarefas e % de atendimento por mês de criação</div><div class="card-sub">Barras = tarefas criadas · linha = % já atendidas · clique numa barra para filtrar o mês</div><div style="height:320px"><canvas id="ch-ind"></canvas></div></div>
@@ -789,8 +762,9 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     </div>
 
     <div class="panel" id="panel-trat">
-      <div class="dica"><strong>Sobre as tratativas:</strong> Os casos abaixo são acompanhados por tipo — Barrar, Transportadora a pagar, Recolhimento, Não retornou, etc. (as Perdas agora têm aba própria, no menu Perdas). Não há prazo específico nesta seção. Use os filtros para localizar casos e cobrar ações junto às transportadoras.</div>
-      <div class="minitabs" id="minitabs-trat">
+      <div class="pworld" id="ph-trat"></div>
+      <div class="ind-f">
+        <div class="ind-fr"><b>Grupo</b><div style="flex:1"><div class="minitabs" id="minitabs-trat">
         <button class="minitab on" onclick="setGrupoTab('')">Todos <span class="mt-n" id="mtn-todos"></span></button>
         <button class="minitab" onclick="setGrupoTab('recolhimento')">Recolhimento <span class="mt-n" id="mtn-recolhimento"></span></button>
         <button class="minitab" onclick="setGrupoTab('barrar')">Barrar <span class="mt-n" id="mtn-barrar"></span></button>
@@ -798,8 +772,8 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <button class="minitab" onclick="setGrupoTab('naoretornou')">Não retornou <span class="mt-n" id="mtn-naoretornou"></span></button>
         <button class="minitab" onclick="setGrupoTab('nova')">Novo / a triar <span class="mt-n" id="mtn-nova"></span></button>
         <button class="minitab" onclick="setGrupoTab('outros')">Outros <span class="mt-n" id="mtn-outros"></span></button>
-      </div>
-      <div class="chips" id="chips-trat">
+      </div></div></div>
+        <div class="ind-fr"><b>Transportadora</b><div style="flex:1"><div class="chips" id="chips-trat">
         <span class="chip ch-all on" onclick="setGrupo('')">Todos</span>
         <span class="chip ch-i9" onclick="setGrupo('I9')">I9 <span id="ct-i9"></span></span>
         <span class="chip ch-fedex" onclick="setGrupo('FEDEX')">Fedex <span id="ct-fedex"></span></span>
@@ -808,12 +782,13 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <span class="chip ch-hello" onclick="setGrupo('HELLO')">Hello <span id="ct-hello"></span></span>
         <span class="chip ch-generoso" onclick="setGrupo('GENEROSO')">Generoso <span id="ct-generoso"></span></span>
         <span class="chip ch-outros" onclick="setGrupo('OUTROS')">Outros <span id="ct-outros"></span></span>
-      </div>
-      <div class="filterbar">
+      </div></div></div>
+        <div class="ind-fr"><b>Filtros</b><div style="flex:1"><div class="filterbar">
         <select class="fsel" id="ftrat-tipo" onchange="renderTrat()"><option value="">Todos os tipos</option></select>
         <select class="fsel" id="ftrat-uf" onchange="renderTrat()"><option value="">Todas as UFs</option></select>
         <input class="fsearch" id="ftrat-q" placeholder="Buscar cliente, CPF ou NF..." oninput="renderTrat()">
         <span class="fcnt" id="cnt-trat"></span><button class="btn-exp" onclick="exportTratativas()"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
+      </div></div></div>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
         <table><thead><tr><th>Grupo</th><th>Cliente</th><th>CPF</th><th>NF</th><th>Tipo</th><th>UF</th><th>Situação</th><th>Responsável</th><th>Descrição</th></tr></thead>
@@ -942,9 +917,12 @@ function statusIgnorado(s){ const t = normStatus(s); return !!t && IGN_STATUS.so
 let OCULTOS = [];
 function parseBR(s){
   if (!s) return null;
-  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);
-  if (!m) return null;
-  return new Date(+m[3], +m[2]-1, +m[1]);
+  if (s instanceof Date) return isNaN(s) ? null : new Date(s.getFullYear(), s.getMonth(), s.getDate());
+  s = String(s).trim();
+  let m = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/.exec(s);
+  if (m){ let y = +m[3]; if (y < 100) y += 2000; return new Date(y, +m[2]-1, +m[1]); }
+  m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  return m ? new Date(+m[1], +m[2]-1, +m[3]) : null;
 }
 function daysBetween(a,b){ return Math.round((b-a)/86400000); }
 const RE_COLETA_STATUS = /realizad|coletad|coleta feita|coleta ok|recolhid|retirad|coleta efetuad/i;
@@ -998,6 +976,7 @@ let COL = [];       // coletas pendentes de coleta (nao realizadas, nao cancelad
 let REA = [];       // coleta realizada na casa do cliente, aguardando chegada no CD
 let HIST = [];       // coletas historico (canceladas ou realizadas)
 let TRAT = [];       // tratativas em aberto
+let TRAT_ALL = [];   // todas as tratativas (pendentes + finalizadas), base dos indicadores
 let TRAT_HIST = [];  // tratativas que sairam do arquivo (concluidas automaticamente)
 let AT = [], RI = [], EM = [], AT_FORA = [];
 const D = { kpis:{}, tags:{}, rank_transp:[], rank_uf:[] };
@@ -1056,7 +1035,9 @@ function rebuildData(){
   // Perdas sao fato historico (indice mensal) e vivem na propria aba: nao saem do controle por sumirem do arquivo.
   PERDAS = allTrat.filter(t => t.grupo==='perdas').map(derivePerda);
   const outrasTrat = allTrat.filter(t => t.grupo!=='perdas');
-  TRAT = outrasTrat.filter(t => !t.concluido_auto);
+  TRAT_ALL = outrasTrat;
+  // painel de tratativas: so o que esta pendente (Finalizada / Desconsiderar saem; seguem nos indicadores)
+  TRAT = outrasTrat.filter(t => !t.concluido_auto && sitClasseDe(t.tipo_devolucao||'')==='Pendente');
   TRAT_HIST = outrasTrat.filter(t => t.concluido_auto);
 
   AT = COL.filter(c=>c.prazo_status==='ATRASADO');
@@ -1117,7 +1098,7 @@ const TITLES = {
   dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Protocolo de Coleta — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
-  sit:'Controle de Situações', ind:'Indicadores por transportadora', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
+  ind:'Controle de Situações', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
 };
 function ir(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
@@ -1128,7 +1109,6 @@ function ir(id){
   if(nav)   nav.classList.add('on');
   document.getElementById('tb-title').textContent = TITLES[id]||id;
   renderPerdasActive();
-  if (id==='sit') renderSit();
   if (id==='ind') renderInd();
   window.scrollTo({top:0});
 }
@@ -1594,8 +1574,9 @@ function renderAll(){
   renderCrit();
   renderPerdasBadges();
   renderPerdasActive();
-  renderSit();
   renderInd();
+  renderProtoHero();
+  renderTratHero();
   renderOcultos();
   renderBanner();
   document.querySelectorAll('.tbl-wrap table').forEach(applySort);
@@ -2270,9 +2251,30 @@ async function _initDb(interactive){
 }
 
 
-// ================= INDICADORES POR TRANSPORTADORA =================
+
+// ================= HERO NO PADRAO PERDAS (reutilizavel) =================
+function pwHero(kick, title, sub, stats){
+  return `<div class="pw-hero"><div class="pw-top"><div><div class="pw-kick">${kick}</div><h2>${title}</h2><div class="pw-sub">${sub}</div></div>
+    <div class="pw-actions no-print"><button class="pw-btn" type="button" onclick="document.getElementById('file-input').click()">⭱ Importar planilha</button></div></div>
+    <div class="pw-stats">${stats.map(([l,v,n,go,sm]) => `<div class="pw-stat"${go?` onclick="${go}" style="cursor:pointer"`:''}><div class="l">${l}</div><div class="v${sm?' sm':''}">${v}</div><div class="n">${n||''}</div></div>`).join('')}</div></div>`;
+}
+const PH_TITLES = { at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD', 'col-all':'Todos os protocolos' };
+function renderProtoHero(){
+  const stats = [['Atrasadas', AT.length, `Prazo > ${SLA} dias`, "ir('at')"], ['Em risco', RI.length, 'Entram em atraso em breve', "ir('ri')"], ['No prazo', EM.length, `Dentro dos ${SLA} dias`, "ir('em')"],
+    ['Aguardando CD', REA.length, 'Coleta feita, falta chegar no CD', "ir('rea')"], ['Total em aberto', COL.length + REA.length, 'Protocolos pendentes', "ir('col-all')"]];
+  document.querySelectorAll('[data-ph]').forEach(el => { el.innerHTML = pwHero('Protocolo de Coleta', PH_TITLES[el.dataset.ph]||'', `Prazo de ${SLA} dias para a coleta · atualiza sozinho a cada importação.`, stats); });
+}
+function renderTratHero(){
+  const el = document.getElementById('ph-trat'); if (!el) return;
+  const c = g => TRAT.filter(t => (t.grupo||'outros')===g).length;
+  el.innerHTML = pwHero('Tratativas Transportadora', 'Tratativas por grupo', 'Casos acompanhados por tipo, sem prazo fixo · clique num grupo para filtrar.',
+    [['Em aberto', TRAT.length, 'todas as tratativas', "setGrupoTab('')"], ['Recolhimento', c('recolhimento'), '', "setGrupoTab('recolhimento')"], ['Barrar', c('barrar'), '', "setGrupoTab('barrar')"],
+     ['Financeiro', c('financeiro'), '', "setGrupoTab('financeiro')"], ['Não retornou', c('naoretornou'), '', "setGrupoTab('naoretornou')"], ['Novo / a triar', c('nova'), '', "setGrupoTab('nova')"]]);
+}
+
+// ================= CONTROLE DE SITUACOES (indicadores por transportadora) =================
 const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente'];
-const IND_COR = { 'No prazo':'#16A34A', 'Relacionamento':'#2563EB', 'Transporte':'#D97706', 'Cliente':'#7C3AED', 'A classificar':'#DC2626' };
+const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'A classificar':'#64748B' };
 const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'' };
 const IND_CORTE = 7;   // a partir de julho o detalhe mes a mes; antes disso os meses entram como um bloco ja finalizado
 const indAntigos = () => Array.from({length:IND_CORTE-1},(_,i)=>i+1);
@@ -2286,7 +2288,7 @@ function indFonte(){
   const out = [];
   COL.concat(REA).forEach(c => out.push({ ...c, __tipo:'coleta', sit:'Protocolo de Coleta', fin:false }));
   HIST.filter(c => !c.cancelada).forEach(c => out.push({ ...c, __tipo:'coleta', sit:'Protocolo de Coleta', fin:true }));
-  TRAT.concat(TRAT_HIST).forEach(t => { const sit = t.tipo_devolucao || '(sem situação)', cl = sitClasseDe(sit); if (cl==='Desconsiderar') return; out.push({ ...t, __tipo:'tratativa', sit, fin: cl==='Finalizada' }); });
+  TRAT_ALL.forEach(t => { const sit = t.tipo_devolucao || '(sem situação)', cl = sitClasseDe(sit); if (cl==='Desconsiderar') return; out.push({ ...t, __tipo:'tratativa', sit, fin: cl==='Finalizada' }); });
   return out;
 }
 function indCalcula(){
@@ -2297,8 +2299,8 @@ function indCalcula(){
     const dias = d ? daysBetween(d, hoje) : null, sla = sitSlaDe(x.sit);
     let motivo = null;
     if (!x.fin) motivo = IND_MOTIVOS.includes(x.motivo_pend) ? x.motivo_pend : ((!sla || dias==null || dias<=sla) ? 'No prazo' : 'A classificar');
-    return { ...x, d, ano:d?d.getFullYear():null, mes:d?d.getMonth()+1:null, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indNome(x.transportadora) };
-  }).filter(x => x.ano);
+    return { ...x, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indNome(x.transportadora) };
+  });
 }
 function indAgg(arr){
   const fin = arr.filter(x=>x.fin), sl = fin.filter(x=>x.slaDias!=null);
@@ -2359,11 +2361,8 @@ function renderInd(){
 
   // ---- KPIs ----
   const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
-  document.getElementById('ind-kpis').innerHTML =
-    `<div class="ind-k b"><small>Tarefas no período</small><b>${A.total}</b></div>
-     <div class="ind-k ${tc||'g'}"><small>Taxa de atendimento</small><b>${fmt1(A.taxa)}<i>%</i></b></div>
-     <div class="ind-k b" title="${A.nsla} tarefas com data de finalização registrada"><small>SLA médio (finalizadas)</small><b>${fmt1(A.sla)}<i>dias</i></b></div>
-     <div class="ind-k a"><small>Em aberto hoje</small><b>${A.aberto}</b></div>`;
+  document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', 'Tarefas, taxa de atendimento, SLA médio e o que ainda está em aberto — atualiza a cada importação.',
+    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'aparece conforme as finalizações forem registradas'], ['Em aberto hoje', A.aberto, 'pendentes de resolução']]);
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
@@ -2386,13 +2385,13 @@ function renderInd(){
   if (vis){
     if (charts.ind) charts.ind.destroy();
     charts.ind = new Chart(document.getElementById('ch-ind'), { data:{ labels:meses.map(mesLbl), datasets:[
-      { type:'bar', label:'Tarefas criadas', data:vol, backgroundColor:meses.map(m=>!IND.meses.size||mesOn(m)?(m===0?'#64748B':'#2563EB'):'#1E3A5F55'), borderRadius:6, yAxisID:'y', order:2 },
-      { type:'line', label:'% atendimento', data:pct, borderColor:'#E8704F', backgroundColor:'#E8704F', tension:.25, pointRadius:4, yAxisID:'y1', order:1 } ] },
+      { type:'bar', label:'Tarefas criadas', data:vol, backgroundColor:meses.map(m=>!IND.meses.size||mesOn(m)?(m===0?'#64748B':'#7C3AED'):'#1E3A5F55'), borderRadius:6, yAxisID:'y', order:2 },
+      { type:'line', label:'% atendimento', data:pct, borderColor:'#F43F5E', backgroundColor:'#F43F5E', tension:.25, pointRadius:4, yAxisID:'y1', order:1 } ] },
       options:{ responsive:true, maintainAspectRatio:false, animation:{duration:450},
         onClick:(e,els)=>{ if (els.length) indSet('mes', meses[els[0].index]); },
         plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } }, tooltip:{ callbacks:{ label:c => c.dataset.type==='line' ? ` ${c.parsed.y}% atendidas` : ` ${c.parsed.y} tarefas` } } },
         scales:{ x:{ ticks:{color:tick}, grid:{display:false} }, y:{ beginAtZero:true, ticks:{color:tick}, grid:{color:grid}, title:{display:true,text:'Tarefas criadas',color:tick} },
-                 y1:{ position:'right', min:0, max:100, ticks:{color:'#E8704F', callback:v=>v+'%'}, grid:{display:false}, title:{display:true,text:'% Atendimento',color:'#E8704F'} } } } });
+                 y1:{ position:'right', min:0, max:100, ticks:{color:'#F43F5E', callback:v=>v+'%'}, grid:{display:false}, title:{display:true,text:'% Atendimento',color:'#F43F5E'} } } } });
   }
 
   // ---- quadro de pendencias (mes x transportadora x motivo) ----
@@ -2426,7 +2425,6 @@ function indExport(){
 
 // ================= CONTROLE DE SITUACOES (SLA por situacao) =================
 let SIT_CFG = { base:'prog', regras:{} };   // regras[chave] = { nome, sla }
-let SIT_ESTADO = '', SIT_FILTRO = null, SIT_ROWS = [], SIT_LINHAS = [], SIT_VISIVEL = [], SIT_IGNORADOS = 0;
 const sitKey = nome => norm(nome).replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'') || 'sem_situacao';
 try { const c = JSON.parse(localStorage.getItem('sit_cfg')||'null'); if (c && c.regras) SIT_CFG = c; } catch(e){}
 // classe padrao de cada situacao (planilha enviada pela equipe): Pendente conta SLA; Finalizada e Desconsiderar nao geram atraso
@@ -2445,150 +2443,6 @@ function sitSlaDe(nome){
   const r = SIT_CFG.regras[sitKey(nome)];
   if (r) return r.sla>0 ? r.sla : null;
   return sitKey(nome)==='protocolo_de_coleta' ? CONFIG.SLA_COLETA_DIAS : null;
-}
-function sitFonte(){
-  const out = [];
-  COL.forEach(c => out.push({ ...c, __tipo:'coleta', sit:'Protocolo de Coleta' }));
-  TRAT.forEach(t => out.push({ ...t, __tipo:'tratativa', sit:t.tipo_devolucao || '(sem situação)' }));
-  PERDAS.forEach(p => out.push({ ...p, sit:p.tipo_devolucao || '(sem situação)' }));
-  return out;
-}
-function sitCalcula(){
-  const hoje = new Date();
-  SIT_IGNORADOS = 0;
-  SIT_ROWS = sitFonte().filter(x => { if (sitClasseDe(x.sit)==='Desconsiderar'){ SIT_IGNORADOS++; return false; } return true; }).map(x => {
-    const d = SIT_CFG.base==='solic' ? (parseBR(x.data_solicitacao) || parseBR(x.data_programacao)) : (parseBR(x.data_programacao) || parseBR(x.data_solicitacao));
-    const dias = d ? daysBetween(d, hoje) : null, sla = sitSlaDe(x.sit);
-    let estado = 'SEM SLA';
-    if (sitClasseDe(x.sit)==='Finalizada') estado = 'FINALIZADA';
-    else if (sla){ if (dias==null) estado = 'SEM DATA'; else if (dias > sla) estado = 'ATRASADO'; else if (dias >= sla - Math.max(1, Math.round(sla*0.3))) estado = 'RISCO'; else estado = 'NO PRAZO'; }
-    return { ...x, dias, sla, estado, atraso: (sla && dias!=null && dias>sla) ? dias-sla : 0 };
-  });
-  const m = new Map();
-  SIT_ROWS.forEach(r => {
-    const k = sitKey(r.sit); if (!m.has(k)) m.set(k,{ key:k, nome:r.sit, sla:r.sla, n:0, ok:0, risco:0, at:0, max:0 });
-    const g = m.get(k); g.n++;
-    if (r.estado==='FINALIZADA') g.fin = (g.fin||0)+1;
-    else if (r.estado==='NO PRAZO') g.ok++; else if (r.estado==='RISCO') g.risco++; else if (r.estado==='ATRASADO'){ g.at++; g.max = Math.max(g.max, r.atraso); }
-  });
-  Object.entries(SIT_CFG.regras).forEach(([k,r]) => { if (!m.has(k)) m.set(k,{ key:k, nome:r.nome, sla:r.sla>0?r.sla:null, n:0, ok:0, risco:0, at:0, max:0 }); });
-  sitFonte().forEach(x => { if (sitClasseDe(x.sit)==='Desconsiderar'){ const k=sitKey(x.sit); if(!m.has(k)) m.set(k,{ key:k, nome:x.sit, sla:null, n:0, ok:0, risco:0, at:0, max:0 }); m.get(k).ign=(m.get(k).ign||0)+1; } });
-  SIT_LINHAS = [...m.values()].sort((a,b)=> b.at-a.at || b.n-a.n);
-}
-function renderSit(){
-  if (!document.getElementById('panel-sit')) return;
-  sitCalcula();
-  const cnt = e => SIT_ROWS.filter(r=>r.estado===e).length;
-  const at = cnt('ATRASADO'), ri = cnt('RISCO'), ok = cnt('NO PRAZO'), fin = cnt('FINALIZADA'), sem = SIT_ROWS.length - at - ri - ok - fin;
-  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
-  set('bdg-sit', at); set('k-sit', at);
-  const kp = (cls, v, l, st) => `<div class="kpi ${cls} kpi-click" onclick="sitSetEstado('${st}')" role="button" tabindex="0"><div class="kpi-v">${v}</div><div class="kpi-l">${l}</div></div>`;
-  document.getElementById('sit-kpis').innerHTML = kp('k-acc', SIT_ROWS.length, 'Em controle', '') + kp('k-red', at, 'Atrasados', 'ATRASADO') + kp('k-amb', ri, 'Em risco', 'RISCO') + kp('k-grn', ok, 'No prazo', 'NO PRAZO') + kp('k-pur', sem, 'Pendentes sem SLA', 'SEM SLA') + kp('k-acc', fin, 'Finalizadas', 'FINALIZADA');
-  const sel = document.getElementById('sit-base'); if (sel) sel.value = SIT_CFG.base;
-
-  const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-sit-reg-b');
-  if (!ativo) document.getElementById('tb-sit-reg-b').innerHTML = SIT_LINHAS.map(g => `<tr class="clickable${SIT_FILTRO===g.key?' sel':''}" onclick="sitSetFiltro('${g.key}')">
-    <td class="td-nome">${esc(g.nome)}</td><td>${g.n||g.ign||0}</td>
-    <td onclick="event.stopPropagation()"><select onchange="sitSetClasse('${g.key}',this)" data-nome="${esc(g.nome)}" style="padding:3px 4px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11px">${SIT_CLASSES.map(c=>`<option${c===sitClasseDe(g.nome)?' selected':''}>${c}</option>`).join('')}</select></td>
-    <td onclick="event.stopPropagation()"><input type="number" min="0" max="999" value="${g.sla||''}" placeholder="—" style="width:64px;padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx)" onchange="sitSetSla('${g.key}',this)" data-nome="${esc(g.nome)}"></td>
-    <td>${g.ok}</td><td>${g.risco?`<span class="bdg b-amb">${g.risco}</span>`:0}</td><td>${g.at?`<span class="bdg b-red">${g.at}</span>`:0}</td><td>${g.max?g.max+' d':'—'}</td></tr>`).join('') || '<tr><td colspan="8" style="color:var(--tx3);padding:14px">Importe um arquivo para ver as situações.</td></tr>';
-
-  if (document.getElementById('panel-sit').classList.contains('on') && window.Chart){
-    const top = SIT_LINHAS.filter(g=>g.n).slice(0,12), cs = getComputedStyle(document.documentElement);
-    const tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
-    if (charts.sit) charts.sit.destroy();
-    charts.sit = new Chart(document.getElementById('ch-sit'), { type:'bar',
-      data:{ labels: top.map(g=>g.nome.length>26?g.nome.slice(0,25)+'…':g.nome), datasets:[
-        { label:'Atrasados', data:top.map(g=>g.at), backgroundColor:'#DC2626' },
-        { label:'Em risco', data:top.map(g=>g.risco), backgroundColor:'#F59E0B' },
-        { label:'No prazo', data:top.map(g=>g.ok), backgroundColor:'#16A34A' },
-        { label:'Sem SLA', data:top.map(g=>g.n-g.ok-g.risco-g.at-(g.fin||0)), backgroundColor:'#94A3B8' },
-        { label:'Finalizadas', data:top.map(g=>g.fin||0), backgroundColor:'#7C3AED55' } ] },
-      options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, animation:{duration:400},
-        onClick:(e,els)=>{ if (els.length) sitSetFiltro(top[els[0].index].key); },
-        plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } },
-        scales:{ x:{ stacked:true, ticks:{color:tick}, grid:{color:grid} }, y:{ stacked:true, ticks:{color:tick}, grid:{display:false} } } } });
-  }
-  renderSitCasos();
-}
-function renderSitCasos(){
-  const q = norm((document.getElementById('sit-q')||{}).value||'');
-  const data = SIT_ROWS.filter(r => (!SIT_FILTRO || sitKey(r.sit)===SIT_FILTRO) && (!SIT_ESTADO || r.estado===SIT_ESTADO || (SIT_ESTADO==='SEM SLA' && r.estado==='SEM DATA')) &&
-    (!q || norm(r.cliente).includes(q) || (r.nf||'').includes(q) || (r.cpf||'').includes(q)));
-  data.sort((a,b)=> b.atraso-a.atraso || (b.dias||0)-(a.dias||0));
-  document.getElementById('cnt-sit').textContent = data.length + ' resultado' + (data.length!==1?'s':'');
-  SIT_VISIVEL = data;
-  const bdg = e => ({ATRASADO:'<span class="bdg b-red">Atrasado</span>', RISCO:'<span class="bdg b-amb">Em risco</span>', 'NO PRAZO':'<span class="bdg b-grn">No prazo</span>', 'SEM DATA':'<span class="bdg b-dk">Sem data</span>', FINALIZADA:'<span class="bdg b-grn" style="opacity:.75">Finalizada</span>'})[e] || '<span class="bdg b-dk">Sem SLA</span>';
-  document.getElementById('tb-sit').innerHTML = data.slice(0,300).map(r => `<tr class="clickable" onclick="openDetailIdx(${regDetail(r)})">
-    <td><span class="bdg b-dk" style="font-size:10px">${esc(r.sit)}</span></td><td class="td-nome">${esc(r.cliente)}</td><td class="td-nf">${esc(r.nf||'—')}</td>
-    <td><span class="bdg b-acc">${esc(r.uf||'—')}</span></td><td>${r.dias==null?'—':r.dias+' d'}</td><td>${r.sla?r.sla+' d':'—'}</td>
-    <td>${r.atraso?'<b style="color:var(--red)">+'+r.atraso+' d</b>':'—'}</td><td>${bdg(r.estado)}</td><td style="font-size:11px;color:var(--tx3)">${esc(r.usuario||'—')}</td></tr>`).join('')
-    + (data.length>300 ? `<tr><td colspan="9" style="color:var(--tx3);padding:10px">Mostrando 300 de ${data.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '');
-  document.querySelectorAll('[data-sit-st]').forEach(c => c.classList.toggle('on', c.getAttribute('data-sit-st')===SIT_ESTADO));
-  const pill = document.getElementById('sit-pill'), g = SIT_FILTRO && SIT_LINHAS.find(x=>x.key===SIT_FILTRO);
-  pill.style.display = g ? '' : 'none'; if (g) pill.textContent = g.nome + ' ✕';
-}
-function sitSetEstado(e){ SIT_ESTADO = e; if (!document.getElementById('panel-sit').classList.contains('on')) ir('sit'); else renderSitCasos(); }
-function sitSetFiltro(k){ SIT_FILTRO = (!k || SIT_FILTRO===k) ? null : k; renderSit(); }
-let _sitSave;
-function sitPersist(){
-  try { localStorage.setItem('sit_cfg', JSON.stringify(SIT_CFG)); } catch(e){}
-  clearTimeout(_sitSave);
-  _sitSave = setTimeout(async () => {
-    if (!DB) return;
-    try { await DB.doc('config/sla_situacoes').set({ base:SIT_CFG.base, regras:SIT_CFG.regras, updatedAt:isoNow() }); }
-    catch(err){ console.warn('sla save', err); toast('Não consegui salvar o SLA no banco: ' + (err.code||err.message), {type:'err'}); }
-  }, 500);
-}
-function sitSetSla(key, inp){
-  const nome = inp.getAttribute('data-nome'), n = Math.round(+String(inp.value).replace(',','.'));
-  SIT_CFG.regras[key] = { ...(SIT_CFG.regras[key]||{}), nome, sla: n>0 ? n : 0 };
-  sitPersist(); inp.blur(); renderSit();
-  toast(n>0 ? `SLA de "${nome}": ${n} dias` : `SLA de "${nome}" removido`, {type:'ok', ms:2500});
-}
-function sitSetClasse(key, sel){
-  const nome = sel.getAttribute('data-nome');
-  SIT_CFG.regras[key] = { ...(SIT_CFG.regras[key]||{ sla:0 }), nome, classe: sel.value };
-  sitPersist(); renderSit(); toast(`"${nome}" agora é ${sel.value}`, {type:'ok', ms:2500});
-}
-function sitSetBase(b){ SIT_CFG.base = b==='solic' ? 'solic' : 'prog'; sitPersist(); renderSit(); }
-function sitExportModelo(){
-  const dados = SIT_LINHAS.map(g => ({ 'Situação': g.nome, 'Classe': sitClasseDe(g.nome), 'SLA (dias)': g.sla || '' }));
-  if (!dados.length){ toast('Importe um arquivo do Innovaro primeiro para listar as situações.', {type:'warn'}); return; }
-  exportCSV(dados, 'modelo_sla_situacoes');
-}
-async function sitImportFile(inp){
-  const f = inp.files[0]; inp.value = ''; if (!f) return;
-  const msg = document.getElementById('sit-msg');
-  try{
-    let rows;
-    if (/\.csv$/i.test(f.name)){
-      const buf = await f.arrayBuffer(); let t;
-      try { t = new TextDecoder('utf-8', {fatal:true}).decode(buf); } catch(e){ t = new TextDecoder('windows-1252').decode(buf); }
-      rows = parseCsvSemicolon(t.replace(/^\uFEFF/,''));
-    } else {
-      const wb = XLSX.read(await f.arrayBuffer(), {type:'array'});
-      rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
-    }
-    if (!rows || rows.length < 2) throw new Error('Planilha vazia.');
-    const h = rows[0].map(x => norm(x).trim());
-    const ci = h.findIndex(x => /situa/.test(x)), cs = h.findIndex(x => /sla|prazo|dias/.test(x)), cc = h.findIndex(x => /classe|status|class/.test(x));
-    if (ci<0 || (cs<0 && cc<0)) throw new Error('Preciso da coluna "Situação" e de "Classe" (Pendente/Finalizada/Desconsiderar) e/ou "SLA (dias)".');
-    let n = 0;
-    rows.slice(1).forEach(r => {
-      const nome = String(r[ci]||'').trim(); if (!nome) return;
-      const k = sitKey(nome), cur = SIT_CFG.regras[k] || { sla:0 }, novo = { ...cur, nome };
-      if (cs>=0){ const sla = Math.round(parseFloat(String(r[cs]||'').replace(',','.'))); novo.sla = sla>0 ? sla : 0; }
-      if (cc>=0){ const c = SIT_CLASSES.find(x => norm(x)===norm(String(r[cc]||'')).trim()); if (c) novo.classe = c; }
-      SIT_CFG.regras[k] = novo; n++;
-    });
-    sitPersist(); renderSit();
-    msg.textContent = n + ' situações atualizadas.'; toast(n + ' SLAs importados de ' + f.name, {type:'ok'});
-  } catch(err){ msg.textContent = err.message; toast('Falha ao importar SLAs: ' + err.message, {type:'err'}); }
-}
-function sitExportCasos(){
-  if (!SIT_VISIVEL.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(SIT_VISIVEL.map(r => ({ 'Situação':r.sit, 'Cliente':r.cliente||'', 'CPF':r.cpf||'', 'NF':r.nf||'', 'UF':r.uf||'', 'Dias':r.dias==null?'':r.dias, 'SLA':r.sla||'', 'Classe':sitClasseDe(r.sit), 'Atraso (dias)':r.atraso||'', 'Estado':r.estado, 'Responsável':r.usuario||'', 'Descrição':r.descricao||'' })), 'controle_situacoes');
 }
 
 // ================= MUNDO PERDAS =================
@@ -2844,6 +2698,15 @@ function renderPerdas(scope){
       <td>${esc(shortCarr(p.carrier))}</td><td><span class="bdg b-acc">${esc(p.uf||'—')}</span></td>
       <td title="${p.valorOrigem==='titulo'?'Valor do título (registrado)':p.valorOrigem==='nota'?'Estimado pelo valor da nota de saída':p.valorOrigem==='unitario'?'Estimado pelo valor unitário':'Sem valor'}">${p.valorEst?(p.valorOrigem==='titulo'?'':'≈ ')+brl(p.valorEst):'—'}</td><td class="td-desc" title="${esc(p.descricao)}">${esc(p.descricao||'—')}</td></tr>`).join('');
 
+  // valor atualizado das perdas: mes de referencia e acumulado desde janeiro
+  { const hj = new Date(), anoRef = ano==='all' ? hj.getFullYear() : ano;
+    const mRef = PF.mes!=='all' ? PF.mes : (anoRef===hj.getFullYear() ? hj.getMonth()+1 : Math.max(0, ...PERDAS.filter(p=>p.ano===anoRef).map(p=>p.mes||0)));
+    if (mRef){
+      const bv = PERDAS.filter(p => (scope==='all'||p.ptipo===scope) && p.ano===anoRef && canalOk(p) && (!PF.motivo||p.motivo===PF.motivo) && (!PF.carrier||p.carrier===PF.carrier) && (!PF.uf||p.uf===PF.uf));
+      const dM = bv.filter(p=>p.mes===mRef), dA = bv.filter(p=>p.mes && p.mes<=mRef), soma = a => a.reduce((t,p)=>t+(p.valorEst||0),0);
+      stats.push([`Perdas em ${MESES[mRef-1]}/${anoRef}`, soma(dM), '', `${dM.length} perda${dM.length!==1?'s':''} no mês`, true],
+                 [`Acumulado Jan–${MESES[mRef-1]}/${anoRef}`, soma(dA), '', `${dA.length} perdas · média de ${brl(soma(dA)/mRef)} por mês`, true]);
+    } }
   root.innerHTML = `
     <div class="pw-hero">
       <div class="pw-top">
@@ -2857,13 +2720,12 @@ function renderPerdas(scope){
       </div>
       <div class="pw-stats">${stats.map(([l,v,d,n,flag])=>`<div class="pw-stat"><div class="l">${l}</div><div class="v${flag==='txt'?' sm':''}" ${typeof v==='number'?`data-count="${v}" ${flag===true?'data-money="1"':''}`:''}>${typeof v==='number'?(flag===true?brl(v):v):esc(v)}</div>${d||''}<div class="n">${n||''}</div></div>`).join('')}</div>
     </div>
-    <div class="pw-filters">
-      <select class="pw-sel" onchange="pwSet('ano',this.value)" aria-label="Ano"><option value="all"${ano==='all'?' selected':''}>Todos os anos</option>${anos.map(a=>`<option value="${a}"${a===ano?' selected':''}>${a}</option>`).join('')}</select>
-      <div class="pw-seg no-print" role="group" aria-label="Métrica"><button type="button" class="${PF.metric!=='valor'?'on':''}" onclick="pwSet('metric','qtd')">Quantidade</button><button type="button" class="${PF.metric==='valor'?'on':''}" onclick="pwSet('metric','valor')">Valor R$</button></div>
-      <div class="pw-seg no-print" role="group" aria-label="Canal"><button type="button" class="${!PF.canal?'on':''}" onclick="pwSet('canal',PF.canal)">Todos os canais <small>${canalBase.length}</small></button><button type="button" class="${PF.canal==='Marketplace'?'on':''}" onclick="pwSet('canal','Marketplace')" title="Usuários: Thairiny e João">Marketplace <small>${canalBase.filter(p=>p.canal==='Marketplace').length}</small></button><button type="button" class="${PF.canal==='Relacionamento'?'on':''}" onclick="pwSet('canal','Relacionamento')" title="Demais usuários">Relacionamento <small>${canalBase.filter(p=>p.canal==='Relacionamento').length}</small></button></div>
-      <div class="pw-months">${monthChips}</div>
-      <button class="chip no-print" type="button" onclick="pwClear()">Limpar filtros</button>
-      ${pills?`<div class="pw-pills">${pills}</div>`:''}
+    <div class="ind-f">
+      <div class="ind-fr"><b>Ano</b><div><select class="pw-sel" onchange="pwSet('ano',this.value)" aria-label="Ano"><option value="all"${ano==='all'?' selected':''}>Todos os anos</option>${anos.map(a=>`<option value="${a}"${a===ano?' selected':''}>${a}</option>`).join('')}</select></div></div>
+      <div class="ind-fr"><b>Mês</b><div class="pw-months">${monthChips}</div></div>
+      <div class="ind-fr"><b>Canal</b><div><div class="pw-seg no-print" role="group" aria-label="Canal"><button type="button" class="${!PF.canal?'on':''}" onclick="pwSet('canal',PF.canal)">Todos os canais <small>${canalBase.length}</small></button><button type="button" class="${PF.canal==='Marketplace'?'on':''}" onclick="pwSet('canal','Marketplace')" title="Usuários: Thairiny e João">Marketplace <small>${canalBase.filter(p=>p.canal==='Marketplace').length}</small></button><button type="button" class="${PF.canal==='Relacionamento'?'on':''}" onclick="pwSet('canal','Relacionamento')" title="Demais usuários">Relacionamento <small>${canalBase.filter(p=>p.canal==='Relacionamento').length}</small></button></div></div></div>
+      <div class="ind-fr"><b>Métrica</b><div><div class="pw-seg no-print" role="group" aria-label="Métrica"><button type="button" class="${PF.metric!=='valor'?'on':''}" onclick="pwSet('metric','qtd')">Quantidade</button><button type="button" class="${PF.metric==='valor'?'on':''}" onclick="pwSet('metric','valor')">Valor R$</button></div><button class="chip no-print" type="button" onclick="pwClear()">Limpar filtros</button></div></div>
+      ${pills?`<div class="ind-fr"><b>Filtros ativos</b><div class="pw-pills">${pills}</div></div>`:''}
     </div>
     <div class="pw-grid">
       <div class="pw-card"><h3>Evolução mensal</h3><div class="s">Clique numa barra para filtrar o mês</div><div class="pw-chart"><canvas id="pwc-${scope}-evol"></canvas></div></div>

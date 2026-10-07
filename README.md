@@ -57,3 +57,7 @@ Menu **Controle → Controle de Situações**. Cada situação do Innovaro tem u
 ## Indicadores por transportadora
 
 Menu **Controle → Indicadores por transportadora**. Cada caso (Pendente + Finalizada; Cancelada* e Perdas ficam fora) é uma tarefa criada na data da solicitação. Mostra tarefas no período, taxa de atendimento (Finalizadas ÷ total), SLA médio das finalizadas e em aberto hoje, por transportadora e por mês. Nos casos em aberto o time escolhe o **motivo da pendência** (No prazo / Relacionamento / Transporte / Cliente), gravado em `cases/{id}.motivo_pend` e refletido em tempo real. O SLA médio usa `finalizado_em`, registrado na importação em que o caso passa a Finalizado.
+
+## Padrão visual e importação
+
+Protocolo de Coleta, Tratativas e Controle de Situações usam o mesmo cabeçalho/estatísticas e a mesma barra de filtros das Perdas. Cada aba tem o botão **Importar planilha**; qualquer importação atualiza o painel inteiro. As Perdas mostram também o valor do mês e o acumulado de janeiro até o mês atual. O painel de Tratativas lista só situações Pendentes; Finalizadas e canceladas seguem nos indicadores.
