@@ -57,3 +57,7 @@ Menu **Controle → Controle de Situações**. Cada situação do Innovaro tem u
 ## Indicadores por transportadora
 
 Menu **Controle → Indicadores por transportadora**. Cada caso (Pendente + Finalizada; Cancelada* e Perdas ficam fora) é uma tarefa criada na data da solicitação. Mostra tarefas no período, taxa de atendimento (Finalizadas ÷ total), SLA médio das finalizadas e em aberto hoje, por transportadora e por mês. Nos casos em aberto o time escolhe o **motivo da pendência** (No prazo / Relacionamento / Transporte / Cliente), gravado em `cases/{id}.motivo_pend` e refletido em tempo real. O SLA médio usa `finalizado_em`, registrado na importação em que o caso passa a Finalizado.
+
+## Fechamento mensal de SLA
+
+Menu **Controle → Fechamento mensal de SLA**. Retrato fixo por mês (`snapshots/ind_AAAA-MM`): casos com dias acima do SLA da situação, calculado só por data + SLA (sem motivo nem ajustes manuais). O mês corrente acumula (quem estourou o prazo continua listado mesmo se resolvido depois); na virada o retrato é congelado. Meses sem retrato aparecem como "Não salvo" (calculados agora) e só são gravados pelo botão.

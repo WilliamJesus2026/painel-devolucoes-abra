@@ -17,5 +17,8 @@ service cloud.firestore {
     match /config/{configId} {
       allow read, write: if isAbraUser();
     }
+    match /snapshots/{snapId} {
+      allow read, write: if isAbraUser();
+    }
   }
 }
