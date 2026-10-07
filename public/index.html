@@ -455,6 +455,11 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .ind-f-res{font-size:12px;color:var(--tx3);margin-top:8px}.ind-f-res b{color:var(--tx)}
 @media(max-width:700px){.ind-fr{flex-direction:column}.ind-fr>b{padding-top:0}}
 .hero-chips .hchip{display:none!important}
+.dsec .pw-hero{padding:18px 22px 18px;margin-bottom:14px}
+.dsec .pw-stats{margin-top:14px}
+.dsec .pw-stat .v{font-size:30px}
+.dsec .pw-stat .v.sm{font-size:22px}
+.dsec .pw-hero h2{font-size:22px}
 .ind-ch.on,.ind-f .minitab.on{background:linear-gradient(135deg,#7C3AED,#DB2777);border-color:transparent;color:#fff}
 .ind-f .minitabs{border:none;display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0}
 .ind-f .minitab{border:1px solid var(--bd);border-radius:999px;padding:5px 12px;margin:0;background:none;font-size:12px}
@@ -626,36 +631,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
     <!-- DASHBOARD -->
     <div class="panel on" id="panel-dash">
-      <div class="kpi-row">
-        <div class="kpi k-acc kpi-click" onclick="ir('col-all')" role="button" tabindex="0"><div class="kpi-v" id="k-col">—</div><div class="kpi-l">Coletas pendentes</div><div class="kpi-s">Ainda não coletadas</div></div>
-        <div class="kpi k-red kpi-click" onclick="ir('at')" role="button" tabindex="0"><div class="kpi-v" id="k-at">—</div><div class="kpi-l">Atrasadas</div><div class="kpi-s" id="ks-at">Prazo &gt; 20 dias</div></div>
-        <div class="kpi k-amb kpi-click" onclick="ir('ri')" role="button" tabindex="0"><div class="kpi-v" id="k-ri">—</div><div class="kpi-l">Em risco</div><div class="kpi-s">Entram em atraso em breve</div></div>
-        <div class="kpi k-grn kpi-click" onclick="ir('em')" role="button" tabindex="0"><div class="kpi-v" id="k-em">—</div><div class="kpi-l">No prazo</div><div class="kpi-s">Dentro dos 20 dias</div></div>
-        <div class="kpi k-pur kpi-click" onclick="ir('rea')" role="button" tabindex="0"><div class="kpi-v" id="k-rea">—</div><div class="kpi-l">Coleta realizada</div><div class="kpi-s">Aguardando chegada no CD</div></div>
-        <div class="kpi k-rose kpi-click" onclick="ir('perdas')" role="button" tabindex="0"><div class="kpi-v" id="k-prd">—</div><div class="kpi-l" id="k-prd-l">Perdas</div><div class="kpi-s">Abrir análise de perdas</div></div>
-        <div class="kpi k-pur kpi-click" onclick="ir('perdas');pwSet('metric','valor')" role="button" tabindex="0"><div class="kpi-v" id="k-vest" style="font-size:22px">—</div><div class="kpi-l">Valor total estimado</div><div class="kpi-s" id="k-vest-s">Perdas em R$</div></div>
-        <div class="kpi k-acc kpi-click" onclick="ir('trat')" role="button" tabindex="0"><div class="kpi-v" id="k-trat">—</div><div class="kpi-l">Tratativas ativas</div><div class="kpi-s">Devoluções transportadora</div></div>
-      </div>
-      <div id="alertas-dash" style="margin-bottom:14px"></div>
-      <div class="card" style="margin-bottom:12px"><div class="card-title">Mais críticas agora</div><div class="card-sub">Maiores atrasos em aberto · clique para ver o caso</div><div id="crit-list"></div></div>
-      <div class="g2">
-        <div class="card">
-          <div class="card-title">Status das coletas</div>
-          <div class="card-sub">Protocolo de Coleta ativo · <span id="dash-sla">20</span> dias de prazo</div>
-          <div style="position:relative;height:170px"><canvas id="ch-donut" role="img" aria-label="Distribuição de coletas por status: atrasadas, em risco e no prazo.">Distribuição de coletas.</canvas></div>
-          <div class="leg-custom" id="leg-donut" style="display:flex;gap:14px;margin-top:10px;font-size:11px;flex-wrap:wrap"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">Ranking de transportadoras</div>
-          <div class="card-sub">% de atraso · meta interna: ≤ 20%</div>
-          <div id="rank-div"></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Tratativas por grupo</div>
-        <div class="card-sub">423 casos ativos · I9 · Fedex · Movvi · Total · Hello · Generoso</div>
-        <div style="position:relative;height:150px"><canvas id="ch-grupos" role="img" aria-label="Casos de tratativas por grupo de transportadora.">Distribuição por grupo.</canvas></div>
-      </div>
+      <div id="dash-blocks"></div>
     </div>
 
     <!-- ATRASADAS -->
@@ -1422,13 +1398,7 @@ function buildRank(divId){
 
 function renderDash(){
   const K=D.kpis;
-  document.getElementById('k-col').textContent=K.col_total;
-  document.getElementById('k-at').textContent=K.at;
-  document.getElementById('k-ri').textContent=K.ri;
-  document.getElementById('k-em').textContent=K.em;
-  document.getElementById('k-rea').textContent=K.rea;
   document.getElementById('bdg-rea').textContent=K.rea;
-  document.getElementById('k-trat').textContent=K.trat_total;
   document.getElementById('bdg-at').textContent=K.at;
   document.getElementById('bdg-ri').textContent=K.ri;
   document.getElementById('bdg-em').textContent=K.em;
@@ -1447,27 +1417,7 @@ function renderDash(){
     document.getElementById('tb-ref').textContent = 'Dados de ' + D.ref;
   }
   document.getElementById('ft-ref').textContent='Protocolo de Coleta + Tratativas · '+D.ref;
-  document.getElementById('dash-sla').textContent=SLA;
 
-  let al='';
-  if(K.at>0){
-    const casos=AT.slice(0,3).map(c=>`NF ${c.nf||'—'} · ${c.cliente} · ${c.transportadora||''} · ${c.uf} · ${c.dias}d`).join(' &nbsp;|&nbsp; ');
-    al+=`<div class="alert alert-red"><div class="al-dot"></div><div>
-      <div class="al-title">${K.at} coleta${K.at>1?'s':''} em atraso — acionar transportadoras</div>
-      <div class="al-body">${casos}${K.at>3?` <b>+ ${K.at-3} mais</b>`:''} &nbsp;·&nbsp; Valor total: R$ ${(K.valor_at||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
-    </div></div>`;
-  }
-  if(K.ri>0){
-    const casos=RI.slice(0,2).map(c=>`NF ${c.nf||'—'} · ${c.cliente} · atrasa em ${SLA-(c.dias||0)}d`).join(' &nbsp;|&nbsp; ');
-    al+=`<div class="alert alert-amb"><div class="al-dot"></div><div>
-      <div class="al-title">${K.ri} coleta${K.ri>1?'s':''} entram em atraso em breve</div>
-      <div class="al-body">${casos}</div>
-    </div></div>`;
-  }
-  if(K.at===0&&K.ri===0){
-    al='<div class="alert alert-grn"><div class="al-dot"></div><div><div class="al-title">Tudo dentro do prazo</div><div class="al-body">Nenhuma coleta atrasada ou em risco no momento.</div></div></div>';
-  }
-  document.getElementById('alertas-dash').innerHTML=al;
 
   let al2='';
   if(AT_FORA.length>0){
@@ -1488,36 +1438,7 @@ function renderDash(){
   const ctOut=document.getElementById('ct-outros');
   if(ctOut) ctOut.textContent=outrosCnt;
 
-  if(charts.donut) charts.donut.destroy();
-  const ctx=document.getElementById('ch-donut').getContext('2d');
-  charts.donut=new Chart(ctx,{type:'doughnut',data:{
-    labels:['Atrasadas','Em risco','No prazo'],
-    datasets:[{data:[K.at,K.ri,K.em],backgroundColor:['#C0392B','#B45309','#1A6B3C'],borderColor:'#fff',borderWidth:2,hoverOffset:4}]
-  },options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
-    onClick:(evt,els)=>{ if(!els.length) return; ir(['at','ri','em'][els[0].index]); },
-    onHover:(evt,els)=>{ evt.native.target.style.cursor = els.length?'pointer':'default'; },
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed} (${K.col_total?Math.round(c.parsed/K.col_total*100):0}%)`}}}}});
-
-  document.getElementById('leg-donut').innerHTML=[
-    ['#C0392B','Atrasadas',K.at],['#B45309','Em risco',K.ri],['#1A6B3C','No prazo',K.em]
-  ].map(([col,lbl,val])=>`<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:${col}"></span>${lbl}: ${val}</span>`).join('');
-
-  buildRank('rank-div');
   buildRank('rank-div-2');
-
-  if(charts.grupos) charts.grupos.destroy();
-  const gKeys=['FEDEX','I9','TOTAL','MOVVI','HELLO','GENEROSO'];
-  const gVals=gKeys.map(k=>tags[k]||0);
-  const gCols=['#6B3FA0','#2E86DE','#0369A1','#1A6B3C','#B45309','#86198F'];
-  const ctx2=document.getElementById('ch-grupos').getContext('2d');
-  charts.grupos=new Chart(ctx2,{type:'bar',data:{
-    labels:gKeys,
-    datasets:[{data:gVals,backgroundColor:gCols,borderRadius:4,barThickness:32}]
-  },options:{responsive:true,maintainAspectRatio:false,
-    onClick:(evt,els)=>{ if(!els.length) return; const g=gKeys[els[0].index]; setGrupo(g); document.querySelectorAll('.chips .chip').forEach(c=>c.classList.remove('on')); const chip=document.querySelector(`.ch-${g.toLowerCase()}`); if(chip) chip.classList.add('on'); ir('trat'); },
-    onHover:(evt,els)=>{ evt.native.target.style.cursor = els.length?'pointer':'default'; },
-    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed} casos`}}},
-    scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},stepSize:20}}}}});
 
   const ufData=D.rank_uf.filter(u=>u.at>0);
   if(charts.uf) charts.uf.destroy();
@@ -1579,6 +1500,7 @@ function renderAll(){
   renderInd();
   renderProtoHero();
   renderTratHero();
+  renderDashBlocks();
   renderOcultos();
   renderBanner();
   document.querySelectorAll('.tbl-wrap table').forEach(applySort);
@@ -2257,9 +2179,9 @@ async function _initDb(interactive){
 
 
 // ================= HERO NO PADRAO PERDAS (reutilizavel) =================
-function pwHero(kick, title, sub, stats){
+function pwHero(kick, title, sub, stats, acao){
   return `<div class="pw-hero"><div class="pw-top"><div><div class="pw-kick">${kick}</div><h2>${title}</h2><div class="pw-sub">${sub}</div></div>
-    <div class="pw-actions no-print"><button class="pw-btn" type="button" onclick="document.getElementById('file-input').click()">⭱ Importar planilha</button></div></div>
+    <div class="pw-actions no-print">${acao!==undefined ? acao : `<button class="pw-btn" type="button" onclick="document.getElementById('file-input').click()">⭱ Importar planilha</button>`}</div></div>
     <div class="pw-stats">${stats.map(([l,v,n,go,sm]) => `<div class="pw-stat"${go?` onclick="${go}" style="cursor:pointer"`:''}><div class="l">${l}</div><div class="v${sm?' sm':''}">${v}</div><div class="n">${n||''}</div></div>`).join('')}</div></div>`;
 }
 const PH_TITLES = { at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD', 'col-all':'Todos os protocolos' };
@@ -2267,6 +2189,33 @@ function renderProtoHero(){
   const stats = [['Atrasadas', AT.length, `Prazo > ${SLA} dias`, "ir('at')"], ['Em risco', RI.length, 'Entram em atraso em breve', "ir('ri')"], ['No prazo', EM.length, `Dentro dos ${SLA} dias`, "ir('em')"],
     ['Aguardando CD', REA.length, 'Coleta feita, falta chegar no CD', "ir('rea')"], ['Total em aberto', COL.length + REA.length, 'Protocolos pendentes', "ir('col-all')"]];
   document.querySelectorAll('[data-ph]').forEach(el => { el.innerHTML = pwHero('Protocolo de Coleta', PH_TITLES[el.dataset.ph]||'', `Prazo de ${SLA} dias para a coleta · atualiza sozinho a cada importação.`, stats); });
+}
+function renderDashBlocks(){
+  const el = document.getElementById('dash-blocks'); if (!el) return;
+  const K = D.kpis, hj = new Date();
+  const go = (id, txt) => `<button class="pw-btn" type="button" onclick="ir('${id}')">${txt} →</button>`;
+  // Controle de Situacoes (indicadores do ano em foco)
+  const doAno = IND_ALL.filter(x => x.ano===IND.ano), A = indAgg(doAno);
+  const abMk = doAno.filter(x=>!x.fin && x.canal==='Marketplace').length, abRel = doAno.filter(x=>!x.fin && x.canal==='Relacionamento').length;
+  // Perdas do ano mais recente com dados (mes atual e acumulado)
+  const anosP = pwAnos(), anoP = anosP.includes(hj.getFullYear()) ? hj.getFullYear() : (anosP[0] || hj.getFullYear());
+  const pAno = PERDAS.filter(p => p.ano===anoP), mRef = anoP===hj.getFullYear() ? hj.getMonth()+1 : Math.max(0, ...pAno.map(p=>p.mes||0));
+  const vSum = a => a.reduce((t,p)=>t+(p.valorEst||0),0);
+  // Tratativas: os 3 grupos com mais casos
+  const gNomes = { recolhimento:'Recolhimento', barrar:'Barrar', financeiro:'Financeiro', naoretornou:'Não retornou', nova:'Novo / a triar', outros:'Outros' };
+  const gTop = Object.keys(gNomes).map(g => [g, TRAT.filter(t => (t.grupo||'outros')===g).length]).filter(a=>a[1]).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const blocos = [
+    ['Protocolo de Coleta', 'Prazo de coleta', `${SLA} dias de prazo · coletas pendentes`,
+      [['Atrasadas', K.at, `Prazo > ${SLA} dias`, "ir('at')"], ['Em risco', K.ri, 'Entram em atraso em breve', "ir('ri')"], ['No prazo', K.em, `Dentro dos ${SLA} dias`, "ir('em')"], ['Aguardando CD', K.rea, 'Coleta feita, falta chegar', "ir('rea')"]], go('col-all','Abrir protocolo')],
+    ['Controle de Situações', 'Atendimento por transportadora', `Tarefas de ${IND.ano}`,
+      [['Tarefas', A.total, 'criadas no ano', "ir('ind')"], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total', "ir('ind')"], ['Em aberto', A.aberto, 'pendentes de resolução', "ir('ind')"], ['Marketplace | Relacionamento', `${abMk} | ${abRel}`, 'em aberto por canal', "ir('ind')", true]], go('ind','Abrir controle')],
+    ['Perdas', `Perdas ${anoP}`, 'Índice de perdas cliente e transportadora',
+      [['Total de perdas', pAno.length, `em ${anoP}`, "ir('perdas')"], ['Valor estimado', brl(vSum(pAno)), `acumulado de ${anoP}`, "ir('perdas')", true],
+       ...(mRef ? [[`Perdas em ${MESES[mRef-1]}`, brl(vSum(pAno.filter(p=>p.mes===mRef))), 'valor no mês', "ir('perdas')", true], [`Jan–${MESES[mRef-1]}`, brl(vSum(pAno.filter(p=>p.mes && p.mes<=mRef))), 'acumulado até o mês', "ir('perdas')", true]] : [])], go('perdas','Abrir perdas')],
+    ['Tratativas Transportadora', 'Tratativas por grupo', 'Casos pendentes, sem prazo fixo',
+      [['Em aberto', TRAT.length, 'todas as tratativas', "ir('trat')"], ...gTop.map(([g,n]) => [gNomes[g], n, 'casos', `ir('trat');setGrupoTab('${g}')`])], go('trat','Abrir tratativas')],
+  ];
+  el.innerHTML = blocos.map(([kick,t,sub,st,acao]) => `<div class="pworld dsec">${pwHero(kick, t, sub, st, acao)}</div>`).join('');
 }
 function renderTratHero(){
   const el = document.getElementById('ph-trat'); if (!el) return;
