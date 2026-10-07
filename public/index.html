@@ -548,6 +548,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     </label>
     <div class="up-msg" id="up-msg"></div>
     <div id="dbStatus" style="font-size:10px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.5"></div>
+    <div id="ocultosBox" style="display:none;margin-top:8px"><button class="btn-exp" id="ocultosBtn" type="button" onclick="mostrarOcultos()" style="width:100%;justify-content:center"></button></div>
     <div id="loginBox" style="display:none;margin-top:8px">
       <input type="email" id="login-email" placeholder="seu.email@abracadabra.com.br" class="login-input" autocomplete="username">
       <input type="password" id="login-pass" placeholder="Senha" class="login-input" autocomplete="current-password" style="margin-top:6px">
@@ -837,6 +838,17 @@ const CONFIG = {
 };
 const SLA = CONFIG.SLA_COLETA_DIAS;
 
+// Casos de outra area (nao sao analisados aqui): status/abas como "Mercadoria conferida OK", "OK", "OK 2",
+// "Canc prox", "Cancelada", "Cancelar processo", "Cobranca realizada", "Conferencia Expedicao (2)" e parecidos.
+const IGN_STATUS = [
+  /^ok( ?\d+)?\b/,                 // ok, ok 2, ok cliente...
+  /mercadoria conferid/, /confer(encia|id)/,   // mercadoria conferida, conferencia expedicao (2)
+  /cancel|\bcanc\b/,                // cancelada, cancelar processo, canc prox, cancelamento
+  /cobranca realizada/,
+];
+function normStatus(s){ return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim(); }
+function statusIgnorado(s){ const t = normStatus(s); return !!t && IGN_STATUS.some(rx => rx.test(t)); }
+let OCULTOS = [];
 function parseBR(s){
   if (!s) return null;
   const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);
@@ -943,11 +955,13 @@ function rebuildData(){
     else if (id.startsWith('trat_')) tratMap[id] = { ...(tratMap[id]||{}), ...data };
   });
 
-  const allColetas = Object.values(coletaMap).map(deriveColetaLive);
+  OCULTOS = [];
+  const visivel = x => { if (statusIgnorado(x.status)){ OCULTOS.push(x); return false; } return true; };
+  const allColetas = Object.values(coletaMap).filter(visivel).map(deriveColetaLive);
   COL = allColetas.filter(c => !c.cancelada && !c.realizada && !c.coletaRealizada);
   REA = allColetas.filter(c => !c.cancelada && !c.realizada && c.coletaRealizada);
   HIST = allColetas.filter(c => c.cancelada || c.realizada);
-  const allTrat = Object.values(tratMap).map(deriveTratativaLive);
+  const allTrat = Object.values(tratMap).filter(visivel).map(deriveTratativaLive);
   // Perdas sao fato historico (indice mensal) e vivem na propria aba: nao saem do controle por sumirem do arquivo.
   PERDAS = allTrat.filter(t => t.grupo==='perdas').map(derivePerda);
   const outrasTrat = allTrat.filter(t => t.grupo!=='perdas');
@@ -1487,6 +1501,7 @@ function renderAll(){
   renderCrit();
   renderPerdasBadges();
   renderPerdasActive();
+  renderOcultos();
   renderBanner();
   document.querySelectorAll('.tbl-wrap table').forEach(applySort);
 }
@@ -1503,6 +1518,21 @@ function renderCrit(){
     </div>`).join('') : '<div style="font-size:12px;color:var(--tx3);padding:6px">Nenhum caso atrasado no momento.</div>';
 }
 
+function renderOcultos(){
+  const box = document.getElementById('ocultosBox'), btn = document.getElementById('ocultosBtn');
+  if (!box) return;
+  box.style.display = OCULTOS.length ? 'block' : 'none';
+  if (btn) btn.textContent = OCULTOS.length + ' caso' + (OCULTOS.length===1?'':'s') + ' oculto' + (OCULTOS.length===1?'':'s') + ' (outra área)';
+}
+function mostrarOcultos(){
+  const m = new Map();
+  OCULTOS.forEach(x => { const k = String(x.status||'').trim(); m.set(k,(m.get(k)||0)+1); });
+  const rows = [...m.entries()].sort((a,b)=>b[1]-a[1]).map(([s,n])=>`<tr><td style="padding:4px 10px 4px 0">${esc(s)}</td><td style="text-align:right;font-weight:700">${n}</td></tr>`).join('');
+  askConfirm('Casos ocultos (status de outra área)',
+    `<p>Estes casos não aparecem em nenhuma aba porque o status indica que são analisados por outra área. Continuam guardados no banco.</p>
+     <table style="margin-top:10px;font-size:12px;width:100%">${rows||'<tr><td>—</td></tr>'}</table>
+     <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
+}
 let AUTH_DONE = false;
 function renderBanner(){
   const el = document.getElementById('stateBanner');
@@ -1708,6 +1738,7 @@ function parseCsvSemicolon(text){
   if (field.length || row.length){ row.push(field); rows.push(row); }
   return rows.filter(r => r.some(c => c && c.trim()!==''));
 }
+let SKIPPED_SHEETS = [];
 async function readFileRows(file){
   const isCsv = /\.csv$/i.test(file.name);
   if (isCsv){
@@ -1719,8 +1750,19 @@ async function readFileRows(file){
   }
   const buf = await file.arrayBuffer();
   const wb = XLSX.read(buf, { type:'array', cellDates:true });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  return XLSX.utils.sheet_to_json(ws, { header:1, raw:false, dateNF:'dd/mm/yyyy' });
+  SKIPPED_SHEETS = [];
+  let header = null; const out = [];
+  for (const name of wb.SheetNames){
+    if (statusIgnorado(name)){ SKIPPED_SHEETS.push(name); continue; }   // aba de outra area
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header:1, raw:false, dateNF:'dd/mm/yyyy' });
+    if (!rows.length) continue;
+    const hdr = rows[0].map(c=>String(c||'').trim().toUpperCase());
+    if (!hdr.includes('CHAVE')) continue;                                // resumo/dashboard
+    if (!header){ header = hdr; out.push(rows[0]); rows.slice(1).forEach(r=>out.push(r)); }
+    else { const map = header.map(c=>hdr.indexOf(c)); rows.slice(1).forEach(r=>out.push(map.map(i=>i>=0 ? r[i] : ''))); }
+  }
+  if (out.length) return out;
+  return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1, raw:false, dateNF:'dd/mm/yyyy' });
 }
 function toFloatBR(s){ return parseMoney(s); }
 function splitCliente(s){
@@ -1840,10 +1882,12 @@ async function importFile(file){
     const tipoLabel = result.tipo==='coleta' ? 'Protocolo de Coleta' : 'Tratativas';
     const prefix = result.tipo==='coleta' ? 'coleta_' : 'trat_';
     const seen = new Set(result.rows.map(r=>r.id));
-    const abertos = Object.keys(DB_CASES).filter(id => id.startsWith(prefix) && !DB_CASES[id].concluido_auto && groupOf(DB_CASES[id].tipo_devolucao)!=='perdas');
+    const abertos = Object.keys(DB_CASES).filter(id => id.startsWith(prefix) && !DB_CASES[id].concluido_auto && groupOf(DB_CASES[id].tipo_devolucao)!=='perdas' && !statusIgnorado(DB_CASES[id].status));
     const toClose = abertos.filter(id => !seen.has(id));
-    const novos = result.rows.filter(r => !DB_CASES[r.id]).length;
-    const reabertos = result.rows.filter(r => DB_CASES[r.id] && DB_CASES[r.id].concluido_auto).length;
+    const novos = result.rows.filter(r => !DB_CASES[r.id] && !statusIgnorado(r.status)).length;
+    const reabertos = result.rows.filter(r => DB_CASES[r.id] && DB_CASES[r.id].concluido_auto && !statusIgnorado(r.status)).length;
+    const ocultosN = result.rows.filter(r => statusIgnorado(r.status)).length;
+    const xtra = (ocultosN ? ` · ${ocultosN} ocultos (status de outra área)` : '') + (SKIPPED_SHEETS.length ? ` · ${SKIPPED_SHEETS.length} aba(s) ignorada(s)` : '');
 
     // Protecao: arquivo errado/parcial faria "sumir" muita gente de uma vez. Pede confirmacao so nesse caso.
     if (toClose.length > 25 && toClose.length > abertos.length * 0.3){
@@ -1882,8 +1926,8 @@ async function importFile(file){
         .catch(err => console.warn('upload asset falhou', err));
     }
 
-    say(`Importação concluída: ${result.rows.length} linhas · ${novos} novas · ${toClose.length} saíram do controle.`);
-    toast(`${tipoLabel}: ${result.rows.length} linhas lidas · ${novos} novas${reabertos?` · ${reabertos} reabertas`:''} · ${toClose.length} saíram do controle`, {
+    say(`Importação concluída: ${result.rows.length} linhas · ${novos} novas · ${toClose.length} saíram do controle${xtra}.`);
+    toast(`${tipoLabel}: ${result.rows.length} linhas lidas · ${novos} novas${reabertos?` · ${reabertos} reabertas`:''} · ${toClose.length} saíram do controle${xtra}`, {
       type:'ok', ms: toClose.length ? 20000 : 6000,
       actionLabel: toClose.length ? 'Desfazer' : null,
       onAction: async () => {
