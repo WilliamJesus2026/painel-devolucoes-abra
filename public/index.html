@@ -434,6 +434,9 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .pw-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--tx3);margin-bottom:8px}
 .pw-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .pw-sel-motivo{width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--bd);background:var(--srf);color:var(--tx);font-size:12.5px}
+.pw-seg{display:inline-flex;border:1px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--srf)}
+.pw-seg button{border:none;background:none;padding:7px 13px;font-size:11.5px;font-weight:700;color:var(--tx2);cursor:pointer;transition:.14s}
+.pw-seg button.on{background:linear-gradient(135deg,#7C3AED,#DB2777);color:#fff}
 @media print{
   @page{size:A4 landscape;margin:9mm}
   .sb,.hero,#toasts,#palette,.pw-actions,.pw-filters .pw-months,.pw-filters .pw-sel,#stateBanner,.ft,.no-print{display:none!important}
@@ -1504,7 +1507,7 @@ let AUTH_DONE = false;
 function renderBanner(){
   const el = document.getElementById('stateBanner');
   if (!el) return;
-  const total = COL.length + REA.length + HIST.length + TRAT.length + TRAT_HIST.length;
+  const total = COL.length + REA.length + HIST.length + TRAT.length + TRAT_HIST.length + PERDAS.length;
   document.body.classList.toggle('loading', !!DB && !FIRST_SNAPSHOT);
   if (!AUTH_DONE){ el.className=''; return; }
   if (!DB){
@@ -1767,6 +1770,7 @@ function detectAndNormalize(rows){
     usuario: findCol(header,'USUARIO'), descricao: findCol(header,'DESCRICAO'),
     tagraw: findCol(header,'NUMERO'), transpnova: findCol(header,'TIPO_SAIDA_NOVA_SAIDA'),
     valortit: findCol(header,'VALOR_TITULO'), notapeca: findCol(header,'NUMERO_NOTA_PECA'),
+    vnota: findCol(header,'VALOR_NOTA_SAIDA'), vunit: findCol(header,'VALOR UNITARIO'), qtdev: findCol(header,'QUANTIDADE DEVOLVIDA'),
   };
   if (col.chave===-1 || col.situacao===-1){
     return { error:'Não reconheci a estrutura de colunas deste arquivo (faltam CHAVE e/ou SITUACAO). Confirme se é um export do Innovaro.' };
@@ -1807,7 +1811,8 @@ function detectAndNormalize(rows){
       tipo_devolucao:tipoRaw, grupo:groupOf(tipoRaw), transportadora, uf, cidade,
       data_solicitacao:dt, data_programacao:prog, valor, usuario, descricao,
       tag_raw: cellAt(r, col.tagraw) || null, transp_nova: cellAt(r, col.transpnova) || null,
-      valor_titulo: parseMoney(cellAt(r, col.valortit)), nota_peca: cellAt(r, col.notapeca) || null };
+      valor_titulo: parseMoney(cellAt(r, col.valortit)), nota_peca: cellAt(r, col.notapeca) || null,
+      valor_nota_saida: parseMoney(cellAt(r, col.vnota)), valor_unitario: parseMoney(cellAt(r, col.vunit)), qtd_devolvida: parseMoney(cellAt(r, col.qtdev)) };
   });
   return { tipo:tipoDetectado, rows:normalized };
 }
@@ -2152,9 +2157,19 @@ const shortCarr = c => String(c||'').replace(/^Transportadora\s+/,'').replace(/^
 function parseMoney(v){
   if (v==null || v==='') return null;
   if (typeof v==='number') return v;
-  const s = String(v).trim();
+  const s = String(v).replace(/[^\d,.\-]/g,'');
+  if (!s || s==='-') return null;
   const n = s.includes(',') ? parseFloat(s.replace(/\./g,'').replace(',','.')) : parseFloat(s);
   return isNaN(n) ? null : n;
+}
+// Valor da perda: 1) VALOR_TITULO (registrado, igual ao indice) 2) VALOR_NOTA_SAIDA 3) VALOR UNITARIO x qtd
+function pwValores(t){
+  const vt = parseMoney(t.valor_titulo), vn = parseMoney(t.valor_nota_saida), vu = parseMoney(t.valor_unitario), q = parseMoney(t.qtd_devolvida) || 1;
+  let valorEst = null, valorOrigem = null;
+  if (vt > 0){ valorEst = vt; valorOrigem = 'titulo'; }
+  else if (vn && Math.abs(vn) > 0){ valorEst = Math.abs(vn); valorOrigem = 'nota'; }
+  else if (vu > 0){ valorEst = vu * q; valorOrigem = 'unitario'; }
+  return { valorReg: vt, valorEst, valorOrigem, valorNota: vn, valorUnit: vu };
 }
 function custoCitado(desc){
   const m = /pre[cç]o de custo[^0-9]{0,25}(\d{1,3}(?:\.\d{3})*,\d{2}|\d+(?:,\d{1,2})?)/i.exec(desc||'');
@@ -2169,10 +2184,10 @@ function derivePerda(t){
     data:d, ano: d ? d.getFullYear() : null, mes: d ? d.getMonth()+1 : null,
     mesKey: d ? d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') : null,
     motivoAuto, motivo: t.motivo_manual || motivoAuto, manual: !!t.motivo_manual,
-    carrier: carrierOf(t), valorReg: parseMoney(t.valor_titulo), custo: custoCitado(t.descricao) };
+    carrier: carrierOf(t), ...pwValores(t), custo: custoCitado(t.descricao) };
 }
 let PERDAS = [];
-const PF = { ano:null, mes:'all', motivo:null, carrier:null, uf:null };
+const PF = { ano:null, mes:'all', motivo:null, carrier:null, uf:null, metric:'qtd' };
 const pcharts = {};
 const brl = v => 'R$ ' + (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const mesLabel = k => { if(!k) return '—'; const [y,m]=k.split('-'); return MESES[+m-1]+'/'+y; };
@@ -2199,10 +2214,14 @@ function pwMonthsRange(scope){
 }
 const groupCount = (arr, fn) => { const m = new Map(); arr.forEach(x => { const k = fn(x); if (k!=null) m.set(k,(m.get(k)||0)+1); }); return [...m.entries()].sort((a,b)=>b[1]-a[1]); };
 const sumVal = arr => arr.reduce((s,p)=>s+(p.valorReg||0),0);
+const PW = p => PF.metric==='valor' ? (p.valorEst||0) : 1;
+const fmtM = n => PF.metric==='valor' ? brl(n) : n;
+const groupSum = (arr, fn, w) => { const m = new Map(); arr.forEach(x => { const k = fn(x); if (k!=null) m.set(k,(m.get(k)||0)+w(x)); }); return [...m.entries()].sort((a,b)=>b[1]-a[1]); };
 
 function pwSet(k, v){
   if (k==='mes') PF.mes = (PF.mes===v ? 'all' : v);
   else if (k==='ano'){ PF.ano = v==='all' ? 'all' : +v; PF.mes='all'; }
+  else if (k==='metric'){ PF.metric = v; }
   else PF[k] = (PF[k]===v ? null : v);
   renderPerdasActive();
 }
@@ -2236,8 +2255,10 @@ function pwInsights(scope, items, prevItems){
     const re = items.filter(p=>p.reenvio).length;
     if (items.filter(p=>p.ptipo==='cliente').length) out.push(`<b>${re}</b> perda(s) de cliente tiveram reenvio do produto.`);
   }
-  const semVal = items.filter(p=>!p.valorReg).length;
-  if (semVal) out.push(`${semVal} de ${items.length} ocorrências estão <b>sem valor registrado</b> — o total financeiro é parcial.`);
+  const semVal = items.filter(p=>!p.valorEst).length;
+  const vE = items.reduce((s,p)=>s+(p.valorEst||0),0);
+  if (vE){ const topV = groupSum(items,p=>p.motivo,p=>p.valorEst||0)[0]; out.push(`Impacto estimado de <b>${brl(vE)}</b>; em valor, <b>${topV[0]}</b> lidera (${brl(topV[1])}).`); }
+  if (semVal) out.push(`${semVal} de ${items.length} ocorrências estão <b>sem valor em nenhuma coluna</b> — o total financeiro é parcial.`);
   return out;
 }
 
@@ -2283,6 +2304,8 @@ function renderPerdas(scope){
   const cli = items.filter(p=>p.ptipo==='cliente'), trp = items.filter(p=>p.ptipo==='transportadora');
   const reenv = cli.filter(p=>p.reenvio).length;
   const vReg = sumVal(items), comVal = items.filter(p=>p.valorReg).length;
+  const vEst = items.reduce((s,p)=>s+(p.valorEst||0),0), vNota = items.filter(p=>p.valorOrigem && p.valorOrigem!=='titulo').reduce((s,p)=>s+p.valorEst,0), semAny = items.filter(p=>!p.valorEst).length;
+  const vSub = `${brl(vReg)} em título · ${brl(vNota)} por nota de saída/unitário${semAny?` · ${semAny} sem valor`:''}`;
   const motTop = groupCount(items,p=>p.motivo)[0], carTop = groupCount(items,p=>p.carrier)[0];
 
   let stats;
@@ -2290,17 +2313,17 @@ function renderPerdas(scope){
     ['Total de perdas', items.length, pwDeltaCounts(items.length, prevItems), 'registradas no período'],
     ['Perdas Cliente', cli.length, '', `${reenv} com reenvio`],
     ['Perdas Transportadora', trp.length, '', 'avaria/extravio na operação'],
-    ['Valor registrado', vReg, '', `${comVal} de ${items.length} com valor`, true]];
+    ['Valor estimado', vEst, '', vSub, true]];
   else if (scope==='cliente') stats = [
     ['Perdas Cliente', items.length, pwDeltaCounts(items.length, prevItems), 'mercadoria ficou com o cliente'],
     ['Com reenvio', reenv, '', 'produto reenviado'],
     ['Sem reenvio', items.length-reenv, '', 'cancelamento / reembolso / perda'],
-    ['Valor registrado', vReg, '', `${comVal} de ${items.length} com valor`, true]];
+    ['Valor estimado', vEst, '', vSub, true]];
   else stats = [
     ['Perdas Transportadora', items.length, pwDeltaCounts(items.length, prevItems), 'perda na operação do transporte'],
     ['Principal motivo', motTop?motTop[0]:'—', '', motTop?`${motTop[1]} ocorrências`:'', 'txt'],
     ['Transportadora líder', carTop?shortCarr(carTop[0]):'—', '', carTop?`${carTop[1]} ocorrências`:'', 'txt'],
-    ['Valor registrado', vReg, '', `${comVal} de ${items.length} com valor`, true]];
+    ['Valor estimado', vEst, '', vSub, true]];
 
   const baseScope = PERDAS.filter(p=>(scope==='all'||p.ptipo===scope) && (ano==='all'||p.ano===ano));
   const monthChips = Array.from({length:12},(_,i)=>{
@@ -2310,13 +2333,13 @@ function renderPerdas(scope){
   const pills = [PF.motivo&&['motivo','Motivo: '+PF.motivo], PF.carrier&&['carrier','Transp.: '+shortCarr(PF.carrier)], PF.uf&&['uf','UF: '+PF.uf]].filter(Boolean)
     .map(([k,t])=>`<span class="pw-pill" onclick="pwSet('${k}',PF.${k})" title="Remover filtro">${esc(t)} ✕</span>`).join('');
 
-  const motivos = groupCount(pwBase(scope,['motivo']), p=>p.motivo), maxM = motivos.length?motivos[0][1]:1, totM = pwBase(scope,['motivo']).length||1;
-  const rankMot = motivos.length ? motivos.map(([m,n])=>`<div class="pw-r${PF.motivo===m?' on':''}" data-pf="motivo" data-v="${esc(m)}"><span class="nm"><i class="dot" style="background:${MOTIVO_COR[m]||'#94A3B8'}"></i>${esc(m)}</span><span class="bar"><i style="width:${n/maxM*100}%;background:${MOTIVO_COR[m]||'#94A3B8'}"></i></span><span class="ct">${n} <small>${Math.round(n/totM*100)}%</small></span></div>`).join('') : '<div class="pw-empty">Sem dados.</div>';
+  const motivos = groupSum(pwBase(scope,['motivo']), p=>p.motivo, PW), maxM = motivos.length?(motivos[0][1]||1):1, totM = pwBase(scope,['motivo']).reduce((s,p)=>s+PW(p),0)||1;
+  const rankMot = motivos.length ? motivos.map(([m,n])=>`<div class="pw-r${PF.motivo===m?' on':''}" data-pf="motivo" data-v="${esc(m)}"><span class="nm"><i class="dot" style="background:${MOTIVO_COR[m]||'#94A3B8'}"></i>${esc(m)}</span><span class="bar"><i style="width:${n/maxM*100}%;background:${MOTIVO_COR[m]||'#94A3B8'}"></i></span><span class="ct">${fmtM(n)} <small>${Math.round(n/totM*100)}%</small></span></div>`).join('') : '<div class="pw-empty">Sem dados.</div>';
 
-  const cars = groupCount(pwBase(scope,['carrier']), p=>p.carrier), maxC = cars.length?cars[0][1]:1, totC = pwBase(scope,['carrier']).length||1;
+  const cars = groupSum(pwBase(scope,['carrier']), p=>p.carrier, PW), maxC = cars.length?(cars[0][1]||1):1, totC = pwBase(scope,['carrier']).reduce((s,p)=>s+PW(p),0)||1;
   const rankCar = cars.length ? cars.map(([c,n])=>{
-    const arr = pwBase(scope,['carrier']).filter(p=>p.carrier===c), a=arr.filter(p=>p.ptipo==='cliente').length, b=n-a;
-    return `<div class="pw-r${PF.carrier===c?' on':''}" data-pf="carrier" data-v="${esc(c)}"><span class="nm" title="${esc(c)}">${esc(shortCarr(c))}</span><span class="bar" style="width:${n/maxC*100}%"><i style="width:${a/n*100}%;background:#7C3AED"></i><i style="width:${b/n*100}%;background:#F43F5E"></i></span><span class="ct">${n} <small>${Math.round(n/totC*100)}%</small></span></div>`;
+    const arr = pwBase(scope,['carrier']).filter(p=>p.carrier===c), a=arr.filter(p=>p.ptipo==='cliente').reduce((s,p)=>s+PW(p),0), b=n-a;
+    return `<div class="pw-r${PF.carrier===c?' on':''}" data-pf="carrier" data-v="${esc(c)}"><span class="nm" title="${esc(c)}">${esc(shortCarr(c))}</span><span class="bar" style="width:${n/maxC*100}%"><i style="width:${a/(n||1)*100}%;background:#7C3AED"></i><i style="width:${b/(n||1)*100}%;background:#F43F5E"></i></span><span class="ct">${fmtM(n)} <small>${Math.round(n/totC*100)}%</small></span></div>`;
   }).join('') : '<div class="pw-empty">Sem dados.</div>';
 
   // heatmap motivo x mes
@@ -2346,7 +2369,7 @@ function renderPerdas(scope){
       <td><span class="bdg" style="background:${MOTIVO_COR[p.motivo]||'#94A3B8'}22;color:${MOTIVO_COR[p.motivo]||'#64748B'};border-color:${MOTIVO_COR[p.motivo]||'#94A3B8'}55">${esc(p.motivo)}${p.manual?' ✎':''}</span></td>
       <td class="td-nome">${esc(p.cliente||'—')}</td>
       <td>${esc(shortCarr(p.carrier))}</td><td><span class="bdg b-acc">${esc(p.uf||'—')}</span></td>
-      <td>${p.valorReg?brl(p.valorReg):'—'}</td><td class="td-desc" title="${esc(p.descricao)}">${esc(p.descricao||'—')}</td></tr>`).join('');
+      <td title="${p.valorOrigem==='titulo'?'Valor do título (registrado)':p.valorOrigem==='nota'?'Estimado pelo valor da nota de saída':p.valorOrigem==='unitario'?'Estimado pelo valor unitário':'Sem valor'}">${p.valorEst?(p.valorOrigem==='titulo'?'':'≈ ')+brl(p.valorEst):'—'}</td><td class="td-desc" title="${esc(p.descricao)}">${esc(p.descricao||'—')}</td></tr>`).join('');
 
   root.innerHTML = `
     <div class="pw-hero">
@@ -2363,6 +2386,7 @@ function renderPerdas(scope){
     </div>
     <div class="pw-filters">
       <select class="pw-sel" onchange="pwSet('ano',this.value)" aria-label="Ano"><option value="all"${ano==='all'?' selected':''}>Todos os anos</option>${anos.map(a=>`<option value="${a}"${a===ano?' selected':''}>${a}</option>`).join('')}</select>
+      <div class="pw-seg no-print" role="group" aria-label="Métrica"><button type="button" class="${PF.metric!=='valor'?'on':''}" onclick="pwSet('metric','qtd')">Quantidade</button><button type="button" class="${PF.metric==='valor'?'on':''}" onclick="pwSet('metric','valor')">Valor R$</button></div>
       <div class="pw-months">${monthChips}</div>
       <button class="chip no-print" type="button" onclick="pwClear()">Limpar filtros</button>
       ${pills?`<div class="pw-pills">${pills}</div>`:''}
@@ -2385,7 +2409,7 @@ function renderPerdas(scope){
     </div>
     <div class="pw-card" style="margin-bottom:12px"><h3>Detalhamento · ${items.length} ocorrência${items.length===1?'':'s'}</h3><div class="s">Clique numa linha para ver o caso e reclassificar o motivo</div>
       <div class="tbl-wrap" style="box-shadow:none"><div class="tbl-scroll"><table><thead><tr><th>Data</th><th>Tipo</th><th>Motivo</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Valor</th><th>Descrição</th></tr></thead><tbody>${tbl||'<tr><td colspan="8" class="pw-empty">Nenhuma perda no período selecionado.</td></tr>'}</tbody></table></div></div>
-      <div class="pw-note">Valor registrado = soma do VALOR_TITULO do Innovaro. Vazio ou zero não significa impacto financeiro zero — o total é parcial quando há ocorrências sem valor.</div>
+      <div class="pw-note"><b>Valor estimado</b> = valor do título (VALOR_TITULO) quando existe; senão o valor da nota de saída (VALOR_NOTA_SAIDA) ou o valor unitário do item — marcado com ≈ na tabela. É uma referência de exposição, não substitui a validação financeira.</div>
     </div>`;
 
   // graficos
@@ -2393,7 +2417,7 @@ function renderPerdas(scope){
   Chart.defaults.color = css.getPropertyValue('--tx3').trim() || '#7A8FA0';
   Chart.defaults.font.family = '-apple-system,"Segoe UI",sans-serif';
   const evKeys = range, evBase = PERDAS.filter(p=>(scope==='all'||p.ptipo===scope) && (!PF.motivo||p.motivo===PF.motivo) && (!PF.carrier||p.carrier===PF.carrier) && (!PF.uf||p.uf===PF.uf));
-  const cnt = (k,f)=>evBase.filter(p=>p.mesKey===k && f(p)).length;
+  const cnt = (k,f)=>evBase.filter(p=>p.mesKey===k && f(p)).reduce((s,p)=>s+PW(p),0);
   const series = scope==='all' ? [['Cliente','#7C3AED',p=>p.ptipo==='cliente'],['Transportadora','#F43F5E',p=>p.ptipo==='transportadora']]
     : scope==='cliente' ? [['Com reenvio','#06B6D4',p=>p.reenvio],['Sem reenvio','#7C3AED',p=>!p.reenvio]] : [['Transportadora','#F43F5E',()=>true]];
   const keyDestroy = n => { if (pcharts[n]) { pcharts[n].destroy(); delete pcharts[n]; } };
@@ -2404,8 +2428,8 @@ function renderPerdas(scope){
     options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
       onClick:(e,els)=>{ if(!els.length) return; const k=evKeys[els[0].index]; const [y,m]=k.split('-'); if (ano==='all') PF.ano=+y; PF.mes = (PF.mes===+m && PF.ano===+y) ? 'all' : +m; renderPerdasActive(); },
       onHover:(e,els)=>{ e.native.target.style.cursor = els.length?'pointer':'default'; },
-      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, boxHeight:10, usePointStyle:true } } },
-      scales:{ x:{ stacked:true, grid:{display:false} }, y:{ stacked:true, beginAtZero:true, ticks:{precision:0}, grid:{color:'rgba(127,140,160,.15)'} } } } });
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, boxHeight:10, usePointStyle:true } }, tooltip:{ callbacks:{ label:c=>`${c.dataset.label}: ${PF.metric==='valor'?brl(c.parsed.y):c.parsed.y}` } } },
+      scales:{ x:{ stacked:true, grid:{display:false} }, y:{ stacked:true, beginAtZero:true, ticks:{precision:0, callback:v=>PF.metric==='valor'?'R$ '+Math.round(v):v}, grid:{color:'rgba(127,140,160,.15)'} } } } });
   keyDestroy(scope+'dn');
   const dn = document.getElementById(`pwc-${scope}-donut`);
   if (dn){
@@ -2457,7 +2481,7 @@ function pwSummaryText(scope){
   const cli = items.filter(p=>p.ptipo==='cliente').length, trp = items.length-cli;
   const mot = groupCount(items,p=>p.motivo).slice(0,5).map(([m,n])=>`  • ${m}: ${n}`).join('\n');
   const car = groupCount(items,p=>p.carrier).slice(0,5).map(([m,n])=>`  • ${shortCarr(m)}: ${n}`).join('\n');
-  return `ÍNDICE DE PERDAS — ${SCOPE_NAME[scope]} — ${periodo}\n\nTotal: ${items.length} (Cliente: ${cli} · Transportadora: ${trp})\nValor registrado: ${brl(sumVal(items))} (${items.filter(p=>p.valorReg).length} de ${items.length} ocorrências com valor)\n\nPrincipais motivos:\n${mot||'  —'}\n\nPor transportadora:\n${car||'  —'}\n\nObs.: valor vazio/zero não significa impacto zero; total financeiro é parcial.`;
+  return `ÍNDICE DE PERDAS — ${SCOPE_NAME[scope]} — ${periodo}\n\nTotal: ${items.length} (Cliente: ${cli} · Transportadora: ${trp})\nImpacto estimado: ${brl(items.reduce((s,p)=>s+(p.valorEst||0),0))} (${brl(sumVal(items))} em título + ${brl(items.reduce((s,p)=>s+(p.valorEst||0),0)-sumVal(items))} pela nota de saída/valor unitário)\n\nPrincipais motivos:\n${mot||'  —'}\n\nPor transportadora:\n${car||'  —'}\n\nObs.: valor vazio/zero não significa impacto zero; total financeiro é parcial.`;
 }
 async function pwCopy(scope){
   try{ await navigator.clipboard.writeText(pwSummaryText(scope)); toast('Resumo copiado — é só colar no e-mail.', {type:'ok'}); }
@@ -2465,7 +2489,7 @@ async function pwCopy(scope){
 }
 function pwExport(scope){
   const items = pwBase(scope), hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
-  exportCSV(items.map(p=>({ 'Data':p.data?p.data.toLocaleDateString('pt-BR'):'', 'Tipo':p.ptipo==='cliente'?'Perdas Cliente':'Perdas Transportadora', 'Reenvio':p.reenvio?'Sim':'Não', 'Motivo':p.motivo, 'Cliente':p.cliente||'', 'CPF':p.cpf||'', 'NF':p.nf||'', 'Transportadora':p.carrier, 'UF':p.uf||'', 'Cidade':p.cidade||'', 'Valor registrado':p.valorReg||'', 'Custo citado':p.custo||'', 'Responsável':p.usuario||'', 'Descrição':p.descricao||'' })), `Perdas_${scope}_${hoje}.csv`);
+  exportCSV(items.map(p=>({ 'Data':p.data?p.data.toLocaleDateString('pt-BR'):'', 'Tipo':p.ptipo==='cliente'?'Perdas Cliente':'Perdas Transportadora', 'Reenvio':p.reenvio?'Sim':'Não', 'Motivo':p.motivo, 'Cliente':p.cliente||'', 'CPF':p.cpf||'', 'NF':p.nf||'', 'Transportadora':p.carrier, 'UF':p.uf||'', 'Cidade':p.cidade||'', 'Valor título':p.valorReg||'', 'Valor estimado':p.valorEst||'', 'Origem do valor':p.valorOrigem||'', 'Custo citado':p.custo||'', 'Responsável':p.usuario||'', 'Descrição':p.descricao||'' })), `Perdas_${scope}_${hoje}.csv`);
 }
 
 // ---------- detalhe da perda + reclassificacao manual ----------
@@ -2484,7 +2508,10 @@ function openPerdaDetail(item){
       <dt>Motivo ${item.manual?'(ajustado manualmente)':'(classificação automática)'}</dt>
       <dd><select class="pw-sel-motivo" id="pw-motivo-sel" onchange="pwSetMotivo('${esc(String(item.chave))}',this.value)">${sel}</select>
         ${item.manual?`<div style="margin-top:6px"><button class="chip" type="button" onclick="pwSetMotivo('${esc(String(item.chave))}','')">Voltar para automático (${esc(item.motivoAuto)})</button></div>`:''}</dd>
-      <dt>Valor registrado</dt><dd class="mono">${item.valorReg?brl(item.valorReg):'Não registrado'}</dd>
+      <dt>Valor do título (registrado)</dt><dd class="mono">${item.valorReg?brl(item.valorReg):'Não registrado'}</dd>
+      <dt>Valor da nota de saída</dt><dd class="mono">${item.valorNota?brl(Math.abs(item.valorNota)):'—'}</dd>
+      <dt>Valor unitário</dt><dd class="mono">${item.valorUnit?brl(item.valorUnit):'—'}</dd>
+      <dt>Valor estimado usado no painel</dt><dd class="mono"><b>${item.valorEst?brl(item.valorEst):'—'}</b> ${item.valorOrigem?'<span style="color:var(--tx3);font-size:11px">('+({titulo:'do título',nota:'da nota de saída',unitario:'do valor unitário'}[item.valorOrigem])+')</span>':''}</dd>
       <dt>Custo citado na descrição</dt><dd class="mono">${item.custo?brl(item.custo):'—'}</dd>
       <dt>Status</dt><dd>${esc(item.status)||'—'}</dd>
       <dt>Responsável</dt><dd>${esc(item.usuario)||'—'}</dd>
