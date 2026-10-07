@@ -61,3 +61,7 @@ Menu **Controle → Indicadores por transportadora**. Cada caso (Pendente + Fina
 ## Padrão visual e importação
 
 Protocolo de Coleta, Tratativas e Controle de Situações usam o mesmo cabeçalho/estatísticas e a mesma barra de filtros das Perdas. Cada aba tem o botão **Importar planilha**; qualquer importação atualiza o painel inteiro. As Perdas mostram também o valor do mês e o acumulado de janeiro até o mês atual. O painel de Tratativas lista só situações Pendentes; Finalizadas e canceladas seguem nos indicadores.
+
+## Canais: Marketplace x Relacionamento
+
+O canal é identificado pelo **usuário responsável** (coluna USUARIO). Por padrão, usuários que começam com `thairiny` ou `joao` são **Marketplace**; todos os outros são **Relacionamento**. A lista é editável em Controle de Situações → Canal → "Definir usuários do Marketplace" (salva em `config/canais`) e vale também para as Perdas.

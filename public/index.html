@@ -749,6 +749,8 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <div class="panel" id="panel-ind">
       <div class="pworld" id="ph-ind"></div>
       <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
+      <div class="ind-h">Por canal de atendimento</div><div class="ind-sub" id="ind-canais-sub"></div>
+      <div class="ind-cars" id="ind-canais" style="margin-bottom:6px"></div>
       <div class="ind-h">Indicadores por transportadora</div><div class="ind-sub" id="ind-sub"></div>
       <div class="ind-cars" id="ind-cars"></div>
       <div class="card" style="margin-bottom:14px"><div class="card-title">Volume de tarefas e % de atendimento por mês de criação</div><div class="card-sub">Barras = tarefas criadas · linha = % já atendidas · clique numa barra para filtrar o mês</div><div style="height:320px"><canvas id="ch-ind"></canvas></div></div>
@@ -758,7 +760,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Motivo da pendência</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Motivo da pendência</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
     </div>
 
     <div class="panel" id="panel-trat">
@@ -2241,6 +2243,8 @@ async function _initDb(interactive){
 
   DB.collection('config').onSnapshot(snap => {
     const d = snap.docs.find(x => x.id==='sla_situacoes');
+    const cn = snap.docs.find(x => x.id==='canais');
+    if (cn && Array.isArray(cn.data().marketplace)){ MKT_USERS = cn.data().marketplace; try { localStorage.setItem('mkt_users', JSON.stringify(MKT_USERS)); } catch(e){} scheduleRender(); }
     if (d){ const v = d.data(); SIT_CFG = { base: v.base==='solic'?'solic':'prog', regras: v.regras||{} }; try { localStorage.setItem('sit_cfg', JSON.stringify(SIT_CFG)); } catch(e){} scheduleRender(); }
   }, err => console.warn('config onSnapshot error', err));
 
@@ -2275,7 +2279,7 @@ function renderTratHero(){
 // ================= CONTROLE DE SITUACOES (indicadores por transportadora) =================
 const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente'];
 const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'A classificar':'#64748B' };
-const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'' };
+const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'' };
 const IND_CORTE = 7;   // a partir de julho o detalhe mes a mes; antes disso os meses entram como um bloco ja finalizado
 const indAntigos = () => Array.from({length:IND_CORTE-1},(_,i)=>i+1);
 let IND_ALL = [], IND_ABERTOS = [];
@@ -2299,7 +2303,7 @@ function indCalcula(){
     const dias = d ? daysBetween(d, hoje) : null, sla = sitSlaDe(x.sit);
     let motivo = null;
     if (!x.fin) motivo = IND_MOTIVOS.includes(x.motivo_pend) ? x.motivo_pend : ((!sla || dias==null || dias<=sla) ? 'No prazo' : 'A classificar');
-    return { ...x, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indNome(x.transportadora) };
+    return { ...x, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indNome(x.transportadora), canal:canalOf(x.usuario) };
   });
 }
 function indAgg(arr){
@@ -2314,8 +2318,9 @@ function indSet(k,v){
   else if (k==='carr') tg(IND.carrs, v);
   else if (k==='motivo'){ tg(IND.motivos, v); if (IND.motivos.size) IND.status = 'aberto'; }
   else if (k==='status'){ IND.status = v; if (v==='fin') IND.motivos.clear(); }
+  else if (k==='canal') IND.canal = (IND.canal===v ? '' : v);
   else if (k==='q') IND.q = norm(v).trim();
-  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
+  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; IND.canal=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
   renderInd();
 }
 function indSetMotivo(id, v){
@@ -2335,6 +2340,7 @@ function renderInd(){
       (ign.includes('carr') || !IND.carrs.size || IND.carrs.has(x.carr)) &&
       (ign.includes('status') || !IND.status || (IND.status==='fin') === x.fin) &&
       (ign.includes('motivo') || !IND.motivos.size || (!x.fin && IND.motivos.has(x.motivo))) &&
+      (ign.includes('canal') || !IND.canal || x.canal===IND.canal) &&
       (!IND.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(IND.q)); };
   const base = doAno.filter(x=>f(x,['status','motivo']));
   const A = indAgg(base);
@@ -2350,10 +2356,11 @@ function renderInd(){
   const carrs = [...new Set(doAno.map(x=>x.carr))].map(c=>{ const k = cnt(doAno.filter(x=>x.carr===c),['carr']); return {c, n:k[0], ab:k[1]}; }).sort((a,b)=>b.n-a.n);
   const nFin = doAno.filter(x=>x.fin && f(x,['status','motivo'])).length, nAb = doAno.filter(x=>!x.fin && f(x,['status','motivo'])).length;
   const motCont = m => doAno.filter(x=>!x.fin && x.motivo===m && f(x,['status','motivo'])).length;
-  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q;
+  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q || IND.canal;
   document.getElementById('ind-fbody').innerHTML =
     `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${antChip}${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join('')}</div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join('')}</div></div>
+     <div class="ind-fr"><b>Canal</b><div>${chip(!IND.canal, "indSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Marketplace','Relacionamento'].map(c => { const k = cnt(doAno.filter(x=>x.canal===c),['canal']); return chip(IND.canal===c, `indSet('canal','${c}')`, c, k[0], k[1]); }).join('')}<button type="button" class="ind-ch" onclick="indUsuarios()" title="Quem é do Marketplace; os demais usuários são do Relacionamento">⚙ Definir usuários do Marketplace</button></div></div>
      <div class="ind-fr"><b>Situação</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
      ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Motivo da pendência</b><div>${['No prazo','Relacionamento','Transporte','Cliente','A classificar'].map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${m}`, m, motCont(m))).join('')}</div></div>`}`;
   document.getElementById('ind-fres').innerHTML = `${IND.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${IND.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio aparece conforme as finalizações forem registradas nas próximas importações</i>');
@@ -2362,7 +2369,7 @@ function renderInd(){
   // ---- KPIs ----
   const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
   document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', 'Tarefas, taxa de atendimento, SLA médio e o que ainda está em aberto — atualiza a cada importação.',
-    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'aparece conforme as finalizações forem registradas'], ['Em aberto hoje', A.aberto, 'pendentes de resolução']]);
+    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'aparece conforme as finalizações forem registradas'], ['Em aberto hoje', A.aberto, `Marketplace ${base.filter(x=>!x.fin&&x.canal==='Marketplace').length} · Relacionamento ${base.filter(x=>!x.fin&&x.canal==='Relacionamento').length}`]]);
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
@@ -2371,6 +2378,13 @@ function renderInd(){
   document.getElementById('ind-cars').innerHTML = [...por.entries()].map(([c,arr])=>({c, a:indAgg(arr)})).sort((x,y)=>y.a.total-x.a.total).map(({c,a}) => {
     const cl = a.taxa>=90 ? '' : a.taxa>=75 ? ' am' : ' rd', tcl = a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
     return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}</h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div></div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
+
+  // ---- por canal (Marketplace x Relacionamento) ----
+  document.getElementById('ind-canais-sub').textContent = 'Marketplace e Relacionamento atendem o cliente separadamente · identificados pelo usuário responsável (Marketplace: ' + MKT_USERS.join(', ') + '). Clique para filtrar.';
+  document.getElementById('ind-canais').innerHTML = ['Marketplace','Relacionamento'].map(c => {
+    const arr = doAno.filter(x=>x.canal===c && f(x,['canal','status','motivo'])), a = indAgg(arr), tcl = a.taxa==null ? '' : a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
+    const us = [...arr.reduce((m,x)=>m.set(x.usuario||'—',(m.get(x.usuario||'—')||0)+1), new Map()).entries()].sort((p,q)=>q[1]-p[1]).slice(0,4).map(([u,n])=>esc(u)+' ('+n+')').join(' · ');
+    return `<div class="ind-c${IND.canal===c?' on':''}" onclick="indSet('canal','${c}')"><h4>${c}</h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div><div style="font-size:10.5px;color:var(--tx3);margin-top:8px">${us||'sem casos'}</div></div>`; }).join('');
 
   // ---- grafico mensal (ignora mes/situacao/motivo para mostrar a serie inteira; meses filtrados ficam destacados) ----
   const doCar = doAno.filter(x=>f(x,['mes','status','motivo']));
@@ -2414,9 +2428,28 @@ function renderInd(){
   document.getElementById('ind-lista-t').textContent = verFin ? 'Tarefas atendidas' : IND.status==='' ? 'Todas as tarefas (atendidas e em aberto)' : 'Casos em aberto — defina o motivo';
   document.getElementById('cnt-ind').textContent = lista.length + (verFin ? ' atendidas' : IND.status==='' ? ' tarefas' : ' em aberto');
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind');
-  if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td>
+  if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td style="font-size:11px">${esc(x.usuario||'—')} <span class="bdg" style="background:${x.canal==='Marketplace'?'#7C3AED22':'#06B6D422'};color:${x.canal==='Marketplace'?'#7C3AED':'#06B6D4'};font-size:9.5px">${x.canal==='Marketplace'?'Marketplace':'Relacion.'}</span></td>
     <td onclick="event.stopPropagation()">${x.fin ? '<span class="bdg b-grn">Atendida</span>' : `<select data-id="${esc(x.id||'')}" onchange="indSetMotivo(this.dataset.id,this.value)" style="padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">${x.motivo==='A classificar'?'<option value="" selected>A classificar…</option>':''}${IND_MOTIVOS.map(m=>`<option${m===x.motivo?' selected':''}>${m}</option>`).join('')}</select>`}</td></tr>`).join('')
-    + (lista.length>300 ? `<tr><td colspan="7" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
+    + (lista.length>300 ? `<tr><td colspan="8" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
+}
+async function indUsuarios(){
+  const cont = new Map(); IND_ALL.concat(PERDAS).forEach(x => { const u = String(x.usuario||'').trim(); if (u) cont.set(u, (cont.get(u)||0)+1); });
+  const us = [...cont.entries()].sort((a,b)=>b[1]-a[1]);
+  const html = `<p style="margin-bottom:8px">Marque quem é do <b>Marketplace</b>. Os demais usuários são do <b>Relacionamento</b>. Vale para o Controle de Situações e para as Perdas.</p>
+    <div style="max-height:300px;overflow:auto;border:1px solid var(--bd);border-radius:10px;padding:8px">${us.map(([u,n]) => `<label style="display:flex;gap:8px;align-items:center;padding:3px 2px;cursor:pointer"><input type="checkbox" data-u="${esc(u)}"${canalOf(u)==='Marketplace'?' checked':''}> ${esc(u)} <small style="color:var(--tx3)">${n} caso${n>1?'s':''}</small></label>`).join('') || '<i>Importe um arquivo para listar os usuários.</i>'}</div>
+    <p style="margin-top:8px;font-size:11.5px;color:var(--tx3)">Usuário que ainda não apareceu? Digite o nome (ou o começo dele), separados por vírgula:</p>
+    <input id="mkt-extra" style="width:100%;padding:7px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--srf);color:var(--tx)" placeholder="ex.: thairiny, joao">`;
+  const ok = await askConfirm('Usuários do Marketplace', html, 'Salvar');
+  if (!ok) return;
+  const marcados = [...document.querySelectorAll('#confirmModal .cm-body input[data-u]')];
+  const extras = String((document.getElementById('mkt-extra')||{}).value||'').split(',').map(t=>norm(t).trim()).filter(Boolean);
+  const todos = marcados.map(i => i.getAttribute('data-u'));
+  const manter = MKT_USERS.filter(k => !todos.some(u => norm(u).startsWith(k)));   // regras antigas que nao casam com nenhum usuario listado
+  const lista = [...new Set([...manter, ...marcados.filter(i=>i.checked).map(i=>norm(i.getAttribute('data-u')).trim()), ...extras])];
+  MKT_USERS = lista; try { localStorage.setItem('mkt_users', JSON.stringify(lista)); } catch(e){}
+  if (DB){ try { await DB.doc('config/canais').set({ marketplace:lista, updatedAt:isoNow() }); } catch(err){ toast('Não consegui salvar no banco: '+(err.code||err.message), {type:'err'}); } }
+  toast('Marketplace: ' + (lista.join(', ')||'ninguém') + ' · os demais são Relacionamento', {type:'ok'});
+  renderAll();
 }
 function indExport(){
   if (!IND_ABERTOS.length){ toast('Nada para exportar.', {type:'warn'}); return; }
@@ -2497,7 +2530,7 @@ function custoCitado(desc){
   const m = /pre[cç]o de custo[^0-9]{0,25}(\d{1,3}(?:\.\d{3})*,\d{2}|\d+(?:,\d{1,2})?)/i.exec(desc||'');
   return m ? parseMoney(m[1]) : null;
 }
-const MKT_USERS = ['thairiny','joao'];
+let MKT_USERS = (() => { try { const a = JSON.parse(localStorage.getItem('mkt_users')||'null'); if (Array.isArray(a) && a.length) return a; } catch(e){} return ['thairiny','joao']; })();   // usuarios do Marketplace; os demais sao Relacionamento
 function canalOf(u){ const n = norm(u||'').trim(); return MKT_USERS.some(k => n.startsWith(k)) ? 'Marketplace' : 'Relacionamento'; }
 function derivePerda(t){
   const tipoRaw = t.tipo_devolucao || '';
