@@ -537,12 +537,6 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <span class="bdg" id="bdg-ind">0</span>
     </button>
 
-    <button class="nav" onclick="ir('slam')" id="nav-slam">
-      <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2" stroke-width="1.5"/><path d="M3 10h18M8 3v4M16 3v4" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Fechamento mensal de SLA
-      <span class="bdg" id="bdg-slam">0</span>
-    </button>
-
     <div class="sb-grp">Perdas</div>
     <button class="nav" onclick="ir('perdas')" id="nav-perdas">
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15 6 21 6 21 12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -782,19 +776,6 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       </div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Motivo da pendência</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
-    </div>
-
-    <div class="panel" id="panel-slam">
-      <div class="dica"><strong>Fechamento mensal de SLA:</strong> o quadro "ao vivo" muda conforme vocês ajustam os casos. Aqui fica o <b>retrato fixo</b> de cada mês: quem estava <b>fora do prazo</b> (dias acima do SLA da situação), sem considerar motivos ou ajustes feitos depois. O mês corrente vai acumulando e os meses anteriores ficam <b>congelados</b>; um caso que estourou o prazo continua no mês mesmo se for resolvido depois. Meses marcados como <i>reconstruído</i> foram montados a partir dos casos ainda em aberto (não incluem os que já tinham sido resolvidos).</div>
-      <div class="ind-cars" id="slam-meses" style="grid-template-columns:repeat(auto-fill,minmax(170px,1fr))"></div>
-      <div class="ind-kpis" id="slam-kpis"></div>
-      <div class="g2">
-        <div class="card"><div class="card-title">Cumprimento do SLA por mês</div><div class="card-sub">Barras = casos fora do prazo · linha = % dentro do prazo · clique para abrir o mês</div><div style="height:280px"><canvas id="ch-slam"></canvas></div></div>
-        <div class="card"><div class="card-title" id="slam-t-transp">Por transportadora</div><div class="card-sub">Clique para filtrar a lista abaixo</div><div class="tbl-scroll" style="max-height:290px"><table><thead><tr><th>Transportadora</th><th>Ativas</th><th>Fora do prazo</th><th>Cumprimento</th></tr></thead><tbody id="tb-slam-tr"></tbody></table></div></div>
-      </div>
-      <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="slam-lista-t">Fora do prazo</b><span class="chip" id="slam-pill" style="display:none" onclick="SM.carrier=null;renderSlaMes()"></span><span class="fcnt" id="cnt-slam"></span>
-        <button class="btn-exp" type="button" id="slam-btn" onclick="slamRefazer()">Salvar agora</button><button class="btn-exp" onclick="slamExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Transportadora</th><th>Situação</th><th>Cliente</th><th>NF</th><th>Venceu em</th><th>SLA</th><th>Atraso no fechamento</th><th>Status hoje</th></tr></thead><tbody id="tb-slam"></tbody></table></div></div>
     </div>
 
     <div class="panel" id="panel-trat">
@@ -1126,7 +1107,7 @@ const TITLES = {
   dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Protocolo de Coleta — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
-  sit:'Controle de Situações', ind:'Indicadores por transportadora', slam:'Fechamento mensal de SLA', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
+  sit:'Controle de Situações', ind:'Indicadores por transportadora', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
 };
 function ir(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
@@ -1139,7 +1120,6 @@ function ir(id){
   renderPerdasActive();
   if (id==='sit') renderSit();
   if (id==='ind') renderInd();
-  if (id==='slam') renderSlaMes();
   window.scrollTo({top:0});
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1606,7 +1586,6 @@ function renderAll(){
   renderPerdasActive();
   renderSit();
   renderInd();
-  renderSlaMes();
   renderOcultos();
   renderBanner();
   document.querySelectorAll('.tbl-wrap table').forEach(applySort);
@@ -2274,135 +2253,12 @@ async function _initDb(interactive){
     if (d){ const v = d.data(); SIT_CFG = { base: v.base==='solic'?'solic':'prog', regras: v.regras||{} }; try { localStorage.setItem('sit_cfg', JSON.stringify(SIT_CFG)); } catch(e){} scheduleRender(); }
   }, err => console.warn('config onSnapshot error', err));
 
-  DB.collection('snapshots').onSnapshot(snap => {
-    const m = {}; snap.docs.forEach(d => { const v = d.data(); if (v && v.key) m[v.key] = v; });
-    SNAPS = m; SNAPS_OK = true; _snapAuto = 0; scheduleRender();
-  }, err => console.warn('snapshots onSnapshot error', err));
-
   DB.collection('imports').orderBy('importedAt','desc').limit(1).onSnapshot(snap => {
     LAST_IMPORT = snap.docs.length ? snap.docs[0].data() : null;
     scheduleRender();
   }, err => console.warn('imports onSnapshot error', err));
 }
 
-
-// ================= FECHAMENTO MENSAL DE SLA (retrato fixo) =================
-let SNAPS = {}, SNAPS_OK = false, SM = { key:null, carrier:null }, _snapAuto = 0, SLAM_LISTA = [];
-const fmtD = d => String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
-const mkKey = (y,m) => y+'-'+String(m).padStart(2,'0');
-const mkLabel = k => { const [y,m] = k.split('-'); return MESES[+m-1]+'/'+y; };
-function slamBase(x){ return SIT_CFG.base==='solic' ? (parseBR(x.data_solicitacao)||parseBR(x.data_programacao)) : (parseBR(x.data_programacao)||parseBR(x.data_solicitacao)); }
-// retrato objetivo do mes: so olha data + SLA da situacao (nao usa motivo, classe manual de pendencia nem ajustes)
-function slamBuild(key){
-  const [y,m] = key.split('-').map(Number), fim = new Date(y, m, 0), hoje = new Date(), ref = fim < hoje ? fim : hoje;
-  const fora = [], ativas = [];
-  IND_ALL.forEach(x => {
-    const d = slamBase(x); if (!d || d > ref) return;
-    const criadoNoMes = d.getFullYear()===y && d.getMonth()+1===m;
-    if (x.fin){ if (criadoNoMes) ativas.push(x); return; }
-    ativas.push(x);
-    const sla = sitSlaDe(x.sit); if (!sla) return;
-    const dias = daysBetween(d, ref);
-    if (dias > sla){ const v = new Date(d.getTime()+sla*86400000); fora.push({ id:x.id||'', cliente:x.cliente||'', nf:x.nf||'', carr:x.carr, sit:x.sit, criado:fmtD(d), venceu:fmtD(v), sla, atraso:dias-sla, motivo:IND_MOTIVOS.includes(x.motivo_pend)?x.motivo_pend:null, resolvido:false }); }
-  });
-  const por = new Map(); ativas.forEach(x => { if(!por.has(x.carr)) por.set(x.carr,{c:x.carr,ativas:0,fora:0}); por.get(x.carr).ativas++; });
-  fora.forEach(f => { if(!por.has(f.carr)) por.set(f.carr,{c:f.carr,ativas:0,fora:0}); por.get(f.carr).fora++; });
-  return { key, ativas:ativas.length, fora, porTransp:[...por.values()] };
-}
-function slamMerge(novo, antigo){
-  // congela o que ja foi registrado: quem estourou o prazo no mes continua listado, mesmo resolvido depois
-  if (!antigo || !antigo.fora) return novo;
-  const atuais = new Map(novo.fora.map(f=>[f.id||f.nf+f.cliente, f]));
-  const vistos = new Set(), saida = [];
-  antigo.fora.forEach(o => { const k = o.id||o.nf+o.cliente; vistos.add(k); const a = atuais.get(k); const x = IND_ALL.find(y => (y.id||'')===o.id);
-    if (a) saida.push({ ...o, atraso:Math.max(o.atraso||0, a.atraso), resolvido:false });
-    else saida.push({ ...o, resolvido:true, resolvidoEm:o.resolvidoEm || fmtD(new Date()) }); });
-  novo.fora.forEach(f => { if (!vistos.has(f.id||f.nf+f.cliente)) saida.push(f); });
-  const por = new Map(); saida.forEach(f => { if(!por.has(f.carr)) por.set(f.carr,{c:f.carr,ativas:0,fora:0}); por.get(f.carr).fora++; });
-  novo.porTransp.forEach(t => { if(!por.has(t.c)) por.set(t.c,{c:t.c,ativas:0,fora:0}); por.get(t.c).ativas = Math.max(t.ativas, por.get(t.c).ativas); });
-  return { ...novo, fora:saida, ativas:Math.max(novo.ativas, antigo.ativas||0), porTransp:[...por.values()] };
-}
-async function slamSalvar(key, extra){
-  if (!DB) return false;
-  const doc = { ...extra, key, geradoEm:isoNow(), ref:fmtD(new Date()) };
-  doc.fora = doc.fora.slice(0, 1500);
-  SNAPS[key] = doc;
-  try { await DB.doc('snapshots/ind_'+key).set(doc); return true; }
-  catch(err){ console.warn('snapshot', err); toast('Não consegui salvar o fechamento: '+(err.code||err.message), {type:'err'}); return false; }
-}
-function slamAuto(){
-  if (!DB || !SNAPS_OK || !IND_ALL.length || Date.now()-_snapAuto < 60000) return;
-  _snapAuto = Date.now();
-  const hoje = new Date(), cur = mkKey(hoje.getFullYear(), hoje.getMonth()+1);
-  // virada de mes: o retrato que vinha acumulando vira "fechado" (congelado). Meses sem retrato NAO sao gravados sozinhos.
-  Object.keys(SNAPS).forEach(k => { const o = SNAPS[k]; if (k < cur && o.fechado===false) slamSalvar(k, { ...slamMerge(slamBuild(k), o), fechado:true, reconstruido:false }); });
-  const atual = slamBuild(cur), ant = SNAPS[cur];
-  const mudou = !ant || ant.fechado===false && (JSON.stringify(slamMerge(atual,ant).fora.map(f=>f.id+f.resolvido)) !== JSON.stringify(ant.fora.map(f=>f.id+f.resolvido)));
-  if (!ant || mudou) slamSalvar(cur, { ...slamMerge(atual, ant), fechado:false, reconstruido:false });
-}
-async function slamRefazer(){
-  const key = SM.key; if (!key) return;
-  const hoje = new Date(), cur = mkKey(hoje.getFullYear(), hoje.getMonth()+1), atual = SNAPS[key];
-  if (atual && atual.fechado){
-    const ok = await askConfirm('Refazer fechamento', `<p>O retrato de <b>${mkLabel(key)}</b> está congelado. Refazer vai substituí-lo pelo estado de hoje (casos já resolvidos deixam de aparecer).</p>`, 'Refazer');
-    if (!ok) return;
-  }
-  const novo = slamBuild(key);
-  const ok = await slamSalvar(key, key===cur ? { ...slamMerge(novo, atual), fechado:false, reconstruido:false } : { ...novo, fechado:true, reconstruido:true });
-  if (ok){ toast('Fechamento de '+mkLabel(key)+' salvo.', {type:'ok'}); renderSlaMes(); }
-}
-function renderSlaMes(){
-  if (!document.getElementById('panel-slam')) return;
-  const hoje = new Date(), cur = mkKey(hoje.getFullYear(), hoje.getMonth()+1);
-  const todos = new Set([...Object.keys(SNAPS), cur]);
-  IND_ALL.forEach(x => { const d = slamBase(x); if (d){ const k = mkKey(d.getFullYear(), d.getMonth()+1); if (k <= cur) todos.add(k); } });
-  const keys = [...todos].sort();
-  if (!SM.key || !keys.includes(SM.key)) SM.key = cur;
-  const cache = {};
-  const dados = k => SNAPS[k] || (IND_ALL.length ? (cache[k] = cache[k] || { ...slamBuild(k), fechado:false, aoVivo:true, reconstruido:k<cur }) : null);
-  const resumo = k => { const d = dados(k); if (!d) return null; const f = d.fora.length, a = d.ativas||0; return { d, f, a, pct: a ? Math.round((1-f/a)*1000)/10 : null }; };
-  document.getElementById('bdg-slam').textContent = (resumo(cur)||{f:0}).f;
-  document.getElementById('slam-meses').innerHTML = keys.slice().reverse().map(k => { const r = resumo(k); if (!r) return '';
-    const cl = r.pct==null ? '' : r.pct>=90 ? '' : r.pct>=75 ? ' am' : ' rd';
-    const tag = r.d.aoVivo ? (r.d.reconstruido ? 'Não salvo' : 'Ao vivo') : r.d.fechado ? (r.d.reconstruido ? 'Reconstruído' : 'Fechado') : 'Em andamento';
-    return `<div class="ind-c${cl}${SM.key===k?' on':''}" data-k="${k}" onclick="SM.key=this.dataset.k;SM.carrier=null;renderSlaMes()"><h4>${mkLabel(k)} <small style="font-weight:600;color:var(--tx3);font-size:10px">· ${tag}</small></h4><div class="ind-m" style="grid-template-columns:1fr 1fr"><div><span>Dentro do prazo</span><b>${fmt1(r.pct)}%</b></div><div><span>Fora do prazo</span><b>${r.f}</b></div></div></div>`; }).join('');
-  const r = resumo(SM.key), prevK = keys[keys.indexOf(SM.key)-1], rp = prevK ? resumo(prevK) : null;
-  const vis = document.getElementById('panel-slam').classList.contains('on') && window.Chart;
-  if (!r){ document.getElementById('slam-kpis').innerHTML = '<div class="ind-sub">Importe um arquivo para gerar o primeiro fechamento.</div>'; document.getElementById('tb-slam').innerHTML=''; return; }
-  const d = r.d, delta = (rp && rp.pct!=null && r.pct!=null) ? r.pct - rp.pct : null;
-  document.getElementById('slam-kpis').innerHTML =
-    `<div class="ind-k b"><small>Tarefas ativas em ${mkLabel(SM.key)}</small><b>${r.a}</b></div>
-     <div class="ind-k ${r.pct>=90?'g':r.pct>=75?'a':'r'}"><small>Dentro do prazo (SLA do mês)</small><b>${fmt1(r.pct)}<i>%</i></b></div>
-     <div class="ind-k r"><small>Fora do prazo</small><b>${r.f}</b></div>
-     <div class="ind-k ${delta==null?'b':delta>=0?'g':'r'}"><small>Variação vs mês anterior</small><b>${delta==null?'—':(delta>=0?'+':'')+fmt1(delta)}<i>p.p.</i></b></div>`;
-  document.getElementById('slam-t-transp').textContent = 'Por transportadora — ' + mkLabel(SM.key) + (d.aoVivo ? ' (calculado agora, ainda não salvo)' : d.reconstruido ? ' (reconstruído)' : '');
-  const trs = (d.porTransp||[]).map(t => ({ ...t, pct: t.ativas ? (1-t.fora/t.ativas)*100 : null })).sort((a,b)=>b.fora-a.fora);
-  document.getElementById('tb-slam-tr').innerHTML = trs.map(t => `<tr class="clickable${SM.carrier===t.c?' sel':''}" data-c="${esc(t.c)}" onclick="SM.carrier=(SM.carrier===this.dataset.c?null:this.dataset.c);renderSlaMes()"><td class="td-nome">${esc(t.c)}</td><td>${t.ativas}</td><td>${t.fora?`<span class="bdg b-red">${t.fora}</span>`:0}</td><td><b style="color:${t.pct>=90?'#16A34A':t.pct>=75?'#D97706':'#DC2626'}">${fmt1(t.pct)}%</b></td></tr>`).join('');
-  const lista = d.fora.filter(f => !SM.carrier || f.carr===SM.carrier).sort((a,b)=>b.atraso-a.atraso);
-  SLAM_LISTA = lista;
-  document.getElementById('slam-lista-t').textContent = 'Fora do prazo em ' + mkLabel(SM.key);
-  document.getElementById('cnt-slam').textContent = lista.length + ' caso' + (lista.length!==1?'s':'');
-  const pill = document.getElementById('slam-pill'); pill.style.display = SM.carrier ? '' : 'none'; pill.textContent = (SM.carrier||'') + ' ✕';
-  const btn = document.getElementById('slam-btn'); btn.textContent = d.fechado ? 'Refazer fechamento' : (d.aoVivo && d.reconstruido ? 'Salvar este mês' : 'Salvar agora');
-  const emAberto = new Set(IND_ALL.filter(x=>!x.fin).map(x=>x.id||''));
-  document.getElementById('tb-slam').innerHTML = lista.slice(0,300).map(f => `<tr><td>${esc(f.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(f.sit)}</span></td><td class="td-nome">${esc(f.cliente)}</td><td class="td-nf">${esc(f.nf||'—')}</td><td>${f.venceu}</td><td>${f.sla} d</td><td><b style="color:var(--red)">+${f.atraso} d</b></td><td>${f.resolvido ? '<span class="bdg b-grn">Resolvido'+(f.resolvidoEm?' em '+f.resolvidoEm:'')+'</span>' : (emAberto.has(f.id)?'<span class="bdg b-red">Ainda em aberto</span>':'<span class="bdg b-grn">Resolvido</span>')}</td></tr>`).join('')
-    || '<tr><td colspan="8" style="color:var(--tx3);padding:14px">Nenhum caso fora do prazo neste mês.</td></tr>';
-  if (vis){
-    const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
-    const ks = keys.filter(k=>resumo(k)); if (charts.slam) charts.slam.destroy();
-    charts.slam = new Chart(document.getElementById('ch-slam'), { data:{ labels:ks.map(mkLabel), datasets:[
-      { type:'bar', label:'Fora do prazo', data:ks.map(k=>resumo(k).f), backgroundColor:ks.map(k=>k===SM.key?'#DC2626':'#7F1D1D'), borderRadius:6, yAxisID:'y' },
-      { type:'line', label:'% dentro do prazo', data:ks.map(k=>resumo(k).pct), borderColor:'#16A34A', backgroundColor:'#16A34A', tension:.25, pointRadius:4, yAxisID:'y1' } ] },
-      options:{ responsive:true, maintainAspectRatio:false, animation:{duration:400}, onClick:(e,els)=>{ if (els.length){ SM.key = ks[els[0].index]; SM.carrier=null; renderSlaMes(); } },
-        plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } },
-        scales:{ x:{ ticks:{color:tick}, grid:{display:false} }, y:{ beginAtZero:true, ticks:{color:tick}, grid:{color:grid} }, y1:{ position:'right', min:0, max:100, ticks:{color:'#16A34A', callback:v=>v+'%'}, grid:{display:false} } } } });
-  }
-  slamAuto();
-}
-function slamExport(){
-  if (!SLAM_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(SLAM_LISTA.map(f => ({ 'Mês':mkLabel(SM.key), 'Transportadora':f.carr, 'Situação':f.sit, 'Cliente':f.cliente, 'NF':f.nf, 'Criado em':f.criado, 'Venceu em':f.venceu, 'SLA (dias)':f.sla, 'Atraso no fechamento (dias)':f.atraso, 'Resolvido':f.resolvido?'Sim':'Não' })), 'fechamento_sla_'+SM.key);
-}
 
 // ================= INDICADORES POR TRANSPORTADORA =================
 const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente'];
