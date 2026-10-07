@@ -102,9 +102,42 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 
 /* MAIN */
 .main{display:flex;flex-direction:column;min-width:0}
-.topbar{display:flex;align-items:center;gap:10px;padding:11px 20px;background:var(--srf);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10}
-.tb-title{font-size:13px;font-weight:600;color:var(--tx)}
-.tb-ref{font-size:11px;color:var(--tx3);margin-left:auto;background:var(--srf1);border:1px solid var(--bd);padding:3px 10px;border-radius:99px}
+/* ===== CABECALHO 3D ===== */
+.hero{position:sticky;top:0;z-index:20;padding:12px 20px 0;background:linear-gradient(var(--bg) 70%,transparent)}
+.hero-scene{perspective:1100px}
+.hero-card{--rx:0deg;--ry:0deg;position:relative;display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 20px;border-radius:18px;color:#fff;
+  background:linear-gradient(125deg,#0A2342 0%,#123060 45%,#1A5EA8 100%);
+  box-shadow:0 22px 44px -18px rgba(10,35,66,.7),0 2px 0 rgba(255,255,255,.14) inset,0 -3px 0 rgba(0,0,0,.28) inset;
+  transform-style:preserve-3d;transform:rotateX(var(--rx)) rotateY(var(--ry));transition:transform .18s ease-out,padding .2s}
+.hero-card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(520px 160px at var(--mx,25%) -20%,rgba(255,255,255,.28),transparent 60%)}
+.hero-brand{display:flex;align-items:center;gap:14px;transform:translateZ(38px);min-width:0}
+.cube-wrap{perspective:240px;width:38px;height:38px;flex-shrink:0}
+.cube{position:relative;width:38px;height:38px;transform-style:preserve-3d;animation:cubeSpin 16s linear infinite}
+.cube i{position:absolute;inset:0;display:grid;place-items:center;font:800 17px/1 -apple-system,'Segoe UI',sans-serif;font-style:normal;color:#fff;
+  border:1px solid rgba(255,255,255,.55);background:linear-gradient(135deg,rgba(255,255,255,.28),rgba(46,134,222,.7));backface-visibility:visible}
+.cube .f1{transform:translateZ(19px)} .cube .f2{transform:rotateY(90deg) translateZ(19px)} .cube .f3{transform:rotateY(180deg) translateZ(19px)}
+.cube .f4{transform:rotateY(-90deg) translateZ(19px)} .cube .f5{transform:rotateX(90deg) translateZ(19px)} .cube .f6{transform:rotateX(-90deg) translateZ(19px)}
+@keyframes cubeSpin{from{transform:rotateX(-18deg) rotateY(0)}to{transform:rotateX(-18deg) rotateY(360deg)}}
+.hero-kick{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.62);transition:.2s}
+.tb-title{font-size:21px;font-weight:800;letter-spacing:-.3px;line-height:1.15;color:#fff;
+  text-shadow:0 1px 0 #1d4f8a,0 2px 0 #174077,0 3px 0 #123565,0 7px 14px rgba(0,0,0,.4)}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;transform:translateZ(24px);transition:.2s}
+.hchip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;font-size:11.5px;font-weight:600;cursor:pointer;
+  color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(4px);transition:.15s}
+.hchip b{font-size:14px}
+.hchip:hover{background:rgba(255,255,255,.22);transform:translateY(-1px)}
+.hchip.hc-red b{color:#ffb4ab} .hchip.hc-amb b{color:#fcd34d} .hchip.hc-pur b{color:#d9b8ff}
+.tb-ref{font-size:11px;color:rgba(255,255,255,.78);padding:6px 11px;border-radius:99px;background:rgba(0,0,0,.18);cursor:default}
+.hero-search{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);font-size:12px;cursor:pointer;transform:translateZ(30px);transition:.15s}
+.hero-search:hover{background:rgba(255,255,255,.2);color:#fff}
+.hero-search kbd{font:600 10px monospace;padding:2px 6px;border-radius:5px;background:rgba(0,0,0,.25);color:rgba(255,255,255,.8)}
+.hero.compact .hero-card{padding:8px 16px}
+.hero.compact .hero-kick,.hero.compact .hero-chips .hc-ref{display:none}
+.hero.compact .tb-title{font-size:15px}
+.hero.compact .cube-wrap{transform:scale(.7)}
+@media (max-width:860px){.hero{padding:8px 10px 0}.hero-search span{display:none}.cube-wrap{display:none}.tb-title{font-size:16px}}
+@media (hover:none),(prefers-reduced-motion:reduce){.hero-card{transform:none!important}.cube{animation:none}}
 .content{padding:18px 20px;flex:1}
 
 /* PANELS */
@@ -261,6 +294,56 @@ tr.clickable:hover td{background:var(--srf1)}
 .dpanel dd{margin:2px 0 0;font-size:12.5px;color:var(--tx);line-height:1.5}
 .dpanel dd.mono{font-family:monospace}
 .dpanel-nf{font-family:monospace;font-size:18px;font-weight:800;color:var(--acc)}
+
+/* TOAST / MODAL / DROP */
+#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:90;max-width:min(420px,92vw)}
+.toast{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;background:var(--srf);color:var(--tx);border:1px solid var(--bd);box-shadow:0 8px 28px rgba(5,11,20,.28);font-size:12px;line-height:1.45;animation:toastIn .22s ease}
+.toast.out{opacity:0;transform:translateY(6px);transition:.2s}
+.toast.t-ok{border-left:4px solid var(--grn)} .toast.t-err{border-left:4px solid var(--red)} .toast.t-warn{border-left:4px solid var(--amb)} .toast.t-info{border-left:4px solid var(--acc)}
+.toast-t{flex:1}
+.toast-a{border:none;background:var(--acc);color:#fff;font-weight:700;font-size:11px;padding:5px 11px;border-radius:6px;cursor:pointer}
+.toast-x{border:none;background:none;color:var(--tx3);cursor:pointer;font-size:12px}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#dropOverlay{position:fixed;inset:0;z-index:95;background:rgba(10,35,66,.72);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center}
+#dropOverlay.on{display:flex}
+.drop-box{display:flex;flex-direction:column;gap:6px;align-items:center;padding:42px 64px;border:2px dashed rgba(255,255,255,.7);border-radius:18px;color:#fff;font-size:20px}
+.drop-box span{font-size:12px;opacity:.75}
+.cmodal{position:fixed;inset:0;z-index:92;background:rgba(5,11,20,.55);display:none;align-items:center;justify-content:center;padding:16px}
+.cmodal.on{display:flex}
+.cm-card{background:var(--srf);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:20px;width:min(480px,100%);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.cm-title{font-size:15px;font-weight:700;margin-bottom:10px}
+.cm-body{font-size:12.5px;line-height:1.55;color:var(--tx2)}
+.cm-act{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+
+/* ===== INTERACAO / ACABAMENTO ===== */
+.panel.on{animation:panelIn .22s ease}
+@keyframes panelIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.kpi-row{perspective:900px}
+.kpi-click:hover{transform:translateY(-3px) rotateX(3deg)}
+.tbl-wrap th{cursor:pointer;user-select:none}
+.tbl-wrap th:hover{color:var(--tx)}
+.tbl-wrap th.s-asc::after{content:" ▲";font-size:8px;color:var(--acc)} .tbl-wrap th.s-desc::after{content:" ▼";font-size:8px;color:var(--acc)}
+#stateBanner{display:none;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;margin-bottom:14px;border-radius:12px;border:1px solid var(--amb-bd);background:var(--amb-bg);color:var(--tx);font-size:12.5px}
+#stateBanner.on{display:flex}
+#stateBanner b{color:var(--amb)}
+body.loading .kpi-v,body.loading .kpi-s{color:transparent!important;background:linear-gradient(90deg,var(--bd) 25%,var(--srf1) 50%,var(--bd) 75%);background-size:200% 100%;animation:shim 1.2s infinite;border-radius:6px}
+@keyframes shim{to{background-position:-200% 0}}
+.crit-row{display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:.5px solid var(--bd);cursor:pointer;border-radius:6px;transition:background .12s}
+.crit-row:last-child{border-bottom:none} .crit-row:hover{background:var(--srf1)}
+.crit-row .cr-n{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crit-row .cr-s{font-size:11px;color:var(--tx3)}
+#palette{position:fixed;inset:0;z-index:93;background:rgba(5,11,20,.55);display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 0}
+#palette.on{display:flex}
+.pal-card{width:min(600px,100%);background:var(--srf);color:var(--tx);border:1px solid var(--bd);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.45);overflow:hidden}
+.pal-in{width:100%;padding:15px 18px;border:none;border-bottom:1px solid var(--bd);background:transparent;color:var(--tx);font-size:14px;outline:none}
+.pal-list{max-height:52vh;overflow-y:auto;padding:6px}
+.pal-it{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:12.5px}
+.pal-it.on,.pal-it:hover{background:var(--acc-lt)}
+.pal-it .pi-t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pal-it .pi-s{font-size:11px;color:var(--tx3)}
+.pal-h{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);padding:8px 12px 4px}
+.pal-foot{padding:8px 14px;border-top:1px solid var(--bd);font-size:10.5px;color:var(--tx3)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -353,12 +436,26 @@ tr.clickable:hover td{background:var(--srf1)}
 
 <!-- MAIN -->
 <div class="main">
-  <div class="topbar">
-    <div class="tb-title" id="tb-title">Dashboard</div>
-    <div class="tb-ref" id="tb-ref">—</div>
-  </div>
+  <header class="hero" id="hero">
+    <div class="hero-scene">
+      <div class="hero-card" id="hero-card">
+        <div class="hero-brand">
+          <div class="cube-wrap" aria-hidden="true"><div class="cube"><i class="f1">A</i><i class="f2">A</i><i class="f3">A</i><i class="f4">A</i><i class="f5"></i><i class="f6"></i></div></div>
+          <div><div class="hero-kick">Abracadabra · Devoluções &amp; Recolhimentos</div><h1 class="tb-title" id="tb-title">Dashboard</h1></div>
+        </div>
+        <div class="hero-chips">
+          <button class="hchip hc-red" type="button" onclick="ir('at')" title="Ver atrasadas"><b id="hc-at">0</b> atrasadas</button>
+          <button class="hchip hc-amb" type="button" onclick="ir('ri')" title="Ver em risco"><b id="hc-ri">0</b> em risco</button>
+          <button class="hchip hc-pur" type="button" onclick="ir('rea')" title="Coleta feita, aguardando o CD"><b id="hc-rea">0</b> aguardando CD</button>
+          <span class="tb-ref hc-ref" id="tb-ref">—</span>
+        </div>
+        <button class="hero-search" type="button" onclick="openPalette()" aria-label="Buscar"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke-width="2" stroke-linecap="round"/></svg><span>Buscar cliente, NF ou CPF</span><kbd>Ctrl K</kbd></button>
+      </div>
+    </div>
+  </header>
 
   <div class="content">
+    <div id="stateBanner"></div>
 
     <!-- DASHBOARD -->
     <div class="panel on" id="panel-dash">
@@ -371,6 +468,7 @@ tr.clickable:hover td{background:var(--srf1)}
         <div class="kpi k-acc kpi-click" onclick="ir('trat')" role="button" tabindex="0"><div class="kpi-v" id="k-trat">—</div><div class="kpi-l">Tratativas ativas</div><div class="kpi-s">Devoluções transportadora</div></div>
       </div>
       <div id="alertas-dash" style="margin-bottom:14px"></div>
+      <div class="card" style="margin-bottom:12px"><div class="card-title">Mais críticas agora</div><div class="card-sub">Maiores atrasos em aberto · clique para ver o caso</div><div id="crit-list"></div></div>
       <div class="g2">
         <div class="card">
           <div class="card-title">Status das coletas</div>
@@ -535,7 +633,7 @@ tr.clickable:hover td{background:var(--srf1)}
     <div class="panel" id="panel-hist">
       <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn-exp" onclick="exportColetas('hist')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV histórico</button></div><div class="dica"><strong>Histórico:</strong> Coletas já recebidas no CD ou canceladas — removidas do controle ativo e mantidas aqui para auditoria. Coletas realizadas que ainda não chegaram ao CD ficam na aba "Coleta realizada".</div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Situação</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Origem</th><th>Motivo</th><th>Descrição</th></tr></thead>
         <tbody id="tb-hist"></tbody></table>
       </div></div>
     </div>
@@ -590,6 +688,10 @@ tr.clickable:hover td{background:var(--srf1)}
 </div>
 </div>
 
+<div id="palette" role="dialog" aria-modal="true" aria-label="Busca rápida"><div class="pal-card"><input class="pal-in" id="pal-in" placeholder="Buscar cliente, NF, CPF, transportadora… ou digitar um comando" autocomplete="off"><div class="pal-list" id="pal-list"></div><div class="pal-foot">↑↓ navegar · Enter abrir · Esc fechar</div></div></div>
+<div id="toasts" aria-live="polite"></div>
+<div id="dropOverlay"><div class="drop-box"><b>Solte o arquivo aqui</b><span>Protocolo de Coleta ou Tratativas (.csv / .xlsx)</span></div></div>
+<div id="confirmModal" class="cmodal" role="dialog" aria-modal="true"><div class="cm-card"><div class="cm-title"></div><div class="cm-body"></div><div class="cm-act"><button class="cm-no btn-exp" type="button">Cancelar</button><button class="cm-ok btn-exp" type="button" style="background:var(--acc);color:#fff;border-color:var(--acc)">Confirmar</button></div></div></div>
 <div class="ov" id="ov" onclick="closeDetail()"></div>
 <aside class="dpanel" id="dpanel" aria-hidden="true">
   <button class="dpanel-close" id="dpanel-close" aria-label="Fechar detalhe" onclick="closeDetail()">✕</button>
@@ -656,12 +758,15 @@ function tratKey(chave){ return 'trat_'+chave; }
 let SEED_COLETA = [];
 let SEED_TRATATIVAS = [];
 let DB_CASES = {};
+let FIRST_SNAPSHOT = false;
+let LAST_IMPORT = null;
 let REF = new Date().toLocaleDateString('pt-BR');
 
 let COL = [];       // coletas pendentes de coleta (nao realizadas, nao canceladas, nao recebidas no CD)
 let REA = [];       // coleta realizada na casa do cliente, aguardando chegada no CD
 let HIST = [];       // coletas historico (canceladas ou realizadas)
-let TRAT = [];       // tratativas
+let TRAT = [];       // tratativas em aberto
+let TRAT_HIST = [];  // tratativas que sairam do arquivo (concluidas automaticamente)
 let AT = [], RI = [], EM = [], AT_FORA = [];
 const D = { kpis:{}, tags:{}, rank_transp:[], rank_uf:[] };
 
@@ -674,9 +779,11 @@ function deriveColetaLive(c){
   const cancelada = bucket==='cancelada';
   const coletaRealizada = bucket==='realizada' || !!c.recebido_cd;
   const recebidoCD = !!c.recebido_cd;
-  const realizada = recebidoCD; // concluido = recebido no CD (a coleta na casa do cliente NAO encerra o SLA de 20 dias)
+  const concluidoAuto = !!c.concluido_auto; // sumiu do arquivo mais recente => nao esta mais em aberto no Innovaro
+  const realizada = recebidoCD || concluidoAuto; // concluido = recebido no CD ou saiu do arquivo
 
   let prazo_status = null, prazo_pct = null;
+  const motivoHist = cancelada ? 'Cancelada' : (recebidoCD ? 'Recebido no CD' : (concluidoAuto ? 'Saiu do arquivo (concluído automaticamente)' : null));
   if (temData && coletaRealizada && !cancelada && !realizada){
     prazo_status = 'REALIZADA';
   } else if (temData && !cancelada && !realizada){
@@ -687,7 +794,7 @@ function deriveColetaLive(c){
   }
 
   return { ...c, transportadora, transportadoraOriginal: c.transportadora, tag, modalidade,
-    dias, prazo_status, prazo_pct, cancelada, realizada, coletaRealizada, recebidoCD, temData,
+    dias, prazo_status, prazo_pct, cancelada, realizada, coletaRealizada, recebidoCD, concluidoAuto, motivoHist, temData,
     regiao: c.regiao || regiaoOf(c.uf) };
 }
 
@@ -707,10 +814,12 @@ function rebuildData(){
   });
 
   const allColetas = Object.values(coletaMap).map(deriveColetaLive);
-  COL = allColetas.filter(c => !c.cancelada && !c.recebidoCD && !c.coletaRealizada);
-  REA = allColetas.filter(c => !c.cancelada && !c.recebidoCD && c.coletaRealizada);
+  COL = allColetas.filter(c => !c.cancelada && !c.realizada && !c.coletaRealizada);
+  REA = allColetas.filter(c => !c.cancelada && !c.realizada && c.coletaRealizada);
   HIST = allColetas.filter(c => c.cancelada || c.realizada);
-  TRAT = Object.values(tratMap).map(deriveTratativaLive);
+  const allTrat = Object.values(tratMap).map(deriveTratativaLive);
+  TRAT = allTrat.filter(t => !t.concluido_auto);
+  TRAT_HIST = allTrat.filter(t => t.concluido_auto);
 
   AT = COL.filter(c=>c.prazo_status==='ATRASADO');
   RI = COL.filter(c=>c.prazo_status==='RISCO');
@@ -719,7 +828,7 @@ function rebuildData(){
 
   D.kpis = {
     col_total: COL.length, rea: REA.length, at: AT.length, ri: RI.length, em: EM.length,
-    hist: HIST.length, trat_total: TRAT.length,
+    hist: HIST.length + TRAT_HIST.length, trat_total: TRAT.length,
     valor_at: AT.reduce((s,c)=>s+Math.abs(c.valor||0),0),
   };
   D.ref = REF;
@@ -779,6 +888,7 @@ function ir(id){
   if(panel) panel.classList.add('on');
   if(nav)   nav.classList.add('on');
   document.getElementById('tb-title').textContent = TITLES[id]||id;
+  window.scrollTo({top:0});
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function colBdg(c){
@@ -1100,7 +1210,16 @@ function renderDash(){
   document.getElementById('bdg-trat').textContent=K.trat_total;
   document.getElementById('bdg-hist').textContent=K.hist;
   document.getElementById('sb-ref').textContent='Ref.: '+D.ref;
-  document.getElementById('tb-ref').textContent='Dados de '+D.ref;
+  document.getElementById('hc-at').textContent=K.at;
+  document.getElementById('hc-ri').textContent=K.ri;
+  document.getElementById('hc-rea').textContent=K.rea;
+  if (LAST_IMPORT && LAST_IMPORT.importedAt){
+    const d = new Date(LAST_IMPORT.importedAt);
+    document.getElementById('tb-ref').textContent = 'Atualizado ' + d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('tb-ref').title = (LAST_IMPORT.filename||'') + ' · ' + (LAST_IMPORT.rowCount||0) + ' linhas';
+  } else {
+    document.getElementById('tb-ref').textContent = 'Dados de ' + D.ref;
+  }
   document.getElementById('ft-ref').textContent='Protocolo de Coleta + Tratativas · '+D.ref;
   document.getElementById('dash-sla').textContent=SLA;
 
@@ -1205,14 +1324,19 @@ function renderDash(){
 
   const tbHist=document.getElementById('tb-hist');
   if(tbHist){
-    tbHist.innerHTML=HIST.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
+    const histAll = [
+      ...HIST.map(c=>({...c,__tipo:'coleta'})),
+      ...TRAT_HIST.map(t=>({...t,__tipo:'tratativa',motivoHist:'Saiu do arquivo (concluído automaticamente)'})),
+    ].sort((a,b)=>String(b.concluidoEm||'').localeCompare(String(a.concluidoEm||'')));
+    tbHist.innerHTML = histAll.length ? histAll.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail(c)})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente||'—')}</td>
       <td>${esc(c.transportadora||'—')}</td>
       <td><span class="bdg b-acc">${esc(c.uf||'—')}</span></td>
-      <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
+      <td><span class="bdg b-dk">${c.__tipo==='coleta'?'Coleta':'Tratativa'}</span></td>
+      <td style="font-size:11px;color:var(--tx2)">${esc(c.motivoHist||c.status||'—')}${c.concluidoEm?` <span style="color:var(--tx3)">· ${new Date(c.concluidoEm).toLocaleDateString('pt-BR')}</span>`:''}</td>
       <td class="td-desc">${esc(c.descricao||'—')}</td>
-    </tr>`).join('');
+    </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:18px;color:var(--tx3)">Nenhum caso concluído ainda.</td></tr>';
   }
 }
 
@@ -1223,7 +1347,149 @@ function renderAll(){
   renderCol('at'); renderCol('ri'); renderCol('em'); renderCol('rea'); renderCol('all');
   renderTrat();
   initFiltros();
+  renderCrit();
+  renderBanner();
+  document.querySelectorAll('.tbl-wrap table').forEach(applySort);
 }
+
+function renderCrit(){
+  const el = document.getElementById('crit-list');
+  if (!el) return;
+  const top = [...AT].sort((a,b)=>(b.dias||0)-(a.dias||0)).slice(0,6);
+  el.innerHTML = top.length ? top.map(c=>`<div class="crit-row" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})" role="button" tabindex="0">
+      <span class="bdg b-red">${c.dias}d</span>
+      <span class="cr-n">${esc(c.cliente||'—')} <span class="cr-s">· NF ${esc(c.nf||'—')}</span></span>
+      <span class="cr-s">${esc(c.transportadora||'—')} · ${esc(c.uf||'')}</span>
+      <span class="cr-s" style="color:var(--red)">+${Math.max(0,(c.dias||0)-SLA)}d além do prazo</span>
+    </div>`).join('') : '<div style="font-size:12px;color:var(--tx3);padding:6px">Nenhum caso atrasado no momento.</div>';
+}
+
+let AUTH_DONE = false;
+function renderBanner(){
+  const el = document.getElementById('stateBanner');
+  if (!el) return;
+  const total = COL.length + REA.length + HIST.length + TRAT.length + TRAT_HIST.length;
+  document.body.classList.toggle('loading', !!DB && !FIRST_SNAPSHOT);
+  if (!AUTH_DONE){ el.className=''; return; }
+  if (!DB){
+    el.className='on';
+    el.innerHTML = '<span><b>Você não está conectado.</b> Os números abaixo estão zerados porque os dados só carregam depois do login.</span><button class="btn-exp" type="button" onclick="focusLogin()">Entrar</button>';
+  } else if (FIRST_SNAPSHOT && total===0){
+    el.className='on';
+    el.innerHTML = '<span><b>Nenhum dado ainda.</b> Arraste o arquivo do Innovaro (Protocolo de Coleta ou Tratativas) para qualquer lugar da tela, ou use "Importar arquivo" na barra lateral.</span>';
+  } else el.className='';
+}
+function focusLogin(){
+  const i = document.getElementById('login-email');
+  if (i){ i.scrollIntoView({block:'center'}); i.focus(); }
+}
+
+// ================= ORDENAR COLUNAS (clique no cabecalho) =================
+function cmpCell(a,b){ return a.localeCompare(b,'pt-BR',{numeric:true,sensitivity:'base'}); }
+function applySort(table){
+  const col = table.dataset.sc;
+  if (col==null) return;
+  const dir = table.dataset.sd==='desc' ? -1 : 1;
+  const body = table.tBodies[0];
+  const rows = [...body.rows];
+  if (rows.length<2 || rows[0].cells.length<=+col) return;
+  rows.sort((r1,r2)=> dir*cmpCell(r1.cells[col].textContent.trim(), r2.cells[col].textContent.trim()));
+  rows.forEach(r=>body.appendChild(r));
+  table.querySelectorAll('th').forEach((th,i)=>{ th.classList.toggle('s-asc', i==col && dir===1); th.classList.toggle('s-desc', i==col && dir===-1); });
+}
+document.addEventListener('click', e => {
+  const th = e.target.closest('.tbl-wrap th');
+  if (!th) return;
+  const table = th.closest('table');
+  const idx = [...th.parentElement.children].indexOf(th);
+  table.dataset.sd = (table.dataset.sc==String(idx) && table.dataset.sd==='asc') ? 'desc' : 'asc';
+  table.dataset.sc = String(idx);
+  applySort(table);
+});
+
+// ================= BUSCA RAPIDA (Ctrl+K) =================
+const norm = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const PAL_CMDS = [
+  ['Ir para Dashboard',()=>ir('dash')], ['Ir para Atrasadas',()=>ir('at')], ['Ir para Em risco',()=>ir('ri')],
+  ['Ir para Coleta realizada (aguardando CD)',()=>ir('rea')], ['Ir para Tratativas',()=>ir('trat')], ['Ir para Histórico',()=>ir('hist')],
+  ['Importar arquivo…',()=>document.getElementById('file-input').click()], ['Alternar modo claro/escuro',()=>toggleTheme()],
+];
+let palSel = 0, palItems = [];
+function openPalette(){
+  const pal = document.getElementById('palette'); pal.classList.add('on');
+  const inp = document.getElementById('pal-in'); inp.value=''; renderPalette(''); inp.focus();
+}
+function closePalette(){ document.getElementById('palette').classList.remove('on'); }
+function renderPalette(q){
+  const nq = norm(q).trim();
+  const out = [];
+  if (!nq){
+    PAL_CMDS.forEach(([t,fn])=>out.push({h:'Comandos', t, s:'', fn}));
+  } else {
+    PAL_CMDS.filter(([t])=>norm(t).includes(nq)).forEach(([t,fn])=>out.push({h:'Comandos', t, s:'', fn}));
+    const src = [...AT,...RI,...EM,...REA,...COL.filter(c=>!c.prazo_status)].map(c=>({...c,__tipo:'coleta'}))
+      .concat(HIST.map(c=>({...c,__tipo:'coleta'})), TRAT.map(t=>({...t,__tipo:'tratativa'})));
+    const seen = new Set(); let n = 0;
+    for (const c of src){
+      const key = c.__tipo+(c.chave||c.nf||c.cliente);
+      if (seen.has(key)) continue;
+      const hay = norm([c.cliente,c.nf,c.cpf,c.chave,c.transportadora,c.cidade].join(' '));
+      if (!hay.includes(nq)) continue;
+      seen.add(key);
+      const tag = c.__tipo==='tratativa' ? 'Tratativa' : (c.cancelada||c.realizada ? 'Histórico' : (c.prazo_status==='ATRASADO'?'Atrasado':c.prazo_status==='RISCO'?'Em risco':c.prazo_status==='REALIZADA'?'Coleta realizada':'No prazo'));
+      out.push({h:'Casos', t:(c.cliente||'—')+(c.nf?'  ·  NF '+c.nf:''), s:tag+' · '+(c.transportadora||'')+' '+(c.uf||''), fn:()=>openDetail(c)});
+      if (++n>=40) break;
+    }
+  }
+  palItems = out; palSel = 0;
+  const list = document.getElementById('pal-list');
+  let last = '';
+  list.innerHTML = out.length ? out.map((o,i)=>{ const hd = o.h!==last ? `<div class="pal-h">${o.h}</div>` : ''; last=o.h;
+    return hd + `<div class="pal-it${i===0?' on':''}" data-i="${i}"><span class="pi-t">${esc(o.t)}</span><span class="pi-s">${esc(o.s)}</span></div>`; }).join('')
+    : '<div class="pal-h">Nada encontrado</div>';
+}
+function palMove(d){
+  if (!palItems.length) return;
+  palSel = (palSel + d + palItems.length) % palItems.length;
+  document.querySelectorAll('#pal-list .pal-it').forEach(el=>el.classList.toggle('on', +el.dataset.i===palSel));
+  const on = document.querySelector('#pal-list .pal-it.on'); if (on) on.scrollIntoView({block:'nearest'});
+}
+function palRun(i){ const it = palItems[i]; if (!it) return; closePalette(); it.fn(); }
+document.getElementById('pal-in').addEventListener('input', e=>renderPalette(e.target.value));
+document.getElementById('pal-list').addEventListener('click', e=>{ const el=e.target.closest('.pal-it'); if (el) palRun(+el.dataset.i); });
+document.getElementById('palette').addEventListener('mousedown', e=>{ if (e.target.id==='palette') closePalette(); });
+document.addEventListener('keydown', e => {
+  const open = document.getElementById('palette').classList.contains('on');
+  if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); open ? closePalette() : openPalette(); return; }
+  if (!open){
+    if (e.key==='/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)){ e.preventDefault(); openPalette(); }
+    return;
+  }
+  if (e.key==='Escape') closePalette();
+  else if (e.key==='ArrowDown'){ e.preventDefault(); palMove(1); }
+  else if (e.key==='ArrowUp'){ e.preventDefault(); palMove(-1); }
+  else if (e.key==='Enter'){ e.preventDefault(); palRun(palSel); }
+});
+
+// ================= CABECALHO 3D: inclinacao pelo mouse + compactar ao rolar =================
+(function(){
+  const hero = document.getElementById('hero'), card = document.getElementById('hero-card');
+  if (matchMedia('(hover:hover)').matches && !matchMedia('(prefers-reduced-motion:reduce)').matches){
+    hero.addEventListener('mousemove', e=>{
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX-r.left)/r.width, y = (e.clientY-r.top)/r.height;
+      card.style.setProperty('--ry', ((x-.5)*7).toFixed(2)+'deg');
+      card.style.setProperty('--rx', ((.5-y)*5).toFixed(2)+'deg');
+      card.style.setProperty('--mx', (x*100).toFixed(0)+'%');
+    });
+    hero.addEventListener('mouseleave', ()=>{ card.style.setProperty('--rx','0deg'); card.style.setProperty('--ry','0deg'); });
+  }
+  let ticking = false;
+  window.addEventListener('scroll', ()=>{
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(()=>{ hero.classList.toggle('compact', window.scrollY>60); ticking=false; });
+  }, {passive:true});
+})();
 
 // ================= EXPORTAR CSV (mantido do arquivo enviado) =================
 function exportCSV(dados, nomeArquivo) {
@@ -1414,63 +1680,146 @@ function detectAndNormalize(rows){
 
 function isoNow(){ return new Date().toISOString(); }
 
-document.getElementById('file-input').addEventListener('change', async function(e){
-  const file=e.target.files[0]; if(!file) return;
-  const msg=document.getElementById('up-msg');
-  msg.style.display='block'; msg.textContent='Lendo: '+file.name+'...';
+let IMPORTING = false;
+
+async function importFile(file){
+  const msg = document.getElementById('up-msg');
+  const say = t => { msg.style.display='block'; msg.textContent = t; };
+  if (IMPORTING){ toast('Já existe uma importação em andamento.', {type:'warn'}); return; }
   if (!DB){
-    msg.textContent = 'Banco indisponível — entre com sua conta @abracadabra.com.br antes de importar.';
+    say('Banco indisponível — entre com sua conta antes de importar.');
+    toast('Entre com sua conta para importar arquivos.', {type:'warn'});
     return;
   }
+  IMPORTING = true;
   try{
+    say('Lendo: ' + file.name + '...');
     const rows = await readFileRows(file);
     const result = detectAndNormalize(rows);
-    if (result.error){ msg.textContent = result.error; return; }
-    msg.textContent = `${result.rows.length} linhas reconhecidas (${result.tipo==='coleta'?'Protocolo de Coleta':'Tratativas'}) — salvando...`;
+    if (result.error){ say(result.error); toast(result.error, {type:'err'}); return; }
 
-    const importId = 'imp_' + Date.now();
-    const seenIds = new Set();
-    for (let i=0;i<result.rows.length;i++){
-      const r = result.rows[i];
-      seenIds.add(r.id);
-      msg.textContent = `Salvando ${i+1} de ${result.rows.length}...`;
-      const ref = DB.doc('cases/'+r.id);
-      let prevHistory = [];
-      try{ const snap = await ref.get(); if (snap.exists){ const d=snap.data(); prevHistory = Array.isArray(d.history)?d.history:[]; } } catch(err){}
-      const history = [...prevHistory, { importId, at: isoNow(), status:r.status||null }].slice(-8);
-      const body = { ...r, history, concluido_auto:false, updatedAt: isoNow(), lastImportId: importId };
-      await ref.set(body);
-    }
-
+    const tipoLabel = result.tipo==='coleta' ? 'Protocolo de Coleta' : 'Tratativas';
     const prefix = result.tipo==='coleta' ? 'coleta_' : 'trat_';
-    const existing = await DB.collection('cases').get();
-    const toClose = existing.docs.filter(d => d.exists && d.id.startsWith(prefix) && !seenIds.has(d.id) && !(d.data().concluido_auto));
-    for (let i=0;i<toClose.length;i++){
-      msg.textContent = `Marcando concluídos automaticamente ${i+1} de ${toClose.length}...`;
-      await DB.doc('cases/'+toClose[i].id).update({ concluido_auto:true, concluidoEm: isoNow(), concluidoPorImport: importId });
+    const seen = new Set(result.rows.map(r=>r.id));
+    const abertos = Object.keys(DB_CASES).filter(id => id.startsWith(prefix) && !DB_CASES[id].concluido_auto);
+    const toClose = abertos.filter(id => !seen.has(id));
+    const novos = result.rows.filter(r => !DB_CASES[r.id]).length;
+    const reabertos = result.rows.filter(r => DB_CASES[r.id] && DB_CASES[r.id].concluido_auto).length;
+
+    // Protecao: arquivo errado/parcial faria "sumir" muita gente de uma vez. Pede confirmacao so nesse caso.
+    if (toClose.length > 25 && toClose.length > abertos.length * 0.3){
+      const nomes = toClose.slice(0,6).map(id => esc(DB_CASES[id].cliente||id)).join(', ');
+      const ok = await askConfirm('Confirmar importação',
+        `<p><b>${esc(file.name)}</b> (${tipoLabel}) traz <b>${result.rows.length}</b> linhas, mas hoje há <b>${abertos.length}</b> casos em aberto.</p>
+         <p style="margin-top:8px"><b>${toClose.length}</b> casos não estão mais no arquivo e serão <b>tirados do controle</b> (vão para o Histórico): ${nomes}${toClose.length>6?'…':''}.</p>
+         <p style="margin-top:8px;color:var(--tx3)">Se esse não for o arquivo completo mais recente, cancele. Dá para desfazer logo após importar.</p>`,
+        'Importar e atualizar');
+      if (!ok){ say('Importação cancelada.'); return; }
     }
 
-    let assetUrl=null;
-    if (ASSETS){
-      try{
-        const blob = new Blob([JSON.stringify({ tipo:result.tipo, filename:file.name, rows:result.rows }, null, 1)], { type:'application/json' });
-        const up = await ASSETS.upload(blob, { type:'application/json' });
-        assetUrl = up.url;
-      } catch(err){ console.warn('upload asset falhou', err); }
-    }
+    say(`Salvando ${result.rows.length} linhas...`);
+    const importId = 'imp_' + Date.now();
+    const now = isoNow();
+    const ops = [];
+    result.rows.forEach(r => {
+      const prev = DB_CASES[r.id];
+      const prevHistory = prev && Array.isArray(prev.history) ? prev.history : [];
+      const history = [...prevHistory, { importId, at: now, status: r.status||null }].slice(-8);
+      ops.push({ type:'set', path:'cases/'+r.id, data:{ ...r, history, concluido_auto:false, concluidoEm:null, updatedAt: now, lastImportId: importId } });
+    });
+    toClose.forEach(id => ops.push({ type:'update', path:'cases/'+id, data:{ concluido_auto:true, concluidoEm: now, concluidoPorImport: importId } }));
+    await DB.batchCommit(ops);
+
     await DB.collection('imports').doc(importId).set({
       tipo: result.tipo, filename: file.name, rowCount: result.rows.length,
-      importedAt: isoNow(), assetUrl, autoConcluidos: toClose.length,
+      importedAt: now, novos, reabertos, autoConcluidos: toClose.length,
+      closedIds: toClose.slice(0, 500), assetUrl: null,
     });
+    // copia do arquivo normalizado (historico) em segundo plano - nao trava a importacao
+    if (ASSETS){
+      const blob = new Blob([JSON.stringify({ tipo:result.tipo, filename:file.name, rows:result.rows })], { type:'application/json' });
+      ASSETS.upload(blob, { type:'application/json' })
+        .then(up => DB.collection('imports').doc(importId).update({ assetUrl: up.url }))
+        .catch(err => console.warn('upload asset falhou', err));
+    }
 
-    REF = new Date().toLocaleDateString('pt-BR');
-    msg.textContent = `Importação concluída: ${result.rows.length} linhas salvas, ${toClose.length} caso(s) concluído(s) automaticamente.`;
-    setTimeout(()=>{ msg.style.display='none'; e.target.value=''; }, 4000);
+    say(`Importação concluída: ${result.rows.length} linhas · ${novos} novas · ${toClose.length} saíram do controle.`);
+    toast(`${tipoLabel}: ${result.rows.length} linhas lidas · ${novos} novas${reabertos?` · ${reabertos} reabertas`:''} · ${toClose.length} saíram do controle`, {
+      type:'ok', ms: toClose.length ? 20000 : 6000,
+      actionLabel: toClose.length ? 'Desfazer' : null,
+      onAction: async () => {
+        await DB.batchCommit(toClose.map(id => ({ type:'update', path:'cases/'+id, data:{ concluido_auto:false, concluidoEm:null, concluidoPorImport:null } })));
+        toast(`${toClose.length} casos voltaram para o controle.`, {type:'ok'});
+        scheduleRender();
+      },
+    });
+    setTimeout(()=>{ msg.style.display='none'; }, 6000);
   } catch(err){
     console.error(err);
-    msg.textContent = 'Erro ao importar: ' + (err.message||String(err));
+    say('Erro ao importar: ' + (err.message||String(err)));
+    toast('Erro ao importar: ' + (err.message||String(err)), {type:'err'});
+  } finally {
+    IMPORTING = false;
+    document.getElementById('file-input').value = '';
+    scheduleRender();
   }
-});
+}
+document.getElementById('file-input').addEventListener('change', e => { const f=e.target.files[0]; if (f) importFile(f); });
+
+// soltar o arquivo em qualquer lugar da tela
+(function(){
+  let depth = 0;
+  const ov = () => document.getElementById('dropOverlay');
+  window.addEventListener('dragenter', e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')){ depth++; ov().classList.add('on'); } });
+  window.addEventListener('dragleave', () => { depth = Math.max(0, depth-1); if (!depth) ov().classList.remove('on'); });
+  window.addEventListener('dragover', e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) e.preventDefault(); });
+  window.addEventListener('drop', e => {
+    if (!(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length)) return;
+    e.preventDefault(); depth = 0; ov().classList.remove('on');
+    importFile(e.dataTransfer.files[0]);
+  });
+})();
+
+// ================= TOAST / CONFIRMACAO =================
+function toast(text, opt){
+  opt = opt || {};
+  const box = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = 'toast t-' + (opt.type||'info');
+  el.innerHTML = '<span class="toast-t"></span>' + (opt.actionLabel ? '<button class="toast-a" type="button"></button>' : '') + '<button class="toast-x" aria-label="Fechar" type="button">✕</button>';
+  el.querySelector('.toast-t').textContent = text;
+  const close = () => { el.classList.add('out'); setTimeout(()=>el.remove(), 200); };
+  el.querySelector('.toast-x').onclick = close;
+  if (opt.actionLabel){
+    const a = el.querySelector('.toast-a'); a.textContent = opt.actionLabel;
+    a.onclick = async () => { close(); try{ await opt.onAction(); } catch(e){ toast('Erro: '+(e.message||e), {type:'err'}); } };
+  }
+  box.appendChild(el);
+  setTimeout(close, opt.ms || 5000);
+}
+function askConfirm(title, html, okLabel){
+  return new Promise(resolve => {
+    const wrap = document.getElementById('confirmModal');
+    wrap.querySelector('.cm-title').textContent = title;
+    wrap.querySelector('.cm-body').innerHTML = html;
+    const ok = wrap.querySelector('.cm-ok'), no = wrap.querySelector('.cm-no');
+    ok.textContent = okLabel || 'Confirmar';
+    const done = v => { wrap.classList.remove('on'); ok.onclick = no.onclick = null; resolve(v); };
+    ok.onclick = () => done(true); no.onclick = () => done(false);
+    wrap.classList.add('on'); ok.focus();
+  });
+}
+
+// ================= RENDER AGENDADO (evita re-render a cada gravacao) =================
+let _rt = null;
+function scheduleRender(){
+  if (IMPORTING) return;
+  clearTimeout(_rt);
+  _rt = setTimeout(()=>{ renderAll(); }, 120);
+}
+// mantem dias/atrasos corretos com a aba aberta o dia todo
+setInterval(()=>{ if (!IMPORTING) renderAll(); }, 30*60*1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleRender(); });
 
 // ================= BANCO DE DADOS (Firebase Firestore + Storage + Auth) =================
 let DB = null;
@@ -1503,7 +1852,17 @@ function makeFirestoreShim(db, fs){
       },
     };
   }
-  return { doc: (path) => docRef(path), collection: (path) => collectionRef(path, []) };
+  async function batchCommit(ops){
+    for (let i=0; i<ops.length; i+=400){
+      const b = fs.writeBatch(db);
+      ops.slice(i, i+400).forEach(o => {
+        const r = fs.doc(db, o.path);
+        if (o.type==='update') b.update(r, o.data); else b.set(r, o.data);
+      });
+      await b.commit();
+    }
+  }
+  return { doc: (path) => docRef(path), collection: (path) => collectionRef(path, []), batchCommit };
 }
 function makeStorageShim(storage, st){
   return {
@@ -1574,6 +1933,9 @@ async function doLogin(){
 document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
 
 async function initDb(interactive){
+  try{ await _initDb(interactive); } finally { AUTH_DONE = true; renderBanner(); }
+}
+async function _initDb(interactive){
   const statusEl = document.getElementById('dbStatus');
   try{
     const { authMod, auth, db, fsMod, storage, stMod } = await loadFirebase();
@@ -1611,8 +1973,14 @@ async function initDb(interactive){
     const map = {};
     snap.docs.forEach(d => { if (d.exists) map[d.id] = d.data(); });
     DB_CASES = map;
-    renderAll();
-  }, err => { console.warn('cases onSnapshot error', err); });
+    FIRST_SNAPSHOT = true;
+    scheduleRender();
+  }, err => { console.warn('cases onSnapshot error', err); toast('Falha ao ler o banco: ' + (err.code||err.message), {type:'err'}); });
+
+  DB.collection('imports').orderBy('importedAt','desc').limit(1).onSnapshot(snap => {
+    LAST_IMPORT = snap.docs.length ? snap.docs[0].data() : null;
+    scheduleRender();
+  }, err => console.warn('imports onSnapshot error', err));
 }
 
 // ================= INIT =================
