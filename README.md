@@ -53,3 +53,7 @@ Menu **Perdas** (Panorama · Perdas Cliente · Perdas Transportadora). Alimentad
 ## Controle de Situações
 
 Menu **Controle → Controle de Situações**. Cada situação do Innovaro tem uma classe — **Pendente** (conta SLA), **Finalizada** (não gera atraso) ou **Desconsiderar** (fora do controle, ex.: Cancelada 1–4) — e um SLA em dias, editáveis na tabela ou por planilha (`Situação; Classe; SLA (dias)`). As regras ficam no Firestore (`config/sla_situacoes`). Protocolo de Coleta começa com 20 dias.
+
+## Indicadores por transportadora
+
+Menu **Controle → Indicadores por transportadora**. Cada caso (Pendente + Finalizada; Cancelada* e Perdas ficam fora) é uma tarefa criada na data da solicitação. Mostra tarefas no período, taxa de atendimento (Finalizadas ÷ total), SLA médio das finalizadas e em aberto hoje, por transportadora e por mês. Nos casos em aberto o time escolhe o **motivo da pendência** (No prazo / Relacionamento / Transporte / Cliente), gravado em `cases/{id}.motivo_pend` e refletido em tempo real. O SLA médio usa `finalizado_em`, registrado na importação em que o caso passa a Finalizado.

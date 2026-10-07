@@ -436,6 +436,22 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .pw-sel-motivo{width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--bd);background:var(--srf);color:var(--tx);font-size:12.5px}
 .pw-seg{display:inline-flex;border:1px solid var(--bd);border-radius:10px;overflow:hidden;background:var(--srf)}
 .pw-seg button{border:none;background:none;padding:7px 13px;font-size:11.5px;font-weight:700;color:var(--tx2);cursor:pointer;transition:.14s}
+.ind-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.ind-k{background:var(--srf);border:1px solid var(--bd);border-top:4px solid var(--acc);border-radius:14px;padding:16px 18px;box-shadow:var(--sh);transition:.15s}
+.ind-k:hover{transform:translateY(-2px)}
+.ind-k small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px}
+.ind-k b{font-size:34px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ind-k b i{font-style:normal;font-size:15px;font-weight:600;color:var(--tx3);margin-left:4px}
+.ind-k.g{border-top-color:#16A34A}.ind-k.b{border-top-color:#2563EB}.ind-k.a{border-top-color:#D97706}.ind-k.r{border-top-color:#DC2626}
+.ind-h{font-size:17px;font-weight:700;margin:6px 0 4px}.ind-sub{font-size:12px;color:var(--tx3);margin-bottom:12px}
+.ind-cars{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:18px}
+.ind-c{background:var(--srf);border:1px solid var(--bd);border-top:4px solid #16A34A;border-radius:14px;padding:14px 16px;cursor:pointer;box-shadow:var(--sh);transition:.15s}
+.ind-c:hover{transform:translateY(-2px)}.ind-c.on{outline:2px solid var(--acc)}.ind-c.am{border-top-color:#D97706}.ind-c.rd{border-top-color:#DC2626}
+.ind-c h4{font-size:15px;margin-bottom:10px}
+.ind-m{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ind-m span{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tx3);display:block}
+.ind-m b{font-size:17px;font-variant-numeric:tabular-nums}
+.ind-m b.gg{color:#16A34A}.ind-m b.aa{color:#D97706}.ind-m b.rr{color:#DC2626}
 .pw-seg button small{opacity:.7;font-weight:600;margin-left:3px}
 .pw-seg button.on{background:linear-gradient(135deg,#7C3AED,#DB2777);color:#fff}
 @media print{
@@ -513,6 +529,12 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><polyline points="12 7 12 12 15.5 14" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Controle de Situações
       <span class="bdg" id="bdg-sit">0</span>
+    </button>
+
+    <button class="nav" onclick="ir('ind')" id="nav-ind">
+      <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="9" stroke-width="1.5"/><rect x="10" y="7" width="4" height="14" stroke-width="1.5"/><rect x="17" y="3" width="4" height="18" stroke-width="1.5"/></svg>
+      Indicadores por transportadora
+      <span class="bdg" id="bdg-ind">0</span>
     </button>
 
     <div class="sb-grp">Perdas</div>
@@ -738,6 +760,22 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>UF</th><th>Dias</th><th>SLA</th><th>Atraso</th><th>Estado</th><th>Responsável</th></tr></thead>
         <tbody id="tb-sit"></tbody></table>
       </div></div>
+    </div>
+
+    <div class="panel" id="panel-ind">
+      <div class="dica"><strong>Indicadores por transportadora:</strong> cada caso é uma <b>tarefa</b> (criada na data da solicitação). <b>Atendida</b> = situação Finalizada; <b>em aberto</b> = situação Pendente. Cancelada* e Perdas ficam fora. Nos casos em aberto, escolha o <b>motivo da pendência</b> (No prazo, Relacionamento, Transporte ou Cliente) — os gráficos e o quadro atualizam na hora, para todos.</div>
+      <div class="filters" style="margin-bottom:12px"><select class="fsel" id="ind-ano" onchange="indSet('ano',this.value)"></select><span class="chip no-print" onclick="indSet('limpar')">Limpar filtros</span><span class="chip" id="ind-pill" style="display:none" onclick="indSet('limpar')"></span><span class="fcnt" id="ind-info"></span></div>
+      <div class="ind-kpis" id="ind-kpis"></div>
+      <div class="ind-h">Indicadores por transportadora</div><div class="ind-sub" id="ind-sub"></div>
+      <div class="ind-cars" id="ind-cars"></div>
+      <div class="card" style="margin-bottom:14px"><div class="card-title">Volume de tarefas e % de atendimento por mês de criação</div><div class="card-sub">Barras = tarefas criadas · linha = % já atendidas · clique numa barra para filtrar o mês</div><div style="height:320px"><canvas id="ch-ind"></canvas></div></div>
+      <div class="g2">
+        <div class="card"><div class="card-title">Pendências por mês, transportadora e motivo</div><div class="card-sub">Gerado dos casos em aberto · clique numa linha para ver os casos</div>
+          <div class="tbl-scroll" style="max-height:380px"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Motivo</th><th>Qtd.</th></tr></thead><tbody id="tb-ind-pend"></tbody></table></div></div>
+        <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
+      </div>
+      <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Motivo da pendência</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
     </div>
 
     <div class="panel" id="panel-trat">
@@ -1069,7 +1107,7 @@ const TITLES = {
   dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Protocolo de Coleta — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
-  sit:'Controle de Situações', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
+  sit:'Controle de Situações', ind:'Indicadores por transportadora', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
 };
 function ir(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
@@ -1081,6 +1119,7 @@ function ir(id){
   document.getElementById('tb-title').textContent = TITLES[id]||id;
   renderPerdasActive();
   if (id==='sit') renderSit();
+  if (id==='ind') renderInd();
   window.scrollTo({top:0});
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1546,6 +1585,7 @@ function renderAll(){
   renderPerdasBadges();
   renderPerdasActive();
   renderSit();
+  renderInd();
   renderOcultos();
   renderBanner();
   document.querySelectorAll('.tbl-wrap table').forEach(applySort);
@@ -1773,7 +1813,7 @@ function parseCsvSemicolon(text){
       if (c === '"'){ if (text[i+1]==='"'){ field+='"'; i++; } else inQuotes=false; }
       else field += c;
     } else {
-      if (c === '"') inQuotes = true;
+      if (c === '"' && field === '') inQuotes = true;   // aspa so abre campo no inicio; aspa solta (ex.: 5") e texto
       else if (c === ';'){ row.push(field); field=''; }
       else if (c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
       else if (c === '\r'){ /* ignore */ }
@@ -1952,6 +1992,8 @@ async function importFile(file){
     const ops = [];
     result.rows.forEach(r => {
       const prev = DB_CASES[r.id];
+      const ehFin = o => o.origem==='coleta' ? !!o.recebido_cd : sitClasseDe(o.tipo_devolucao||'')==='Finalizada';
+      if (prev && !prev.finalizado_em && !ehFin(prev) && ehFin(r)){ const n = new Date(); r.finalizado_em = String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
       const prevHistory = prev && Array.isArray(prev.history) ? prev.history : [];
       const history = [...prevHistory, { importId, at: now, status: r.status||null }].slice(-8);
       ops.push({ type:'set', merge:true, path:'cases/'+r.id, data:{ ...r, history, concluido_auto:false, concluidoEm:null, updatedAt: now, lastImportId: importId } });
@@ -2217,6 +2259,123 @@ async function _initDb(interactive){
   }, err => console.warn('imports onSnapshot error', err));
 }
 
+
+// ================= INDICADORES POR TRANSPORTADORA =================
+const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente'];
+const IND_COR = { 'No prazo':'#16A34A', 'Relacionamento':'#2563EB', 'Transporte':'#D97706', 'Cliente':'#7C3AED', 'A classificar':'#DC2626' };
+const IND = { ano:null, carrier:null, mes:null, motivo:null };
+let IND_ALL = [], IND_ABERTOS = [];
+function indNome(n){
+  n = String(n||'').trim(); if (!n) return 'Sem transportadora';
+  if (/hello|i9/i.test(n)) return 'Hello - I9';
+  return n.replace(/^(transportadora|transp\.?|trans\.?)\s+/i,'') || n;
+}
+function indFonte(){
+  const out = [];
+  COL.concat(REA).forEach(c => out.push({ ...c, __tipo:'coleta', sit:'Protocolo de Coleta', fin:false }));
+  HIST.filter(c => !c.cancelada).forEach(c => out.push({ ...c, __tipo:'coleta', sit:'Protocolo de Coleta', fin:true }));
+  TRAT.concat(TRAT_HIST).forEach(t => { const sit = t.tipo_devolucao || '(sem situação)', cl = sitClasseDe(sit); if (cl==='Desconsiderar') return; out.push({ ...t, __tipo:'tratativa', sit, fin: cl==='Finalizada' }); });
+  return out;
+}
+function indCalcula(){
+  const hoje = new Date();
+  IND_ALL = indFonte().map(x => {
+    const d = parseBR(x.data_solicitacao) || parseBR(x.data_programacao);
+    const fe = parseBR(x.finalizado_em);
+    const dias = d ? daysBetween(d, hoje) : null, sla = sitSlaDe(x.sit);
+    let motivo = null;
+    if (!x.fin) motivo = IND_MOTIVOS.includes(x.motivo_pend) ? x.motivo_pend : ((!sla || dias==null || dias<=sla) ? 'No prazo' : 'A classificar');
+    return { ...x, d, ano:d?d.getFullYear():null, mes:d?d.getMonth()+1:null, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indNome(x.transportadora) };
+  }).filter(x => x.ano);
+}
+function indAgg(arr){
+  const fin = arr.filter(x=>x.fin), sl = fin.filter(x=>x.slaDias!=null);
+  return { total:arr.length, fin:fin.length, aberto:arr.length-fin.length, taxa:arr.length ? fin.length/arr.length*100 : null, sla: sl.length ? sl.reduce((s,x)=>s+x.slaDias,0)/sl.length : null, nsla:sl.length };
+}
+const fmt1 = n => n==null ? '—' : n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
+function indSet(k,v){
+  if (k==='ano') IND.ano = +v;
+  else if (k==='limpar'){ IND.carrier=null; IND.mes=null; IND.motivo=null; }
+  else IND[k] = (IND[k]===v ? null : v);
+  renderInd();
+}
+function indSetMotivo(id, v){
+  const x = IND_ALL.find(y=>y.id===id); if (!x || !DB){ toast('Entre com sua conta para gravar o motivo.', {type:'warn'}); return; }
+  DB.doc('cases/'+id).set({ motivo_pend:v||null, motivo_pend_em:isoNow() }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
+  DB_CASES[id] = { ...(DB_CASES[id]||{}), motivo_pend:v||null }; scheduleRender();
+}
+function renderInd(){
+  if (!document.getElementById('panel-ind')) return;
+  indCalcula();
+  const anos = [...new Set(IND_ALL.map(x=>x.ano))].sort((a,b)=>b-a);
+  if (!anos.includes(IND.ano)) IND.ano = anos[0] || new Date().getFullYear();
+  const sel = document.getElementById('ind-ano'); sel.innerHTML = anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('') || '<option>—</option>';
+  const doAno = IND_ALL.filter(x=>x.ano===IND.ano);
+  const base = doAno.filter(x => (!IND.carrier || x.carr===IND.carrier) && (!IND.mes || x.mes===IND.mes));
+  const A = indAgg(base);
+  document.getElementById('bdg-ind').textContent = IND_ALL.filter(x=>!x.fin).length;
+  const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
+  document.getElementById('ind-kpis').innerHTML =
+    `<div class="ind-k b"><small>Tarefas no período</small><b>${A.total}</b></div>
+     <div class="ind-k ${tc||'g'}"><small>Taxa de atendimento</small><b>${fmt1(A.taxa)}<i>%</i></b></div>
+     <div class="ind-k b" title="${A.nsla} tarefas com data de finalização registrada"><small>SLA médio (finalizadas)</small><b>${fmt1(A.sla)}<i>dias</i></b></div>
+     <div class="ind-k a"><small>Em aberto hoje</small><b>${A.aberto}</b></div>`;
+  const pills = [IND.carrier&&'Transportadora: '+IND.carrier, IND.mes&&'Mês: '+MESES[IND.mes-1], IND.motivo&&'Motivo: '+IND.motivo].filter(Boolean);
+  const pill = document.getElementById('ind-pill'); pill.style.display = pills.length ? '' : 'none'; pill.textContent = pills.join(' · ') + ' ✕';
+  document.getElementById('ind-info').textContent = A.nsla ? '' : 'SLA médio aparece conforme as finalizações forem sendo registradas nas próximas importações.';
+
+  // cards por transportadora
+  const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
+  document.getElementById('ind-sub').textContent = `Total acumulado, % de atendimento, SLA médio e tarefas em aberto — ${isFinite(mi)?MESES[mi-1].toLowerCase()+' a '+MESES[ma-1].toLowerCase()+'/'+IND.ano:'sem dados'}.`;
+  const por = new Map(); doAno.filter(x=>!IND.mes||x.mes===IND.mes).forEach(x => { if(!por.has(x.carr)) por.set(x.carr,[]); por.get(x.carr).push(x); });
+  document.getElementById('ind-cars').innerHTML = [...por.entries()].map(([c,arr])=>({c, a:indAgg(arr)})).sort((x,y)=>y.a.total-x.a.total).map(({c,a}) => {
+    const cl = a.taxa>=90 ? '' : a.taxa>=75 ? ' am' : ' rd', tcl = a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
+    return `<div class="ind-c${cl}${IND.carrier===c?' on':''}" onclick="indSet('carrier',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}</h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div></div>`; }).join('') || '<div class="ind-sub">Importe um arquivo para ver os indicadores.</div>';
+
+  // grafico mensal (respeita transportadora)
+  const doCar = doAno.filter(x=>!IND.carrier||x.carr===IND.carrier);
+  const meses = Array.from({length:12},(_,i)=>i+1).filter(m => doCar.some(x=>x.mes===m) || m<=ma);
+  const vol = meses.map(m=>doCar.filter(x=>x.mes===m).length), pct = meses.map(m=>{ const a=doCar.filter(x=>x.mes===m); return a.length ? Math.round(a.filter(x=>x.fin).length/a.length*100) : null; });
+  const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
+  const vis = document.getElementById('panel-ind').classList.contains('on') && window.Chart;
+  if (vis){
+    if (charts.ind) charts.ind.destroy();
+    charts.ind = new Chart(document.getElementById('ch-ind'), { data:{ labels:meses.map(m=>MESES[m-1]), datasets:[
+      { type:'bar', label:'Tarefas criadas', data:vol, backgroundColor:meses.map(m=>m===IND.mes?'#2563EB':'#1E3A5F'), borderRadius:6, yAxisID:'y', order:2 },
+      { type:'line', label:'% atendimento', data:pct, borderColor:'#E8704F', backgroundColor:'#E8704F', tension:.25, pointRadius:4, yAxisID:'y1', order:1 } ] },
+      options:{ responsive:true, maintainAspectRatio:false, animation:{duration:450},
+        onClick:(e,els)=>{ if (els.length) indSet('mes', meses[els[0].index]); },
+        plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } }, tooltip:{ callbacks:{ label:c => c.dataset.type==='line' ? ` ${c.parsed.y}% atendidas` : ` ${c.parsed.y} tarefas` } } },
+        scales:{ x:{ ticks:{color:tick}, grid:{display:false} }, y:{ beginAtZero:true, ticks:{color:tick}, grid:{color:grid}, title:{display:true,text:'Tarefas criadas',color:tick} },
+                 y1:{ position:'right', min:0, max:100, ticks:{color:'#E8704F', callback:v=>v+'%'}, grid:{display:false}, title:{display:true,text:'% Atendimento',color:'#E8704F'} } } } });
+  }
+
+  // quadro de pendencias (mes x transportadora x motivo)
+  const ab = doAno.filter(x=>!x.fin && (!IND.carrier||x.carr===IND.carrier));
+  const g = new Map(); ab.forEach(x => { const k = x.mes+'|'+x.carr+'|'+x.motivo; g.set(k, (g.get(k)||0)+1); });
+  const linhas = [...g.entries()].map(([k,n]) => { const [m,c,mo] = k.split('|'); return { m:+m, c, mo, n }; }).sort((a,b)=>a.m-b.m || a.c.localeCompare(b.c) || a.mo.localeCompare(b.mo));
+  document.getElementById('tb-ind-pend').innerHTML = linhas.map(l => `<tr class="clickable${IND.mes===l.m&&IND.motivo===l.mo&&IND.carrier===l.c?' sel':''}" onclick="IND.mes=${l.m};IND.carrier=this.dataset.c;IND.motivo=this.dataset.mo;renderInd()" data-c="${esc(l.c)}" data-mo="${esc(l.mo)}"><td>${MESES[l.m-1]}/${IND.ano}</td><td>${esc(l.c)}</td><td><span class="bdg" style="background:${IND_COR[l.mo]}22;color:${IND_COR[l.mo]}">${l.mo}</span></td><td><b>${l.n}</b></td></tr>`).join('') || '<tr><td colspan="4" style="color:var(--tx3);padding:14px">Nenhuma pendência em aberto neste período.</td></tr>';
+
+  if (vis){
+    const mo = ['No prazo','Relacionamento','Transporte','Cliente','A classificar'].map(m=>[m, ab.filter(x=>x.motivo===m).length]).filter(a=>a[1]);
+    if (charts.indMot) charts.indMot.destroy();
+    charts.indMot = new Chart(document.getElementById('ch-ind-mot'), { type:'doughnut', data:{ labels:mo.map(a=>a[0]), datasets:[{ data:mo.map(a=>a[1]), backgroundColor:mo.map(a=>IND_COR[a[0]]), borderWidth:0 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', onClick:(e,els)=>{ if (els.length) indSet('motivo', mo[els[0].index][0]); }, plugins:{ legend:{ position:'right', labels:{ color:tick, boxWidth:10 } } } } });
+  }
+
+  // casos em aberto com seletor de motivo
+  const lista = doAno.filter(x=>!x.fin && (!IND.carrier||x.carr===IND.carrier) && (!IND.mes||x.mes===IND.mes) && (!IND.motivo||x.motivo===IND.motivo)).sort((a,b)=>(b.dias||0)-(a.dias||0));
+  IND_ABERTOS = lista;
+  document.getElementById('cnt-ind').textContent = lista.length + ' em aberto';
+  const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind');
+  if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td>
+    <td onclick="event.stopPropagation()"><select data-id="${esc(x.id||'')}" onchange="indSetMotivo(this.dataset.id,this.value)" style="padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">${x.motivo==='A classificar'?'<option value="" selected>A classificar…</option>':''}${IND_MOTIVOS.map(m=>`<option${m===x.motivo?' selected':''}>${m}</option>`).join('')}</select></td></tr>`).join('')
+    + (lista.length>300 ? `<tr><td colspan="7" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
+}
+function indExport(){
+  if (!IND_ABERTOS.length){ toast('Nada para exportar.', {type:'warn'}); return; }
+  exportCSV(IND_ABERTOS.map(x => ({ 'Mês':MESES[x.mes-1]+'/'+x.ano, 'Transportadora':x.carr, 'Situação':x.sit, 'Cliente':x.cliente||'', 'NF':x.nf||'', 'Dias':x.dias==null?'':x.dias, 'Motivo da pendência':x.motivo })), 'pendencias_transportadora');
+}
 
 // ================= CONTROLE DE SITUACOES (SLA por situacao) =================
 let SIT_CFG = { base:'prog', regras:{} };   // regras[chave] = { nome, sla }
