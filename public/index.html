@@ -115,7 +115,9 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 .cube-wrap{perspective:240px;width:38px;height:38px;flex-shrink:0}
 .cube{position:relative;width:38px;height:38px;transform-style:preserve-3d;animation:cubeSpin 16s linear infinite}
 .cube i{position:absolute;inset:0;display:grid;place-items:center;font:800 17px/1 -apple-system,'Segoe UI',sans-serif;font-style:normal;color:#fff;
-  border:1px solid rgba(255,255,255,.55);background:linear-gradient(135deg,rgba(255,255,255,.28),rgba(46,134,222,.7));backface-visibility:visible}
+  border:1px solid rgba(255,255,255,.6);background:linear-gradient(135deg,#FFC400,#E11D2E);text-shadow:0 1px 2px rgba(0,0,0,.45);backface-visibility:visible}
+.cube .f2,.cube .f4{background:linear-gradient(135deg,#E11D2E,#FFC400)}
+.cube .f5{background:#FFC400}.cube .f6{background:#E11D2E}
 .cube .f1{transform:translateZ(19px)} .cube .f2{transform:rotateY(90deg) translateZ(19px)} .cube .f3{transform:rotateY(180deg) translateZ(19px)}
 .cube .f4{transform:rotateY(-90deg) translateZ(19px)} .cube .f5{transform:rotateX(90deg) translateZ(19px)} .cube .f6{transform:rotateX(-90deg) translateZ(19px)}
 @keyframes cubeSpin{from{transform:rotateX(-18deg) rotateY(0)}to{transform:rotateX(-18deg) rotateY(360deg)}}
@@ -578,6 +580,13 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <span class="bdg" id="bdg-p-trp">0</span>
     </button>
 
+    <div class="sb-grp">Transportadora</div>
+    <button class="nav" onclick="ir('nr')" id="nav-nr">
+      <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2" stroke-width="1.5"/><circle cx="12" cy="12" r="2.5" stroke-width="1.5"/><path d="M6 10v4M18 10v4" stroke-width="1.5" stroke-linecap="round"/></svg>
+      A pagar e Não retornou
+      <span class="bdg" id="bdg-nr">0</span>
+    </button>
+
     <div class="sb-grp">Análise</div>
     <button class="nav" onclick="ir('regiao')" id="nav-regiao">
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke-width="1.5"/><circle cx="12" cy="9" r="2.5" stroke-width="1.5"/></svg>
@@ -742,7 +751,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Motivo da pendência</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Motivo da pendência</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
     </div>
 
     <div class="panel" id="panel-trat">
@@ -753,7 +762,6 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <button class="minitab" onclick="setGrupoTab('recolhimento')">Recolhimento <span class="mt-n" id="mtn-recolhimento"></span></button>
         <button class="minitab" onclick="setGrupoTab('barrar')">Barrar <span class="mt-n" id="mtn-barrar"></span></button>
         <button class="minitab" onclick="setGrupoTab('financeiro')">Financeiro <span class="mt-n" id="mtn-financeiro"></span></button>
-        <button class="minitab" onclick="setGrupoTab('naoretornou')">Não retornou <span class="mt-n" id="mtn-naoretornou"></span></button>
         <button class="minitab" onclick="setGrupoTab('nova')">Novo / a triar <span class="mt-n" id="mtn-nova"></span></button>
         <button class="minitab" onclick="setGrupoTab('outros')">Outros <span class="mt-n" id="mtn-outros"></span></button>
       </div></div></div>
@@ -790,7 +798,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <div class="ind-h" id="sla-t-fluxo"></div><div class="ind-sub">Cada situação tem um prazo para o responsável apontar o próximo passo. Prazo 0 = visível, mas fora do SLA. <b>~</b> = atraso estimado pela data de programação/criação (o painel ainda não viu o caso mudar de situação; fica exato conforme as importações diárias). Clique numa situação para filtrar a lista.</div>
       <div class="tbl-wrap" style="margin-bottom:16px"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Prazo</th><th>Próximos passos</th><th>Casos</th><th>Em atraso</th><th>Vence hoje</th><th>Maior atraso</th></tr></thead><tbody id="tb-sla-sit"></tbody></table></div></div>
       <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px" id="sla-lista-t">Casos para cobrar</b><span class="fcnt" id="cnt-sla"></span><button class="btn-exp" onclick="slaExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Venceu em</th><th>Atraso</th><th>Responsável</th><th>Deveria ir para</th></tr></thead><tbody id="tb-sla"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Venceu em</th><th>Atraso</th><th>Responsável</th><th>Motivo (por que não atualizou)</th></tr></thead><tbody id="tb-sla"></tbody></table></div></div>
       <details class="ind-f" style="margin-top:16px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Classes do Innovaro → fluxo (ajuste só se algum caso ficar em "sem fluxo")</summary><div id="sla-classes" style="margin-top:10px"></div></details>
     </div>
 
@@ -799,6 +807,17 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <div class="panel pworld" id="panel-p-trp"><div id="pw-transportadora"></div></div>
 
     <!-- ATRASOS REGIAO -->
+    <div class="panel" id="panel-nr">
+      <div class="pworld" id="ph-nr"></div>
+      <div class="ind-f">
+        <div class="ind-f-top"><input id="nr-q" placeholder="Buscar cliente, NF ou CPF..." oninput="nrSet('q',this.value)"><button class="btn-exp" type="button" id="nr-limpar" onclick="nrSet('limpar')">Limpar filtros</button></div>
+        <div id="nr-fbody"></div>
+      </div>
+      <div class="pworld"><div class="pw-grid even"><div class="pw-card"><h3>Casos por transportadora</h3><div class="s">Clique numa barra para filtrar</div><div class="pw-chart"><canvas id="nr-ch-car"></canvas></div></div><div class="pw-card"><h3>Casos por mês de abertura</h3><div class="s">Transportadora a pagar x produto não retornou</div><div class="pw-chart"><canvas id="nr-ch-mes"></canvas></div></div></div></div>
+      <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos</b><span class="fcnt" id="cnt-nr"></span><button class="btn-exp" onclick="nrExport()">Exportar CSV</button></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Aberto em</th><th>Dias parado</th><th>Valor</th><th>Responsável</th></tr></thead><tbody id="tb-nr"></tbody></table></div></div>
+    </div>
+
     <div class="panel" id="panel-regiao">
       <div class="g2">
         <div class="card">
@@ -973,6 +992,7 @@ let COL = [];       // coletas pendentes de coleta (nao realizadas, nao cancelad
 let REA = [];       // coleta realizada na casa do cliente, aguardando chegada no CD
 let HIST = [];       // coletas historico (canceladas ou realizadas)
 let TRAT = [];       // tratativas em aberto
+let NR = [];       // transportadora a pagar + produto nao retornou (aba propria)
 let TRAT_ALL = [];   // todas as tratativas (pendentes + finalizadas), base dos indicadores
 let TRAT_HIST = [];  // tratativas que sairam do arquivo (concluidas automaticamente)
 let AT = [], RI = [], EM = [], AT_FORA = [];
@@ -1031,7 +1051,8 @@ function rebuildData(){
   const allTrat = Object.values(tratMap).filter(visivel).map(deriveTratativaLive);
   // Perdas sao fato historico (indice mensal) e vivem na propria aba: nao saem do controle por sumirem do arquivo.
   PERDAS = allTrat.filter(t => t.grupo==='perdas').map(derivePerda);
-  const outrasTrat = allTrat.filter(t => t.grupo!=='perdas');
+  NR = allTrat.filter(t => t.grupo!=='perdas' && isNR(t) && !t.concluido_auto).map(deriveNR);
+  const outrasTrat = allTrat.filter(t => t.grupo!=='perdas' && !isNR(t));
   TRAT_ALL = outrasTrat;
   // painel de tratativas: so o que esta pendente (Finalizada / Desconsiderar saem; seguem nos indicadores)
   TRAT = outrasTrat.filter(t => !t.concluido_auto && sitClasseDe(t.tipo_devolucao||'')==='Pendente');
@@ -1095,7 +1116,7 @@ const TITLES = {
   dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Coleta Reversa — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
-  ind:'Controle de Situações', sla:'SLA de Apontamento', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
+  ind:'Controle de Situações', sla:'SLA de Apontamento', nr:'A pagar e Não retornou', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
 };
 function ir(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
@@ -1108,6 +1129,7 @@ function ir(id){
   renderPerdasActive();
   if (id==='ind') renderInd();
   if (id==='sla') renderSla();
+  if (id==='nr') renderNR();
   window.scrollTo({top:0});
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1362,6 +1384,8 @@ function openDetail(item){
       ${item.modalidade ? `<dt>Modalidade</dt><dd>${esc(item.modalidade)}</dd>` : ''}
       <dt>Estado / cidade</dt><dd>${esc(item.uf)||'—'} · ${esc(item.cidade)||'—'}</dd>
       <dt>Tipo de devolução</dt><dd>${esc(item.tipo_devolucao)||(isColeta?'Protocolo de Coleta':'—')}</dd>
+      <dt>Classe</dt><dd>${esc(item.classe)||'—'}</dd>
+      <dt>Tipo de saída</dt><dd>${esc(item.transportadoraOriginal||item.transportadora)||'—'}</dd>
       <dt>Data da solicitação</dt><dd class="mono">${esc(item.data_solicitacao)||'Não informado'}</dd>
       <dt>Data do protocolo</dt><dd class="mono">${esc(item.data_programacao)||'Não informado'}</dd>
       ${isColeta ? `<dt>Dias em aberto (hoje)</dt><dd class="mono">${item.temData ? item.dias+' dias' : '—'}</dd>` : ''}
@@ -1519,6 +1543,7 @@ function renderAll(){
   renderPerdasActive();
   renderInd();
   renderSla();
+  renderNR();
   renderProtoHero();
   renderTratHero();
   renderDashBlocks();
@@ -1558,7 +1583,7 @@ let AUTH_DONE = false;
 function renderBanner(){
   const el = document.getElementById('stateBanner');
   if (!el) return;
-  const total = COL.length + REA.length + HIST.length + TRAT.length + TRAT_HIST.length + PERDAS.length;
+  const total = COL.length + REA.length + HIST.length + TRAT.length + TRAT_HIST.length + PERDAS.length + NR.length;
   document.body.classList.toggle('loading', !!DB && !FIRST_SNAPSHOT);
   if (!AUTH_DONE){ el.className=''; return; }
   if (!DB){
@@ -2191,7 +2216,7 @@ async function _initDb(interactive){
     const sa = snap.docs.find(x => x.id==='sla_apontamento');
     if (sa && sa.data().classes){ SLA_CLASSES = sa.data().classes; try { localStorage.setItem('sla_classes', JSON.stringify(SLA_CLASSES)); } catch(e){} scheduleRender(); }
     const cn = snap.docs.find(x => x.id==='canais');
-    if (cn && Array.isArray(cn.data().marketplace)){ MKT_USERS = cn.data().marketplace; try { localStorage.setItem('mkt_users', JSON.stringify(MKT_USERS)); } catch(e){} scheduleRender(); }
+    if (cn && Array.isArray(cn.data().marketplace)){ MKT_USERS = cn.data().marketplace; if (Array.isArray(cn.data().logistica)) LOG_USERS = cn.data().logistica; try { localStorage.setItem('mkt_users', JSON.stringify(MKT_USERS)); localStorage.setItem('log_users', JSON.stringify(LOG_USERS)); } catch(e){} scheduleRender(); }
     if (d){ const v = d.data(); SIT_CFG = { base: v.base==='solic'?'solic':'prog', regras: v.regras||{} }; try { localStorage.setItem('sit_cfg', JSON.stringify(SIT_CFG)); } catch(e){} scheduleRender(); }
   }, err => console.warn('config onSnapshot error', err));
 
@@ -2286,13 +2311,14 @@ function renderTratHero(){
   const c = g => TRAT.filter(t => (t.grupo||'outros')===g).length;
   el.innerHTML = pwHero('Tratativas Transportadora', 'Tratativas por grupo', 'Casos acompanhados por tipo, sem prazo fixo · clique num grupo para filtrar.',
     [['Em aberto', TRAT.length, 'todas as tratativas', "setGrupoTab('')"], ['Recolhimento', c('recolhimento'), '', "setGrupoTab('recolhimento')"], ['Barrar', c('barrar'), '', "setGrupoTab('barrar')"],
-     ['Financeiro', c('financeiro'), '', "setGrupoTab('financeiro')"], ['Não retornou', c('naoretornou'), '', "setGrupoTab('naoretornou')"], ['Novo / a triar', c('nova'), '', "setGrupoTab('nova')"]]);
+     ['Financeiro', c('financeiro'), '', "setGrupoTab('financeiro')"], ['Novo / a triar', c('nova'), '', "setGrupoTab('nova')"]]);
 }
 
 // ================= CONTROLE DE SITUACOES (indicadores por transportadora) =================
 const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente'];
 const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'A classificar':'#64748B' };
 const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'' };
+const IND_INICIO = new Date(2026, 6, 1);   // pendencias criadas antes de 01/07/2026 contam como finalizadas; dai em diante a equipe vai sanando
 const IND_CORTE = 7;   // a partir de julho o detalhe mes a mes; antes disso os meses entram como um bloco ja finalizado
 const indAntigos = () => Array.from({length:IND_CORTE-1},(_,i)=>i+1);
 let IND_ALL = [], IND_ABERTOS = [];
@@ -2314,9 +2340,10 @@ function indCalcula(){
     const d = parseBR(x.data_solicitacao) || parseBR(x.data_programacao);
     const fe = parseBR(x.finalizado_em);
     const dias = d ? daysBetween(d, hoje) : null, sla = sitSlaDe(x.sit);
+    const fin = x.fin || !!(d && d < IND_INICIO);
     let motivo = null;
-    if (!x.fin) motivo = IND_MOTIVOS.includes(x.motivo_pend) ? x.motivo_pend : ((!sla || dias==null || dias<=sla) ? 'No prazo' : 'A classificar');
-    return { ...x, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indNome(x.transportadora), canal:canalOf(x.usuario) };
+    if (!fin) motivo = IND_MOTIVOS.includes(x.motivo_pend) ? x.motivo_pend : ((!sla || dias==null || dias<=sla) ? 'No prazo' : 'A classificar');
+    return { ...x, fin, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indNome(x.transportadora), canal:canalOf(x.usuario) };
   });
 }
 function indAgg(arr){
@@ -2373,7 +2400,7 @@ function renderInd(){
   document.getElementById('ind-fbody').innerHTML =
     `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${antChip}${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join('')}</div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join('')}</div></div>
-     <div class="ind-fr"><b>Canal</b><div>${chip(!IND.canal, "indSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Marketplace','Relacionamento'].map(c => { const k = cnt(doAno.filter(x=>x.canal===c),['canal']); return chip(IND.canal===c, `indSet('canal','${c}')`, c, k[0], k[1]); }).join('')}<button type="button" class="ind-ch" onclick="indUsuarios()" title="Quem é do Marketplace; os demais usuários são do Relacionamento">⚙ Definir usuários do Marketplace</button></div></div>
+     <div class="ind-fr"><b>Canal</b><div>${chip(!IND.canal, "indSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Marketplace','Relacionamento','Logística'].map(c => { const k = cnt(doAno.filter(x=>x.canal===c),['canal']); return chip(IND.canal===c, `indSet('canal','${c}')`, c, k[0], k[1]); }).join('')}<button type="button" class="ind-ch" onclick="indUsuarios()" title="Marketplace, Logística ou Relacionamento (padrão)">⚙ Definir usuários por canal</button></div></div>
      <div class="ind-fr"><b>Situação</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
      ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Motivo da pendência</b><div>${['No prazo','Relacionamento','Transporte','Cliente','A classificar'].map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${m}`, m, motCont(m))).join('')}</div></div>`}`;
   document.getElementById('ind-fres').innerHTML = `${IND.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${IND.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio aparece conforme as finalizações forem registradas nas próximas importações</i>');
@@ -2382,7 +2409,7 @@ function renderInd(){
   // ---- KPIs ----
   const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
   document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', 'Tarefas, taxa de atendimento, SLA médio e o que ainda está em aberto — atualiza a cada importação.',
-    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'aparece conforme as finalizações forem registradas'], ['Em aberto hoje', A.aberto, `Marketplace ${base.filter(x=>!x.fin&&x.canal==='Marketplace').length} · Relacionamento ${base.filter(x=>!x.fin&&x.canal==='Relacionamento').length}`]]);
+    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'aparece conforme as finalizações forem registradas'], ['Em aberto hoje', A.aberto, `Marketplace ${base.filter(x=>!x.fin&&x.canal==='Marketplace').length} · Relacionamento ${base.filter(x=>!x.fin&&x.canal==='Relacionamento').length} · Logística ${base.filter(x=>!x.fin&&x.canal==='Logística').length}`]]);
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
@@ -2394,7 +2421,7 @@ function renderInd(){
 
   // ---- por canal (Marketplace x Relacionamento) ----
   document.getElementById('ind-canais-sub').textContent = 'Marketplace e Relacionamento atendem o cliente separadamente · identificados pelo usuário responsável (Marketplace: ' + MKT_USERS.join(', ') + '). Clique para filtrar.';
-  document.getElementById('ind-canais').innerHTML = ['Marketplace','Relacionamento'].map(c => {
+  document.getElementById('ind-canais').innerHTML = ['Marketplace','Relacionamento','Logística'].map(c => {
     const arr = doAno.filter(x=>x.canal===c && f(x,['canal','status','motivo'])), a = indAgg(arr), tcl = a.taxa==null ? '' : a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
     const us = [...arr.reduce((m,x)=>m.set(x.usuario||'—',(m.get(x.usuario||'—')||0)+1), new Map()).entries()].sort((p,q)=>q[1]-p[1]).slice(0,4).map(([u,n])=>esc(u)+' ('+n+')').join(' · ');
     return `<div class="ind-c${IND.canal===c?' on':''}" onclick="indSet('canal','${c}')"><h4>${c}</h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div><div style="font-size:10.5px;color:var(--tx3);margin-top:8px">${us||'sem casos'}</div></div>`; }).join('');
@@ -2441,32 +2468,35 @@ function renderInd(){
   document.getElementById('ind-lista-t').textContent = verFin ? 'Tarefas atendidas' : IND.status==='' ? 'Todas as tarefas (atendidas e em aberto)' : 'Casos em aberto — defina o motivo';
   document.getElementById('cnt-ind').textContent = lista.length + (verFin ? ' atendidas' : IND.status==='' ? ' tarefas' : ' em aberto');
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind');
-  if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td style="font-size:11px">${esc(x.usuario||'—')} <span class="bdg" style="background:${x.canal==='Marketplace'?'#7C3AED22':'#06B6D422'};color:${x.canal==='Marketplace'?'#7C3AED':'#06B6D4'};font-size:9.5px">${x.canal==='Marketplace'?'Marketplace':'Relacion.'}</span></td>
+  if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
     <td onclick="event.stopPropagation()">${x.fin ? '<span class="bdg b-grn">Atendida</span>' : `<select data-id="${esc(x.id||'')}" onchange="indSetMotivo(this.dataset.id,this.value)" style="padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">${x.motivo==='A classificar'?'<option value="" selected>A classificar…</option>':''}${IND_MOTIVOS.map(m=>`<option${m===x.motivo?' selected':''}>${m}</option>`).join('')}</select>`}</td></tr>`).join('')
-    + (lista.length>300 ? `<tr><td colspan="8" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
+    + (lista.length>300 ? `<tr><td colspan="10" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
 }
 async function indUsuarios(){
   const cont = new Map(); IND_ALL.concat(PERDAS).forEach(x => { const u = String(x.usuario||'').trim(); if (u) cont.set(u, (cont.get(u)||0)+1); });
   const us = [...cont.entries()].sort((a,b)=>b[1]-a[1]);
-  const html = `<p style="margin-bottom:8px">Marque quem é do <b>Marketplace</b>. Os demais usuários são do <b>Relacionamento</b>. Vale para o Controle de Situações e para as Perdas.</p>
-    <div style="max-height:300px;overflow:auto;border:1px solid var(--bd);border-radius:10px;padding:8px">${us.map(([u,n]) => `<label style="display:flex;gap:8px;align-items:center;padding:3px 2px;cursor:pointer"><input type="checkbox" data-u="${esc(u)}"${canalOf(u)==='Marketplace'?' checked':''}> ${esc(u)} <small style="color:var(--tx3)">${n} caso${n>1?'s':''}</small></label>`).join('') || '<i>Importe um arquivo para listar os usuários.</i>'}</div>
+  const opts = u => ['Relacionamento','Marketplace','Logística'].map(n => `<option${canalOf(u)===n?' selected':''}>${n}</option>`).join('');
+  const html = `<p style="margin-bottom:8px">Escolha o canal de cada usuário. Quem não for marcado fica no <b>Relacionamento</b>. Vale para Controle de Situações, SLA de Apontamento e Perdas.</p>
+    <div style="max-height:300px;overflow:auto;border:1px solid var(--bd);border-radius:10px;padding:8px">${us.map(([u,n]) => `<div style="display:flex;gap:8px;align-items:center;padding:3px 2px"><span style="flex:1">${esc(u)} <small style="color:var(--tx3)">${n} caso${n>1?'s':''}</small></span><select data-u="${esc(u)}" class="fsel">${opts(u)}</select></div>`).join('') || '<i>Importe um arquivo para listar os usuários.</i>'}</div>
     <p style="margin-top:8px;font-size:11.5px;color:var(--tx3)">Usuário que ainda não apareceu? Digite o nome (ou o começo dele), separados por vírgula:</p>
-    <input id="mkt-extra" style="width:100%;padding:7px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--srf);color:var(--tx)" placeholder="ex.: thairiny, joao">`;
-  const ok = await askConfirm('Usuários do Marketplace', html, 'Salvar');
+    <input id="mkt-extra" style="width:100%;padding:7px 10px;margin-bottom:6px;border:1px solid var(--bd);border-radius:8px;background:var(--srf);color:var(--tx)" placeholder="Marketplace — ex.: thairiny, joao">
+    <input id="log-extra" style="width:100%;padding:7px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--srf);color:var(--tx)" placeholder="Logística — ex.: dayane.costa">`;
+  const ok = await askConfirm('Usuários por canal', html, 'Salvar');
   if (!ok) return;
-  const marcados = [...document.querySelectorAll('#confirmModal .cm-body input[data-u]')];
-  const extras = String((document.getElementById('mkt-extra')||{}).value||'').split(',').map(t=>norm(t).trim()).filter(Boolean);
-  const todos = marcados.map(i => i.getAttribute('data-u'));
-  const manter = MKT_USERS.filter(k => !todos.some(u => norm(u).startsWith(k)));   // regras antigas que nao casam com nenhum usuario listado
-  const lista = [...new Set([...manter, ...marcados.filter(i=>i.checked).map(i=>norm(i.getAttribute('data-u')).trim()), ...extras])];
-  MKT_USERS = lista; try { localStorage.setItem('mkt_users', JSON.stringify(lista)); } catch(e){}
-  if (DB){ try { await DB.doc('config/canais').set({ marketplace:lista, updatedAt:isoNow() }); } catch(err){ toast('Não consegui salvar no banco: '+(err.code||err.message), {type:'err'}); } }
-  toast('Marketplace: ' + (lista.join(', ')||'ninguém') + ' · os demais são Relacionamento', {type:'ok'});
+  const sels = [...document.querySelectorAll('#confirmModal .cm-body select[data-u]')];
+  const split = id => String((document.getElementById(id)||{}).value||'').split(',').map(t=>norm(t).trim()).filter(Boolean);
+  const todos = sels.map(i => i.getAttribute('data-u'));
+  const sem = lista => lista.filter(k => !todos.some(u => norm(u).startsWith(k)));   // regras antigas que nao casam com nenhum usuario listado
+  const mk = [...new Set([...sem(MKT_USERS), ...sels.filter(i=>i.value==='Marketplace').map(i=>norm(i.getAttribute('data-u')).trim()), ...split('mkt-extra')])];
+  const lg = [...new Set([...sem(LOG_USERS), ...sels.filter(i=>i.value==='Logística').map(i=>norm(i.getAttribute('data-u')).trim()), ...split('log-extra')])];
+  MKT_USERS = mk; LOG_USERS = lg; try { localStorage.setItem('mkt_users', JSON.stringify(mk)); localStorage.setItem('log_users', JSON.stringify(lg)); } catch(e){}
+  if (DB){ try { await DB.doc('config/canais').set({ marketplace:mk, logistica:lg, updatedAt:isoNow() }); } catch(err){ toast('Não consegui salvar no banco: '+(err.code||err.message), {type:'err'}); } }
+  toast('Canais atualizados · Marketplace: ' + (mk.join(', ')||'ninguém') + ' · Logística: ' + (lg.join(', ')||'ninguém'), {type:'ok'});
   renderAll();
 }
 function indExport(){
   if (!IND_ABERTOS.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(IND_ABERTOS.map(x => ({ 'Mês':MESES[x.mes-1]+'/'+x.ano, 'Transportadora':x.carr, 'Situação':x.sit, 'Cliente':x.cliente||'', 'NF':x.nf||'', 'Dias':x.dias==null?'':x.dias, 'Motivo da pendência':x.motivo })), 'pendencias_transportadora');
+  exportCSV(IND_ABERTOS.map(x => ({ 'Mês':MESES[x.mes-1]+'/'+x.ano, 'Transportadora':x.carr, 'Situação':x.sit, 'Classe':x.classe||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Cliente':x.cliente||'', 'NF':x.nf||'', 'Dias':x.dias==null?'':x.dias, 'Responsável':x.usuario||'', 'Canal':x.canal, 'Motivo da pendência':x.motivo })), 'pendencias_transportadora');
 }
 
 // ================= CONTROLE DE SITUACOES (SLA por situacao) =================
@@ -2563,10 +2593,15 @@ Não Realiz Equipe|0|sit|
 Cancelada|0|sit|
 Cancelada 2|0|sit|` };
 const SLA_FLUXOS = [['rec','Recolhimento depois de entregue'], ['sp','Recolhimento SP cancelamento'], ['trat','Tratativas transportadora'], ['troca','Troca SP mesmo produto (rota emergencial)']];
+const NR_TIPOS = { produto_nao_retornou:'Produto não retornou', produto_nao_retornou_2:'Produto não retornou 2', transportadora_a_pagar:'Transportadora a pagar', transportadora_a_pagar_2:'Transportadora a pagar 2' };   // vivem na aba propria
+const SLA_LOGISTICA = new Set(['conferencia_expedicao','conferencia_expedicao_2']);   // etapa da logistica: visivel, mas nao conta atraso
+const SLA_MOTIVOS = ['Aguardando cliente','Aguardando transportadora','Aguardando logística','Aguardando fiscal / financeiro','Esquecimento / falta de apontamento','Problema no Innovaro','Outro'];
 const SLA_REGRAS = {};
 Object.keys(SLA_TXT).forEach(f => { SLA_REGRAS[f] = SLA_TXT[f].split('\n').map(l => { const [sit, pz, base, prox] = l.split('|'); const m = /^(\d+)([cu])?$/.exec(pz.trim());
-  return { sit, key:sitKey(sit), n:m ? +m[1] : 0, util: !!m && m[2]==='u', base:base.trim(), prox:(prox||'').split(';').map(t=>t.trim()).filter(Boolean) }; }); });
-const SLA_ST = { fluxo:'rec', estado:'atraso', sit:'', usuario:'', q:'' };
+  const key = sitKey(sit), lg = SLA_LOGISTICA.has(key);
+  return { sit, key, n:(m && !lg) ? +m[1] : 0, logistica:lg, util: !!m && m[2]==='u', base:base.trim(), prox:(prox||'').split(';').map(t=>t.trim()).filter(Boolean) }; })
+  .filter(r => !/^perdas/.test(r.key) && !NR_TIPOS[r.key]); });   // perdas e a pagar/nao retornou tem aba propria
+const SLA_ST = { fluxo:'rec', estado:'atraso', sit:'', usuario:'', motivo:'', q:'' };
 let SLA_CLASSES = {}, SLA_LISTA = [], SLA_ITENS = [];
 try { const c = JSON.parse(localStorage.getItem('sla_classes')||'null'); if (c) SLA_CLASSES = c; } catch(e){}
 
@@ -2575,7 +2610,7 @@ const isoD = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'
 const ehUtil = d => d.getDay()!==0 && d.getDay()!==6 && !SLA_FERIADOS.has(isoD(d));
 function slaSomaDias(d, n, util){ const r = new Date(d.getFullYear(), d.getMonth(), d.getDate()); if (!util){ r.setDate(r.getDate()+n); return r; } let k=0; while (k<n){ r.setDate(r.getDate()+1); if (ehUtil(r)) k++; } return r; }
 function slaDifDias(a, b, util){ if (!util) return daysBetween(a,b); let k=0; const r = new Date(a.getFullYear(), a.getMonth(), a.getDate()); while (r<b){ r.setDate(r.getDate()+1); if (ehUtil(r)) k++; } return k; }
-const slaPrazoTxt = r => !r.n ? 'Sem SLA (0)' : r.n+(r.util ? (r.n>1?' dias úteis':' dia útil') : (r.n>1?' dias corridos':' dia corrido'))+({data:' · da criação', prog:' · da programação', sit:''})[r.base];
+const slaPrazoTxt = r => !r.n ? (r.logistica ? 'Sem SLA (logística)' : 'Sem SLA (0)') : r.n+(r.util ? (r.n>1?' dias úteis':' dia útil') : (r.n>1?' dias corridos':' dia corrido'))+({data:' · da criação', prog:' · da programação', sit:''})[r.base];
 
 function slaFluxoDe(x){
   const k = norm(x.classe||'').trim();
@@ -2595,8 +2630,7 @@ function slaFonte(){
   const out = [];
   COL.concat(REA).forEach(c => out.push({ ...c, __tipo:'coleta', sit:'Protocolo de Coleta' }));
   TRAT_ALL.filter(t => !t.concluido_auto).forEach(t => out.push({ ...t, __tipo:'tratativa', sit:t.tipo_devolucao || '(sem situação)' }));
-  PERDAS.filter(p => !p.concluido_auto).forEach(p => out.push({ ...p, sit:p.tipo_devolucao || '(sem situação)' }));
-  return out;
+  return out.filter(x => !/^perdas/.test(sitKey(x.sit)) && !NR_TIPOS[sitKey(x.sit)]);
 }
 function slaCalcula(){
   const hj = new Date(), hoje = new Date(hj.getFullYear(), hj.getMonth(), hj.getDate());
@@ -2617,13 +2651,20 @@ function slaCalcula(){
     return { ...x, fluxo, regra, estado, venceu, atraso, estimado, canal:canalOf(x.usuario) };
   });
 }
+function slaSetMotivo(id, v){
+  if (!DB){ toast('Entre com sua conta para gravar o motivo.', {type:'warn'}); return; }
+  DB.doc('cases/'+id).set({ motivo_apont:v||null, motivo_apont_em:isoNow() }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
+  DB_CASES[id] = { ...(DB_CASES[id]||{}), motivo_apont:v||null }; scheduleRender();
+}
 function slaSet(k, v){
   if (k==='fluxo'){ SLA_ST.fluxo = v; SLA_ST.sit = ''; SLA_ST.usuario = ''; }
   else if (k==='estado') SLA_ST.estado = v;
-  else if (k==='sit') SLA_ST.sit = (SLA_ST.sit===v ? '' : v);
+  else if (k==='sit'){ if (SLA_ST.sit===v) SLA_ST.sit = ''; else { SLA_ST.sit = v; SLA_ST.estado = 'todos'; } }
+  else if (k==='sitAtraso'){ SLA_ST.sit = v; SLA_ST.estado = 'atraso'; }
+  else if (k==='motivo') SLA_ST.motivo = (SLA_ST.motivo===v ? '' : v);
   else if (k==='usuario') SLA_ST.usuario = v;
   else if (k==='q') SLA_ST.q = norm(v).trim();
-  else if (k==='limpar'){ SLA_ST.estado='atraso'; SLA_ST.sit=''; SLA_ST.usuario=''; SLA_ST.q=''; const i=document.getElementById('sla-q'); if (i) i.value=''; }
+  else if (k==='limpar'){ SLA_ST.estado='atraso'; SLA_ST.sit=''; SLA_ST.usuario=''; SLA_ST.motivo=''; SLA_ST.q=''; const i=document.getElementById('sla-q'); if (i) i.value=''; }
   renderSla();
 }
 function slaSetClasse(cl, f){ if (f) SLA_CLASSES[cl] = f; else delete SLA_CLASSES[cl]; try { localStorage.setItem('sla_classes', JSON.stringify(SLA_CLASSES)); } catch(e){}
@@ -2641,23 +2682,24 @@ function renderSla(){
   const usuarios = [...new Set(doFluxo.filter(x=>x.estado==='ATRASO'||x.estado==='HOJE').map(x=>x.usuario||'—'))].sort();
   const f = (x, ign) => { ign = ign||[]; return x.fluxo===SLA_ST.fluxo && (ign.includes('sit') || !SLA_ST.sit || sitKey(x.sit)===SLA_ST.sit) &&
     (ign.includes('estado') || SLA_ST.estado==='todos' || (SLA_ST.estado==='atraso' && x.estado==='ATRASO') || (SLA_ST.estado==='hoje' && x.estado==='HOJE') || (SLA_ST.estado==='prazo' && x.estado==='PRAZO')) &&
-    (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario) && (!SLA_ST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(SLA_ST.q)); };
+    (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario) && (ign.includes('motivo') || !SLA_ST.motivo || (SLA_ST.motivo==='__sem' ? !x.motivo_apont : x.motivo_apont===SLA_ST.motivo)) && (!SLA_ST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(SLA_ST.q)); };
   const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
   const nEst = e => SLA_ITENS.filter(x => x.fluxo===SLA_ST.fluxo && (e==='todos' || x.estado===e) && (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario)).length;
   document.getElementById('sla-fbody').innerHTML =
     `<div class="ind-fr"><b>Tópico</b><div>${SLA_FLUXOS.map(([k,n]) => chip(SLA_ST.fluxo===k, `slaSet('fluxo','${k}')`, n, SLA_ITENS.filter(x=>x.fluxo===k && x.estado==='ATRASO').length+' em atraso')).join('')}</div></div>
      <div class="ind-fr"><b>Estado</b><div>${chip(SLA_ST.estado==='atraso', "slaSet('estado','atraso')", 'Em atraso', nEst('ATRASO'))}${chip(SLA_ST.estado==='hoje', "slaSet('estado','hoje')", 'Vence hoje', nEst('HOJE'))}${chip(SLA_ST.estado==='prazo', "slaSet('estado','prazo')", 'No prazo', nEst('PRAZO'))}${chip(SLA_ST.estado==='todos', "slaSet('estado','todos')", 'Todos', nEst('todos'))}</div></div>
+     <div class="ind-fr"><b>Motivo</b><div>${chip(!SLA_ST.motivo, "slaSet('motivo','')", 'Todos', SLA_ITENS.filter(x=>f(x,['motivo'])).length)}${chip(SLA_ST.motivo==='__sem', "slaSet('motivo','__sem')", 'Sem motivo', SLA_ITENS.filter(x=>f(x,['motivo']) && !x.motivo_apont).length)}${SLA_MOTIVOS.map(m => chip(SLA_ST.motivo===m, `slaSet('motivo',this.dataset.m)" data-m="${m}`, m, SLA_ITENS.filter(x=>f(x,['motivo']) && x.motivo_apont===m).length)).join('')}</div></div>
      <div class="ind-fr"><b>Responsável</b><div><select class="fsel" onchange="slaSet('usuario',this.value)"><option value="">Todos</option>${usuarios.map(u=>`<option${SLA_ST.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select></div></div>`;
-  document.getElementById('sla-limpar').style.visibility = (SLA_ST.estado!=='atraso' || SLA_ST.sit || SLA_ST.usuario || SLA_ST.q) ? 'visible' : 'hidden';
+  document.getElementById('sla-limpar').style.visibility = (SLA_ST.estado!=='atraso' || SLA_ST.sit || SLA_ST.usuario || SLA_ST.motivo || SLA_ST.q) ? 'visible' : 'hidden';
 
   // tabela por situacao (regra + contagens)
   document.getElementById('sla-t-fluxo').textContent = (SLA_FLUXOS.find(a=>a[0]===SLA_ST.fluxo)||[])[1] || '';
   const regras = SLA_REGRAS[SLA_ST.fluxo] || [];
-  const baseTab = doFluxo.filter(x => (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario));
+  const baseTab = SLA_ITENS.filter(x => f(x,['sit','estado']));   // mesmos filtros da lista, menos situacao/estado
   document.getElementById('tb-sla-sit').innerHTML = regras.map(r => {
     const its = baseTab.filter(x => sitKey(x.sit)===r.key), a = its.filter(x=>x.estado==='ATRASO'), h = its.filter(x=>x.estado==='HOJE').length, mx = a.reduce((m,x)=>Math.max(m,x.atraso),0), un = r.util?'d.u.':'d';
     return `<tr class="clickable${SLA_ST.sit===r.key?' sel':''}${r.n?'':' sla-zero'}" data-k="${r.key}" onclick="slaSet('sit',this.dataset.k)"${r.n?'':' style="opacity:.6"'}><td class="td-nome">${esc(r.sit)}</td><td>${r.n?`<b>${slaPrazoTxt(r)}</b>`:'<span class="bdg b-dk">Sem SLA (0)</span>'}</td>
-      <td style="font-size:11px;color:var(--tx3)">${r.prox.length?esc(r.prox.join(' · ')):'—'}</td><td>${its.length}</td><td>${a.length?`<span class="bdg b-red">${a.length}</span>`:(r.n?0:'—')}</td><td>${h||(r.n?0:'—')}</td><td>${mx?mx+' '+un:'—'}</td></tr>`; }).join('');
+      <td style="font-size:11px;color:var(--tx3)">${r.prox.length?esc(r.prox.join(' · ')):'—'}</td><td>${its.length}</td><td>${a.length?`<span class="bdg b-red" data-k="${r.key}" onclick="event.stopPropagation();slaSet('sitAtraso',this.dataset.k)" title="Ver só os atrasados desta situação">${a.length}</span>`:(r.n?0:'—')}</td><td>${h||(r.n?0:'—')}</td><td>${mx?mx+' '+un:'—'}</td></tr>`; }).join('');
   const conhecidas = new Set(regras.map(r=>r.key)), fora = baseTab.filter(x => !conhecidas.has(sitKey(x.sit)));
   if (fora.length) document.getElementById('tb-sla-sit').innerHTML += `<tr style="opacity:.6"><td class="td-nome">Outras situações sem regra</td><td><span class="bdg b-dk">Sem SLA</span></td><td style="font-size:11px;color:var(--tx3)">${[...new Set(fora.map(x=>x.sit))].slice(0,6).map(esc).join(' · ')}</td><td>${fora.length}</td><td>—</td><td>—</td><td>—</td></tr>`;
 
@@ -2666,12 +2708,14 @@ function renderSla(){
   SLA_LISTA = lista;
   document.getElementById('cnt-sla').textContent = lista.length + ' caso' + (lista.length!==1?'s':'');
   document.getElementById('sla-lista-t').textContent = SLA_ST.estado==='atraso' ? 'Casos em atraso — para cobrar' : SLA_ST.estado==='hoje' ? 'Vencem hoje' : SLA_ST.estado==='prazo' ? 'Dentro do prazo' : 'Todos os casos do tópico';
-  document.getElementById('tb-sla').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>
+  const ativoSla = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-sla');
+  if (!ativoSla) document.getElementById('tb-sla').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>
+    <td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td>
     <td>${x.venceu?fmtD2(x.venceu):'—'}</td><td>${x.atraso?`<b style="color:var(--red)">${x.estimado?'~':''}+${x.atraso} ${x.regra.util?'d.u.':'d'}</b>`:(x.estado==='HOJE'?'<span class="bdg b-amb">vence hoje</span>':'—')}</td>
-    <td style="font-size:11px">${esc(x.usuario||'—')} <span class="bdg" style="background:${x.canal==='Marketplace'?'#7C3AED22':'#06B6D422'};color:${x.canal==='Marketplace'?'#7C3AED':'#06B6D4'};font-size:9.5px">${x.canal==='Marketplace'?'Marketplace':'Relacion.'}</span></td>
-    <td style="font-size:11px;color:var(--tx3)">${x.regra&&x.regra.prox.length?esc(x.regra.prox.slice(0,3).join(' · '))+(x.regra.prox.length>3?'…':''):'—'}</td></tr>`).join('')
-    + (lista.length>300 ? `<tr><td colspan="7" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '')
-    || '<tr><td colspan="7" style="color:var(--tx3);padding:14px">Nenhum caso neste filtro.</td></tr>';
+    <td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
+    <td onclick="event.stopPropagation()">${x.id ? `<select data-id="${esc(x.id)}" onchange="slaSetMotivo(this.dataset.id,this.value)" style="padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px"><option value="">${x.estado==='ATRASO'||x.estado==='HOJE'?'Informar motivo…':'—'}</option>${SLA_MOTIVOS.map(m=>`<option${m===x.motivo_apont?' selected':''}>${m}</option>`).join('')}</select>` : '—'}</td></tr>`).join('')
+    + (lista.length>300 ? `<tr><td colspan="9" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '')
+    || '<tr><td colspan="9" style="color:var(--tx3);padding:14px">Nenhum caso neste filtro.</td></tr>';
 
   // mapeamento de classes
   const cl = new Map(); SLA_ITENS.forEach(x => { const k = norm(x.classe||'').trim(); if (k){ if(!cl.has(k)) cl.set(k,{nome:x.classe,n:0,f:x.fluxo}); cl.get(k).n++; } });
@@ -2681,7 +2725,64 @@ function renderSla(){
 const fmtD2 = d => String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
 function slaExport(){
   if (!SLA_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(SLA_LISTA.map(x => ({ 'Tópico':(SLA_FLUXOS.find(a=>a[0]===x.fluxo)||[])[1]||'', 'Situação':x.sit, 'Cliente':x.cliente||'', 'NF':x.nf||'', 'Prazo':x.regra?slaPrazoTxt(x.regra):'', 'Venceu em':x.venceu?fmtD2(x.venceu):'', 'Atraso':x.atraso||'', 'Estado':x.estado, 'Responsável':x.usuario||'', 'Canal':x.canal, 'Deveria ir para':x.regra?x.regra.prox.join(' / '):'' })), 'sla_apontamento');
+  exportCSV(SLA_LISTA.map(x => ({ 'Tópico':(SLA_FLUXOS.find(a=>a[0]===x.fluxo)||[])[1]||'', 'Situação':x.sit, 'Cliente':x.cliente||'', 'NF':x.nf||'', 'Prazo':x.regra?slaPrazoTxt(x.regra):'', 'Venceu em':x.venceu?fmtD2(x.venceu):'', 'Atraso':x.atraso||'', 'Estado':x.estado, 'Classe':x.classe||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Responsável':x.usuario||'', 'Canal':x.canal, 'Motivo':x.motivo_apont||'', 'Deveria ir para':x.regra?x.regra.prox.join(' / '):'' })), 'sla_apontamento');
+}
+
+// ================= A PAGAR E NAO RETORNOU (aba propria, sem indice de atraso) =================
+const isNR = t => !!NR_TIPOS[sitKey(t.tipo_devolucao||'')];
+function deriveNR(t){
+  const d = parseBR(t.data_solicitacao) || parseBR(t.data_programacao), key = sitKey(t.tipo_devolucao||'');
+  return { ...t, __tipo:'tratativa', sit:NR_TIPOS[key]||t.tipo_devolucao, kind: /pagar/.test(key) ? 'ap' : 'nr', d, ano:d?d.getFullYear():null, mes:d?d.getMonth()+1:null,
+    dias: d ? daysBetween(d, new Date()) : null, valor_est: pwValores(t).valorEst || 0, carr: indNome(t.transportadora), canal: canalOf(t.usuario) };
+}
+const NR_ST = { kind:'', sit:'', carrs:new Set(), q:'' };
+let NR_LISTA = [];
+function nrSet(k, v){
+  if (k==='kind') NR_ST.kind = (NR_ST.kind===v ? '' : v);
+  else if (k==='sit') NR_ST.sit = (NR_ST.sit===v ? '' : v);
+  else if (k==='carr'){ NR_ST.carrs.has(v) ? NR_ST.carrs.delete(v) : NR_ST.carrs.add(v); }
+  else if (k==='q') NR_ST.q = norm(v).trim();
+  else if (k==='limpar'){ NR_ST.kind=''; NR_ST.sit=''; NR_ST.carrs.clear(); NR_ST.q=''; const i=document.getElementById('nr-q'); if(i) i.value=''; }
+  renderNR();
+}
+function renderNR(){
+  if (!document.getElementById('panel-nr')) return;
+  document.getElementById('bdg-nr').textContent = NR.length;
+  const f = (x, ign) => { ign = ign||[]; return (ign.includes('kind') || !NR_ST.kind || x.kind===NR_ST.kind) && (ign.includes('sit') || !NR_ST.sit || sitKey(x.sit)===NR_ST.sit) &&
+    (ign.includes('carr') || !NR_ST.carrs.size || NR_ST.carrs.has(x.carr)) && (!NR_ST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(NR_ST.q)); };
+  const base = NR.filter(x=>f(x)), ap = base.filter(x=>x.kind==='ap'), nr = base.filter(x=>x.kind==='nr'), soma = a => a.reduce((t,x)=>t+x.valor_est,0);
+  document.getElementById('ph-nr').innerHTML = pwHero('Transportadora', 'A pagar e Não retornou', 'Casos à parte, sem índice de atraso: acompanhamento do que a transportadora precisa pagar e do produto que não retornou.',
+    [['Total de casos', base.length, 'no filtro atual'], ['Transportadora a pagar', ap.length, brl(soma(ap)), "nrSet('kind','ap')"], ['Produto não retornou', nr.length, brl(soma(nr)), "nrSet('kind','nr')"], ['Valor estimado', brl(soma(base)), 'título, nota de saída ou unitário', null, true]]);
+  const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
+  const sits = Object.entries(NR_TIPOS), carrs = [...new Set(NR.map(x=>x.carr))].map(c => ({ c, n:NR.filter(x=>x.carr===c && f(x,['carr'])).length })).sort((a,b)=>b.n-a.n);
+  document.getElementById('nr-fbody').innerHTML =
+    `<div class="ind-fr"><b>Tipo</b><div>${chip(!NR_ST.kind, "nrSet('kind','')", 'Todos', NR.filter(x=>f(x,['kind'])).length)}${chip(NR_ST.kind==='ap', "nrSet('kind','ap')", 'Transportadora a pagar', NR.filter(x=>x.kind==='ap'&&f(x,['kind'])).length)}${chip(NR_ST.kind==='nr', "nrSet('kind','nr')", 'Produto não retornou', NR.filter(x=>x.kind==='nr'&&f(x,['kind'])).length)}</div></div>
+     <div class="ind-fr"><b>Situação</b><div>${sits.map(([k,n]) => chip(NR_ST.sit===k, `nrSet('sit','${k}')`, n, NR.filter(x=>sitKey(x.sit)===k && f(x,['sit'])).length)).join('')}</div></div>
+     <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o => chip(NR_ST.carrs.has(o.c), `nrSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>`;
+  document.getElementById('nr-limpar').style.visibility = (NR_ST.kind || NR_ST.sit || NR_ST.carrs.size || NR_ST.q) ? 'visible' : 'hidden';
+
+  if (window.Chart && document.getElementById('panel-nr').classList.contains('on')){
+    const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
+    const opt = { responsive:true, maintainAspectRatio:false, animation:{duration:400}, plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } } };
+    const cc = carrs.filter(o=>o.n).map(o=>o.c), baseC = NR.filter(x=>f(x,['carr']));
+    if (charts.nrCar) charts.nrCar.destroy();
+    charts.nrCar = new Chart(document.getElementById('nr-ch-car'), { type:'bar', data:{ labels:cc, datasets:[{ label:'Transportadora a pagar', data:cc.map(c=>baseC.filter(x=>x.carr===c&&x.kind==='ap').length), backgroundColor:'#F43F5E' }, { label:'Produto não retornou', data:cc.map(c=>baseC.filter(x=>x.carr===c&&x.kind==='nr').length), backgroundColor:'#7C3AED' }] },
+      options:{ ...opt, indexAxis:'y', onClick:(e,els)=>{ if (els.length) nrSet('carr', cc[els[0].index]); }, scales:{ x:{ stacked:true, beginAtZero:true, ticks:{color:tick, precision:0}, grid:{color:grid} }, y:{ stacked:true, ticks:{color:tick}, grid:{display:false} } } } });
+    const baseM = NR.filter(x=>f(x)&&x.d), mk = [...new Set(baseM.map(x=>x.ano+'-'+String(x.mes).padStart(2,'0')))].sort();
+    if (charts.nrMes) charts.nrMes.destroy();
+    charts.nrMes = new Chart(document.getElementById('nr-ch-mes'), { type:'bar', data:{ labels:mk.map(k=>MESES[+k.split('-')[1]-1]+'/'+k.slice(2,4)), datasets:[{ label:'Transportadora a pagar', data:mk.map(k=>baseM.filter(x=>x.kind==='ap'&&x.ano+'-'+String(x.mes).padStart(2,'0')===k).length), backgroundColor:'#F43F5E' }, { label:'Produto não retornou', data:mk.map(k=>baseM.filter(x=>x.kind==='nr'&&x.ano+'-'+String(x.mes).padStart(2,'0')===k).length), backgroundColor:'#7C3AED' }] },
+      options:{ ...opt, scales:{ x:{ stacked:true, ticks:{color:tick}, grid:{display:false} }, y:{ stacked:true, beginAtZero:true, ticks:{color:tick, precision:0}, grid:{color:grid} } } } });
+  }
+  const lista = base.slice().sort((a,b)=>(b.dias||0)-(a.dias||0)); NR_LISTA = lista;
+  document.getElementById('cnt-nr').textContent = lista.length + ' caso' + (lista.length!==1?'s':'');
+  document.getElementById('tb-nr').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>
+    <td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td>${x.valor_est?brl(x.valor_est):'—'}</td>
+    <td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td></tr>`).join('') + (lista.length>300 ? `<tr><td colspan="9" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '')
+    || '<tr><td colspan="9" style="color:var(--tx3);padding:14px">Nenhum caso. Importe o arquivo de Tratativas Transportadora.</td></tr>';
+}
+function nrExport(){
+  if (!NR_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
+  exportCSV(NR_LISTA.map(x => ({ 'Situação':x.sit, 'Cliente':x.cliente||'', 'CPF':x.cpf||'', 'NF':x.nf||'', 'Classe':x.classe||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Aberto em':x.data_solicitacao||'', 'Dias parado':x.dias==null?'':x.dias, 'Valor estimado':x.valor_est||'', 'Responsável':x.usuario||'', 'Canal':x.canal, 'Descrição':x.descricao||'' })), 'a_pagar_nao_retornou');
 }
 
 // ================= MUNDO PERDAS =================
@@ -2737,7 +2838,10 @@ function custoCitado(desc){
   return m ? parseMoney(m[1]) : null;
 }
 let MKT_USERS = (() => { try { const a = JSON.parse(localStorage.getItem('mkt_users')||'null'); if (Array.isArray(a) && a.length) return a; } catch(e){} return ['thairiny','joao']; })();   // usuarios do Marketplace; os demais sao Relacionamento
-function canalOf(u){ const n = norm(u||'').trim(); return MKT_USERS.some(k => n.startsWith(k)) ? 'Marketplace' : 'Relacionamento'; }
+let LOG_USERS = (() => { try { const a = JSON.parse(localStorage.getItem('log_users')||'null'); if (Array.isArray(a)) return a; } catch(e){} return ['dayane.costa']; })();   // usuarios da Logistica
+function canalOf(u){ const n = norm(u||'').trim(); return LOG_USERS.some(k => n.startsWith(k)) ? 'Logística' : MKT_USERS.some(k => n.startsWith(k)) ? 'Marketplace' : 'Relacionamento'; }
+const CANAL_COR = { 'Marketplace':'#7C3AED', 'Relacionamento':'#06B6D4', 'Logística':'#F59E0B' };
+const canalBdg = c => `<span class="bdg" style="background:${CANAL_COR[c]||'#64748B'}22;color:${CANAL_COR[c]||'#64748B'};font-size:9.5px">${c==='Relacionamento'?'Relacion.':esc(c)}</span>`;
 function derivePerda(t){
   const tipoRaw = t.tipo_devolucao || '';
   const tipo = /transportadora/i.test(tipoRaw) ? 'transportadora' : 'cliente';
@@ -2962,7 +3066,7 @@ function renderPerdas(scope){
     <div class="ind-f">
       <div class="ind-fr"><b>Ano</b><div><select class="pw-sel" onchange="pwSet('ano',this.value)" aria-label="Ano"><option value="all"${ano==='all'?' selected':''}>Todos os anos</option>${anos.map(a=>`<option value="${a}"${a===ano?' selected':''}>${a}</option>`).join('')}</select></div></div>
       <div class="ind-fr"><b>Mês</b><div class="pw-months">${monthChips}</div></div>
-      <div class="ind-fr"><b>Canal</b><div><div class="pw-seg no-print" role="group" aria-label="Canal"><button type="button" class="${!PF.canal?'on':''}" onclick="pwSet('canal',PF.canal)">Todos os canais <small>${canalBase.length}</small></button><button type="button" class="${PF.canal==='Marketplace'?'on':''}" onclick="pwSet('canal','Marketplace')" title="Usuários: Thairiny e João">Marketplace <small>${canalBase.filter(p=>p.canal==='Marketplace').length}</small></button><button type="button" class="${PF.canal==='Relacionamento'?'on':''}" onclick="pwSet('canal','Relacionamento')" title="Demais usuários">Relacionamento <small>${canalBase.filter(p=>p.canal==='Relacionamento').length}</small></button></div></div></div>
+      <div class="ind-fr"><b>Canal</b><div><div class="pw-seg no-print" role="group" aria-label="Canal"><button type="button" class="${!PF.canal?'on':''}" onclick="pwSet('canal',PF.canal)">Todos os canais <small>${canalBase.length}</small></button><button type="button" class="${PF.canal==='Marketplace'?'on':''}" onclick="pwSet('canal','Marketplace')" title="Usuários: Thairiny e João">Marketplace <small>${canalBase.filter(p=>p.canal==='Marketplace').length}</small></button><button type="button" class="${PF.canal==='Relacionamento'?'on':''}" onclick="pwSet('canal','Relacionamento')" title="Demais usuários">Relacionamento <small>${canalBase.filter(p=>p.canal==='Relacionamento').length}</small></button><button type="button" class="${PF.canal==='Logística'?'on':''}" onclick="pwSet('canal','Logística')">Logística <small>${canalBase.filter(p=>p.canal==='Logística').length}</small></button></div></div></div>
       <div class="ind-fr"><b>Métrica</b><div><div class="pw-seg no-print" role="group" aria-label="Métrica"><button type="button" class="${PF.metric!=='valor'?'on':''}" onclick="pwSet('metric','qtd')">Quantidade</button><button type="button" class="${PF.metric==='valor'?'on':''}" onclick="pwSet('metric','valor')">Valor R$</button></div><button class="chip no-print" type="button" onclick="pwClear()">Limpar filtros</button></div></div>
       ${pills?`<div class="ind-fr"><b>Filtros ativos</b><div class="pw-pills">${pills}</div></div>`:''}
     </div>

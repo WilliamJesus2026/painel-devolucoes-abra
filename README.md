@@ -73,3 +73,11 @@ Menu **Controle → SLA de Apontamento**. Quatro tópicos (Recolhimento depois d
 ## Dashboard
 
 Página única (sem abas): faixa de números + gráficos (coleta reversa, atendimento por mês, perdas por mês, SLA de apontamento, tratativas por grupo) + lista "Atenção agora". Tudo clicável para abrir o detalhe. O antigo "Protocolo de Coleta" agora se chama **Coleta Reversa** na interface (a situação do Innovaro continua com o nome original).
+
+## A pagar e Não retornou
+
+Aba própria (menu **Transportadora**) para as situações *Transportadora a pagar* (1 e 2) e *Produto Não Retornou* (1 e 2), sem índice de atraso. Esses casos não aparecem no Controle de Situações, no SLA de Apontamento nem em Tratativas por grupo. Perdas também ficam fora do SLA (têm aba própria). *Conferência Expedição* é etapa da Logística: visível, mas sem SLA.
+
+## Canais e motivo de apontamento
+
+Canais por usuário: Relacionamento (padrão), Marketplace (Thairiny, João) e Logística (Dayane Costa), editáveis em "Definir usuários por canal" (`config/canais`). No SLA de Apontamento cada caso tem o motivo de não ter atualizado a tarefa (`motivo_apont`), com filtro. No Controle de Situações, pendências criadas antes de 01/07/2026 contam como finalizadas.
