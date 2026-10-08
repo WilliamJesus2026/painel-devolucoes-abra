@@ -65,3 +65,11 @@ Protocolo de Coleta, Tratativas e Controle de Situações usam o mesmo cabeçalh
 ## Canais: Marketplace x Relacionamento
 
 O canal é identificado pelo **usuário responsável** (coluna USUARIO). Por padrão, usuários que começam com `thairiny` ou `joao` são **Marketplace**; todos os outros são **Relacionamento**. A lista é editável em Controle de Situações → Canal → "Definir usuários do Marketplace" (salva em `config/canais`) e vale também para as Perdas.
+
+## SLA de Apontamento
+
+Menu **Controle → SLA de Apontamento**. Quatro tópicos (Recolhimento depois de entregue, Recolhimento SP cancelamento, Tratativas transportadora, Troca SP mesmo produto/rota emergencial), cada um com a tabela de prazos por situação (`SLA_TXT` no código): prazo 0 = visível, mas fora do SLA; dias corridos ou úteis (feriados nacionais 2026 em `SLA_FERIADOS`); base de contagem = criação, programação ou entrada na situação. O tópico de cada caso vem da coluna CLASSE do Innovaro (mapeamento ajustável na própria aba). A data de entrada na situação (`sit_desde`) só é conhecida quando a situação muda entre duas importações; antes disso o atraso é estimado (marcado com `~`).
+
+## Dashboard
+
+Página única (sem abas): faixa de números + gráficos (coleta reversa, atendimento por mês, perdas por mês, SLA de apontamento, tratativas por grupo) + lista "Atenção agora". Tudo clicável para abrir o detalhe. O antigo "Protocolo de Coleta" agora se chama **Coleta Reversa** na interface (a situação do Innovaro continua com o nome original).

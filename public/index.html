@@ -514,7 +514,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       Dashboard
     </button>
 
-    <div class="sb-grp">Protocolo de Coleta</div>
+    <div class="sb-grp">Coleta Reversa</div>
     <button class="nav" onclick="ir('at')" id="nav-at">
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><line x1="12" y1="8" x2="12" y2="12" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="15.5" r="1" fill="currentColor"/></svg>
       Atrasados
@@ -555,6 +555,12 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <span class="bdg" id="bdg-ind">0</span>
     </button>
 
+    <button class="nav" onclick="ir('sla')" id="nav-sla">
+      <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" stroke-width="1.5"/><polyline points="12 9 12 13 15 15" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3h6" stroke-width="1.6" stroke-linecap="round"/></svg>
+      SLA de Apontamento
+      <span class="bdg" id="bdg-sla">0</span>
+    </button>
+
     <div class="sb-grp">Perdas</div>
     <button class="nav" onclick="ir('perdas')" id="nav-perdas">
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15 6 21 6 21 12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -592,7 +598,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <label class="up-zone">
       <input type="file" id="file-input" accept=".xlsx,.xlsm,.csv">
       <svg width="20" height="20" fill="none" stroke="rgba(255,255,255,.35)" viewBox="0 0 24 24" style="margin:0 auto"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      <p><strong>Importar arquivo</strong><br>Protocolo de Coleta ou Tratativas do Innovaro</p>
+      <p><strong>Importar arquivo</strong><br>Coleta Reversa ou Tratativas do Innovaro</p>
     </label>
     <div class="up-msg" id="up-msg"></div>
     <div id="dbStatus" style="font-size:10px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.5"></div>
@@ -775,6 +781,19 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     </div>
 
     <!-- PERDAS (mundo proprio) -->
+    <div class="panel" id="panel-sla">
+      <div class="pworld" id="ph-sla"></div>
+      <div class="ind-f">
+        <div class="ind-f-top"><input id="sla-q" placeholder="Buscar cliente, NF ou CPF..." oninput="slaSet('q',this.value)"><button class="btn-exp" type="button" id="sla-limpar" onclick="slaSet('limpar')">Limpar filtros</button></div>
+        <div id="sla-fbody"></div>
+      </div>
+      <div class="ind-h" id="sla-t-fluxo"></div><div class="ind-sub">Cada situação tem um prazo para o responsável apontar o próximo passo. Prazo 0 = visível, mas fora do SLA. <b>~</b> = atraso estimado pela data de programação/criação (o painel ainda não viu o caso mudar de situação; fica exato conforme as importações diárias). Clique numa situação para filtrar a lista.</div>
+      <div class="tbl-wrap" style="margin-bottom:16px"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Prazo</th><th>Próximos passos</th><th>Casos</th><th>Em atraso</th><th>Vence hoje</th><th>Maior atraso</th></tr></thead><tbody id="tb-sla-sit"></tbody></table></div></div>
+      <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px" id="sla-lista-t">Casos para cobrar</b><span class="fcnt" id="cnt-sla"></span><button class="btn-exp" onclick="slaExport()">Exportar CSV</button></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Venceu em</th><th>Atraso</th><th>Responsável</th><th>Deveria ir para</th></tr></thead><tbody id="tb-sla"></tbody></table></div></div>
+      <details class="ind-f" style="margin-top:16px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Classes do Innovaro → fluxo (ajuste só se algum caso ficar em "sem fluxo")</summary><div id="sla-classes" style="margin-top:10px"></div></details>
+    </div>
+
     <div class="panel pworld" id="panel-perdas"><div id="pw-all"></div></div>
     <div class="panel pworld" id="panel-p-cli"><div id="pw-cliente"></div></div>
     <div class="panel pworld" id="panel-p-trp"><div id="pw-transportadora"></div></div>
@@ -864,7 +883,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
 <div id="palette" role="dialog" aria-modal="true" aria-label="Busca rápida"><div class="pal-card"><input class="pal-in" id="pal-in" placeholder="Buscar cliente, NF, CPF, transportadora… ou digitar um comando" autocomplete="off"><div class="pal-list" id="pal-list"></div><div class="pal-foot">↑↓ navegar · Enter abrir · Esc fechar</div></div></div>
 <div id="toasts" aria-live="polite"></div>
-<div id="dropOverlay"><div class="drop-box"><b>Solte o arquivo aqui</b><span>Protocolo de Coleta ou Tratativas (.csv / .xlsx)</span></div></div>
+<div id="dropOverlay"><div class="drop-box"><b>Solte o arquivo aqui</b><span>Coleta Reversa ou Tratativas (.csv / .xlsx)</span></div></div>
 <div id="confirmModal" class="cmodal" role="dialog" aria-modal="true"><div class="cm-card"><div class="cm-title"></div><div class="cm-body"></div><div class="cm-act"><button class="cm-no btn-exp" type="button">Cancelar</button><button class="cm-ok btn-exp" type="button" style="background:var(--acc);color:#fff;border-color:var(--acc)">Confirmar</button></div></div></div>
 <div class="ov" id="ov" onclick="closeDetail()"></div>
 <aside class="dpanel" id="dpanel" aria-hidden="true">
@@ -1074,9 +1093,9 @@ let GRP = '';
 let charts = {};
 const TITLES = {
   dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
-  'col-all':'Protocolo de Coleta — Todos', trat:'Tratativas por grupo',
+  'col-all':'Coleta Reversa — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
-  ind:'Controle de Situações', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
+  ind:'Controle de Situações', sla:'SLA de Apontamento', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
 };
 function ir(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
@@ -1088,6 +1107,7 @@ function ir(id){
   document.getElementById('tb-title').textContent = TITLES[id]||id;
   renderPerdasActive();
   if (id==='ind') renderInd();
+  if (id==='sla') renderSla();
   window.scrollTo({top:0});
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1416,7 +1436,7 @@ function renderDash(){
   } else {
     document.getElementById('tb-ref').textContent = 'Dados de ' + D.ref;
   }
-  document.getElementById('ft-ref').textContent='Protocolo de Coleta + Tratativas · '+D.ref;
+  document.getElementById('ft-ref').textContent='Coleta Reversa + Tratativas · '+D.ref;
 
 
   let al2='';
@@ -1498,6 +1518,7 @@ function renderAll(){
   renderPerdasBadges();
   renderPerdasActive();
   renderInd();
+  renderSla();
   renderProtoHero();
   renderTratHero();
   renderDashBlocks();
@@ -1545,7 +1566,7 @@ function renderBanner(){
     el.innerHTML = '<span><b>Você não está conectado.</b> Os números abaixo estão zerados porque os dados só carregam depois do login.</span><button class="btn-exp" type="button" onclick="focusLogin()">Entrar</button>';
   } else if (FIRST_SNAPSHOT && total===0){
     el.className='on';
-    el.innerHTML = '<span><b>Nenhum dado ainda.</b> Arraste o arquivo do Innovaro (Protocolo de Coleta ou Tratativas) para qualquer lugar da tela, ou use "Importar arquivo" na barra lateral.</span>';
+    el.innerHTML = '<span><b>Nenhum dado ainda.</b> Arraste o arquivo do Innovaro (Coleta Reversa ou Tratativas) para qualquer lugar da tela, ou use "Importar arquivo" na barra lateral.</span>';
   } else el.className='';
 }
 function focusLogin(){
@@ -1809,7 +1830,7 @@ function detectAndNormalize(rows){
     solicitante: findCol(header,'SOLICITANTE'), casos: findCol(header,/^CASOS/), situacao: findCol(header,'SITUACAO'),
     nf: findCol(header,'NUMERO DA NOTA'), valor: findCol(header,'VALOR DA NOTA'), romaneio: findCol(header,'ROMANEIO_ENTRADA'),
     tiposaida: findCol(header,'TIPOSAIDA'), uf: findCol(header,'UF'), cidade: findCol(header,'CIDADE'),
-    usuario: findCol(header,'USUARIO'), descricao: findCol(header,'DESCRICAO'),
+    usuario: findCol(header,'USUARIO'), descricao: findCol(header,'DESCRICAO'), classe: findCol(header,'CLASSE'),
     tagraw: findCol(header,'NUMERO'), transpnova: findCol(header,'TIPO_SAIDA_NOVA_SAIDA'),
     valortit: findCol(header,'VALOR_TITULO'), notapeca: findCol(header,'NUMERO_NOTA_PECA'),
     vnota: findCol(header,'VALOR_NOTA_SAIDA'), vunit: findCol(header,'VALOR UNITARIO'), qtdev: findCol(header,'QUANTIDADE DEVOLVIDA'),
@@ -1846,11 +1867,11 @@ function detectAndNormalize(rows){
     const ehColeta = /protocolo de coleta/i.test(tipoRaw) || (tipoDetectado === 'coleta' && groupOf(tipoRaw) === 'outros');
     if (ehColeta){
       return { id:coletaKey(chave), origem:'coleta', chave, nf, cpf, cliente, status:casos,
-        transportadora, uf, cidade, tipo_devolucao:'Protocolo de Coleta',
+        transportadora, uf, cidade, tipo_devolucao:'Protocolo de Coleta', classe: cellAt(r, col.classe) || null,
         data_solicitacao:dt, data_programacao:prog, recebido_cd: !!romaneio,
         valor, usuario, descricao };
     }
-    return { id:tratKey(chave), origem:'tratativa', chave, nf, cpf, cliente, status:casos,
+    return { id:tratKey(chave), origem:'tratativa', chave, nf, cpf, cliente, status:casos, classe: cellAt(r, col.classe) || null,
       tipo_devolucao:tipoRaw, grupo:groupOf(tipoRaw), transportadora, uf, cidade,
       data_solicitacao:dt, data_programacao:prog, valor, usuario, descricao,
       tag_raw: cellAt(r, col.tagraw) || null, transp_nova: cellAt(r, col.transpnova) || null,
@@ -1880,7 +1901,7 @@ async function importFile(file){
     const result = detectAndNormalize(rows);
     if (result.error){ say(result.error); toast(result.error, {type:'err'}); return; }
 
-    const tipoLabel = result.tipo==='coleta' ? 'Protocolo de Coleta' : 'Tratativas';
+    const tipoLabel = result.tipo==='coleta' ? 'Coleta Reversa' : 'Tratativas';
     const prefix = result.tipo==='coleta' ? 'coleta_' : 'trat_';
     const seen = new Set(result.rows.map(r=>r.id));
     const abertos = Object.keys(DB_CASES).filter(id => id.startsWith(prefix) && !DB_CASES[id].concluido_auto && groupOf(DB_CASES[id].tipo_devolucao)!=='perdas' && !statusIgnorado(DB_CASES[id].status));
@@ -1907,6 +1928,8 @@ async function importFile(file){
     const ops = [];
     result.rows.forEach(r => {
       const prev = DB_CASES[r.id];
+      // data em que o caso entrou na situacao atual (so sabemos quando a situacao MUDA entre duas importacoes)
+      if (prev && prev.tipo_devolucao && prev.tipo_devolucao !== r.tipo_devolucao){ const n = new Date(); r.sit_desde = String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
       const ehFin = o => o.origem==='coleta' ? !!o.recebido_cd : sitClasseDe(o.tipo_devolucao||'')==='Finalizada';
       if (prev && !prev.finalizado_em && !ehFin(prev) && ehFin(r)){ const n = new Date(); r.finalizado_em = String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
       const prevHistory = prev && Array.isArray(prev.history) ? prev.history : [];
@@ -2165,6 +2188,8 @@ async function _initDb(interactive){
 
   DB.collection('config').onSnapshot(snap => {
     const d = snap.docs.find(x => x.id==='sla_situacoes');
+    const sa = snap.docs.find(x => x.id==='sla_apontamento');
+    if (sa && sa.data().classes){ SLA_CLASSES = sa.data().classes; try { localStorage.setItem('sla_classes', JSON.stringify(SLA_CLASSES)); } catch(e){} scheduleRender(); }
     const cn = snap.docs.find(x => x.id==='canais');
     if (cn && Array.isArray(cn.data().marketplace)){ MKT_USERS = cn.data().marketplace; try { localStorage.setItem('mkt_users', JSON.stringify(MKT_USERS)); } catch(e){} scheduleRender(); }
     if (d){ const v = d.data(); SIT_CFG = { base: v.base==='solic'?'solic':'prog', regras: v.regras||{} }; try { localStorage.setItem('sit_cfg', JSON.stringify(SIT_CFG)); } catch(e){} scheduleRender(); }
@@ -2188,34 +2213,73 @@ const PH_TITLES = { at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta re
 function renderProtoHero(){
   const stats = [['Atrasadas', AT.length, `Prazo > ${SLA} dias`, "ir('at')"], ['Em risco', RI.length, 'Entram em atraso em breve', "ir('ri')"], ['No prazo', EM.length, `Dentro dos ${SLA} dias`, "ir('em')"],
     ['Aguardando CD', REA.length, 'Coleta feita, falta chegar no CD', "ir('rea')"], ['Total em aberto', COL.length + REA.length, 'Protocolos pendentes', "ir('col-all')"]];
-  document.querySelectorAll('[data-ph]').forEach(el => { el.innerHTML = pwHero('Protocolo de Coleta', PH_TITLES[el.dataset.ph]||'', `Prazo de ${SLA} dias para a coleta · atualiza sozinho a cada importação.`, stats); });
+  document.querySelectorAll('[data-ph]').forEach(el => { el.innerHTML = pwHero('Coleta Reversa', PH_TITLES[el.dataset.ph]||'', `Prazo de ${SLA} dias para a coleta · atualiza sozinho a cada importação.`, stats); });
 }
 function renderDashBlocks(){
   const el = document.getElementById('dash-blocks'); if (!el) return;
   const K = D.kpis, hj = new Date();
-  const go = (id, txt) => `<button class="pw-btn" type="button" onclick="ir('${id}')">${txt} →</button>`;
-  // Controle de Situacoes (indicadores do ano em foco)
+  const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
+  const PAL = { rose:'#F43F5E', amb:'#F59E0B', cyan:'#06B6D4', pur:'#7C3AED', gray:'#64748B' };
+  // numeros de cada area
   const doAno = IND_ALL.filter(x => x.ano===IND.ano), A = indAgg(doAno);
-  const abMk = doAno.filter(x=>!x.fin && x.canal==='Marketplace').length, abRel = doAno.filter(x=>!x.fin && x.canal==='Relacionamento').length;
-  // Perdas do ano mais recente com dados (mes atual e acumulado)
   const anosP = pwAnos(), anoP = anosP.includes(hj.getFullYear()) ? hj.getFullYear() : (anosP[0] || hj.getFullYear());
-  const pAno = PERDAS.filter(p => p.ano===anoP), mRef = anoP===hj.getFullYear() ? hj.getMonth()+1 : Math.max(0, ...pAno.map(p=>p.mes||0));
-  const vSum = a => a.reduce((t,p)=>t+(p.valorEst||0),0);
-  // Tratativas: os 3 grupos com mais casos
+  const pAno = PERDAS.filter(p => p.ano===anoP), vSum = arr => arr.reduce((t,p)=>t+(p.valorEst||0),0);
+  const slaAt = SLA_ITENS.filter(x=>x.estado==='ATRASO'), slaHj = SLA_ITENS.filter(x=>x.estado==='HOJE').length;
   const gNomes = { recolhimento:'Recolhimento', barrar:'Barrar', financeiro:'Financeiro', naoretornou:'Não retornou', nova:'Novo / a triar', outros:'Outros' };
-  const gTop = Object.keys(gNomes).map(g => [g, TRAT.filter(t => (t.grupo||'outros')===g).length]).filter(a=>a[1]).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  const blocos = [
-    ['Protocolo de Coleta', 'Prazo de coleta', `${SLA} dias de prazo · coletas pendentes`,
-      [['Atrasadas', K.at, `Prazo > ${SLA} dias`, "ir('at')"], ['Em risco', K.ri, 'Entram em atraso em breve', "ir('ri')"], ['No prazo', K.em, `Dentro dos ${SLA} dias`, "ir('em')"], ['Aguardando CD', K.rea, 'Coleta feita, falta chegar', "ir('rea')"]], go('col-all','Abrir protocolo')],
-    ['Controle de Situações', 'Atendimento por transportadora', `Tarefas de ${IND.ano}`,
-      [['Tarefas', A.total, 'criadas no ano', "ir('ind')"], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total', "ir('ind')"], ['Em aberto', A.aberto, 'pendentes de resolução', "ir('ind')"], ['Marketplace | Relacionamento', `${abMk} | ${abRel}`, 'em aberto por canal', "ir('ind')", true]], go('ind','Abrir controle')],
-    ['Perdas', `Perdas ${anoP}`, 'Índice de perdas cliente e transportadora',
-      [['Total de perdas', pAno.length, `em ${anoP}`, "ir('perdas')"], ['Valor estimado', brl(vSum(pAno)), `acumulado de ${anoP}`, "ir('perdas')", true],
-       ...(mRef ? [[`Perdas em ${MESES[mRef-1]}`, brl(vSum(pAno.filter(p=>p.mes===mRef))), 'valor no mês', "ir('perdas')", true], [`Jan–${MESES[mRef-1]}`, brl(vSum(pAno.filter(p=>p.mes && p.mes<=mRef))), 'acumulado até o mês', "ir('perdas')", true]] : [])], go('perdas','Abrir perdas')],
-    ['Tratativas Transportadora', 'Tratativas por grupo', 'Casos pendentes, sem prazo fixo',
-      [['Em aberto', TRAT.length, 'todas as tratativas', "ir('trat')"], ...gTop.map(([g,n]) => [gNomes[g], n, 'casos', `ir('trat');setGrupoTab('${g}')`])], go('trat','Abrir tratativas')],
+  const grupos = Object.keys(gNomes).map(g => [g, TRAT.filter(t => (t.grupo||'outros')===g).length]).filter(a=>a[1]).sort((a,b)=>b[1]-a[1]);
+
+  const hero = pwHero('Visão geral', 'Painel de devoluções', 'Tudo em uma página · clique em qualquer número ou gráfico para abrir o detalhe.', [
+    ['Coleta reversa em atraso', K.at, `${K.ri} em risco · ${K.rea} aguardando CD`, "ir('at')"],
+    ['Apontamentos em atraso', slaAt.length, `${slaHj} vencem hoje`, "ir('sla')"],
+    ['Tarefas em aberto', A.aberto, `atendimento de ${IND.ano}: ${fmt1(A.taxa)}%`, "ir('ind')"],
+    [`Perdas ${anoP}`, brl(vSum(pAno)), `${pAno.length} casos`, "ir('perdas')", true],
+    ['Tratativas pendentes', TRAT.length, 'sem prazo fixo', "ir('trat')"]], '');
+  const card = (t, sub, id, extra) => `<div class="pw-card"><h3>${t}</h3><div class="s">${sub}</div>${extra||`<div class="pw-chart"><canvas id="${id}"></canvas></div>`}</div>`;
+
+  // "atencao agora": o que mais pede cobranca, de qualquer area
+  const crit = [
+    ...[...AT].sort((a,b)=>(b.dias||0)-(a.dias||0)).slice(0,3).map(c => ({ tag:'Coleta reversa', cor:PAL.rose, nome:c.cliente, det:`${c.transportadora||'—'} · NF ${c.nf||'—'}`, val:`${c.dias} d`, item:{...c,__tipo:'coleta'} })),
+    ...[...slaAt].sort((a,b)=>b.atraso-a.atraso).slice(0,3).map(x => ({ tag:'SLA de apontamento', cor:PAL.amb, nome:x.cliente, det:`${x.sit} · ${x.usuario||'—'}`, val:`${x.estimado?'~':''}+${x.atraso} ${x.regra.util?'d.u.':'d'}`, item:x })),
   ];
-  el.innerHTML = blocos.map(([kick,t,sub,st,acao]) => `<div class="pworld dsec">${pwHero(kick, t, sub, st, acao)}</div>`).join('');
+  const lista = crit.length ? crit.map(c => `<div class="pw-in" style="cursor:pointer" onclick="openDetailIdx(${regDetail(c.item)})"><i style="background:${c.cor}">!</i><div style="flex:1;min-width:0"><b>${esc((c.nome||'—').slice(0,34))}</b><br><span style="font-size:11px;color:var(--tx3)">${esc(c.tag)} · ${esc(c.det)}</span></div><b style="color:${c.cor}">${esc(c.val)}</b></div>`).join('')
+    : '<div class="pw-empty">Nada atrasado agora.</div>';
+
+  el.innerHTML = `<div class="pworld">${hero}
+    <div class="pw-grid even">${card('Coleta reversa', `Prazo de ${SLA} dias · clique numa fatia`, 'dc-col')}${card('Atendimento por mês', `Tarefas criadas e % atendido · ${IND.ano}`, 'dc-ate')}</div>
+    <div class="pw-grid even">${card('Perdas por mês', `Valor estimado e acumulado · ${anoP}`, 'dc-per')}${card('SLA de apontamento', 'Casos por tópico: atraso, vence hoje e no prazo', 'dc-sla')}</div>
+    <div class="pw-grid even">${card('Tratativas por grupo', 'Casos pendentes por tipo', 'dc-trat')}${card('Atenção agora', 'O que mais pede cobrança hoje', '', `<div class="pw-ins">${lista}</div>`)}</div></div>`;
+
+  if (!window.Chart || !document.getElementById('panel-dash').classList.contains('on')) return;
+  const mk = (id, cfg) => { if (charts[id]) charts[id].destroy(); const cv = document.getElementById(id); if (cv) charts[id] = new Chart(cv, cfg); };
+  const base = { responsive:true, maintainAspectRatio:false, animation:{duration:450} };
+  const eixos = (y1) => ({ x:{ ticks:{color:tick}, grid:{display:false} }, y:{ beginAtZero:true, ticks:{color:tick}, grid:{color:grid} }, ...(y1||{}) });
+
+  mk('dc-col', { type:'doughnut', data:{ labels:['Atrasadas','Em risco','No prazo','Aguardando CD'], datasets:[{ data:[K.at,K.ri,K.em,K.rea], backgroundColor:[PAL.rose,PAL.amb,PAL.cyan,PAL.pur], borderWidth:0 }] },
+    options:{ ...base, cutout:'62%', onClick:(e,els)=>{ if (els.length) ir(['at','ri','em','rea'][els[0].index]); }, plugins:{ legend:{ position:'right', labels:{ color:tick, boxWidth:10 } } } } });
+
+  const mesesA = Array.from({length:12},(_,i)=>i+1).filter(m => doAno.some(x=>x.mes===m));
+  mk('dc-ate', { data:{ labels:mesesA.map(m=>MESES[m-1]), datasets:[
+      { type:'bar', label:'Tarefas', data:mesesA.map(m=>doAno.filter(x=>x.mes===m).length), backgroundColor:PAL.pur, borderRadius:6, yAxisID:'y', order:2 },
+      { type:'line', label:'% atendido', data:mesesA.map(m=>{ const a=doAno.filter(x=>x.mes===m); return a.length?Math.round(a.filter(x=>x.fin).length/a.length*100):null; }), borderColor:PAL.rose, backgroundColor:PAL.rose, tension:.25, pointRadius:3, yAxisID:'y1', order:1 } ] },
+    options:{ ...base, onClick:()=>ir('ind'), plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } }, scales:eixos({ y1:{ position:'right', min:0, max:100, ticks:{color:PAL.rose, callback:v=>v+'%'}, grid:{display:false} } }) } });
+
+  const mP = Array.from({length:12},(_,i)=>i+1).filter(m => m <= (anoP===hj.getFullYear() ? hj.getMonth()+1 : 12));
+  const porMes = mP.map(m => vSum(pAno.filter(p=>p.mes===m))); let ac = 0; const acum = porMes.map(v => (ac += v));
+  mk('dc-per', { data:{ labels:mP.map(m=>MESES[m-1]), datasets:[
+      { type:'bar', label:'Valor no mês', data:porMes, backgroundColor:PAL.rose, borderRadius:6, yAxisID:'y', order:2 },
+      { type:'line', label:'Acumulado', data:acum, borderColor:PAL.pur, backgroundColor:PAL.pur, tension:.25, pointRadius:3, yAxisID:'y1', order:1 } ] },
+    options:{ ...base, onClick:()=>ir('perdas'), plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } }, tooltip:{ callbacks:{ label:c => ' '+c.dataset.label+': '+brl(c.parsed.y) } } },
+      scales:eixos({ y:{ beginAtZero:true, ticks:{color:tick, callback:v=>'R$ '+v.toLocaleString('pt-BR')}, grid:{color:grid} }, y1:{ position:'right', beginAtZero:true, ticks:{color:PAL.pur, callback:v=>'R$ '+v.toLocaleString('pt-BR')}, grid:{display:false} } }) } });
+
+  const cont = (f, e) => SLA_ITENS.filter(x => x.fluxo===f && x.estado===e).length;
+  mk('dc-sla', { type:'bar', data:{ labels:SLA_FLUXOS.map(a=>a[1].replace(' (rota emergencial)','')), datasets:[
+      { label:'Em atraso', data:SLA_FLUXOS.map(a=>cont(a[0],'ATRASO')), backgroundColor:PAL.rose }, { label:'Vence hoje', data:SLA_FLUXOS.map(a=>cont(a[0],'HOJE')), backgroundColor:PAL.amb }, { label:'No prazo', data:SLA_FLUXOS.map(a=>cont(a[0],'PRAZO')), backgroundColor:PAL.cyan } ] },
+    options:{ ...base, indexAxis:'y', onClick:(e,els)=>{ if (els.length){ SLA_ST.fluxo = SLA_FLUXOS[els[0].index][0]; SLA_ST.sit=''; SLA_ST.usuario=''; ir('sla'); } },
+      plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } }, scales:{ x:{ stacked:true, beginAtZero:true, ticks:{color:tick}, grid:{color:grid} }, y:{ stacked:true, ticks:{color:tick}, grid:{display:false} } } } });
+
+  mk('dc-trat', { type:'bar', data:{ labels:grupos.map(g=>gNomes[g[0]]), datasets:[{ data:grupos.map(g=>g[1]), backgroundColor:PAL.cyan, borderRadius:6 }] },
+    options:{ ...base, indexAxis:'y', onClick:(e,els)=>{ if (els.length){ ir('trat'); setGrupoTab(grupos[els[0].index][0]); } }, plugins:{ legend:{ display:false } },
+      scales:{ x:{ beginAtZero:true, ticks:{color:tick, precision:0}, grid:{color:grid} }, y:{ ticks:{color:tick}, grid:{display:false} } } } });
 }
 function renderTratHero(){
   const el = document.getElementById('ph-trat'); if (!el) return;
@@ -2425,6 +2489,199 @@ function sitSlaDe(nome){
   const r = SIT_CFG.regras[sitKey(nome)];
   if (r) return r.sla>0 ? r.sla : null;
   return sitKey(nome)==='protocolo_de_coleta' ? CONFIG.SLA_COLETA_DIAS : null;
+}
+
+// ================= SLA DE APONTAMENTO =================
+// prazo para o responsavel apontar o proximo passo de cada situacao. Linha: Situacao|prazo|base|proximas
+//   prazo: 0 = fora do SLA · Nc = N dias corridos · Nu = N dias uteis
+//   base : data = criacao do caso · prog = data de programacao · sit = entrada na situacao (se nao souber, programacao/criacao)
+const SLA_TXT = {
+  rec: `Prod Recolhido no Cliente|0|sit|
+Criada|1c|data|Recol P/ Troca Divergente;Recol P/ Troca Simples;Recolhimento P/Cancelamen;Cancelada;Perdas Cliente C/ Reenvio
+Cancelada|0|sit|
+Cancelada 2|0|sit|
+Cancelada 3|0|sit|
+Cancelada 4|0|sit|
+Financeiro Ok|0|sit|
+Perdas Cliente|0|sit|Financeiro Ok
+Recolhimento P/Cancelamen|1u|prog|Cancelada 2;NF-e Emitida
+Recol P/ Troca Simples|1u|prog|Cancelada 3;NF-e Emitida
+Recol P/ Troca Divergente|1u|prog|Cancelada 4;NF-e Emitida
+Perdas Cliente C/ Reenvio|0|sit|Financeiro Ok
+Protocolo de Coleta|3u|sit|Protocolo de Coleta;Prod Recolhido no Cliente;Cancelada 3;Perdas Cliente
+NF-e Emitida|1u|sit|Protocolo de Coleta`,
+  sp: `Criada|1u|data|Agendada;Cancelada;Criada
+Agendada|1u|prog|Agendada;A Distribuir;Cancelada 2
+A Distribuir|1u|sit|Em Atendimento;Cancelada 2
+Em Atendimento|1u|sit|Não Realiz Cli;Não Realiz Equipe;Em Atendimento;Realizado
+Cancelada|0|sit|
+Realizado|15c|sit|
+Não Realiz Cli|0|sit|
+Não Realiz Equipe|0|sit|
+Cancelada 2|0|sit|`,
+  trat: `Criada|1u|data|Transportadora a pagar;Perdas Cliente;Barrar Entrega Seguir Rec;Recol P/ Acomp Cliente;Cancelada;Perdas Cliente C/ Reenvio
+Barrar Entrega Seguir Rec|1u|sit|Recol Acomp C/Reenvio Tra;Recol P/Acomp Transportad;Cancelada
+Recol P/ Acomp Cliente|15u|sit|Produto Não Retornou 2;Cobrança Realizada 2;Conferência Expedição 2
+Transportadora a pagar|15u|sit|De Acordo;Recol P/Acomp Transportad;Reenvio S Recol Transp Pg;Cli Canc Ped - Transp Pag;Recol Acomp C/Reenvio Tra;Recol P/ Acomp Cliente;Fora de Perfil
+Transportadora a pagar 2|15u|sit|Recol P/Acomp Transportad;Recol P/ Acomp Cliente;De Acordo 2;Fora de Perfil
+Cli Canc Ped - Transp Pag|15u|sit|Recol P/Acomp Transp 2;De Acordo;Fora de Perfil
+Reenvio S Recol Transp Pg|15u|sit|De Acordo 2;Recol P/Acomp Transportad;Canc Proc - Excluir Reevi;Fora de Perfil
+Recol P/Acomp Transportad|15u|sit|Produto Não Retornou;Conferência Expedição;Mercadoria Danificada;Cobrança Realizada;Cancelar Processo;Prod Entreg Cli Seg Rec
+Recol P/Acomp Transp 2|15u|sit|Conferência Expedição;Mercadoria Danificada;Cobrança Realizada;Cancelar Processo;Produto Não Retornou 2
+Recol Acomp C/Reenvio Tra|15u|sit|Produto Não Retornou;Conferência Expedição;Mercadoria Danificada;Cobrança Realizada;Canc Proc - Excluir Reevi;Prod Entreg Cli Seg Rec
+Produto Não Retornou|3u|sit|Transportadora a pagar 2;Perdas Transportadora;Gerar Link de PG Env E-ma;Prod Entreg Cli Seg Rec;Perdas Cliente C/ Reenvio;Perdas Cliente
+Produto Não Retornou 2|3u|sit|Perdas Transportadora;Gerar Link de PG Env E-ma;Prod Entreg Cli Seg Rec;Transportadora a pagar;Perdas Cliente
+Cobrança Realizada|1u|sit|Produto Não Retornou;Conferência Expedição;Mercadoria Danificada;Cobrança Realizada
+Cobrança Realizada 2|1u|sit|Produto Não Retornou 2;Conferência Expedição;Mercadoria Danificada 2;Cobrança Realizada 2
+Conferência Expedição|3u|sit|Mercadoria Conferida OK
+Conferência Expedição 2|3u|sit|Mercadoria Conferida OK 2
+Mercadoria Danificada|1u|sit|Transportadora a pagar 2
+Mercadoria Danificada 2|1u|sit|Transportadora a pagar
+Gerar Link de PG Env E-ma|3u|sit|Prod Entreg Cli Seg Rec;Perdas Cliente;Pagamento Confirmado
+Pagamento Confirmado|15u|sit|Pedido Digitado
+Pedido Digitado|3u|sit|Processo Finalizado  Fisc
+Prod Entreg Cli Seg Rec|3u|sit|
+De Acordo|60u|sit|Financeiro Ok
+De Acordo 2|60u|sit|Financeiro Ok
+Fora de Perfil|0|sit|Financeiro Ok
+Canc Proc - Excluir Reevi|0|sit|
+Mercadoria Conferida OK|0|sit|Financeiro Ok
+Mercadoria Conferida OK 2|0|sit|Financeiro Ok
+Cancelar Processo|0|sit|Financeiro Ok
+Cancelada|0|sit|
+Financeiro Ok|0|sit|
+Perdas Cliente|0|sit|Financeiro Ok
+Perdas Cliente C/ Reenvio|0|sit|Financeiro Ok
+Perdas Transportadora|0|sit|Financeiro Ok
+Processo Finalizado  Fisc|0|sit|`,
+  troca: `Criada|1u|data|Agendada;Cancelada
+Agendada|1u|prog|Agendada;Em Atendimento;Cancelada 2
+Em Atendimento|1u|prog|Cancelada;Não Realiz Cli;Não Realiz Equipe;Realizado
+Realizado|0|sit|
+Não Realiz Cli|0|sit|
+Não Realiz Equipe|0|sit|
+Cancelada|0|sit|
+Cancelada 2|0|sit|` };
+const SLA_FLUXOS = [['rec','Recolhimento depois de entregue'], ['sp','Recolhimento SP cancelamento'], ['trat','Tratativas transportadora'], ['troca','Troca SP mesmo produto (rota emergencial)']];
+const SLA_REGRAS = {};
+Object.keys(SLA_TXT).forEach(f => { SLA_REGRAS[f] = SLA_TXT[f].split('\n').map(l => { const [sit, pz, base, prox] = l.split('|'); const m = /^(\d+)([cu])?$/.exec(pz.trim());
+  return { sit, key:sitKey(sit), n:m ? +m[1] : 0, util: !!m && m[2]==='u', base:base.trim(), prox:(prox||'').split(';').map(t=>t.trim()).filter(Boolean) }; }); });
+const SLA_ST = { fluxo:'rec', estado:'atraso', sit:'', usuario:'', q:'' };
+let SLA_CLASSES = {}, SLA_LISTA = [], SLA_ITENS = [];
+try { const c = JSON.parse(localStorage.getItem('sla_classes')||'null'); if (c) SLA_CLASSES = c; } catch(e){}
+
+const SLA_FERIADOS = new Set(['2026-01-01','2026-02-16','2026-02-17','2026-04-03','2026-04-21','2026-05-01','2026-06-04','2026-09-07','2026-10-12','2026-11-02','2026-11-15','2026-11-20','2026-12-25']);
+const isoD = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const ehUtil = d => d.getDay()!==0 && d.getDay()!==6 && !SLA_FERIADOS.has(isoD(d));
+function slaSomaDias(d, n, util){ const r = new Date(d.getFullYear(), d.getMonth(), d.getDate()); if (!util){ r.setDate(r.getDate()+n); return r; } let k=0; while (k<n){ r.setDate(r.getDate()+1); if (ehUtil(r)) k++; } return r; }
+function slaDifDias(a, b, util){ if (!util) return daysBetween(a,b); let k=0; const r = new Date(a.getFullYear(), a.getMonth(), a.getDate()); while (r<b){ r.setDate(r.getDate()+1); if (ehUtil(r)) k++; } return k; }
+const slaPrazoTxt = r => !r.n ? 'Sem SLA (0)' : r.n+(r.util ? (r.n>1?' dias úteis':' dia útil') : (r.n>1?' dias corridos':' dia corrido'))+({data:' · da criação', prog:' · da programação', sit:''})[r.base];
+
+function slaFluxoDe(x){
+  const k = norm(x.classe||'').trim();
+  if (k && SLA_CLASSES[k]) return SLA_CLASSES[k];
+  if (/tratativ/.test(k)) return 'trat';
+  if (/troca/.test(k)) return 'troca';
+  if (/recolhimento sp|cancelamento/.test(k)) return 'sp';
+  if (/recolhimento por transp|depois de entregue/.test(k)) return 'rec';
+  if (k) return '';                                   // classe nova, ainda sem fluxo definido
+  const key = sitKey(x.sit);                          // importacao antiga, sem CLASSE: tenta pela situacao
+  if (x.__tipo==='coleta') return 'rec';
+  if (SLA_REGRAS.rec.some(r=>r.key===key) && !SLA_REGRAS.trat.some(r=>r.key===key)) return 'rec';
+  if (key==='a_distribuir') return 'sp';
+  return 'trat';
+}
+function slaFonte(){
+  const out = [];
+  COL.concat(REA).forEach(c => out.push({ ...c, __tipo:'coleta', sit:'Protocolo de Coleta' }));
+  TRAT_ALL.filter(t => !t.concluido_auto).forEach(t => out.push({ ...t, __tipo:'tratativa', sit:t.tipo_devolucao || '(sem situação)' }));
+  PERDAS.filter(p => !p.concluido_auto).forEach(p => out.push({ ...p, sit:p.tipo_devolucao || '(sem situação)' }));
+  return out;
+}
+function slaCalcula(){
+  const hj = new Date(), hoje = new Date(hj.getFullYear(), hj.getMonth(), hj.getDate());
+  SLA_ITENS = slaFonte().map(x => {
+    const fluxo = slaFluxoDe(x), regra = fluxo ? SLA_REGRAS[fluxo].find(r => r.key===sitKey(x.sit)) : null;
+    let estado = 'SEM SLA', venceu = null, atraso = 0, estimado = false;
+    if (regra && regra.n){
+      const d1 = parseBR(x.data_solicitacao), d2 = parseBR(x.data_programacao), d3 = parseBR(x.sit_desde);
+      const base = regra.base==='data' ? (d1||d2) : regra.base==='prog' ? (d2||d3||d1) : (d3||d2||d1);
+      estimado = regra.base==='sit' && !d3;
+      if (base){
+        venceu = slaSomaDias(base, regra.n, regra.util);
+        if (hoje > venceu){ estado = 'ATRASO'; atraso = slaDifDias(venceu, hoje, regra.util); }
+        else if (+hoje === +venceu) estado = 'HOJE';
+        else estado = 'PRAZO';
+      }
+    }
+    return { ...x, fluxo, regra, estado, venceu, atraso, estimado, canal:canalOf(x.usuario) };
+  });
+}
+function slaSet(k, v){
+  if (k==='fluxo'){ SLA_ST.fluxo = v; SLA_ST.sit = ''; SLA_ST.usuario = ''; }
+  else if (k==='estado') SLA_ST.estado = v;
+  else if (k==='sit') SLA_ST.sit = (SLA_ST.sit===v ? '' : v);
+  else if (k==='usuario') SLA_ST.usuario = v;
+  else if (k==='q') SLA_ST.q = norm(v).trim();
+  else if (k==='limpar'){ SLA_ST.estado='atraso'; SLA_ST.sit=''; SLA_ST.usuario=''; SLA_ST.q=''; const i=document.getElementById('sla-q'); if (i) i.value=''; }
+  renderSla();
+}
+function slaSetClasse(cl, f){ if (f) SLA_CLASSES[cl] = f; else delete SLA_CLASSES[cl]; try { localStorage.setItem('sla_classes', JSON.stringify(SLA_CLASSES)); } catch(e){}
+  if (DB) DB.doc('config/sla_apontamento').set({ classes:SLA_CLASSES, updatedAt:isoNow() }).catch(err => toast('Não consegui salvar: '+(err.code||err.message), {type:'err'}));
+  renderSla(); }
+function renderSla(){
+  if (!document.getElementById('panel-sla')) return;
+  slaCalcula();
+  const comSla = SLA_ITENS.filter(x => x.regra && x.regra.n), at = comSla.filter(x=>x.estado==='ATRASO').length, hj = comSla.filter(x=>x.estado==='HOJE').length, ok = comSla.filter(x=>x.estado==='PRAZO').length;
+  document.getElementById('bdg-sla').textContent = at;
+  document.getElementById('ph-sla').innerHTML = pwHero('SLA de Apontamento', 'Prazo para apontar o próximo passo', 'O responsável precisa lançar a próxima situação dentro do prazo. Aqui está quem passou do prazo, para cobrança.',
+    [['Em atraso', at, 'passaram do prazo de apontamento'], ['Vencem hoje', hj, 'último dia para apontar'], ['No prazo', ok, 'ainda dentro do prazo'], ['Fora do SLA', SLA_ITENS.length-comSla.length, 'situações com prazo 0 ou sem regra', null, true]]);
+
+  const doFluxo = SLA_ITENS.filter(x => x.fluxo===SLA_ST.fluxo), semFluxo = SLA_ITENS.filter(x => !x.fluxo).length;
+  const usuarios = [...new Set(doFluxo.filter(x=>x.estado==='ATRASO'||x.estado==='HOJE').map(x=>x.usuario||'—'))].sort();
+  const f = (x, ign) => { ign = ign||[]; return x.fluxo===SLA_ST.fluxo && (ign.includes('sit') || !SLA_ST.sit || sitKey(x.sit)===SLA_ST.sit) &&
+    (ign.includes('estado') || SLA_ST.estado==='todos' || (SLA_ST.estado==='atraso' && x.estado==='ATRASO') || (SLA_ST.estado==='hoje' && x.estado==='HOJE') || (SLA_ST.estado==='prazo' && x.estado==='PRAZO')) &&
+    (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario) && (!SLA_ST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(SLA_ST.q)); };
+  const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
+  const nEst = e => SLA_ITENS.filter(x => x.fluxo===SLA_ST.fluxo && (e==='todos' || x.estado===e) && (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario)).length;
+  document.getElementById('sla-fbody').innerHTML =
+    `<div class="ind-fr"><b>Tópico</b><div>${SLA_FLUXOS.map(([k,n]) => chip(SLA_ST.fluxo===k, `slaSet('fluxo','${k}')`, n, SLA_ITENS.filter(x=>x.fluxo===k && x.estado==='ATRASO').length+' em atraso')).join('')}</div></div>
+     <div class="ind-fr"><b>Estado</b><div>${chip(SLA_ST.estado==='atraso', "slaSet('estado','atraso')", 'Em atraso', nEst('ATRASO'))}${chip(SLA_ST.estado==='hoje', "slaSet('estado','hoje')", 'Vence hoje', nEst('HOJE'))}${chip(SLA_ST.estado==='prazo', "slaSet('estado','prazo')", 'No prazo', nEst('PRAZO'))}${chip(SLA_ST.estado==='todos', "slaSet('estado','todos')", 'Todos', nEst('todos'))}</div></div>
+     <div class="ind-fr"><b>Responsável</b><div><select class="fsel" onchange="slaSet('usuario',this.value)"><option value="">Todos</option>${usuarios.map(u=>`<option${SLA_ST.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select></div></div>`;
+  document.getElementById('sla-limpar').style.visibility = (SLA_ST.estado!=='atraso' || SLA_ST.sit || SLA_ST.usuario || SLA_ST.q) ? 'visible' : 'hidden';
+
+  // tabela por situacao (regra + contagens)
+  document.getElementById('sla-t-fluxo').textContent = (SLA_FLUXOS.find(a=>a[0]===SLA_ST.fluxo)||[])[1] || '';
+  const regras = SLA_REGRAS[SLA_ST.fluxo] || [];
+  const baseTab = doFluxo.filter(x => (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario));
+  document.getElementById('tb-sla-sit').innerHTML = regras.map(r => {
+    const its = baseTab.filter(x => sitKey(x.sit)===r.key), a = its.filter(x=>x.estado==='ATRASO'), h = its.filter(x=>x.estado==='HOJE').length, mx = a.reduce((m,x)=>Math.max(m,x.atraso),0), un = r.util?'d.u.':'d';
+    return `<tr class="clickable${SLA_ST.sit===r.key?' sel':''}${r.n?'':' sla-zero'}" data-k="${r.key}" onclick="slaSet('sit',this.dataset.k)"${r.n?'':' style="opacity:.6"'}><td class="td-nome">${esc(r.sit)}</td><td>${r.n?`<b>${slaPrazoTxt(r)}</b>`:'<span class="bdg b-dk">Sem SLA (0)</span>'}</td>
+      <td style="font-size:11px;color:var(--tx3)">${r.prox.length?esc(r.prox.join(' · ')):'—'}</td><td>${its.length}</td><td>${a.length?`<span class="bdg b-red">${a.length}</span>`:(r.n?0:'—')}</td><td>${h||(r.n?0:'—')}</td><td>${mx?mx+' '+un:'—'}</td></tr>`; }).join('');
+  const conhecidas = new Set(regras.map(r=>r.key)), fora = baseTab.filter(x => !conhecidas.has(sitKey(x.sit)));
+  if (fora.length) document.getElementById('tb-sla-sit').innerHTML += `<tr style="opacity:.6"><td class="td-nome">Outras situações sem regra</td><td><span class="bdg b-dk">Sem SLA</span></td><td style="font-size:11px;color:var(--tx3)">${[...new Set(fora.map(x=>x.sit))].slice(0,6).map(esc).join(' · ')}</td><td>${fora.length}</td><td>—</td><td>—</td><td>—</td></tr>`;
+
+  // lista para cobranca
+  const lista = SLA_ITENS.filter(x => f(x)).sort((a,b) => b.atraso-a.atraso || (a.venceu||0)-(b.venceu||0));
+  SLA_LISTA = lista;
+  document.getElementById('cnt-sla').textContent = lista.length + ' caso' + (lista.length!==1?'s':'');
+  document.getElementById('sla-lista-t').textContent = SLA_ST.estado==='atraso' ? 'Casos em atraso — para cobrar' : SLA_ST.estado==='hoje' ? 'Vencem hoje' : SLA_ST.estado==='prazo' ? 'Dentro do prazo' : 'Todos os casos do tópico';
+  document.getElementById('tb-sla').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>
+    <td>${x.venceu?fmtD2(x.venceu):'—'}</td><td>${x.atraso?`<b style="color:var(--red)">${x.estimado?'~':''}+${x.atraso} ${x.regra.util?'d.u.':'d'}</b>`:(x.estado==='HOJE'?'<span class="bdg b-amb">vence hoje</span>':'—')}</td>
+    <td style="font-size:11px">${esc(x.usuario||'—')} <span class="bdg" style="background:${x.canal==='Marketplace'?'#7C3AED22':'#06B6D422'};color:${x.canal==='Marketplace'?'#7C3AED':'#06B6D4'};font-size:9.5px">${x.canal==='Marketplace'?'Marketplace':'Relacion.'}</span></td>
+    <td style="font-size:11px;color:var(--tx3)">${x.regra&&x.regra.prox.length?esc(x.regra.prox.slice(0,3).join(' · '))+(x.regra.prox.length>3?'…':''):'—'}</td></tr>`).join('')
+    + (lista.length>300 ? `<tr><td colspan="7" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '')
+    || '<tr><td colspan="7" style="color:var(--tx3);padding:14px">Nenhum caso neste filtro.</td></tr>';
+
+  // mapeamento de classes
+  const cl = new Map(); SLA_ITENS.forEach(x => { const k = norm(x.classe||'').trim(); if (k){ if(!cl.has(k)) cl.set(k,{nome:x.classe,n:0,f:x.fluxo}); cl.get(k).n++; } });
+  document.getElementById('sla-classes').innerHTML = [...cl.entries()].map(([k,o]) => `<div style="display:flex;gap:10px;align-items:center;padding:4px 0;font-size:12px"><span style="flex:1"><b>${esc(o.nome)}</b> <small style="color:var(--tx3)">${o.n} casos</small></span><select class="fsel" data-k="${esc(k)}" onchange="slaSetClasse(this.dataset.k,this.value)"><option value="">automático (${o.f?(SLA_FLUXOS.find(a=>a[0]===o.f)||[])[1]:'sem fluxo'})</option>${SLA_FLUXOS.map(([id,n])=>`<option value="${id}"${SLA_CLASSES[k]===id?' selected':''}>${n}</option>`).join('')}</select></div>`).join('')
+    + (semFluxo ? `<p style="font-size:11.5px;color:var(--tx3);margin-top:6px">${semFluxo} caso(s) com classe sem fluxo definido.</p>` : '') || '<i>Reimporte o arquivo para o painel ler a CLASSE de cada caso.</i>';
+}
+const fmtD2 = d => String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+function slaExport(){
+  if (!SLA_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
+  exportCSV(SLA_LISTA.map(x => ({ 'Tópico':(SLA_FLUXOS.find(a=>a[0]===x.fluxo)||[])[1]||'', 'Situação':x.sit, 'Cliente':x.cliente||'', 'NF':x.nf||'', 'Prazo':x.regra?slaPrazoTxt(x.regra):'', 'Venceu em':x.venceu?fmtD2(x.venceu):'', 'Atraso':x.atraso||'', 'Estado':x.estado, 'Responsável':x.usuario||'', 'Canal':x.canal, 'Deveria ir para':x.regra?x.regra.prox.join(' / '):'' })), 'sla_apontamento');
 }
 
 // ================= MUNDO PERDAS =================
