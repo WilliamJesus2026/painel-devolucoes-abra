@@ -107,3 +107,7 @@ Coluna **Protocolo Hello** (nº de coleta, campo editável) nas abas da Coleta R
 - Importar o CSV do Controle de Situações lê a coluna **em andamento** (F) como andamento / motivo da pendência de cada caso (o que for digitado no painel prevalece sobre a planilha).
 - Importar a planilha **Tarefas em aberto - recol cliente** (aba Base) enriquece os casos já existentes: último apontamento vira data de finalização (SLA médio) ou data de entrada na situação (SLA de Apontamento), e traz n. coleta / motivo / NFE pendente / unidade quando preenchidos.
 - De/para do tipo de saída → transportadora (tabela da aba Resumo) em SAIDA_MAE; 'Não saiu' (acerto de estoque) e tipos sem de/para ficam fora dos indicadores. Perdas entram como finalizadas, como na planilha de controle.
+
+## Planilha base: Controle de Situações
+
+O CSV 'Controle de Situações' é a base do painel. Ao importar, quem não está mais no arquivo sai do painel (concluído automaticamente), mas só dentro do mesmo universo: mesma CLASSE do Innovaro ou, em casos antigos sem classe, o mesmo fluxo do SLA. Tratativas Transportadora não são afetadas. A planilha 'Tarefas em aberto' é só modelo/enriquecimento. A aba mostra qual planilha está valendo.

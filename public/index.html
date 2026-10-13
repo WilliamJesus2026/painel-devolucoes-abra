@@ -757,7 +757,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Motivo da pendência<br><small style="font-weight:400">(andamento)</small></th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Atualizado em<br><small style="font-weight:400">registro da equipe</small></th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Motivo da pendência<br><small style="font-weight:400">coluna F da planilha</small></th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Atualizado em<br><small style="font-weight:400">registro da equipe</small></th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
     </div>
 
     <div class="panel" id="panel-trat">
@@ -2062,7 +2062,12 @@ async function importFile(file){
     const tipoLabel = result.tipo==='coleta' ? 'Coleta Reversa' : 'Tratativas';
     const prefix = result.tipo==='coleta' ? 'coleta_' : 'trat_';
     const seen = new Set(result.rows.map(r=>r.id));
-    const abertos = Object.keys(DB_CASES).filter(id => id.startsWith(prefix) && !DB_CASES[id].concluido_auto && groupOf(DB_CASES[id].tipo_devolucao)!=='perdas' && !statusIgnorado(DB_CASES[id].status));
+    // a planilha de Controle de Situacoes e a base: caso que nao esta mais nela sai do painel (so dentro do mesmo universo: mesma CLASSE do Innovaro, ou o mesmo fluxo de SLA quando o caso e antigo e nao tem classe)
+    const prefixes = new Set(result.rows.map(r => r.id.split('_')[0] + '_')); prefixes.add(prefix);
+    const classes = new Set(result.rows.map(r => r.classe).filter(Boolean));
+    const fluxosArq = new Set(result.rows.map(r => slaFluxoDe({ classe:r.classe, sit:r.tipo_devolucao, __tipo:r.origem==='coleta'?'coleta':'tratativa' })));
+    const mesmoUniverso = c => c.classe ? classes.has(c.classe) : fluxosArq.has(slaFluxoDe({ classe:null, sit:c.tipo_devolucao, __tipo:c.origem==='coleta'?'coleta':'tratativa' }));
+    const abertos = Object.keys(DB_CASES).filter(id => { const c = DB_CASES[id]; return [...prefixes].some(p => id.startsWith(p)) && !c.concluido_auto && groupOf(c.tipo_devolucao)!=='perdas' && !statusIgnorado(c.status) && mesmoUniverso(c); });
     const toClose = abertos.filter(id => !seen.has(id));
     const novos = result.rows.filter(r => !DB_CASES[r.id] && !statusIgnorado(r.status)).length;
     const reabertos = result.rows.filter(r => DB_CASES[r.id] && DB_CASES[r.id].concluido_auto && !statusIgnorado(r.status)).length;
@@ -2571,7 +2576,7 @@ function renderInd(){
 
   // ---- KPIs ----
   const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
-  document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', 'Tarefas, taxa de atendimento, SLA médio e o que ainda está em aberto — atualiza a cada importação.',
+  document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', 'Base: planilha Controle de Situações' + (LAST_IMPORT && LAST_IMPORT.importedAt ? ' · última importação: ' + (LAST_IMPORT.filename||'') + ' em ' + new Date(LAST_IMPORT.importedAt).toLocaleDateString('pt-BR') + ' ' + new Date(LAST_IMPORT.importedAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) + ' (' + (LAST_IMPORT.rowCount||0) + ' linhas)' : '') + '. Para atualizar, importe o CSV novo com o botão ao lado.',
     [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'aparece conforme as finalizações forem registradas'], ['Em aberto hoje', A.aberto, `Marketplace ${base.filter(x=>!x.fin&&x.canal==='Marketplace').length} · Relacionamento ${base.filter(x=>!x.fin&&x.canal==='Relacionamento').length} · Logística ${base.filter(x=>!x.fin&&x.canal==='Logística').length}`]]);
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
