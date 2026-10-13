@@ -97,3 +97,7 @@ O texto do **Andamento** manda no prazo do caso: contendo 'no prazo' o caso sai 
 ## Andamento move o caso entre as abas
 
 O texto do Andamento define a aba do caso na Coleta Reversa: 'no prazo', 'em risco', 'atrasado', 'coleta realizada' (ou 'aguardando chegada no CD'), 'recebido no CD' e 'cancelada'. Tudo é recalculado na hora, em todo o painel, e marcado com ✎. Trocar ou apagar o texto devolve o caso para o cálculo normal. 'Todos' sempre lista todas as coletas da planilha. Coleta realizada também tem as colunas de andamento/previsão.
+
+## Protocolo Hello e andamento no SLA
+
+Coluna **Protocolo Hello** (nº de coleta, campo editável) nas abas da Coleta Reversa: só clientes Hello têm campo; os demais mostram '—'. A busca também encontra pelo protocolo. Na lista do **SLA de Apontamento** (inclui NF-e Emitida) há Andamento / situação editável com data de atualização e o Protocolo Hello.
