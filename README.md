@@ -89,3 +89,7 @@ Em Atrasados, Em risco e Todos há a coluna **Andamento**, ao lado de Situação
 ## Andamento, data de atualização e totais
 
 Coluna **Andamento** (texto livre com sugestões) + **Andamento atualizado em** (data em que a equipe atualizou; botão ✓ hoje confirma a revisão sem mudar o texto; verde = hoje, âmbar = até 2 dias, vermelho = mais antigo). Não é data do Innovaro. Vale para Atrasados, Em risco, Todos (Coleta Reversa) e para as abas Transportadora a pagar / Produto não retornou (agora separadas). 'Todos' lista todas as coletas da planilha (inclui no CD e canceladas) e o total aparece no topo.
+
+## Andamento define o prazo; previsão de coleta
+
+O texto do **Andamento** manda no prazo do caso: contendo 'no prazo' o caso sai de Atrasados/Em risco e vai para No prazo (marcado com ✎); 'em risco' e 'atrasado' fazem o contrário; negações ('fora do prazo') são ignoradas. Apagar ou trocar o texto devolve o prazo calculado pela data. A coluna **Previsão de coleta** guarda a data que a transportadora informou (campo previsao_coleta, manual) e mostra se já venceu.
