@@ -662,10 +662,11 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <select class="fsel" id="fat-uf" onchange="renderCol('at')"><option value="">Todas as UFs</option></select>
         <select class="fsel" id="fat-tr" onchange="renderCol('at')"><option value="">Todas as transportadoras</option></select>
         <input class="fsearch" id="fat-q" placeholder="Buscar nome ou NF..." oninput="renderCol('at')">
+        <select class="fsel" id="fat-and" onchange="renderCol('at')"><option value="">Todos os andamentos</option></select>
         <span class="fcnt" id="cnt-at"></span><button class="btn-exp" onclick="exportColetas('at')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th><th>Motivo da pendência</th></tr></thead>
         <tbody id="tb-at"></tbody></table>
       </div></div>
     </div>
@@ -676,10 +677,11 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <div class="filterbar">
         <select class="fsel" id="fri-uf" onchange="renderCol('ri')"><option value="">Todas as UFs</option></select>
         <input class="fsearch" id="fri-q" placeholder="Buscar..." oninput="renderCol('ri')">
+        <select class="fsel" id="fri-and" onchange="renderCol('ri')"><option value="">Todos os andamentos</option></select>
         <span class="fcnt" id="cnt-ri"></span><button class="btn-exp" onclick="exportColetas('ri')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>UF</th><th>Prazo usado</th><th>Atrasa em</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>UF</th><th>Prazo usado</th><th>Atrasa em</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th><th>Motivo da pendência</th></tr></thead>
         <tbody id="tb-ri"></tbody></table>
       </div></div>
     </div>
@@ -689,10 +691,11 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <div class="pworld" data-ph="em"></div>
       <div class="filterbar">
         <input class="fsearch" id="fem-q" placeholder="Buscar..." oninput="renderCol('em')">
+        <select class="fsel" id="fem-and" onchange="renderCol('em')"><option value="">Todos os andamentos</option></select>
         <span class="fcnt" id="cnt-em"></span><button class="btn-exp" onclick="exportColetas('em')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>UF</th><th>Prazo usado</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>UF</th><th>Prazo usado</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th><th>Motivo da pendência</th></tr></thead>
         <tbody id="tb-em"></tbody></table>
       </div></div>
     </div>
@@ -705,10 +708,11 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <select class="fsel" id="frea-uf" onchange="renderCol('rea')"><option value="">Todas as UFs</option></select>
         <select class="fsel" id="frea-tr" onchange="renderCol('rea')"><option value="">Todas as transportadoras</option></select>
         <input class="fsearch" id="frea-q" placeholder="Buscar nome ou NF..." oninput="renderCol('rea')">
+        <select class="fsel" id="frea-and" onchange="renderCol('rea')"><option value="">Todos os andamentos</option></select>
         <span class="fcnt" id="cnt-rea"></span><button class="btn-exp" onclick="exportColetas('rea')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>UF</th><th>Dias</th><th>Prazo</th><th>CD</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>UF</th><th>Dias</th><th>Prazo</th><th>CD</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th><th>Motivo da pendência</th></tr></thead>
         <tbody id="tb-rea"></tbody></table>
       </div></div>
     </div>
@@ -734,10 +738,11 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <select class="fsel" id="fall-uf" onchange="renderCol('all')"><option value="">Todas as UFs</option></select>
         <select class="fsel" id="fall-tr" onchange="renderCol('all')"><option value="">Todas as transportadoras</option></select>
         <input class="fsearch" id="fall-q" placeholder="Buscar..." oninput="renderCol('all')">
+        <select class="fsel" id="fall-and" onchange="renderCol('all')"><option value="">Todos os andamentos</option></select>
         <span class="fcnt" id="cnt-all"></span><button class="btn-exp" onclick="exportColetas('col')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th><th>Motivo da pendência</th></tr></thead>
         <tbody id="tb-all"></tbody></table>
       </div></div>
     </div>
@@ -757,11 +762,11 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Motivo da pendência</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Atualizado em<br><small style="font-weight:400">registro da equipe</small></th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
       <div class="ind-h" style="margin-top:22px">Logística — Recol P/ Acomp (cliente e transportadora)</div>
       <div class="ind-sub" id="ind-log-sub"></div>
       <div class="filters" style="margin:6px 0 8px"><span class="fcnt" id="cnt-ind-log"></span><button class="btn-exp" onclick="indLogExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Tipo de saída</th><th>Aberto em</th><th title="Dias desde a última movimentação no Innovaro (ou da programação)">Dias parado</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th></tr></thead><tbody id="tb-ind-log"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Tipo de saída</th><th>Aberto em</th><th title="Dias desde a última movimentação no Innovaro (ou da programação)">Dias parado</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th></tr></thead><tbody id="tb-ind-log"></tbody></table></div></div>
     </div>
 
     <div class="panel" id="panel-trat">
@@ -793,7 +798,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       </div></div></div>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>Grupo</th><th>Cliente</th><th>CPF</th><th>NF</th><th>Tipo</th><th>UF</th><th>Situação</th><th>Responsável</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>Grupo</th><th>Cliente</th><th>CPF</th><th>NF</th><th>Tipo</th><th>UF</th><th>Situação</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Descrição</th><th>Motivo da pendência</th></tr></thead>
         <tbody id="tb-trat"></tbody></table>
       </div></div>
     </div>
@@ -808,7 +813,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <div class="ind-h" id="sla-t-fluxo"></div><div class="ind-sub">Cada situação tem um prazo para o responsável apontar o próximo passo. Prazo 0 = visível, mas fora do SLA. <b>~</b> = atraso estimado pela data de programação/criação (o painel ainda não viu o caso mudar de situação; fica exato conforme as importações diárias). Clique numa situação para filtrar a lista.</div>
       <div class="tbl-wrap" style="margin-bottom:16px"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Prazo</th><th>Próximos passos</th><th>Casos</th><th>Em atraso</th><th>Vence hoje</th><th>Maior atraso</th></tr></thead><tbody id="tb-sla-sit"></tbody></table></div></div>
       <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px" id="sla-lista-t">Casos para cobrar</b><span class="fcnt" id="cnt-sla"></span><button class="btn-exp" onclick="slaExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Venceu em</th><th>Atraso</th><th>Responsável</th><th>Andamento / situação<br><small style="font-weight:400">escreva aqui</small></th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>Motivo (por que não atualizou)</th></tr></thead><tbody id="tb-sla"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Venceu em</th><th>Atraso</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>Motivo da pendência</th></tr></thead><tbody id="tb-sla"></tbody></table></div></div>
       <details class="ind-f" style="margin-top:16px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Classes do Innovaro → fluxo (ajuste só se algum caso ficar em "sem fluxo")</summary><div id="sla-classes" style="margin-top:10px"></div></details>
     </div>
 
@@ -837,6 +842,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <div class="card">
         <div class="card-title">Detalhe — atrasadas fora da região SP</div>
         <div class="card-sub">Coletas que dependem de parceiro regional · acionar a transportadora</div>
+        <input class="fsearch" id="fregiao-q" placeholder="Buscar cliente, NF ou cidade..." oninput="scheduleRender()" style="margin-top:8px">
         <div class="tbl-wrap" style="margin-top:10px"><div class="tbl-scroll">
           <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Cidade</th><th>Dias</th><th>Situação</th><th>Ação</th></tr></thead>
           <tbody id="tb-regiao"></tbody></table>
@@ -846,6 +852,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
     <!-- HISTÓRICO -->
     <div class="panel" id="panel-hist">
+      <div class="filterbar"><input class="fsearch" id="fhist-q" placeholder="Buscar cliente, NF ou transportadora..." oninput="scheduleRender()"></div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn-exp" onclick="exportColetas('hist')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV histórico</button></div><div class="dica"><strong>Histórico:</strong> Coletas já recebidas no CD ou canceladas — removidas do controle ativo e mantidas aqui para auditoria. Coletas realizadas que ainda não chegaram ao CD ficam na aba "Coleta realizada".</div>
       <div class="tbl-wrap"><div class="tbl-scroll">
         <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Origem</th><th>Motivo</th><th>Descrição</th></tr></thead>
@@ -1069,6 +1076,14 @@ function rebuildData(){
     else if (id.startsWith('trat_')) tratMap[id] = { ...(tratMap[id]||{}), ...data };
   });
 
+  { // o mesmo caso pode existir como coleta e como tratativa: o dado mais recente vale para os dois
+    const porChave = new Map();
+    [coletaMap, tratMap].forEach(mp => Object.values(mp).forEach(d => { if (d && d.chave){ if (!porChave.has(d.chave)) porChave.set(d.chave, []); porChave.get(d.chave).push(d); } }));
+    porChave.forEach(arr => { if (arr.length < 2) return;
+      const ult = arr.filter(d => d.andamento_em).sort((p,q) => String(q.andamento_em).localeCompare(String(p.andamento_em)))[0];
+      if (ult) arr.forEach(d => { if (d !== ult){ d.andamento = ult.andamento; d.andamento_em = ult.andamento_em; d.andamento_por = ult.andamento_por; d.andamento_origem = ult.andamento_origem; d.andamento_hist = ult.andamento_hist; } });
+      ['previsao_coleta','protocolo_hello','motivo_pend'].forEach(k => { const v = arr.map(d => d[k]).find(Boolean); if (v) arr.forEach(d => { if (!d[k]) d[k] = v; }); }); });
+  }
   OCULTOS = [];
   const visivel = x => { if (statusIgnorado(x.status)){ OCULTOS.push(x); return false; } return true; };
   const allColetas = Object.values(coletaMap).map(deriveColetaLive);   // coleta nao e escondida por status: todas as linhas da planilha entram
@@ -1223,13 +1238,18 @@ function initFiltros(){
 }
 
 function renderCol(tipo){
-  if (document.activeElement && document.activeElement.matches && document.activeElement.matches('.and-in,.prev-in,.prot-in')) return;   // nao apaga o que esta sendo digitado
+  if (document.activeElement && document.activeElement.matches && document.activeElement.matches('.and-in,.prev-in,.prot-in,.mot-sel')) return;   // nao apaga o que esta sendo digitado
   let rows=[], data=[];
   if(tipo==='at')       data=[...AT];
   else if(tipo==='ri')  data=[...RI];
   else if(tipo==='em')  data=[...EM];
   else if(tipo==='rea') data=[...REA];
   else                  data=[...COLETAS_ARQ];   // 'Todos' = tudo que veio na planilha
+  { const sel = document.getElementById(`f${tipo}-and`);   // filtro por andamento (as opcoes vem do que a equipe escreveu)
+    if (sel){ const vals = [...new Set(data.map(c => String(c.andamento||'').trim()).filter(Boolean))].sort(), cur = sel.value;
+      sel.innerHTML = '<option value="">Todos os andamentos</option><option value="__sem">Sem andamento</option>' + vals.map(v => `<option>${esc(v)}</option>`).join('');
+      sel.value = (vals.includes(cur) || cur==='__sem') ? cur : '';
+      if (sel.value==='__sem') data = data.filter(c => !String(c.andamento||'').trim()); else if (sel.value) data = data.filter(c => String(c.andamento||'').trim()===sel.value); } }
 
   if(tipo==='at'||tipo==='all'){
     const uf=document.getElementById(`f${tipo}-uf`)?.value;
@@ -1277,6 +1297,7 @@ function renderCol(tipo){
       <td><span class="bdg b-amb" title="Coleta feita, ainda sem romaneio de entrada no CD">Aguardando CD</span></td>
       ${andCell(c)}${prevCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
+      ${motivoCell(c)}
     </tr>`);
     document.getElementById('tb-rea').innerHTML=rows.join('');
   } else if(tipo==='at'){
@@ -1291,6 +1312,7 @@ function renderCol(tipo){
       <td>${colBdg(c)}</td>
       ${andCell(c)}${prevCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
+      ${motivoCell(c)}
     </tr>`);
     document.getElementById('tb-at').innerHTML=rows.join('');
   } else if(tipo==='ri'){
@@ -1305,6 +1327,7 @@ function renderCol(tipo){
       <td>${colBdg(c)}</td>
       ${andCell(c)}${prevCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
+      ${motivoCell(c)}
     </tr>`);
     document.getElementById('tb-ri').innerHTML=rows.join('');
   } else if(tipo==='em'){
@@ -1318,6 +1341,7 @@ function renderCol(tipo){
       <td>${colBdg(c)}</td>
       ${andCell(c)}${prevCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
+      ${motivoCell(c)}
     </tr>`);
     document.getElementById('tb-em').innerHTML=rows.join('');
   } else {
@@ -1332,6 +1356,7 @@ function renderCol(tipo){
       <td>${colBdg(c)}</td>
       ${andCell(c)}${prevCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
+      ${motivoCell(c)}
     </tr>`);
     document.getElementById('tb-all').innerHTML=rows.join('');
   }
@@ -1386,7 +1411,9 @@ function renderTrat(){
     <td><span class="bdg b-acc">${esc(t.uf||'—')}</span></td>
     <td style="font-size:11px;color:var(--tx2)">${esc(t.status||'—')}</td>
     <td style="font-size:11px;color:var(--tx3)">${esc(t.usuario||'—')}</td>
+    ${andCell(t,'and-list-ctl')}
     <td class="td-desc" title="${esc(t.descricao)}">${esc(t.descricao)}</td>
+    ${motivoCell(t)}
   </tr>`).join('');
   document.getElementById('tb-trat').innerHTML=rows;
 }
@@ -1538,7 +1565,8 @@ function renderDash(){
 
   const tbReg=document.getElementById('tb-regiao');
   if(tbReg){
-    tbReg.innerHTML=AT.map(c=>{
+    const qr = norm(document.getElementById('fregiao-q')?.value||'').trim();
+    tbReg.innerHTML=AT.filter(c => !qr || norm((c.cliente||'')+' '+(c.nf||'')+' '+(c.cidade||'')+' '+(c.transportadora||'')).includes(qr)).map(c=>{
       const fora=c.uf&&c.uf.toUpperCase()!=='SP';
       return `<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
         <td class="td-nf">${esc(c.nf||'—')}</td>
@@ -1559,7 +1587,9 @@ function renderDash(){
       ...HIST.map(c=>({...c,__tipo:'coleta'})),
       ...TRAT_HIST.map(t=>({...t,__tipo:'tratativa',motivoHist:'Saiu do arquivo (concluído automaticamente)'})),
     ].sort((a,b)=>String(b.concluidoEm||'').localeCompare(String(a.concluidoEm||'')));
-    tbHist.innerHTML = histAll.length ? histAll.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail(c)})">
+    const qh = norm(document.getElementById('fhist-q')?.value||'').trim();
+    const histF = histAll.filter(c => !qh || norm((c.cliente||'')+' '+(c.nf||'')+' '+(c.transportadora||'')+' '+(c.cpf||'')).includes(qh));
+    tbHist.innerHTML = histF.length ? histF.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail(c)})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente||'—')}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -1790,6 +1820,47 @@ function andCell(c, lista){
   return `<td onclick="event.stopPropagation()">${c.id ? `<input class="and-in" list="${lista||'and-list'}" data-id="${esc(c.id)}" value="${esc(c.andamento||'')}" placeholder="Informar andamento…" onchange="andSet(this.dataset.id,this.value)" style="min-width:170px;padding:4px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}</td>
     <td onclick="event.stopPropagation()" style="white-space:nowrap" title="Data em que a equipe atualizou o andamento (não é data do Innovaro)"><b style="color:${cor}">${dt ? dt.txt : '—'}</b><br><small style="color:var(--tx3)">${rel}${c.andamento_por ? ' · por '+esc(nomeDe(c.andamento_por)) : ''}</small>${c.id && c.andamento ? ` <button type="button" class="and-hoje" title="Confirmar que revisei hoje (mantém o texto, só atualiza a data)" onclick="andHoje('${esc(c.id)}')">✓ hoje</button>` : ''}</td>`;
 }
+// ---- gravacao unica: o que a equipe escreve vale para o caso em TODAS as abas e para as copias dele (mesma chave) ----
+function irmaosDe(id){ const ch = (DB_CASES[id]||{}).chave; return ch ? Object.keys(DB_CASES).filter(k => DB_CASES[k].chave===ch) : [id]; }
+function gravaCaso(id, campos){
+  if (!DB){ toast('Entre com sua conta para gravar.', {type:'warn'}); return false; }
+  [...new Set([id, ...irmaosDe(id)])].forEach(k => {
+    DB.doc('cases/'+k).set(campos, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
+    DB_CASES[k] = { ...(DB_CASES[k]||{}), ...campos };
+  });
+  return true;
+}
+// ---- motivo da pendencia: preenchido sozinho (por andamento e situacao), editavel; igual em todas as abas ----
+const MOTIVOS_PEND = ['No prazo','Relacionamento','Transporte','Cliente','Fiscal','Logística','Esquecimento de apontamento','Problema no Innovaro','Outro'];
+const MOT_LEGADO = { 'Aguardando cliente':'Cliente', 'Aguardando transportadora':'Transporte', 'Aguardando logística':'Logística', 'Aguardando fiscal / financeiro':'Fiscal', 'Esquecimento / falta de apontamento':'Esquecimento de apontamento', 'Problema no Innovaro':'Problema no Innovaro', 'Outro':'Outro' };
+function motivoAuto(x){
+  const an = norm(x.andamento||''), sit = sitKey(x.sit || x.tipo_devolucao || '');
+  if (an){
+    if (!/\b(nao|fora)\b.*\bprazo\b/.test(an) && /\bno prazo\b/.test(an)) return 'No prazo';
+    if (/esquec/.test(an)) return 'Esquecimento de apontamento';
+    if (/innovaro|sistema/.test(an)) return 'Problema no Innovaro';
+    if (/relacionamento|laureano/.test(an)) return 'Relacionamento';
+    if (/fiscal|nf-?e|financeiro/.test(an)) return 'Fiscal';
+    if (/cliente/.test(an)) return 'Cliente';
+    if (/logistic|dayane/.test(an)) return 'Logística';
+    if (/transport|movvi|total|generoso|fedex|hello|i9|translovato|cobrad|retorno|coleta (agendada|realizada)|aguardando cd/.test(an)) return 'Transporte';
+  }
+  if (LOG_SITS.has(sit)) return 'Logística';
+  return RESP_SIT[sit] || 'Relacionamento';   // Protocolo de Coleta = Transporte, NF-e Emitida = Fiscal, demais = Relacionamento
+}
+const motivoManual = x => MOTIVOS_PEND.includes(x.motivo_pend) ? x.motivo_pend : (MOT_LEGADO[x.motivo_apont] || '');
+const motivoEf = x => motivoManual(x) || motivoAuto(x);
+function motivoCell(x){
+  if (!x.id) return '<td style="color:var(--tx3)">—</td>';
+  const man = motivoManual(x);
+  return `<td onclick="event.stopPropagation()"><select class="mot-sel" data-id="${esc(x.id)}" onchange="motivoSet(this.dataset.id,this.value)" title="Preenchido automaticamente; escolha outro para fixar" style="padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px;max-width:170px"><option value=""${man?'':' selected'}>Automático: ${esc(motivoAuto(x))}</option>${MOTIVOS_PEND.map(m=>`<option${m===man?' selected':''}>${m}</option>`).join('')}</select></td>`;
+}
+function motivoSet(id, v){
+  if (!gravaCaso(id, { motivo_pend:v||null, motivo_pend_em:isoNow(), motivo_pend_por:CUR_EMAIL||null })) return;
+  toast(v ? 'Motivo da pendência salvo.' : 'Motivo voltou para o automático.', {type:'ok', ms:1800});
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  scheduleRender();
+}
 // numero de protocolo / coleta: existe so para clientes Hello
 const ehHello = c => /hello|i9/i.test((c.transportadoraOriginal||'')+' '+(c.transportadora||''));
 function protCell(c){
@@ -1797,10 +1868,8 @@ function protCell(c){
   return `<td onclick="event.stopPropagation()"><input class="prot-in" data-id="${esc(c.id)}" value="${esc(c.protocolo_hello||'')}" placeholder="Nº protocolo Hello" title="Número de protocolo / coleta da Hello" onchange="protSet(this.dataset.id,this.value)" style="width:130px;padding:4px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px"></td>`;
 }
 function protSet(id, v){
-  if (!DB){ toast('Entre com sua conta para gravar o protocolo.', {type:'warn'}); return; }
-  const txt = String(v||'').trim(), agora = isoNow();
-  DB.doc('cases/'+id).set({ protocolo_hello:txt||null, protocolo_hello_em:agora }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
-  DB_CASES[id] = { ...(DB_CASES[id]||{}), protocolo_hello:txt||null };
+  const txt = String(v||'').trim();
+  if (!gravaCaso(id, { protocolo_hello:txt||null, protocolo_hello_em:isoNow() })) return;
   toast(txt ? 'Protocolo Hello salvo.' : 'Protocolo removido.', {type:'ok', ms:1800});
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   scheduleRender();
@@ -1815,29 +1884,20 @@ function prevCell(c){
   return `<td onclick="event.stopPropagation()" style="white-space:nowrap" title="Data que a transportadora informou para realizar a coleta">${c.id ? `<input type="date" class="prev-in" data-id="${esc(c.id)}" value="${esc(v)}" onchange="prevSet(this.dataset.id,this.value)" style="padding:3px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}<br><small style="color:${cor}">${rel}</small></td>`;
 }
 function prevSet(id, v){
-  if (!DB){ toast('Entre com sua conta para gravar a previsão.', {type:'warn'}); return; }
-  const agora = isoNow();
-  DB.doc('cases/'+id).set({ previsao_coleta:v||null, previsao_coleta_em:agora }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
-  DB_CASES[id] = { ...(DB_CASES[id]||{}), previsao_coleta:v||null, previsao_coleta_em:agora };
+  if (!gravaCaso(id, { previsao_coleta:v||null, previsao_coleta_em:isoNow() })) return;
   toast(v ? 'Previsão de coleta salva.' : 'Previsão removida.', {type:'ok', ms:1800});
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   scheduleRender();
 }
 function andSet(id, v){
-  if (!DB){ toast('Entre com sua conta para gravar o andamento.', {type:'warn'}); return; }
-  const txt = String(v||'').trim(), agora = isoNow();
-  DB.doc('cases/'+id).set({ andamento:txt||null, andamento_em:agora, andamento_origem:'painel', andamento_por:CUR_EMAIL||null, andamento_hist:[...((DB_CASES[id]||{}).andamento_hist||[]), { t:txt, em:agora, por:CUR_EMAIL||null, o:'painel' }].slice(-10) }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
-  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento:txt||null, andamento_em:agora, andamento_origem:'painel', andamento_por:CUR_EMAIL||null, andamento_hist:[...((DB_CASES[id]||{}).andamento_hist||[]), { t:txt, em:agora, por:CUR_EMAIL||null, o:'painel' }].slice(-10) };
-  garanteNome();
+  const txt = String(v||'').trim(), agora = isoNow(), cs = DB_CASES[id] || {};
+  if (!gravaCaso(id, { andamento:txt||null, andamento_em:agora, andamento_origem:'painel', andamento_por:CUR_EMAIL||null, andamento_hist:[...(cs.andamento_hist||[]), { t:txt, em:agora, por:CUR_EMAIL||null, o:'painel' }].slice(-10) })) return;
   toast(txt ? 'Andamento salvo com a data de hoje.' : 'Andamento removido.', {type:'ok', ms:1800});
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-  scheduleRender();
+  garanteNome(); scheduleRender();
 }
 function andHoje(id){
-  if (!DB){ toast('Entre com sua conta para gravar.', {type:'warn'}); return; }
-  const agora = isoNow();
-  DB.doc('cases/'+id).set({ andamento_em:agora, andamento_por:CUR_EMAIL||null }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
-  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento_em:agora, andamento_por:CUR_EMAIL||null };
+  if (!gravaCaso(id, { andamento_em:isoNow(), andamento_por:CUR_EMAIL||null })) return;
   toast('Marcado como revisado hoje.', {type:'ok', ms:1800}); scheduleRender();
 }
 function exportColetas(tipo) {
@@ -2485,9 +2545,9 @@ const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente','Fiscal'
 const MOT_CANON = new Map();   // mesma frase com maiusculas/espacos diferentes conta como um motivo so
 const MOT_PAL = ['#06B6D4','#7C3AED','#F59E0B','#F43F5E','#10B981','#3B82F6','#EC4899','#84CC16','#F97316','#8B5CF6'];
 const escA = t => esc(t).replace(/"/g,'&quot;');
-const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'Fiscal':'#10B981', 'A classificar':'#64748B', 'Sem informação':'#64748B' };
+const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'Fiscal':'#10B981', 'A classificar':'#64748B', 'Sem informação':'#64748B', 'Logística':'#EAB308', 'Esquecimento de apontamento':'#EF4444', 'Problema no Innovaro':'#94A3B8', 'Outro':'#64748B' };
 const motCor = m => IND_COR[m] || MOT_PAL[[...String(m)].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0, 7) % MOT_PAL.length];
-const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', sit:'', usuario:'' };
+const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', sit:'', usuario:'', and:'' };
 const IND_INICIO = new Date(2026, 6, 1);   // pendencias criadas antes de 01/07/2026 contam como finalizadas; dai em diante a equipe vai sanando
 const IND_CORTE = 7;   // a partir de julho o detalhe mes a mes; antes disso os meses entram como um bloco ja finalizado
 const indAntigos = () => Array.from({length:IND_CORTE-1},(_,i)=>i+1);
@@ -2533,8 +2593,9 @@ function indCalcula(){
     // motivo da pendencia = o texto da coluna F da planilha (andamento), exatamente como veio; sem texto = "Sem informação"
     const txtMot = String(x.andamento||'').replace(/\s+/g,' ').trim(), kMot = norm(txtMot);
     if (kMot && !MOT_CANON.has(kMot)) MOT_CANON.set(kMot, txtMot);
-    const motivo = fin ? null : (kMot ? MOT_CANON.get(kMot) : 'Sem informação');
-    return { ...x, fin, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indCarr(x), canal:canalCaso(x), logistica:ehLogSit(x) };
+    const andRaw = kMot ? MOT_CANON.get(kMot) : 'Sem informação';
+    const motivo = fin ? null : motivoEf(x);
+    return { ...x, fin, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, andRaw, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indCarr(x), canal:canalCaso(x), logistica:ehLogSit(x) };
   });
   IND_FORA = IND_ALL.filter(x => SEM_ANALISE.has(x.carr)).length;
   IND_ALL = IND_ALL.filter(x => !SEM_ANALISE.has(x.carr));
@@ -2554,8 +2615,9 @@ function indSet(k,v){
   else if (k==='canal') IND.canal = (IND.canal===v ? '' : v);
   else if (k==='sit') IND.sit = (IND.sit===v ? '' : v);
   else if (k==='usuario') IND.usuario = v;
+  else if (k==='and') IND.and = (IND.and===v ? '' : v);
   else if (k==='q') IND.q = norm(v).trim();
-  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; IND.canal=''; IND.sit=''; IND.usuario=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
+  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; IND.canal=''; IND.sit=''; IND.usuario=''; IND.and=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
   renderInd();
 }
 function indSetMotivo(id, v){
@@ -2577,6 +2639,7 @@ function renderInd(){
       (ign.includes('status') || !IND.status || (IND.status==='fin') === x.fin) &&
       (ign.includes('motivo') || !IND.motivos.size || (!x.fin && IND.motivos.has(x.motivo))) &&
       (ign.includes('canal') || !IND.canal || x.canal===IND.canal) &&
+      (ign.includes('and') || !IND.and || x.andRaw===IND.and) &&
       (ign.includes('sit') || !IND.sit || sitKey(x.sit)===IND.sit) &&
       (ign.includes('resp') || !IND.usuario || (x.usuario||'—')===IND.usuario) &&
       (!IND.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(IND.q)); };
@@ -2595,10 +2658,12 @@ function renderInd(){
   const nFin = doAno.filter(x=>x.fin && f(x,['status','motivo'])).length, nAb = doAno.filter(x=>!x.fin && f(x,['status','motivo'])).length;
   const motCont = m => doAno.filter(x=>!x.fin && x.motivo===m && f(x,['status','motivo'])).length;
   const motList = [...doAno.filter(x=>!x.fin).reduce((mp,x)=>mp.set(x.motivo,(mp.get(x.motivo)||0)+1), new Map()).entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  const andList = [...doAno.filter(x=>!x.fin).reduce((mp,x)=>mp.set(x.andRaw,(mp.get(x.andRaw)||0)+1), new Map()).entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  const andChips = andList.map(m => chip(IND.and===m, `indSet('and',this.dataset.m)" data-m="${escA(m)}`, esc(m), doAno.filter(x=>!x.fin && x.andRaw===m && f(x,['status','motivo','and'])).length)).join('');
   const sitList = [...new Set(doAno.map(x=>x.sit))].map(n => ({ n, k:sitKey(n), c:cnt(doAno.filter(x=>sitKey(x.sit)===sitKey(n)),['sit']) })).sort((a,b)=>b.c[1]-a.c[1] || b.c[0]-a.c[0]);
   const sitChips = sitList.map(o => chip(IND.sit===o.k, `indSet('sit',this.dataset.k)" data-k="${o.k}`, esc(o.n), o.c[0], o.c[1])).join('');
   const usrs = [...new Set(doAno.filter(x=>!x.fin).map(x=>x.usuario||'—'))].sort(), usrSel = `<select class="fsel" onchange="indSet('usuario',this.value)"><option value="">Todos</option>${usrs.map(u=>`<option${IND.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select>`;
-  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q || IND.canal || IND.sit || IND.usuario;
+  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q || IND.canal || IND.sit || IND.usuario || IND.and;
   document.getElementById('ind-fbody').innerHTML =
     `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${antChip}${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join('')}</div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join('')}</div></div>
@@ -2606,7 +2671,7 @@ function renderInd(){
      <div class="ind-fr"><b>Situação do caso</b><div>${sitChips}</div></div>
      <div class="ind-fr"><b>Responsável</b><div>${usrSel}</div></div>
      <div class="ind-fr"><b>Estado</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
-     ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Motivo da pendência</b><div>${motList.map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${escA(m)}`, esc(m), motCont(m))).join('')}</div></div>`}`;
+     ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Andamento</b><div>${andChips}</div></div><div class="ind-fr"><b>Motivo da pendência</b><div>${motList.map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${escA(m)}`, esc(m), motCont(m))).join('')}</div></div>`}`;
   document.getElementById('ind-fres').innerHTML = `${IND.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${IND.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio aparece conforme as finalizações forem registradas nas próximas importações</i>');
   document.getElementById('ind-limpar').style.visibility = temFiltro ? 'visible' : 'hidden';
   if (IND_FORA) document.getElementById('ind-fres').innerHTML += ` · <span title="Acerto de estoque, sem saída ou transportadora sem de/para">${IND_FORA} casos fora da análise (sem transportadora)</span>`;
@@ -2674,8 +2739,8 @@ function renderInd(){
   document.getElementById('cnt-ind').textContent = lista.length + (verFin ? ' atendidas' : IND.status==='' ? ' tarefas' : ' em aberto');
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind');
   if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
-    ${x.fin ? '<td><span class="bdg b-grn">Atendida</span></td><td></td>' : andCell(x, 'and-list-ctl')}</tr>`).join('')
-    + (lista.length>300 ? `<tr><td colspan="11" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
+    ${x.fin ? '<td><span class="bdg b-grn">Atendida</span></td><td></td><td></td>' : andCell(x, 'and-list-ctl') + motivoCell(x)}</tr>`).join('')
+    + (lista.length>300 ? `<tr><td colspan="12" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
   renderIndLog(doAnoAll, f);
 }
 let IND_LOG_LISTA = [];
@@ -2689,13 +2754,13 @@ function renderIndLog(doAnoAll, f){
   document.getElementById('cnt-ind-log').textContent = aberto.length + ' em aberto';
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind-log');
   if (!ativo) document.getElementById('tb-ind-log').innerHTML = aberto.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>
-    <td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td><td>${x.parado==null?'—':x.parado+' d'}</td><td style="font-size:11px">${esc(LOG_RESP)} ${canalBdg('Logística')}</td>${andCell(x,'and-list-log')}</tr>`).join('')
-    + (aberto.length>300 ? `<tr><td colspan="9" style="color:var(--tx3);padding:10px">Mostrando 300 de ${aberto.length}.</td></tr>` : '')
-    || '<tr><td colspan="9" style="color:var(--tx3);padding:14px">Nenhum caso de Recol P/ Acomp em aberto. Eles entram aqui sozinhos quando a planilha traz essas situações.</td></tr>';
+    <td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td><td>${x.parado==null?'—':x.parado+' d'}</td><td style="font-size:11px">${esc(LOG_RESP)} ${canalBdg('Logística')}</td>${andCell(x,'and-list-log')}${motivoCell(x)}</tr>`).join('')
+    + (aberto.length>300 ? `<tr><td colspan="10" style="color:var(--tx3);padding:10px">Mostrando 300 de ${aberto.length}.</td></tr>` : '')
+    || '<tr><td colspan="10" style="color:var(--tx3);padding:14px">Nenhum caso de Recol P/ Acomp em aberto. Eles entram aqui sozinhos quando a planilha traz essas situações.</td></tr>';
 }
 function indLogExport(){
   if (!IND_LOG_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(IND_LOG_LISTA.map(x => ({ 'Situação':x.sit, 'Cliente':x.cliente||'', 'CPF':x.cpf||'', 'NF':x.nf||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Aberto em':x.data_solicitacao||'', 'Dias parado':x.parado==null?'':x.parado, 'Responsável':LOG_RESP, 'Andamento':x.andamento||'', 'Andamento atualizado em':andData(x)?andData(x).txt:'', 'Atualizado por':x.andamento_por||'' })), 'logistica_recol_acomp');
+  exportCSV(IND_LOG_LISTA.map(x => ({ 'Situação':x.sit, 'Cliente':x.cliente||'', 'CPF':x.cpf||'', 'NF':x.nf||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Aberto em':x.data_solicitacao||'', 'Dias parado':x.parado==null?'':x.parado, 'Responsável':LOG_RESP, 'Andamento':x.andamento||'', 'Andamento atualizado em':andData(x)?andData(x).txt:'', 'Atualizado por':nomeDe(x.andamento_por)||'', 'Motivo da pendência':motivoEf(x) })), 'logistica_recol_acomp');
 }
 async function indUsuarios(){
   const cont = new Map(); IND_ALL.concat(PERDAS).forEach(x => { const u = String(x.usuario||'').trim(); if (u) cont.set(u, (cont.get(u)||0)+1); });
@@ -2907,13 +2972,13 @@ function renderSla(){
   const usuarios = [...new Set(doFluxo.filter(x=>x.estado==='ATRASO'||x.estado==='HOJE').map(x=>x.usuario||'—'))].sort();
   const f = (x, ign) => { ign = ign||[]; return x.fluxo===SLA_ST.fluxo && (ign.includes('sit') || !SLA_ST.sit || sitKey(x.sit)===SLA_ST.sit) &&
     (ign.includes('estado') || SLA_ST.estado==='todos' || (SLA_ST.estado==='atraso' && x.estado==='ATRASO') || (SLA_ST.estado==='hoje' && x.estado==='HOJE') || (SLA_ST.estado==='prazo' && x.estado==='PRAZO')) &&
-    (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario) && (ign.includes('motivo') || !SLA_ST.motivo || (SLA_ST.motivo==='__sem' ? !x.motivo_apont : x.motivo_apont===SLA_ST.motivo)) && (!SLA_ST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(SLA_ST.q)); };
+    (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario) && (ign.includes('motivo') || !SLA_ST.motivo || motivoEf(x)===SLA_ST.motivo) && (!SLA_ST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(SLA_ST.q)); };
   const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
   const nEst = e => SLA_ITENS.filter(x => x.fluxo===SLA_ST.fluxo && (e==='todos' || x.estado===e) && (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario)).length;
   document.getElementById('sla-fbody').innerHTML =
     `<div class="ind-fr"><b>Tópico</b><div>${SLA_FLUXOS.map(([k,n]) => chip(SLA_ST.fluxo===k, `slaSet('fluxo','${k}')`, n, SLA_ITENS.filter(x=>x.fluxo===k && x.estado==='ATRASO').length+' em atraso')).join('')}</div></div>
      <div class="ind-fr"><b>Estado</b><div>${chip(SLA_ST.estado==='atraso', "slaSet('estado','atraso')", 'Em atraso', nEst('ATRASO'))}${chip(SLA_ST.estado==='hoje', "slaSet('estado','hoje')", 'Vence hoje', nEst('HOJE'))}${chip(SLA_ST.estado==='prazo', "slaSet('estado','prazo')", 'No prazo', nEst('PRAZO'))}${chip(SLA_ST.estado==='todos', "slaSet('estado','todos')", 'Todos', nEst('todos'))}</div></div>
-     <div class="ind-fr"><b>Motivo</b><div>${chip(!SLA_ST.motivo, "slaSet('motivo','')", 'Todos', SLA_ITENS.filter(x=>f(x,['motivo'])).length)}${chip(SLA_ST.motivo==='__sem', "slaSet('motivo','__sem')", 'Sem motivo', SLA_ITENS.filter(x=>f(x,['motivo']) && !x.motivo_apont).length)}${SLA_MOTIVOS.map(m => chip(SLA_ST.motivo===m, `slaSet('motivo',this.dataset.m)" data-m="${m}`, m, SLA_ITENS.filter(x=>f(x,['motivo']) && x.motivo_apont===m).length)).join('')}</div></div>
+     <div class="ind-fr"><b>Motivo da pendência</b><div>${chip(!SLA_ST.motivo, "slaSet('motivo','')", 'Todos', SLA_ITENS.filter(x=>f(x,['motivo'])).length)}${MOTIVOS_PEND.map(m => chip(SLA_ST.motivo===m, `slaSet('motivo',this.dataset.m)" data-m="${m}`, m, SLA_ITENS.filter(x=>f(x,['motivo']) && motivoEf(x)===m).length)).join('')}</div></div>
      <div class="ind-fr"><b>Responsável</b><div><select class="fsel" onchange="slaSet('usuario',this.value)"><option value="">Todos</option>${usuarios.map(u=>`<option${SLA_ST.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select></div></div>`;
   document.getElementById('sla-limpar').style.visibility = (SLA_ST.estado!=='atraso' || SLA_ST.sit || SLA_ST.usuario || SLA_ST.motivo || SLA_ST.q) ? 'visible' : 'hidden';
 
@@ -2939,7 +3004,7 @@ function renderSla(){
     <td>${x.venceu?fmtD2(x.venceu):'—'}</td><td>${x.atraso?`<b style="color:var(--red)">${x.estimado?'~':''}+${x.atraso} ${x.regra.util?'d.u.':'d'}</b>`:(x.estado==='HOJE'?'<span class="bdg b-amb">vence hoje</span>':'—')}</td>
     <td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
     ${andCell(x, 'and-list-sla')}${protCell(x)}
-    <td onclick="event.stopPropagation()">${x.id ? `<select data-id="${esc(x.id)}" onchange="slaSetMotivo(this.dataset.id,this.value)" style="padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px"><option value="">${x.estado==='ATRASO'||x.estado==='HOJE'?'Informar motivo…':'—'}</option>${SLA_MOTIVOS.map(m=>`<option${m===x.motivo_apont?' selected':''}>${m}</option>`).join('')}</select>` : '—'}</td></tr>`).join('')
+    ${motivoCell(x)}</tr>`).join('')
     + (lista.length>300 ? `<tr><td colspan="12" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '')
     || '<tr><td colspan="12" style="color:var(--tx3);padding:14px">Nenhum caso neste filtro.</td></tr>';
 
@@ -2951,7 +3016,7 @@ function renderSla(){
 const fmtD2 = d => String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
 function slaExport(){
   if (!SLA_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(SLA_LISTA.map(x => ({ 'Tópico':(SLA_FLUXOS.find(a=>a[0]===x.fluxo)||[])[1]||'', 'Situação':x.sit, 'Cliente':x.cliente||'', 'NF':x.nf||'', 'Prazo':x.regra?slaPrazoTxt(x.regra):'', 'Venceu em':x.venceu?fmtD2(x.venceu):'', 'Atraso':x.atraso||'', 'Estado':x.estado, 'Classe':x.classe||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Responsável':x.usuario||'', 'Canal':x.canal, 'Andamento':x.andamento||'', 'Andamento atualizado em':andData(x)?andData(x).txt:'', 'Protocolo Hello':x.protocolo_hello||'', 'Motivo':x.motivo_apont||'', 'Deveria ir para':x.regra?x.regra.prox.join(' / '):'' })), 'sla_apontamento');
+  exportCSV(SLA_LISTA.map(x => ({ 'Tópico':(SLA_FLUXOS.find(a=>a[0]===x.fluxo)||[])[1]||'', 'Situação':x.sit, 'Cliente':x.cliente||'', 'NF':x.nf||'', 'Prazo':x.regra?slaPrazoTxt(x.regra):'', 'Venceu em':x.venceu?fmtD2(x.venceu):'', 'Atraso':x.atraso||'', 'Estado':x.estado, 'Classe':x.classe||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Responsável':x.usuario||'', 'Canal':x.canal, 'Andamento':x.andamento||'', 'Andamento atualizado em':andData(x)?andData(x).txt:'', 'Protocolo Hello':x.protocolo_hello||'', 'Motivo da pendência':motivoEf(x), 'Deveria ir para':x.regra?x.regra.prox.join(' / '):'' })), 'sla_apontamento');
 }
 
 // ================= A PAGAR E NAO RETORNOU (aba propria, sem indice de atraso) =================
@@ -2981,7 +3046,7 @@ function nrSkeleton(sc){
     <div class="ind-f"><div class="ind-f-top"><input id="nr-q-${sc}" placeholder="Buscar cliente, NF ou CPF..." oninput="nrSet('${sc}','q',this.value)"><button class="btn-exp" type="button" id="nr-limpar-${sc}" onclick="nrSet('${sc}','limpar')">Limpar filtros</button></div><div id="nr-fbody-${sc}"></div></div>
     <div class="pworld"><div class="pw-grid even"><div class="pw-card"><h3>Casos por transportadora</h3><div class="s">Clique numa barra para filtrar</div><div class="pw-chart"><canvas id="nr-ch-car-${sc}"></canvas></div></div><div class="pw-card"><h3>Casos por mês de abertura</h3><div class="s">Quando o caso foi aberto</div><div class="pw-chart"><canvas id="nr-ch-mes-${sc}"></canvas></div></div></div></div>
     <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos</b><span class="fcnt" id="cnt-nr-${sc}"></span><button class="btn-exp" onclick="nrExport('${sc}')">Exportar CSV</button></div>
-    <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Aberto em</th><th>Dias parado</th><th>Valor</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th></tr></thead><tbody id="tb-nr-${sc}"></tbody></table></div></div>`;
+    <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Aberto em</th><th>Dias parado</th><th>Valor</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th></tr></thead><tbody id="tb-nr-${sc}"></tbody></table></div></div>`;
 }
 function renderNR(){ ['ap','nr'].forEach(renderNRp); }
 function renderNRp(sc){
@@ -3020,8 +3085,8 @@ function renderNRp(sc){
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-nr-'+sc);
   if (!ativo) document.getElementById('tb-nr-'+sc).innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>
     <td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td>${x.valor_est?brl(x.valor_est):'—'}</td>
-    <td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>${andCell(x, pg.lista)}</tr>`).join('') + (lista.length>300 ? `<tr><td colspan="11" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '')
-    || '<tr><td colspan="11" style="color:var(--tx3);padding:14px">Nenhum caso. Importe o arquivo de Tratativas Transportadora.</td></tr>';
+    <td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>${andCell(x, pg.lista)}${motivoCell(x)}</tr>`).join('') + (lista.length>300 ? `<tr><td colspan="12" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '')
+    || '<tr><td colspan="12" style="color:var(--tx3);padding:14px">Nenhum caso. Importe o arquivo de Tratativas Transportadora.</td></tr>';
 }
 function nrExport(sc){
   const l = NR_LISTA[sc]; if (!l || !l.length){ toast('Nada para exportar.', {type:'warn'}); return; }

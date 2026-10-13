@@ -119,3 +119,7 @@ Regra automática por situação (LOG_SITS no código): *Recol P/ Acomp Cliente*
 ## Motivo da pendência e registro da equipe
 
 No Controle de Situações o motivo da pendência é exatamente o texto da coluna F ('em andamento') da planilha; os filtros, o gráfico e o quadro de pendências usam esses mesmos textos (sem texto: 'Sem informação'). Cada andamento registra quem atualizou (nome, a partir do e-mail logado; a primeira edição pede o nome, salvo em config/usuarios), a data e um histórico das últimas 10 alterações (visível no detalhe do caso). Andamentos que vêm da planilha ficam em nome de quem importou.
+
+## Dados integrados entre as abas
+
+Andamento, data/nome da atualização, previsão de coleta, protocolo Hello e motivo da pendência são um dado só do caso: editar em qualquer aba vale para todas, inclusive para cópias do mesmo caso com a mesma chave (coleta e tratativa). **Andamento** = texto livre (coluna F da planilha); **Motivo da pendência** (última coluna de todas as tabelas de casos) = lista fixa, preenchida automaticamente por andamento e situação, e editável (volta ao automático pela primeira opção). As buscas existem em todas as listas de casos (inclusive Histórico e Atrasos por região) e as abas da Coleta Reversa filtram também por andamento.
