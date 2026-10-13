@@ -101,3 +101,9 @@ O texto do Andamento define a aba do caso na Coleta Reversa: 'no prazo', 'em ris
 ## Protocolo Hello e andamento no SLA
 
 Coluna **Protocolo Hello** (nº de coleta, campo editável) nas abas da Coleta Reversa: só clientes Hello têm campo; os demais mostram '—'. A busca também encontra pelo protocolo. Na lista do **SLA de Apontamento** (inclui NF-e Emitida) há Andamento / situação editável com data de atualização e o Protocolo Hello.
+
+## Controle de Situações: coluna F, tarefas em aberto e de/para
+
+- Importar o CSV do Controle de Situações lê a coluna **em andamento** (F) como andamento / motivo da pendência de cada caso (o que for digitado no painel prevalece sobre a planilha).
+- Importar a planilha **Tarefas em aberto - recol cliente** (aba Base) enriquece os casos já existentes: último apontamento vira data de finalização (SLA médio) ou data de entrada na situação (SLA de Apontamento), e traz n. coleta / motivo / NFE pendente / unidade quando preenchidos.
+- De/para do tipo de saída → transportadora (tabela da aba Resumo) em SAIDA_MAE; 'Não saiu' (acerto de estoque) e tipos sem de/para ficam fora dos indicadores. Perdas entram como finalizadas, como na planilha de controle.
