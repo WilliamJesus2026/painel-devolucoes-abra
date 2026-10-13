@@ -708,7 +708,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <span class="fcnt" id="cnt-rea"></span><button class="btn-exp" onclick="exportColetas('rea')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Dias</th><th>Prazo</th><th>CD</th><th>Situação</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Dias</th><th>Prazo</th><th>CD</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Data que a transportadora informou para realizar a coleta">Previsão de coleta<br><small style="font-weight:400">informada pela transportadora</small></th><th>Descrição</th></tr></thead>
         <tbody id="tb-rea"></tbody></table>
       </div></div>
     </div>
@@ -904,7 +904,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 <datalist id="and-list-ap"><option value="Cobrança enviada à transportadora"><option value="Aguardando resposta da transportadora"><option value="Negociando valor"><option value="Aguardando pagamento"><option value="Pagamento confirmado"><option value="Contestado pela transportadora"><option value="Encaminhado ao financeiro"></datalist>
 <datalist id="and-list-nr"><option value="Rastreando o produto"><option value="Aguardando resposta da transportadora"><option value="Produto localizado"><option value="Aguardando devolução ao CD"><option value="Cobrança enviada"><option value="Sem retorno da transportadora"><option value="Encaminhar para perda"></datalist>
 <datalist id="and-list">
-<option value="No prazo"><option value="Em risco"><option value="Atrasado"><option value="Aguardando agendamento"><option value="Coleta agendada"><option value="Cliente ausente"><option value="Transportadora acionada"><option value="Sem retorno do cliente"><option value="Reagendada"><option value="Aguardando chegada no CD"></datalist>
+<option value="No prazo"><option value="Em risco"><option value="Atrasado"><option value="Coleta realizada"><option value="Recebido no CD"><option value="Cancelada"><option value="Aguardando agendamento"><option value="Coleta agendada"><option value="Cliente ausente"><option value="Transportadora acionada"><option value="Sem retorno do cliente"><option value="Reagendada"><option value="Aguardando chegada no CD"></datalist>
 <div id="dropOverlay"><div class="drop-box"><b>Solte o arquivo aqui</b><span>Coleta Reversa ou Tratativas (.csv / .xlsx)</span></div></div>
 <div id="confirmModal" class="cmodal" role="dialog" aria-modal="true"><div class="cm-card"><div class="cm-title"></div><div class="cm-body"></div><div class="cm-act"><button class="cm-no btn-exp" type="button">Cancelar</button><button class="cm-ok btn-exp" type="button" style="background:var(--acc);color:#fff;border-color:var(--acc)">Confirmar</button></div></div></div>
 <div class="ov" id="ov" onclick="closeDetail()"></div>
@@ -1008,9 +1008,15 @@ function deriveColetaLive(c){
   const temData = !!dataProtocolo;
   const dias = temData ? daysBetween(dataProtocolo, new Date()) : null;
   const bucket = classifyStatusColeta(c.status, c.descricao);
-  const cancelada = bucket==='cancelada';
-  const coletaRealizada = bucket==='realizada' || !!c.recebido_cd;
-  const recebidoCD = !!c.recebido_cd;
+  // o que a equipe escreve no Andamento manda na situacao da coleta (mesma tela, mesmo resultado, sem divergencia)
+  const an = normStatus(c.andamento || '');
+  const aCD   = /\b(recebid\w*|chegou|entregue)\b.*\bcd\b/.test(an) && !/\b(nao|sem|aguardando)\b/.test(an);
+  const aCanc = /\bcancelad/.test(an) && !/\bnao\b/.test(an);
+  const aReal = !aCanc && (/\b(coleta|coletad\w*)\s+(foi\s+)?(realizad\w*|feita|efetuad\w*)\b/.test(an) || /\baguardando\b.*\bcd\b/.test(an)) && !/\b(nao|sem)\b.*\brealizad/.test(an);
+  const col_manual = aCD || aCanc || aReal;
+  const cancelada = bucket==='cancelada' || aCanc;
+  const coletaRealizada = bucket==='realizada' || !!c.recebido_cd || aReal || aCD;
+  const recebidoCD = !!c.recebido_cd || aCD;
   const concluidoAuto = !!c.concluido_auto; // sumiu do arquivo mais recente => nao esta mais em aberto no Innovaro
   const realizada = recebidoCD || concluidoAuto; // concluido = recebido no CD ou saiu do arquivo
 
@@ -1036,7 +1042,7 @@ function deriveColetaLive(c){
     }
   }
   return { ...c, transportadora, transportadoraOriginal: c.transportadora, tag, modalidade,
-    dias, prazo_status, prazo_manual, prazo_pct, cancelada, realizada, coletaRealizada, recebidoCD, concluidoAuto, motivoHist, temData,
+    dias, prazo_status, prazo_manual, col_manual, prazo_pct, cancelada, realizada, coletaRealizada, recebidoCD, concluidoAuto, motivoHist, temData,
     regiao: c.regiao || regiaoOf(c.uf) };
 }
 
@@ -1149,7 +1155,8 @@ function ir(id){
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 const manualTag = c => c.prazo_manual ? ' <span title="Prazo definido pelo andamento informado pela equipe" style="cursor:help">✎</span>' : '';
-function colBdg(c){
+function colBdg(c){ return colBdgBase(c) + (c.col_manual ? ' <span title="Situação da coleta definida pelo andamento informado pela equipe" style="cursor:help">✎</span>' : ''); }
+function colBdgBase(c){
   if (c.cancelada) return '<span class="bdg b-red" title="Cancelada">Cancelada</span>';
   if (c.recebidoCD) return '<span class="bdg b-grn" title="Recebido no CD">No CD</span>';
   if (c.coletaRealizada) return '<span class="bdg b-acc" title="Coleta feita na casa do cliente — aguardando chegada no CD">Coleta realizada</span>';
@@ -1260,7 +1267,7 @@ function renderCol(tipo){
       <td><span class="bdg b-dk">${c.temData ? c.dias+'d' : '—'}</span></td>
       <td>${stBdg(c.prazo_status)}</td>
       <td><span class="bdg b-amb" title="Coleta feita, ainda sem romaneio de entrada no CD">Aguardando CD</span></td>
-      <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
+      ${andCell(c)}${prevCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
     document.getElementById('tb-rea').innerHTML=rows.join('');
