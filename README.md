@@ -123,3 +123,7 @@ No Controle de Situações o motivo da pendência é exatamente o texto da colun
 ## Dados integrados entre as abas
 
 Andamento, data/nome da atualização, previsão de coleta, protocolo Hello e motivo da pendência são um dado só do caso: editar em qualquer aba vale para todas, inclusive para cópias do mesmo caso com a mesma chave (coleta e tratativa). **Andamento** = texto livre (coluna F da planilha); **Motivo da pendência** (última coluna de todas as tabelas de casos) = lista fixa, preenchida automaticamente por andamento e situação, e editável (volta ao automático pela primeira opção). As buscas existem em todas as listas de casos (inclusive Histórico e Atrasos por região) e as abas da Coleta Reversa filtram também por andamento.
+
+## SLA reinicia com a atualização; Logística ampliada
+
+No SLA de Apontamento, atualizar o andamento (ou marcar '✓ hoje') reinicia o prazo do caso: sai de atrasado e só volta se o prazo passar de novo sem nova atualização. A Logística (LOG_SITS) agora cobre Recol P/ Acomp Cliente, Recol P/Acomp Transportad / Transp 2, Recol Acomp C/Reenvio Tra e Cobrança Realizada (1 e 2); o bloco da Logística tem filtro por situação. 'Sem andamento' = caso em aberto sem texto na coluna F.
