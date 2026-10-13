@@ -111,3 +111,7 @@ Coluna **Protocolo Hello** (nº de coleta, campo editável) nas abas da Coleta R
 ## Planilha base: Controle de Situações
 
 O CSV 'Controle de Situações' é a base do painel. Ao importar, quem não está mais no arquivo sai do painel (concluído automaticamente), mas só dentro do mesmo universo: mesma CLASSE do Innovaro ou, em casos antigos sem classe, o mesmo fluxo do SLA. Tratativas Transportadora não são afetadas. A planilha 'Tarefas em aberto' é só modelo/enriquecimento. A aba mostra qual planilha está valendo.
+
+## Logística no Controle de Situações
+
+Regra automática por situação (LOG_SITS no código): *Recol P/ Acomp Cliente*, *Recol P/Acomp Transportad* e *Recol P/Acomp Transp 2* são da Logística (responsável Dayane.Costa), qualquer que seja o usuário da planilha. Elas saem dos números e da lista principal de casos em aberto e aparecem num bloco próprio embaixo, com andamento editável. Novos filtros em casos em aberto: **Situação do caso** e **Responsável**. Cada andamento registra quem editou (e-mail logado) e a data.

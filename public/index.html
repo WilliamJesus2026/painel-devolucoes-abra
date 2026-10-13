@@ -758,6 +758,10 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       </div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Motivo da pendência<br><small style="font-weight:400">coluna F da planilha</small></th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Atualizado em<br><small style="font-weight:400">registro da equipe</small></th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
+      <div class="ind-h" style="margin-top:22px">Logística — Recol P/ Acomp (cliente e transportadora)</div>
+      <div class="ind-sub" id="ind-log-sub"></div>
+      <div class="filters" style="margin:6px 0 8px"><span class="fcnt" id="cnt-ind-log"></span><button class="btn-exp" onclick="indLogExport()">Exportar CSV</button></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Tipo de saída</th><th>Aberto em</th><th title="Dias desde a última movimentação no Innovaro (ou da programação)">Dias parado</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th></tr></thead><tbody id="tb-ind-log"></tbody></table></div></div>
     </div>
 
     <div class="panel" id="panel-trat">
@@ -902,6 +906,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 <div id="palette" role="dialog" aria-modal="true" aria-label="Busca rápida"><div class="pal-card"><input class="pal-in" id="pal-in" placeholder="Buscar cliente, NF, CPF, transportadora… ou digitar um comando" autocomplete="off"><div class="pal-list" id="pal-list"></div><div class="pal-foot">↑↓ navegar · Enter abrir · Esc fechar</div></div></div>
 <div id="toasts" aria-live="polite"></div>
 <datalist id="and-list-ctl"><option value="Pendente"><option value="No prazo"><option value="Aguardando transportadora"><option value="Aguardando relacionamento"><option value="Aguardando fiscal"><option value="Pendência cliente"><option value="Cobrado transportadora"><option value="Coleta agendada"><option value="Coleta realizada"><option value="Finalizada"></datalist>
+<datalist id="and-list-log"><option value="Contato com o cliente"><option value="Aguardando agendamento da coleta"><option value="Coleta agendada"><option value="Transportadora acionada"><option value="Aguardando retorno da transportadora"><option value="Produto recolhido"><option value="Sem retorno do cliente"></datalist>
 <datalist id="and-list-sla"><option value="NF-e emitida, aguardando protocolo"><option value="Protocolo Hello solicitado"><option value="Aguardando fiscal"><option value="Aguardando agendamento"><option value="Coleta agendada"><option value="Aguardando transportadora"><option value="Aguardando cliente"></datalist>
 <datalist id="and-list-ap"><option value="Cobrança enviada à transportadora"><option value="Aguardando resposta da transportadora"><option value="Negociando valor"><option value="Aguardando pagamento"><option value="Pagamento confirmado"><option value="Contestado pela transportadora"><option value="Encaminhado ao financeiro"></datalist>
 <datalist id="and-list-nr"><option value="Rastreando o produto"><option value="Aguardando resposta da transportadora"><option value="Produto localizado"><option value="Aguardando devolução ao CD"><option value="Cobrança enviada"><option value="Sem retorno da transportadora"><option value="Encaminhar para perda"></datalist>
@@ -1614,6 +1619,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
+let CUR_EMAIL = '';   // quem esta logado (fica registrado em cada andamento)
 function renderBanner(){
   const el = document.getElementById('stateBanner');
   if (!el) return;
@@ -1768,7 +1774,7 @@ function andCell(c, lista){
   const dt = andData(c), cor = !dt ? 'var(--tx3)' : dt.dias<=0 ? '#16A34A' : dt.dias<=2 ? '#D97706' : '#DC2626';
   const rel = !dt ? 'sem atualização' : dt.dias<=0 ? 'hoje' : dt.dias===1 ? 'ontem' : 'há '+dt.dias+' dias';
   return `<td onclick="event.stopPropagation()">${c.id ? `<input class="and-in" list="${lista||'and-list'}" data-id="${esc(c.id)}" value="${esc(c.andamento||'')}" placeholder="Informar andamento…" onchange="andSet(this.dataset.id,this.value)" style="min-width:170px;padding:4px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}</td>
-    <td onclick="event.stopPropagation()" style="white-space:nowrap" title="Data em que a equipe atualizou o andamento (não é data do Innovaro)"><b style="color:${cor}">${dt ? dt.txt : '—'}</b><br><small style="color:var(--tx3)">${rel}</small>${c.id && c.andamento ? ` <button type="button" class="and-hoje" title="Confirmar que revisei hoje (mantém o texto, só atualiza a data)" onclick="andHoje('${esc(c.id)}')">✓ hoje</button>` : ''}</td>`;
+    <td onclick="event.stopPropagation()" style="white-space:nowrap" title="Data em que a equipe atualizou o andamento (não é data do Innovaro)"><b style="color:${cor}">${dt ? dt.txt : '—'}</b><br><small style="color:var(--tx3)">${rel}${c.andamento_por ? ' · '+esc(String(c.andamento_por).split('@')[0]) : ''}</small>${c.id && c.andamento ? ` <button type="button" class="and-hoje" title="Confirmar que revisei hoje (mantém o texto, só atualiza a data)" onclick="andHoje('${esc(c.id)}')">✓ hoje</button>` : ''}</td>`;
 }
 // numero de protocolo / coleta: existe so para clientes Hello
 const ehHello = c => /hello|i9/i.test((c.transportadoraOriginal||'')+' '+(c.transportadora||''));
@@ -1806,8 +1812,8 @@ function prevSet(id, v){
 function andSet(id, v){
   if (!DB){ toast('Entre com sua conta para gravar o andamento.', {type:'warn'}); return; }
   const txt = String(v||'').trim(), agora = isoNow();
-  DB.doc('cases/'+id).set({ andamento:txt||null, andamento_em:agora, andamento_origem:'painel' }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
-  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento:txt||null, andamento_em:agora, andamento_origem:'painel' };
+  DB.doc('cases/'+id).set({ andamento:txt||null, andamento_em:agora, andamento_origem:'painel', andamento_por:CUR_EMAIL||null }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
+  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento:txt||null, andamento_em:agora, andamento_origem:'painel', andamento_por:CUR_EMAIL||null };
   toast(txt ? 'Andamento salvo com a data de hoje.' : 'Andamento removido.', {type:'ok', ms:1800});
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   scheduleRender();
@@ -1815,8 +1821,8 @@ function andSet(id, v){
 function andHoje(id){
   if (!DB){ toast('Entre com sua conta para gravar.', {type:'warn'}); return; }
   const agora = isoNow();
-  DB.doc('cases/'+id).set({ andamento_em:agora }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
-  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento_em:agora };
+  DB.doc('cases/'+id).set({ andamento_em:agora, andamento_por:CUR_EMAIL||null }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
+  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento_em:agora, andamento_por:CUR_EMAIL||null };
   toast('Marcado como revisado hoje.', {type:'ok', ms:1800}); scheduleRender();
 }
 function exportColetas(tipo) {
@@ -2329,6 +2335,7 @@ async function _initDb(interactive){
     }
 
     hideLoginBox();
+    CUR_EMAIL = currentUser.email || '';
     DB = makeFirestoreShim(db, fsMod);
     ASSETS = makeStorageShim(storage, stMod);
   } catch(e){
@@ -2388,7 +2395,7 @@ function renderDashBlocks(){
   const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
   const PAL = { rose:'#F43F5E', amb:'#F59E0B', cyan:'#06B6D4', pur:'#7C3AED', gray:'#64748B' };
   // numeros de cada area
-  const doAno = IND_ALL.filter(x => x.ano===IND.ano), A = indAgg(doAno);
+  const doAno = IND_ALL.filter(x => x.ano===IND.ano && !x.logistica), A = indAgg(doAno);
   const anosP = pwAnos(), anoP = anosP.includes(hj.getFullYear()) ? hj.getFullYear() : (anosP[0] || hj.getFullYear());
   const pAno = PERDAS.filter(p => p.ano===anoP), vSum = arr => arr.reduce((t,p)=>t+(p.valorEst||0),0);
   const slaAt = SLA_ITENS.filter(x=>x.estado==='ATRASO'), slaHj = SLA_ITENS.filter(x=>x.estado==='HOJE').length;
@@ -2459,7 +2466,7 @@ function renderTratHero(){
 // ================= CONTROLE DE SITUACOES (indicadores por transportadora) =================
 const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente','Fiscal'];
 const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'Fiscal':'#10B981', 'A classificar':'#64748B' };
-const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'' };
+const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', sit:'', usuario:'' };
 const IND_INICIO = new Date(2026, 6, 1);   // pendencias criadas antes de 01/07/2026 contam como finalizadas; dai em diante a equipe vai sanando
 const IND_CORTE = 7;   // a partir de julho o detalhe mes a mes; antes disso os meses entram como um bloco ja finalizado
 const indAntigos = () => Array.from({length:IND_CORTE-1},(_,i)=>i+1);
@@ -2508,7 +2515,7 @@ function indCalcula(){
       : /cliente/.test(an) ? 'Cliente' : /transport|movvi|total|generoso|fedex|hello|i9|translovato|cobrad|retorno|coleta (agendada|realizada)/.test(an) ? 'Transporte' : '';
     let motivo = null;
     if (!fin) motivo = IND_MOTIVOS.includes(x.motivo_pend) ? x.motivo_pend : (catAnd || ((!sla || dias==null || dias<=sla) ? 'No prazo' : (resp || 'A classificar')));
-    return { ...x, fin, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indCarr(x), canal:canalOf(x.usuario) };
+    return { ...x, fin, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indCarr(x), canal:canalCaso(x), logistica:ehLogSit(x) };
   });
   IND_FORA = IND_ALL.filter(x => SEM_ANALISE.has(x.carr)).length;
   IND_ALL = IND_ALL.filter(x => !SEM_ANALISE.has(x.carr));
@@ -2526,8 +2533,10 @@ function indSet(k,v){
   else if (k==='motivo'){ tg(IND.motivos, v); if (IND.motivos.size) IND.status = 'aberto'; }
   else if (k==='status'){ IND.status = v; if (v==='fin') IND.motivos.clear(); }
   else if (k==='canal') IND.canal = (IND.canal===v ? '' : v);
+  else if (k==='sit') IND.sit = (IND.sit===v ? '' : v);
+  else if (k==='usuario') IND.usuario = v;
   else if (k==='q') IND.q = norm(v).trim();
-  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; IND.canal=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
+  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; IND.canal=''; IND.sit=''; IND.usuario=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
   renderInd();
 }
 function indSetMotivo(id, v){
@@ -2540,7 +2549,8 @@ function renderInd(){
   indCalcula();
   const anos = [...new Set(IND_ALL.map(x=>x.ano))].sort((a,b)=>b-a);
   if (!anos.includes(IND.ano)) IND.ano = anos[0] || new Date().getFullYear();
-  const doAno = IND_ALL.filter(x=>x.ano===IND.ano);
+  const doAnoAll = IND_ALL.filter(x=>x.ano===IND.ano);
+  const doAno = doAnoAll.filter(x=>!x.logistica);   // Recol P/ Acomp (Logistica) tem bloco proprio, embaixo
   // um unico filtro para a aba inteira; "ign" libera um grupo para contar as opcoes dele
   const f = (x, ign) => { ign = ign||[];
     return (ign.includes('mes') || !IND.meses.size || IND.meses.has(x.mes)) &&
@@ -2548,6 +2558,8 @@ function renderInd(){
       (ign.includes('status') || !IND.status || (IND.status==='fin') === x.fin) &&
       (ign.includes('motivo') || !IND.motivos.size || (!x.fin && IND.motivos.has(x.motivo))) &&
       (ign.includes('canal') || !IND.canal || x.canal===IND.canal) &&
+      (ign.includes('sit') || !IND.sit || sitKey(x.sit)===IND.sit) &&
+      (ign.includes('resp') || !IND.usuario || (x.usuario||'—')===IND.usuario) &&
       (!IND.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(IND.q)); };
   const base = doAno.filter(x=>f(x,['status','motivo']));
   const A = indAgg(base);
@@ -2563,12 +2575,17 @@ function renderInd(){
   const carrs = [...new Set(doAno.map(x=>x.carr))].map(c=>{ const k = cnt(doAno.filter(x=>x.carr===c),['carr']); return {c, n:k[0], ab:k[1]}; }).sort((a,b)=>b.n-a.n);
   const nFin = doAno.filter(x=>x.fin && f(x,['status','motivo'])).length, nAb = doAno.filter(x=>!x.fin && f(x,['status','motivo'])).length;
   const motCont = m => doAno.filter(x=>!x.fin && x.motivo===m && f(x,['status','motivo'])).length;
-  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q || IND.canal;
+  const sitList = [...new Set(doAno.map(x=>x.sit))].map(n => ({ n, k:sitKey(n), c:cnt(doAno.filter(x=>sitKey(x.sit)===sitKey(n)),['sit']) })).sort((a,b)=>b.c[1]-a.c[1] || b.c[0]-a.c[0]);
+  const sitChips = sitList.map(o => chip(IND.sit===o.k, `indSet('sit',this.dataset.k)" data-k="${o.k}`, esc(o.n), o.c[0], o.c[1])).join('');
+  const usrs = [...new Set(doAno.filter(x=>!x.fin).map(x=>x.usuario||'—'))].sort(), usrSel = `<select class="fsel" onchange="indSet('usuario',this.value)"><option value="">Todos</option>${usrs.map(u=>`<option${IND.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select>`;
+  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q || IND.canal || IND.sit || IND.usuario;
   document.getElementById('ind-fbody').innerHTML =
     `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${antChip}${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join('')}</div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join('')}</div></div>
      <div class="ind-fr"><b>Canal</b><div>${chip(!IND.canal, "indSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Marketplace','Relacionamento','Logística'].map(c => { const k = cnt(doAno.filter(x=>x.canal===c),['canal']); return chip(IND.canal===c, `indSet('canal','${c}')`, c, k[0], k[1]); }).join('')}<button type="button" class="ind-ch" onclick="indUsuarios()" title="Marketplace, Logística ou Relacionamento (padrão)">⚙ Definir usuários por canal</button></div></div>
-     <div class="ind-fr"><b>Situação</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
+     <div class="ind-fr"><b>Situação do caso</b><div>${sitChips}</div></div>
+     <div class="ind-fr"><b>Responsável</b><div>${usrSel}</div></div>
+     <div class="ind-fr"><b>Estado</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
      ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Motivo da pendência</b><div>${['No prazo','Relacionamento','Transporte','Cliente','Fiscal','A classificar'].map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${m}`, m, motCont(m))).join('')}</div></div>`}`;
   document.getElementById('ind-fres').innerHTML = `${IND.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${IND.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio aparece conforme as finalizações forem registradas nas próximas importações</i>');
   document.getElementById('ind-limpar').style.visibility = temFiltro ? 'visible' : 'hidden';
@@ -2577,7 +2594,7 @@ function renderInd(){
   // ---- KPIs ----
   const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
   document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', 'Base: planilha Controle de Situações' + (LAST_IMPORT && LAST_IMPORT.importedAt ? ' · última importação: ' + (LAST_IMPORT.filename||'') + ' em ' + new Date(LAST_IMPORT.importedAt).toLocaleDateString('pt-BR') + ' ' + new Date(LAST_IMPORT.importedAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) + ' (' + (LAST_IMPORT.rowCount||0) + ' linhas)' : '') + '. Para atualizar, importe o CSV novo com o botão ao lado.',
-    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'aparece conforme as finalizações forem registradas'], ['Em aberto hoje', A.aberto, `Marketplace ${base.filter(x=>!x.fin&&x.canal==='Marketplace').length} · Relacionamento ${base.filter(x=>!x.fin&&x.canal==='Relacionamento').length} · Logística ${base.filter(x=>!x.fin&&x.canal==='Logística').length}`]]);
+    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'aparece conforme as finalizações forem registradas'], ['Em aberto hoje', A.aberto, `Marketplace ${base.filter(x=>!x.fin&&x.canal==='Marketplace').length} · Relacionamento ${base.filter(x=>!x.fin&&x.canal==='Relacionamento').length} · Logística ${base.filter(x=>!x.fin&&x.canal==='Logística').length}` + (() => { const n = doAnoAll.filter(x=>x.logistica && !x.fin).length; return n ? ` · +${n} Recol P/ Acomp com a Logística (abaixo)` : ''; })()]]);
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
@@ -2639,6 +2656,26 @@ function renderInd(){
   if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
     ${x.fin ? '<td><span class="bdg b-grn">Atendida</span></td><td></td>' : andCell(x, 'and-list-ctl')}</tr>`).join('')
     + (lista.length>300 ? `<tr><td colspan="11" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
+  renderIndLog(doAnoAll, f);
+}
+let IND_LOG_LISTA = [];
+// casos de Recol P/ Acomp: automaticamente da Logistica; acompanham periodo, transportadora e busca, mas nao entram nos numeros acima
+function renderIndLog(doAnoAll, f){
+  const hoje = new Date(), aberto = doAnoAll.filter(x => x.logistica && !x.fin && f(x, ['status','motivo','canal','sit','resp']));
+  aberto.forEach(x => { const b = parseBR(x.sit_desde) || parseBR(x.ultimo_apontamento) || parseBR(x.data_programacao) || x.d; x.parado = b ? Math.max(0, daysBetween(b, hoje)) : null; });
+  aberto.sort((a,b) => (b.parado||0)-(a.parado||0)); IND_LOG_LISTA = aberto;
+  const semAnd = aberto.filter(x=>!x.andamento).length, maior = aberto.reduce((m,x)=>Math.max(m,x.parado||0),0);
+  document.getElementById('ind-log-sub').textContent = `Responsável: ${LOG_RESP} (Logística) — esses casos saem dos números acima e ficam aqui para a Logística demandar. ` + (aberto.length ? `${aberto.length} em aberto · ${semAnd} sem andamento · maior tempo parado: ${maior} dias.` : 'Nenhum caso em aberto nessas situações.');
+  document.getElementById('cnt-ind-log').textContent = aberto.length + ' em aberto';
+  const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind-log');
+  if (!ativo) document.getElementById('tb-ind-log').innerHTML = aberto.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>
+    <td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td><td>${x.parado==null?'—':x.parado+' d'}</td><td style="font-size:11px">${esc(LOG_RESP)} ${canalBdg('Logística')}</td>${andCell(x,'and-list-log')}</tr>`).join('')
+    + (aberto.length>300 ? `<tr><td colspan="9" style="color:var(--tx3);padding:10px">Mostrando 300 de ${aberto.length}.</td></tr>` : '')
+    || '<tr><td colspan="9" style="color:var(--tx3);padding:14px">Nenhum caso de Recol P/ Acomp em aberto. Eles entram aqui sozinhos quando a planilha traz essas situações.</td></tr>';
+}
+function indLogExport(){
+  if (!IND_LOG_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
+  exportCSV(IND_LOG_LISTA.map(x => ({ 'Situação':x.sit, 'Cliente':x.cliente||'', 'CPF':x.cpf||'', 'NF':x.nf||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Aberto em':x.data_solicitacao||'', 'Dias parado':x.parado==null?'':x.parado, 'Responsável':LOG_RESP, 'Andamento':x.andamento||'', 'Andamento atualizado em':andData(x)?andData(x).txt:'', 'Atualizado por':x.andamento_por||'' })), 'logistica_recol_acomp');
 }
 async function indUsuarios(){
   const cont = new Map(); IND_ALL.concat(PERDAS).forEach(x => { const u = String(x.usuario||'').trim(); if (u) cont.set(u, (cont.get(u)||0)+1); });
@@ -2816,7 +2853,7 @@ function slaCalcula(){
         else estado = 'PRAZO';
       }
     }
-    return { ...x, fluxo, regra, estado, venceu, atraso, estimado, canal:canalOf(x.usuario) };
+    return { ...x, fluxo, regra, estado, venceu, atraso, estimado, canal:canalCaso(x) };
   });
 }
 function slaSetMotivo(id, v){
@@ -3026,6 +3063,11 @@ function custoCitado(desc){
 let MKT_USERS = (() => { try { const a = JSON.parse(localStorage.getItem('mkt_users')||'null'); if (Array.isArray(a) && a.length) return a; } catch(e){} return ['thairiny','joao']; })();   // usuarios do Marketplace; os demais sao Relacionamento
 let LOG_USERS = (() => { try { const a = JSON.parse(localStorage.getItem('log_users')||'null'); if (Array.isArray(a)) return a; } catch(e){} return ['dayane.costa']; })();   // usuarios da Logistica
 function canalOf(u){ const n = norm(u||'').trim(); return LOG_USERS.some(k => n.startsWith(k)) ? 'Logística' : MKT_USERS.some(k => n.startsWith(k)) ? 'Marketplace' : 'Relacionamento'; }
+// roteamento automatico por situacao: estas situacoes sao da Logistica (quem acompanha: Dayane.Costa), qualquer que seja o usuario que aparece na planilha
+const LOG_SITS = new Set(['recol_p_acomp_cliente','recol_p_acomp_transportad','recol_p_acomp_transp_2']);
+const LOG_RESP = 'Dayane.Costa';
+const ehLogSit = x => LOG_SITS.has(sitKey(x.sit || x.tipo_devolucao || ''));
+const canalCaso = x => ehLogSit(x) ? 'Logística' : canalOf(x.usuario);
 const CANAL_COR = { 'Marketplace':'#7C3AED', 'Relacionamento':'#06B6D4', 'Logística':'#F59E0B' };
 const canalBdg = c => `<span class="bdg" style="background:${CANAL_COR[c]||'#64748B'}22;color:${CANAL_COR[c]||'#64748B'};font-size:9.5px">${c==='Relacionamento'?'Relacion.':esc(c)}</span>`;
 function derivePerda(t){
