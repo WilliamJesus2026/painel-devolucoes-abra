@@ -757,7 +757,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Motivo da pendência<br><small style="font-weight:400">coluna F da planilha</small></th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Atualizado em<br><small style="font-weight:400">registro da equipe</small></th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Motivo da pendência</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Atualizado em<br><small style="font-weight:400">registro da equipe</small></th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
       <div class="ind-h" style="margin-top:22px">Logística — Recol P/ Acomp (cliente e transportadora)</div>
       <div class="ind-sub" id="ind-log-sub"></div>
       <div class="filters" style="margin:6px 0 8px"><span class="fcnt" id="cnt-ind-log"></span><button class="btn-exp" onclick="indLogExport()">Exportar CSV</button></div>
@@ -1433,6 +1433,7 @@ function openDetail(item){
       ${isColeta ? `<dt>Andamento</dt><dd>${esc(item.andamento)||'—'}</dd><dt>Andamento atualizado em</dt><dd class="mono">${andData(item) ? andData(item).txt : '—'} <small>(registro da equipe)</small></dd>${ehHello(item) ? `<dt>Protocolo Hello</dt><dd class="mono">${esc(item.protocolo_hello)||'—'}</dd>` : ''}<dt>Previsão de coleta (transportadora)</dt><dd class=\"mono\">${item.previsao_coleta ? item.previsao_coleta.split('-').reverse().join('/') : '—'}</dd>` : ''}
       ${!isColeta && item.grupo ? `<dt>O que fazer</dt><dd>${esc(GRUPO_ACAO[item.grupo]||GRUPO_ACAO.outros)}</dd>` : ''}
       <dt>Responsável</dt><dd>${esc(item.usuario)||'Não informado'}</dd>
+      ${item.andamento_hist && item.andamento_hist.length ? `<dt>Histórico do andamento</dt><dd>${item.andamento_hist.slice().reverse().map(h => `${esc(new Date(h.em).toLocaleDateString('pt-BR'))} · ${esc(nomeDe(h.por)||'—')}: <b>${esc(h.t||'(apagado)')}</b>`).join('<br>')}</dd>` : ''}
       <dt>Valor</dt><dd class="mono">${item.valor!=null ? 'R$ '+Math.abs(item.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '—'}</dd>
       <dt>Descrição</dt><dd>${esc(item.descricao)||'Não informado'}</dd>
     </dl>
@@ -1619,7 +1620,20 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-let CUR_EMAIL = '';   // quem esta logado (fica registrado em cada andamento)
+let CUR_EMAIL = '';
+let NOMES = {};   // e-mail -> nome de exibicao (config/usuarios)
+const nomeKey = e => String(e||'').toLowerCase().replace(/\./g,'_');
+const nomeDe = e => { if (!e) return ''; if (NOMES[nomeKey(e)]) return NOMES[nomeKey(e)]; return String(e).split('@')[0].split(/[._-]/).map(p => p ? p[0].toUpperCase()+p.slice(1) : '').join(' '); };
+let _perguntouNome = false;
+async function garanteNome(){
+  if (!CUR_EMAIL || _perguntouNome || NOMES[nomeKey(CUR_EMAIL)] || !DB) return; _perguntouNome = true;
+  const ok = await askConfirm('Seu nome no registro da equipe', `<p>Cada andamento que você escrever fica registrado com o seu nome e a data. Como você quer aparecer?</p><input id="meu-nome" style="width:100%;margin-top:8px;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--srf);color:var(--tx)" placeholder="Nome e sobrenome" value="${esc(nomeDe(CUR_EMAIL))}"><p style="margin-top:8px;font-size:11.5px;color:var(--tx3)">Conta: ${esc(CUR_EMAIL)}</p>`, 'Salvar');
+  const v = ok ? String((document.getElementById('meu-nome')||{}).value||'').trim() : '';
+  if (!v) return;
+  NOMES[nomeKey(CUR_EMAIL)] = v;
+  try { await DB.doc('config/usuarios').set({ nomes:{ [nomeKey(CUR_EMAIL)]: v }, updatedAt:isoNow() }, true); toast('Nome salvo: '+v, {type:'ok', ms:2500}); } catch(err){ toast('Não consegui salvar o nome: '+(err.code||err.message), {type:'err'}); }
+  scheduleRender();
+}   // quem esta logado (fica registrado em cada andamento)
 function renderBanner(){
   const el = document.getElementById('stateBanner');
   if (!el) return;
@@ -1774,7 +1788,7 @@ function andCell(c, lista){
   const dt = andData(c), cor = !dt ? 'var(--tx3)' : dt.dias<=0 ? '#16A34A' : dt.dias<=2 ? '#D97706' : '#DC2626';
   const rel = !dt ? 'sem atualização' : dt.dias<=0 ? 'hoje' : dt.dias===1 ? 'ontem' : 'há '+dt.dias+' dias';
   return `<td onclick="event.stopPropagation()">${c.id ? `<input class="and-in" list="${lista||'and-list'}" data-id="${esc(c.id)}" value="${esc(c.andamento||'')}" placeholder="Informar andamento…" onchange="andSet(this.dataset.id,this.value)" style="min-width:170px;padding:4px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}</td>
-    <td onclick="event.stopPropagation()" style="white-space:nowrap" title="Data em que a equipe atualizou o andamento (não é data do Innovaro)"><b style="color:${cor}">${dt ? dt.txt : '—'}</b><br><small style="color:var(--tx3)">${rel}${c.andamento_por ? ' · '+esc(String(c.andamento_por).split('@')[0]) : ''}</small>${c.id && c.andamento ? ` <button type="button" class="and-hoje" title="Confirmar que revisei hoje (mantém o texto, só atualiza a data)" onclick="andHoje('${esc(c.id)}')">✓ hoje</button>` : ''}</td>`;
+    <td onclick="event.stopPropagation()" style="white-space:nowrap" title="Data em que a equipe atualizou o andamento (não é data do Innovaro)"><b style="color:${cor}">${dt ? dt.txt : '—'}</b><br><small style="color:var(--tx3)">${rel}${c.andamento_por ? ' · por '+esc(nomeDe(c.andamento_por)) : ''}</small>${c.id && c.andamento ? ` <button type="button" class="and-hoje" title="Confirmar que revisei hoje (mantém o texto, só atualiza a data)" onclick="andHoje('${esc(c.id)}')">✓ hoje</button>` : ''}</td>`;
 }
 // numero de protocolo / coleta: existe so para clientes Hello
 const ehHello = c => /hello|i9/i.test((c.transportadoraOriginal||'')+' '+(c.transportadora||''));
@@ -1812,8 +1826,9 @@ function prevSet(id, v){
 function andSet(id, v){
   if (!DB){ toast('Entre com sua conta para gravar o andamento.', {type:'warn'}); return; }
   const txt = String(v||'').trim(), agora = isoNow();
-  DB.doc('cases/'+id).set({ andamento:txt||null, andamento_em:agora, andamento_origem:'painel', andamento_por:CUR_EMAIL||null }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
-  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento:txt||null, andamento_em:agora, andamento_origem:'painel', andamento_por:CUR_EMAIL||null };
+  DB.doc('cases/'+id).set({ andamento:txt||null, andamento_em:agora, andamento_origem:'painel', andamento_por:CUR_EMAIL||null, andamento_hist:[...((DB_CASES[id]||{}).andamento_hist||[]), { t:txt, em:agora, por:CUR_EMAIL||null, o:'painel' }].slice(-10) }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
+  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento:txt||null, andamento_em:agora, andamento_origem:'painel', andamento_por:CUR_EMAIL||null, andamento_hist:[...((DB_CASES[id]||{}).andamento_hist||[]), { t:txt, em:agora, por:CUR_EMAIL||null, o:'painel' }].slice(-10) };
+  garanteNome();
   toast(txt ? 'Andamento salvo com a data de hoje.' : 'Andamento removido.', {type:'ok', ms:1800});
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   scheduleRender();
@@ -2101,7 +2116,8 @@ async function importFile(file){
       if (prev && prev.tipo_devolucao && prev.tipo_devolucao !== r.tipo_devolucao){ const n = new Date(); r.sit_desde = String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
       // coluna "em andamento" da planilha: entra como andamento do caso, mas o que foi digitado no painel tem prioridade
       { const arq = r.andamento_arq; delete r.andamento_arq;
-        if (arq){ const pv = prev || {}; if ((!pv.andamento || pv.andamento_origem !== 'painel') && pv.andamento !== arq){ r.andamento = arq; r.andamento_origem = 'planilha'; r.andamento_em = now; } } }
+        if (arq){ const pv = prev || {}; if ((!pv.andamento || pv.andamento_origem !== 'painel') && pv.andamento !== arq){ r.andamento = arq; r.andamento_origem = 'planilha'; r.andamento_em = now; r.andamento_por = CUR_EMAIL || null; r.andamento_hist = [...(pv.andamento_hist||[]), { t:arq, em:now, por:CUR_EMAIL||null, o:'planilha' }].slice(-10); }
+          else if (pv.andamento === arq && !pv.andamento_por && CUR_EMAIL) r.andamento_por = CUR_EMAIL; } }
       const ehFin = o => o.origem==='coleta' ? !!o.recebido_cd : sitClasseDe(o.tipo_devolucao||'')==='Finalizada';
       if (prev && !prev.finalizado_em && !ehFin(prev) && ehFin(r)){ const n = new Date(); r.finalizado_em = String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
       const prevHistory = prev && Array.isArray(prev.history) ? prev.history : [];
@@ -2363,6 +2379,7 @@ async function _initDb(interactive){
     const d = snap.docs.find(x => x.id==='sla_situacoes');
     const sa = snap.docs.find(x => x.id==='sla_apontamento');
     if (sa && sa.data().classes){ SLA_CLASSES = sa.data().classes; try { localStorage.setItem('sla_classes', JSON.stringify(SLA_CLASSES)); } catch(e){} scheduleRender(); }
+    const us = snap.docs.find(x => x.id==='usuarios'); if (us && us.data().nomes){ NOMES = us.data().nomes; scheduleRender(); }
     const cn = snap.docs.find(x => x.id==='canais');
     if (cn && Array.isArray(cn.data().marketplace)){ MKT_USERS = cn.data().marketplace; if (Array.isArray(cn.data().logistica)) LOG_USERS = cn.data().logistica; try { localStorage.setItem('mkt_users', JSON.stringify(MKT_USERS)); localStorage.setItem('log_users', JSON.stringify(LOG_USERS)); } catch(e){} scheduleRender(); }
     if (d){ const v = d.data(); SIT_CFG = { base: v.base==='solic'?'solic':'prog', regras: v.regras||{} }; try { localStorage.setItem('sit_cfg', JSON.stringify(SIT_CFG)); } catch(e){} scheduleRender(); }
@@ -2465,7 +2482,11 @@ function renderTratHero(){
 
 // ================= CONTROLE DE SITUACOES (indicadores por transportadora) =================
 const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente','Fiscal'];
-const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'Fiscal':'#10B981', 'A classificar':'#64748B' };
+const MOT_CANON = new Map();   // mesma frase com maiusculas/espacos diferentes conta como um motivo so
+const MOT_PAL = ['#06B6D4','#7C3AED','#F59E0B','#F43F5E','#10B981','#3B82F6','#EC4899','#84CC16','#F97316','#8B5CF6'];
+const escA = t => esc(t).replace(/"/g,'&quot;');
+const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'Fiscal':'#10B981', 'A classificar':'#64748B', 'Sem informação':'#64748B' };
+const motCor = m => IND_COR[m] || MOT_PAL[[...String(m)].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0, 7) % MOT_PAL.length];
 const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', sit:'', usuario:'' };
 const IND_INICIO = new Date(2026, 6, 1);   // pendencias criadas antes de 01/07/2026 contam como finalizadas; dai em diante a equipe vai sanando
 const IND_CORTE = 7;   // a partir de julho o detalhe mes a mes; antes disso os meses entram como um bloco ja finalizado
@@ -2509,12 +2530,10 @@ function indCalcula(){
     const fe = parseBR(x.finalizado_em);
     const dias = d ? daysBetween(d, hoje) : null, sla = sitSlaDe(x.sit);
     const fin = x.fin || !!(d && d < IND_INICIO) || /^finalizad/.test(norm(x.andamento||''));
-    // motivo da pendencia: o que a equipe escreveu no andamento (coluna F da planilha) > motivo marcado > quem segura a situacao
-    const an = norm(x.andamento||''), resp = RESP_SIT[sitKey(x.sit)] || '';
-    const catAnd = !an ? '' : /\b(nao|fora)\b.*\bprazo\b/.test(an) ? 'A classificar' : /^pendente\b/.test(an) ? 'A classificar' : /\bno prazo\b/.test(an) ? 'No prazo' : /relacionamento|laureano/.test(an) ? 'Relacionamento' : /fiscal|nf-?e/.test(an) ? 'Fiscal'
-      : /cliente/.test(an) ? 'Cliente' : /transport|movvi|total|generoso|fedex|hello|i9|translovato|cobrad|retorno|coleta (agendada|realizada)/.test(an) ? 'Transporte' : '';
-    let motivo = null;
-    if (!fin) motivo = IND_MOTIVOS.includes(x.motivo_pend) ? x.motivo_pend : (catAnd || ((!sla || dias==null || dias<=sla) ? 'No prazo' : (resp || 'A classificar')));
+    // motivo da pendencia = o texto da coluna F da planilha (andamento), exatamente como veio; sem texto = "Sem informação"
+    const txtMot = String(x.andamento||'').replace(/\s+/g,' ').trim(), kMot = norm(txtMot);
+    if (kMot && !MOT_CANON.has(kMot)) MOT_CANON.set(kMot, txtMot);
+    const motivo = fin ? null : (kMot ? MOT_CANON.get(kMot) : 'Sem informação');
     return { ...x, fin, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, slaDias:(x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null, carr:indCarr(x), canal:canalCaso(x), logistica:ehLogSit(x) };
   });
   IND_FORA = IND_ALL.filter(x => SEM_ANALISE.has(x.carr)).length;
@@ -2575,6 +2594,7 @@ function renderInd(){
   const carrs = [...new Set(doAno.map(x=>x.carr))].map(c=>{ const k = cnt(doAno.filter(x=>x.carr===c),['carr']); return {c, n:k[0], ab:k[1]}; }).sort((a,b)=>b.n-a.n);
   const nFin = doAno.filter(x=>x.fin && f(x,['status','motivo'])).length, nAb = doAno.filter(x=>!x.fin && f(x,['status','motivo'])).length;
   const motCont = m => doAno.filter(x=>!x.fin && x.motivo===m && f(x,['status','motivo'])).length;
+  const motList = [...doAno.filter(x=>!x.fin).reduce((mp,x)=>mp.set(x.motivo,(mp.get(x.motivo)||0)+1), new Map()).entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
   const sitList = [...new Set(doAno.map(x=>x.sit))].map(n => ({ n, k:sitKey(n), c:cnt(doAno.filter(x=>sitKey(x.sit)===sitKey(n)),['sit']) })).sort((a,b)=>b.c[1]-a.c[1] || b.c[0]-a.c[0]);
   const sitChips = sitList.map(o => chip(IND.sit===o.k, `indSet('sit',this.dataset.k)" data-k="${o.k}`, esc(o.n), o.c[0], o.c[1])).join('');
   const usrs = [...new Set(doAno.filter(x=>!x.fin).map(x=>x.usuario||'—'))].sort(), usrSel = `<select class="fsel" onchange="indSet('usuario',this.value)"><option value="">Todos</option>${usrs.map(u=>`<option${IND.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select>`;
@@ -2586,7 +2606,7 @@ function renderInd(){
      <div class="ind-fr"><b>Situação do caso</b><div>${sitChips}</div></div>
      <div class="ind-fr"><b>Responsável</b><div>${usrSel}</div></div>
      <div class="ind-fr"><b>Estado</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
-     ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Motivo da pendência</b><div>${['No prazo','Relacionamento','Transporte','Cliente','Fiscal','A classificar'].map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${m}`, m, motCont(m))).join('')}</div></div>`}`;
+     ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Motivo da pendência</b><div>${motList.map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${escA(m)}`, esc(m), motCont(m))).join('')}</div></div>`}`;
   document.getElementById('ind-fres').innerHTML = `${IND.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${IND.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio aparece conforme as finalizações forem registradas nas próximas importações</i>');
   document.getElementById('ind-limpar').style.visibility = temFiltro ? 'visible' : 'hidden';
   if (IND_FORA) document.getElementById('ind-fres').innerHTML += ` · <span title="Acerto de estoque, sem saída ou transportadora sem de/para">${IND_FORA} casos fora da análise (sem transportadora)</span>`;
@@ -2637,12 +2657,12 @@ function renderInd(){
   const ab = doAno.filter(x=>!x.fin && f(x,['status','motivo']));
   const g = new Map(); ab.filter(x=>!IND.motivos.size||IND.motivos.has(x.motivo)).forEach(x => { const k = x.mes+'|'+x.carr+'|'+x.motivo; g.set(k, (g.get(k)||0)+1); });
   const linhas = [...g.entries()].map(([k,n]) => { const [m,c,mo] = k.split('|'); return { m:+m, c, mo, n }; }).sort((a,b)=>a.m-b.m || a.c.localeCompare(b.c) || a.mo.localeCompare(b.mo));
-  document.getElementById('tb-ind-pend').innerHTML = linhas.map(l => `<tr class="clickable" onclick="IND.meses=new Set([${l.m}]);IND.carrs=new Set([this.dataset.c]);IND.motivos=new Set([this.dataset.mo]);IND.status='aberto';renderInd()" data-c="${esc(l.c)}" data-mo="${esc(l.mo)}"><td>${MESES[l.m-1]}/${IND.ano}</td><td>${esc(l.c)}</td><td><span class="bdg" style="background:${IND_COR[l.mo]}22;color:${IND_COR[l.mo]}">${l.mo}</span></td><td><b>${l.n}</b></td></tr>`).join('') || '<tr><td colspan="4" style="color:var(--tx3);padding:14px">Nenhuma pendência em aberto com esses filtros.</td></tr>';
+  document.getElementById('tb-ind-pend').innerHTML = linhas.map(l => `<tr class="clickable" onclick="IND.meses=new Set([${l.m}]);IND.carrs=new Set([this.dataset.c]);IND.motivos=new Set([this.dataset.mo]);IND.status='aberto';renderInd()" data-c="${esc(l.c)}" data-mo="${esc(l.mo)}"><td>${MESES[l.m-1]}/${IND.ano}</td><td>${esc(l.c)}</td><td><span class="bdg" style="background:${motCor(l.mo)}22;color:${motCor(l.mo)}">${esc(l.mo)}</span></td><td><b>${l.n}</b></td></tr>`).join('') || '<tr><td colspan="4" style="color:var(--tx3);padding:14px">Nenhuma pendência em aberto com esses filtros.</td></tr>';
 
   if (vis){
-    const mo = ['No prazo','Relacionamento','Transporte','Cliente','Fiscal','A classificar'].map(m=>[m, ab.filter(x=>x.motivo===m).length]).filter(a=>a[1]);
+    const mo = [...new Set(ab.map(x=>x.motivo))].map(m=>[m, ab.filter(x=>x.motivo===m).length]).sort((a,b)=>b[1]-a[1]);
     if (charts.indMot) charts.indMot.destroy();
-    charts.indMot = new Chart(document.getElementById('ch-ind-mot'), { type:'doughnut', data:{ labels:mo.map(a=>a[0]), datasets:[{ data:mo.map(a=>a[1]), backgroundColor:mo.map(a=>IND_COR[a[0]] + (!IND.motivos.size||IND.motivos.has(a[0])?'':'55')), borderWidth:0 }] },
+    charts.indMot = new Chart(document.getElementById('ch-ind-mot'), { type:'doughnut', data:{ labels:mo.map(a=>a[0]), datasets:[{ data:mo.map(a=>a[1]), backgroundColor:mo.map(a=>motCor(a[0]) + (!IND.motivos.size||IND.motivos.has(a[0])?'':'55')), borderWidth:0 }] },
       options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', onClick:(e,els)=>{ if (els.length) indSet('motivo', mo[els[0].index][0]); }, plugins:{ legend:{ position:'right', labels:{ color:tick, boxWidth:10 } } } } });
   }
 

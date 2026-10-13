@@ -115,3 +115,7 @@ O CSV 'Controle de Situações' é a base do painel. Ao importar, quem não est�
 ## Logística no Controle de Situações
 
 Regra automática por situação (LOG_SITS no código): *Recol P/ Acomp Cliente*, *Recol P/Acomp Transportad* e *Recol P/Acomp Transp 2* são da Logística (responsável Dayane.Costa), qualquer que seja o usuário da planilha. Elas saem dos números e da lista principal de casos em aberto e aparecem num bloco próprio embaixo, com andamento editável. Novos filtros em casos em aberto: **Situação do caso** e **Responsável**. Cada andamento registra quem editou (e-mail logado) e a data.
+
+## Motivo da pendência e registro da equipe
+
+No Controle de Situações o motivo da pendência é exatamente o texto da coluna F ('em andamento') da planilha; os filtros, o gráfico e o quadro de pendências usam esses mesmos textos (sem texto: 'Sem informação'). Cada andamento registra quem atualizou (nome, a partir do e-mail logado; a primeira edição pede o nome, salvo em config/usuarios), a data e um histórico das últimas 10 alterações (visível no detalhe do caso). Andamentos que vêm da planilha ficam em nome de quem importou.
