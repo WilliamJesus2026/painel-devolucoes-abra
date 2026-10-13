@@ -85,3 +85,7 @@ Canais por usuário: Relacionamento (padrão), Marketplace (Thairiny, João) e L
 ## Andamento na Coleta Reversa
 
 Em Atrasados, Em risco e Todos há a coluna **Andamento**, ao lado de Situação: texto livre (com sugestões) para registrar o andamento de cada caso pendente. Fica salvo no caso (ndamento) e vai no CSV e no detalhe.
+
+## Andamento, data de atualização e totais
+
+Coluna **Andamento** (texto livre com sugestões) + **Andamento atualizado em** (data em que a equipe atualizou; botão ✓ hoje confirma a revisão sem mudar o texto; verde = hoje, âmbar = até 2 dias, vermelho = mais antigo). Não é data do Innovaro. Vale para Atrasados, Em risco, Todos (Coleta Reversa) e para as abas Transportadora a pagar / Produto não retornou (agora separadas). 'Todos' lista todas as coletas da planilha (inclui no CD e canceladas) e o total aparece no topo.

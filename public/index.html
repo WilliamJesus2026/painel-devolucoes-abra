@@ -455,6 +455,8 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .ind-f-res{font-size:12px;color:var(--tx3);margin-top:8px}.ind-f-res b{color:var(--tx)}
 @media(max-width:700px){.ind-fr{flex-direction:column}.ind-fr>b{padding-top:0}}
 .hero-chips .hchip{display:none!important}
+.and-hoje{border:1px solid var(--bd);background:none;color:var(--tx2);border-radius:6px;padding:1px 6px;font-size:10px;font-weight:700;cursor:pointer}
+.and-hoje:hover{border-color:#16A34A;color:#16A34A}
 .dsec .pw-hero{padding:18px 22px 18px;margin-bottom:14px}
 .dsec .pw-stats{margin-top:14px}
 .dsec .pw-stat .v{font-size:30px}
@@ -579,10 +581,15 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     </button>
 
     <div class="sb-grp">Transportadora</div>
-    <button class="nav" onclick="ir('nr')" id="nav-nr">
+    <button class="nav" onclick="ir('nr-ap')" id="nav-nr-ap">
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2" stroke-width="1.5"/><circle cx="12" cy="12" r="2.5" stroke-width="1.5"/><path d="M6 10v4M18 10v4" stroke-width="1.5" stroke-linecap="round"/></svg>
-      A pagar e Não retornou
-      <span class="bdg" id="bdg-nr">0</span>
+      Transportadora a pagar
+      <span class="bdg" id="bdg-nr-ap">0</span>
+    </button>
+    <button class="nav" onclick="ir('nr-nr')" id="nav-nr-nr">
+      <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2" stroke-width="1.5"/><circle cx="12" cy="12" r="2.5" stroke-width="1.5"/><path d="M6 10v4M18 10v4" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Produto não retornou
+      <span class="bdg" id="bdg-nr-nr">0</span>
     </button>
 
     <div class="sb-grp">Análise</div>
@@ -658,7 +665,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <span class="fcnt" id="cnt-at"></span><button class="btn-exp" onclick="exportColetas('at')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Situação</th><th>Andamento</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Descrição</th></tr></thead>
         <tbody id="tb-at"></tbody></table>
       </div></div>
     </div>
@@ -672,7 +679,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <span class="fcnt" id="cnt-ri"></span><button class="btn-exp" onclick="exportColetas('ri')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Atrasa em</th><th>Coleta</th><th>Situação</th><th>Andamento</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Atrasa em</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Descrição</th></tr></thead>
         <tbody id="tb-ri"></tbody></table>
       </div></div>
     </div>
@@ -722,6 +729,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
           <option value="pendente">Coleta pendente</option>
           <option value="realizada">Coleta realizada (aguardando CD)</option>
           <option value="cd">Recebido no CD</option>
+          <option value="cancelada">Cancelada</option>
         </select>
         <select class="fsel" id="fall-uf" onchange="renderCol('all')"><option value="">Todas as UFs</option></select>
         <select class="fsel" id="fall-tr" onchange="renderCol('all')"><option value="">Todas as transportadoras</option></select>
@@ -729,7 +737,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <span class="fcnt" id="cnt-all"></span><button class="btn-exp" onclick="exportColetas('col')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Situação</th><th>Andamento</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Descrição</th></tr></thead>
         <tbody id="tb-all"></tbody></table>
       </div></div>
     </div>
@@ -805,16 +813,9 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <div class="panel pworld" id="panel-p-trp"><div id="pw-transportadora"></div></div>
 
     <!-- ATRASOS REGIAO -->
-    <div class="panel" id="panel-nr">
-      <div class="pworld" id="ph-nr"></div>
-      <div class="ind-f">
-        <div class="ind-f-top"><input id="nr-q" placeholder="Buscar cliente, NF ou CPF..." oninput="nrSet('q',this.value)"><button class="btn-exp" type="button" id="nr-limpar" onclick="nrSet('limpar')">Limpar filtros</button></div>
-        <div id="nr-fbody"></div>
-      </div>
-      <div class="pworld"><div class="pw-grid even"><div class="pw-card"><h3>Casos por transportadora</h3><div class="s">Clique numa barra para filtrar</div><div class="pw-chart"><canvas id="nr-ch-car"></canvas></div></div><div class="pw-card"><h3>Casos por mês de abertura</h3><div class="s">Transportadora a pagar x produto não retornou</div><div class="pw-chart"><canvas id="nr-ch-mes"></canvas></div></div></div></div>
-      <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos</b><span class="fcnt" id="cnt-nr"></span><button class="btn-exp" onclick="nrExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Aberto em</th><th>Dias parado</th><th>Valor</th><th>Responsável</th></tr></thead><tbody id="tb-nr"></tbody></table></div></div>
-    </div>
+    <div class="panel" id="panel-nr-ap"></div>
+
+    <div class="panel" id="panel-nr-nr"></div>
 
     <div class="panel" id="panel-regiao">
       <div class="g2">
@@ -900,6 +901,8 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
 <div id="palette" role="dialog" aria-modal="true" aria-label="Busca rápida"><div class="pal-card"><input class="pal-in" id="pal-in" placeholder="Buscar cliente, NF, CPF, transportadora… ou digitar um comando" autocomplete="off"><div class="pal-list" id="pal-list"></div><div class="pal-foot">↑↓ navegar · Enter abrir · Esc fechar</div></div></div>
 <div id="toasts" aria-live="polite"></div>
+<datalist id="and-list-ap"><option value="Cobrança enviada à transportadora"><option value="Aguardando resposta da transportadora"><option value="Negociando valor"><option value="Aguardando pagamento"><option value="Pagamento confirmado"><option value="Contestado pela transportadora"><option value="Encaminhado ao financeiro"></datalist>
+<datalist id="and-list-nr"><option value="Rastreando o produto"><option value="Aguardando resposta da transportadora"><option value="Produto localizado"><option value="Aguardando devolução ao CD"><option value="Cobrança enviada"><option value="Sem retorno da transportadora"><option value="Encaminhar para perda"></datalist>
 <datalist id="and-list"><option value="Aguardando agendamento"><option value="Coleta agendada"><option value="Cliente ausente"><option value="Transportadora acionada"><option value="Sem retorno do cliente"><option value="Reagendada"><option value="Aguardando chegada no CD"></datalist>
 <div id="dropOverlay"><div class="drop-box"><b>Solte o arquivo aqui</b><span>Coleta Reversa ou Tratativas (.csv / .xlsx)</span></div></div>
 <div id="confirmModal" class="cmodal" role="dialog" aria-modal="true"><div class="cm-card"><div class="cm-title"></div><div class="cm-body"></div><div class="cm-act"><button class="cm-no btn-exp" type="button">Cancelar</button><button class="cm-ok btn-exp" type="button" style="background:var(--acc);color:#fff;border-color:var(--acc)">Confirmar</button></div></div></div>
@@ -989,6 +992,7 @@ let REF = new Date().toLocaleDateString('pt-BR');
 
 let COL = [];       // coletas pendentes de coleta (nao realizadas, nao canceladas, nao recebidas no CD)
 let REA = [];       // coleta realizada na casa do cliente, aguardando chegada no CD
+let COLETAS_ARQ = [];   // todas as coletas da planilha atual
 let HIST = [];       // coletas historico (canceladas ou realizadas)
 let TRAT = [];       // tratativas em aberto
 let NR = [];       // transportadora a pagar + produto nao retornou (aba propria)
@@ -1043,10 +1047,11 @@ function rebuildData(){
 
   OCULTOS = [];
   const visivel = x => { if (statusIgnorado(x.status)){ OCULTOS.push(x); return false; } return true; };
-  const allColetas = Object.values(coletaMap).filter(visivel).map(deriveColetaLive);
+  const allColetas = Object.values(coletaMap).map(deriveColetaLive);   // coleta nao e escondida por status: todas as linhas da planilha entram
   COL = allColetas.filter(c => !c.cancelada && !c.realizada && !c.coletaRealizada);
   REA = allColetas.filter(c => !c.cancelada && !c.realizada && c.coletaRealizada);
   HIST = allColetas.filter(c => c.cancelada || c.realizada);
+  COLETAS_ARQ = allColetas.filter(c => !c.concluidoAuto);   // todas as coletas que estao na ultima planilha importada (pendentes, realizadas, no CD e canceladas)
   const allTrat = Object.values(tratMap).filter(visivel).map(deriveTratativaLive);
   // Perdas sao fato historico (indice mensal) e vivem na propria aba: nao saem do controle por sumirem do arquivo.
   PERDAS = allTrat.filter(t => t.grupo==='perdas').map(derivePerda);
@@ -1063,7 +1068,7 @@ function rebuildData(){
   AT_FORA = AT.filter(c=>c.uf && c.uf.toUpperCase()!=='SP');
 
   D.kpis = {
-    col_total: COL.length, rea: REA.length, at: AT.length, ri: RI.length, em: EM.length,
+    col_total: COL.length, col_all: COLETAS_ARQ.length, rea: REA.length, at: AT.length, ri: RI.length, em: EM.length,
     hist: HIST.length + TRAT_HIST.length, trat_total: TRAT.length,
     valor_at: AT.reduce((s,c)=>s+Math.abs(c.valor||0),0),
   };
@@ -1115,7 +1120,7 @@ const TITLES = {
   dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Coleta Reversa — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
-  ind:'Controle de Situações', sla:'SLA de Apontamento', nr:'A pagar e Não retornou', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
+  ind:'Controle de Situações', sla:'SLA de Apontamento', 'nr-ap':'Transportadora a pagar', 'nr-nr':'Produto não retornou', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
 };
 function ir(id){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
@@ -1128,11 +1133,12 @@ function ir(id){
   renderPerdasActive();
   if (id==='ind') renderInd();
   if (id==='sla') renderSla();
-  if (id==='nr') renderNR();
+  if (id==='nr-ap' || id==='nr-nr') renderNR();
   window.scrollTo({top:0});
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function colBdg(c){
+  if (c.cancelada) return '<span class="bdg b-red" title="Cancelada">Cancelada</span>';
   if (c.recebidoCD) return '<span class="bdg b-grn" title="Recebido no CD">No CD</span>';
   if (c.coletaRealizada) return '<span class="bdg b-acc" title="Coleta feita na casa do cliente — aguardando chegada no CD">Coleta realizada</span>';
   return '<span class="bdg b-dk" title="Ainda nao coletado">Pendente</span>';
@@ -1197,7 +1203,7 @@ function renderCol(tipo){
   else if(tipo==='ri')  data=[...RI];
   else if(tipo==='em')  data=[...EM];
   else if(tipo==='rea') data=[...REA];
-  else                  data=[...COL, ...REA];
+  else                  data=[...COLETAS_ARQ];   // 'Todos' = tudo que veio na planilha
 
   if(tipo==='at'||tipo==='all'){
     const uf=document.getElementById(`f${tipo}-uf`)?.value;
@@ -1223,7 +1229,8 @@ function renderCol(tipo){
     const st=document.getElementById('fall-st')?.value;
     if(st) data=data.filter(c=>c.prazo_status===st);
     const cf=document.getElementById('fall-col')?.value;
-    if(cf==='pendente') data=data.filter(c=>!c.coletaRealizada);
+    if(cf==='pendente') data=data.filter(c=>!c.coletaRealizada && !c.cancelada);
+    else if(cf==='cancelada') data=data.filter(c=>c.cancelada);
     else if(cf==='realizada') data=data.filter(c=>c.coletaRealizada && !c.recebidoCD);
     else if(cf==='cd') data=data.filter(c=>c.recebidoCD);
   }
@@ -1254,7 +1261,6 @@ function renderCol(tipo){
       <td>${prazoBar(c)}</td>
       <td>${stBdg(c.prazo_status)}</td>
       <td>${colBdg(c)}</td>
-      <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
       ${andCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
@@ -1268,7 +1274,6 @@ function renderCol(tipo){
       <td>${prazoBar(c)}</td>
       <td>${atrasoEm(c)}</td>
       <td>${colBdg(c)}</td>
-      <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
       ${andCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
@@ -1292,9 +1297,8 @@ function renderCol(tipo){
       <td>${esc(c.transportadora||'—')}</td>
       <td><span class="bdg b-acc">${esc(c.uf)}</span></td>
       <td>${prazoBar(c)}</td>
-      <td>${stBdg(c.prazo_status)}</td>
+      <td>${c.prazo_status ? stBdg(c.prazo_status) : '<span class="bdg b-dk">—</span>'}</td>
       <td>${colBdg(c)}</td>
-      <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
       ${andCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
@@ -1395,7 +1399,7 @@ function openDetail(item){
       ${isColeta ? `<dt>Coleta na casa do cliente</dt><dd>${item.coletaRealizada ? 'Realizada (data exata não registrada na base)' : 'Ainda não realizada'}</dd><dt>Recebimento no CD</dt><dd>${item.recebidoCD ? 'Confirmado (romaneio de entrada)' : 'Não confirmado'}</dd>` : ''}
       ${isColeta ? `<dt>Prazo</dt><dd>20 dias corridos (protocolo → recebimento no CD)</dd>` : `<dt>Prazo</dt><dd>Sem SLA definido para tratativas</dd>`}
       <dt>Status atual (sistema)</dt><dd>${esc(item.status)||'Não informado'}</dd>
-      ${isColeta ? `<dt>Andamento</dt><dd>${esc(item.andamento)||'—'}</dd>` : ''}
+      ${isColeta ? `<dt>Andamento</dt><dd>${esc(item.andamento)||'—'}</dd><dt>Andamento atualizado em</dt><dd class="mono">${andData(item) ? andData(item).txt : '—'} <small>(registro da equipe)</small></dd>` : ''}
       ${!isColeta && item.grupo ? `<dt>O que fazer</dt><dd>${esc(GRUPO_ACAO[item.grupo]||GRUPO_ACAO.outros)}</dd>` : ''}
       <dt>Responsável</dt><dd>${esc(item.usuario)||'Não informado'}</dd>
       <dt>Valor</dt><dd class="mono">${item.valor!=null ? 'R$ '+Math.abs(item.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '—'}</dd>
@@ -1450,7 +1454,7 @@ function renderDash(){
   document.getElementById('bdg-at').textContent=K.at;
   document.getElementById('bdg-ri').textContent=K.ri;
   document.getElementById('bdg-em').textContent=K.em;
-  document.getElementById('bdg-col-all').textContent=K.col_total;
+  document.getElementById('bdg-col-all').textContent=K.col_all;
   document.getElementById('bdg-trat').textContent=K.trat_total;
   document.getElementById('bdg-hist').textContent=K.hist;
   document.getElementById('sb-ref').textContent='Ref.: '+D.ref;
@@ -1728,20 +1732,33 @@ function exportCSV(dados, nomeArquivo) {
   a.href = url; a.download = nomeArquivo; a.click();
   URL.revokeObjectURL(url);
 }
-// andamento dos casos pendentes: texto livre (com sugestoes) gravado no proprio caso
-const ANDAMENTOS = ['Aguardando agendamento','Coleta agendada','Cliente ausente','Transportadora acionada','Sem retorno do cliente','Reagendada','Aguardando chegada no CD'];
-function andCell(c){
-  const tip = c.andamento_em ? 'Atualizado em ' + new Date(c.andamento_em).toLocaleDateString('pt-BR') : '';
-  return `<td onclick="event.stopPropagation()">${c.id ? `<input class="and-in" list="and-list" data-id="${esc(c.id)}" value="${esc(c.andamento||'')}" placeholder="Informar andamento…" title="${esc(tip)}" onchange="andSet(this.dataset.id,this.value)" style="min-width:170px;padding:4px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}</td>`;
+// andamento dos casos pendentes: texto livre (com sugestoes) + data em que a EQUIPE atualizou (nao e data do Innovaro)
+function andData(c){
+  if (!c.andamento_em) return null; const d = new Date(c.andamento_em); if (isNaN(d)) return null;
+  const h = new Date(), dias = Math.round((new Date(h.getFullYear(),h.getMonth(),h.getDate()) - new Date(d.getFullYear(),d.getMonth(),d.getDate()))/86400000);
+  return { txt:d.toLocaleDateString('pt-BR'), dias };
+}
+function andCell(c, lista){
+  const dt = andData(c), cor = !dt ? 'var(--tx3)' : dt.dias<=0 ? '#16A34A' : dt.dias<=2 ? '#D97706' : '#DC2626';
+  const rel = !dt ? 'sem atualização' : dt.dias<=0 ? 'hoje' : dt.dias===1 ? 'ontem' : 'há '+dt.dias+' dias';
+  return `<td onclick="event.stopPropagation()">${c.id ? `<input class="and-in" list="${lista||'and-list'}" data-id="${esc(c.id)}" value="${esc(c.andamento||'')}" placeholder="Informar andamento…" onchange="andSet(this.dataset.id,this.value)" style="min-width:170px;padding:4px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}</td>
+    <td onclick="event.stopPropagation()" style="white-space:nowrap" title="Data em que a equipe atualizou o andamento (não é data do Innovaro)"><b style="color:${cor}">${dt ? dt.txt : '—'}</b><br><small style="color:var(--tx3)">${rel}</small>${c.id && c.andamento ? ` <button type="button" class="and-hoje" title="Confirmar que revisei hoje (mantém o texto, só atualiza a data)" onclick="andHoje('${esc(c.id)}')">✓ hoje</button>` : ''}</td>`;
 }
 function andSet(id, v){
   if (!DB){ toast('Entre com sua conta para gravar o andamento.', {type:'warn'}); return; }
-  const txt = String(v||'').trim();
-  DB.doc('cases/'+id).set({ andamento:txt||null, andamento_em:isoNow() }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
-  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento:txt||null, andamento_em:isoNow() };
-  toast(txt ? 'Andamento salvo.' : 'Andamento removido.', {type:'ok', ms:1800});
+  const txt = String(v||'').trim(), agora = isoNow();
+  DB.doc('cases/'+id).set({ andamento:txt||null, andamento_em:agora }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
+  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento:txt||null, andamento_em:agora };
+  toast(txt ? 'Andamento salvo com a data de hoje.' : 'Andamento removido.', {type:'ok', ms:1800});
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   scheduleRender();
+}
+function andHoje(id){
+  if (!DB){ toast('Entre com sua conta para gravar.', {type:'warn'}); return; }
+  const agora = isoNow();
+  DB.doc('cases/'+id).set({ andamento_em:agora }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
+  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento_em:agora };
+  toast('Marcado como revisado hoje.', {type:'ok', ms:1800}); scheduleRender();
 }
 function exportColetas(tipo) {
   const hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
@@ -1751,14 +1768,14 @@ function exportColetas(tipo) {
   else if(tipo==='em') { dados=EM;  nome=`Coletas_NoPrazo_${hoje}.csv`; }
   else if(tipo==='rea'){ dados=REA; nome=`Coletas_Realizadas_${hoje}.csv`; }
   else if(tipo==='hist'){ dados=HIST; nome=`Coletas_Historico_${hoje}.csv`; }
-  else                 { dados=[...COL,...REA]; nome=`Coletas_Todas_${hoje}.csv`; }
+  else                 { dados=[...COLETAS_ARQ]; nome=`Coletas_Todas_${hoje}.csv`; }
 
   const exp = dados.map(c=>({
     'NF': c.nf||'', 'Cliente': c.cliente||'', 'CPF': c.cpf||'', 'Transportadora': c.transportadora||'',
     'UF': c.uf||'', 'Cidade': c.cidade||'', 'Data Programada': c.data_programacao||'',
     'Data Solicitação': c.data_solicitacao||'', 'Dias em aberto': c.dias||0,
     'Status Prazo': c.prazo_status||'', 'Prazo usado (%)': c.prazo_pct||0,
-    'Situação': c.status||'', 'Andamento': c.andamento||'', 'Usuário': c.usuario||'', 'Descrição': c.descricao||'',
+    'Andamento': c.andamento||'', 'Andamento atualizado em': andData(c) ? andData(c).txt : '', 'Usuário': c.usuario||'', 'Descrição': c.descricao||'',
   }));
   exportCSV(exp, nome);
 }
@@ -2254,9 +2271,10 @@ function pwHero(kick, title, sub, stats, acao){
     <div class="pw-stats">${stats.map(([l,v,n,go,sm]) => `<div class="pw-stat"${go?` onclick="${go}" style="cursor:pointer"`:''}><div class="l">${l}</div><div class="v${sm?' sm':''}">${v}</div><div class="n">${n||''}</div></div>`).join('')}</div></div>`;
 }
 const PH_TITLES = { at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD', 'col-all':'Todos os protocolos' };
+const K_ALL = () => COLETAS_ARQ.length;
 function renderProtoHero(){
   const stats = [['Atrasadas', AT.length, `Prazo > ${SLA} dias`, "ir('at')"], ['Em risco', RI.length, 'Entram em atraso em breve', "ir('ri')"], ['No prazo', EM.length, `Dentro dos ${SLA} dias`, "ir('em')"],
-    ['Aguardando CD', REA.length, 'Coleta feita, falta chegar no CD', "ir('rea')"], ['Total em aberto', COL.length + REA.length, 'Protocolos pendentes', "ir('col-all')"]];
+    ['Aguardando CD', REA.length, 'Coleta feita, falta chegar no CD', "ir('rea')"], ['Total de coletas', K_ALL(), 'todas as linhas da planilha', "ir('col-all')"]];
   document.querySelectorAll('[data-ph]').forEach(el => { el.innerHTML = pwHero('Coleta Reversa', PH_TITLES[el.dataset.ph]||'', `Prazo de ${SLA} dias para a coleta · atualiza sozinho a cada importação.`, stats); });
 }
 function renderDashBlocks(){
@@ -2273,7 +2291,7 @@ function renderDashBlocks(){
   const grupos = Object.keys(gNomes).map(g => [g, TRAT.filter(t => (t.grupo||'outros')===g).length]).filter(a=>a[1]).sort((a,b)=>b[1]-a[1]);
 
   const hero = pwHero('Visão geral', 'Painel de devoluções', 'Tudo em uma página · clique em qualquer número ou gráfico para abrir o detalhe.', [
-    ['Coleta reversa em atraso', K.at, `${K.ri} em risco · ${K.rea} aguardando CD`, "ir('at')"],
+    ['Total de coletas reversas', K.col_all, `${K.at} atrasadas · ${K.ri} em risco · ${K.rea} aguardando CD`, "ir('col-all')"],
     ['Apontamentos em atraso', slaAt.length, `${slaHj} vencem hoje`, "ir('sla')"],
     ['Tarefas em aberto', A.aberto, `atendimento de ${IND.ano}: ${fmt1(A.taxa)}%`, "ir('ind')"],
     [`Perdas ${anoP}`, brl(vSum(pAno)), `${pAno.length} casos`, "ir('perdas')", true],
@@ -2754,54 +2772,71 @@ function deriveNR(t){
   return { ...t, __tipo:'tratativa', sit:NR_TIPOS[key]||t.tipo_devolucao, kind: /pagar/.test(key) ? 'ap' : 'nr', d, ano:d?d.getFullYear():null, mes:d?d.getMonth()+1:null,
     dias: d ? daysBetween(d, new Date()) : null, valor_est: pwValores(t).valorEst || 0, carr: indNome(t.transportadora), canal: canalOf(t.usuario) };
 }
-const NR_ST = { kind:'', sit:'', carrs:new Set(), q:'' };
-let NR_LISTA = [];
-function nrSet(k, v){
-  if (k==='kind') NR_ST.kind = (NR_ST.kind===v ? '' : v);
-  else if (k==='sit') NR_ST.sit = (NR_ST.sit===v ? '' : v);
-  else if (k==='carr'){ NR_ST.carrs.has(v) ? NR_ST.carrs.delete(v) : NR_ST.carrs.add(v); }
-  else if (k==='q') NR_ST.q = norm(v).trim();
-  else if (k==='limpar'){ NR_ST.kind=''; NR_ST.sit=''; NR_ST.carrs.clear(); NR_ST.q=''; const i=document.getElementById('nr-q'); if(i) i.value=''; }
+const NR_PG = {
+  ap:{ kick:'Transportadora', titulo:'Transportadora a pagar', sub:'Valores que a transportadora precisa pagar · acompanhamento por andamento, sem índice de atraso.', lista:'and-list-ap', sits:['transportadora_a_pagar','transportadora_a_pagar_2'] },
+  nr:{ kick:'Transportadora', titulo:'Produto não retornou', sub:'Produtos que a transportadora não devolveu · acompanhamento por andamento, sem índice de atraso.', lista:'and-list-nr', sits:['produto_nao_retornou','produto_nao_retornou_2'] } };
+const NR_ST = { ap:{ sit:'', carrs:new Set(), and:'', q:'' }, nr:{ sit:'', carrs:new Set(), and:'', q:'' } };
+const NR_LISTA = { ap:[], nr:[] };
+function nrSet(sc, k, v){
+  const st = NR_ST[sc];
+  if (k==='sit') st.sit = (st.sit===v ? '' : v);
+  else if (k==='carr'){ st.carrs.has(v) ? st.carrs.delete(v) : st.carrs.add(v); }
+  else if (k==='and') st.and = (st.and===v ? '' : v);
+  else if (k==='q') st.q = norm(v).trim();
+  else if (k==='limpar'){ st.sit=''; st.carrs.clear(); st.and=''; st.q=''; const i=document.getElementById('nr-q-'+sc); if (i) i.value=''; }
   renderNR();
 }
-function renderNR(){
-  if (!document.getElementById('panel-nr')) return;
-  document.getElementById('bdg-nr').textContent = NR.length;
-  const f = (x, ign) => { ign = ign||[]; return (ign.includes('kind') || !NR_ST.kind || x.kind===NR_ST.kind) && (ign.includes('sit') || !NR_ST.sit || sitKey(x.sit)===NR_ST.sit) &&
-    (ign.includes('carr') || !NR_ST.carrs.size || NR_ST.carrs.has(x.carr)) && (!NR_ST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(NR_ST.q)); };
-  const base = NR.filter(x=>f(x)), ap = base.filter(x=>x.kind==='ap'), nr = base.filter(x=>x.kind==='nr'), soma = a => a.reduce((t,x)=>t+x.valor_est,0);
-  document.getElementById('ph-nr').innerHTML = pwHero('Transportadora', 'A pagar e Não retornou', 'Casos à parte, sem índice de atraso: acompanhamento do que a transportadora precisa pagar e do produto que não retornou.',
-    [['Total de casos', base.length, 'no filtro atual'], ['Transportadora a pagar', ap.length, brl(soma(ap)), "nrSet('kind','ap')"], ['Produto não retornou', nr.length, brl(soma(nr)), "nrSet('kind','nr')"], ['Valor estimado', brl(soma(base)), 'título, nota de saída ou unitário', null, true]]);
-  const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
-  const sits = Object.entries(NR_TIPOS), carrs = [...new Set(NR.map(x=>x.carr))].map(c => ({ c, n:NR.filter(x=>x.carr===c && f(x,['carr'])).length })).sort((a,b)=>b.n-a.n);
-  document.getElementById('nr-fbody').innerHTML =
-    `<div class="ind-fr"><b>Tipo</b><div>${chip(!NR_ST.kind, "nrSet('kind','')", 'Todos', NR.filter(x=>f(x,['kind'])).length)}${chip(NR_ST.kind==='ap', "nrSet('kind','ap')", 'Transportadora a pagar', NR.filter(x=>x.kind==='ap'&&f(x,['kind'])).length)}${chip(NR_ST.kind==='nr', "nrSet('kind','nr')", 'Produto não retornou', NR.filter(x=>x.kind==='nr'&&f(x,['kind'])).length)}</div></div>
-     <div class="ind-fr"><b>Situação</b><div>${sits.map(([k,n]) => chip(NR_ST.sit===k, `nrSet('sit','${k}')`, n, NR.filter(x=>sitKey(x.sit)===k && f(x,['sit'])).length)).join('')}</div></div>
-     <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o => chip(NR_ST.carrs.has(o.c), `nrSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>`;
-  document.getElementById('nr-limpar').style.visibility = (NR_ST.kind || NR_ST.sit || NR_ST.carrs.size || NR_ST.q) ? 'visible' : 'hidden';
-
-  if (window.Chart && document.getElementById('panel-nr').classList.contains('on')){
-    const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
-    const opt = { responsive:true, maintainAspectRatio:false, animation:{duration:400}, plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } } };
-    const cc = carrs.filter(o=>o.n).map(o=>o.c), baseC = NR.filter(x=>f(x,['carr']));
-    if (charts.nrCar) charts.nrCar.destroy();
-    charts.nrCar = new Chart(document.getElementById('nr-ch-car'), { type:'bar', data:{ labels:cc, datasets:[{ label:'Transportadora a pagar', data:cc.map(c=>baseC.filter(x=>x.carr===c&&x.kind==='ap').length), backgroundColor:'#F43F5E' }, { label:'Produto não retornou', data:cc.map(c=>baseC.filter(x=>x.carr===c&&x.kind==='nr').length), backgroundColor:'#7C3AED' }] },
-      options:{ ...opt, indexAxis:'y', onClick:(e,els)=>{ if (els.length) nrSet('carr', cc[els[0].index]); }, scales:{ x:{ stacked:true, beginAtZero:true, ticks:{color:tick, precision:0}, grid:{color:grid} }, y:{ stacked:true, ticks:{color:tick}, grid:{display:false} } } } });
-    const baseM = NR.filter(x=>f(x)&&x.d), mk = [...new Set(baseM.map(x=>x.ano+'-'+String(x.mes).padStart(2,'0')))].sort();
-    if (charts.nrMes) charts.nrMes.destroy();
-    charts.nrMes = new Chart(document.getElementById('nr-ch-mes'), { type:'bar', data:{ labels:mk.map(k=>MESES[+k.split('-')[1]-1]+'/'+k.slice(2,4)), datasets:[{ label:'Transportadora a pagar', data:mk.map(k=>baseM.filter(x=>x.kind==='ap'&&x.ano+'-'+String(x.mes).padStart(2,'0')===k).length), backgroundColor:'#F43F5E' }, { label:'Produto não retornou', data:mk.map(k=>baseM.filter(x=>x.kind==='nr'&&x.ano+'-'+String(x.mes).padStart(2,'0')===k).length), backgroundColor:'#7C3AED' }] },
-      options:{ ...opt, scales:{ x:{ stacked:true, ticks:{color:tick}, grid:{display:false} }, y:{ stacked:true, beginAtZero:true, ticks:{color:tick, precision:0}, grid:{color:grid} } } } });
-  }
-  const lista = base.slice().sort((a,b)=>(b.dias||0)-(a.dias||0)); NR_LISTA = lista;
-  document.getElementById('cnt-nr').textContent = lista.length + ' caso' + (lista.length!==1?'s':'');
-  document.getElementById('tb-nr').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>
-    <td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td>${x.valor_est?brl(x.valor_est):'—'}</td>
-    <td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td></tr>`).join('') + (lista.length>300 ? `<tr><td colspan="9" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '')
-    || '<tr><td colspan="9" style="color:var(--tx3);padding:14px">Nenhum caso. Importe o arquivo de Tratativas Transportadora.</td></tr>';
+function nrSkeleton(sc){
+  const el = document.getElementById('panel-nr-'+sc); if (!el || el.dataset.ok) return; el.dataset.ok = '1';
+  el.innerHTML = `<div class="pworld" id="ph-nr-${sc}"></div>
+    <div class="ind-f"><div class="ind-f-top"><input id="nr-q-${sc}" placeholder="Buscar cliente, NF ou CPF..." oninput="nrSet('${sc}','q',this.value)"><button class="btn-exp" type="button" id="nr-limpar-${sc}" onclick="nrSet('${sc}','limpar')">Limpar filtros</button></div><div id="nr-fbody-${sc}"></div></div>
+    <div class="pworld"><div class="pw-grid even"><div class="pw-card"><h3>Casos por transportadora</h3><div class="s">Clique numa barra para filtrar</div><div class="pw-chart"><canvas id="nr-ch-car-${sc}"></canvas></div></div><div class="pw-card"><h3>Casos por mês de abertura</h3><div class="s">Quando o caso foi aberto</div><div class="pw-chart"><canvas id="nr-ch-mes-${sc}"></canvas></div></div></div></div>
+    <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos</b><span class="fcnt" id="cnt-nr-${sc}"></span><button class="btn-exp" onclick="nrExport('${sc}')">Exportar CSV</button></div>
+    <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Aberto em</th><th>Dias parado</th><th>Valor</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th></tr></thead><tbody id="tb-nr-${sc}"></tbody></table></div></div>`;
 }
-function nrExport(){
-  if (!NR_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(NR_LISTA.map(x => ({ 'Situação':x.sit, 'Cliente':x.cliente||'', 'CPF':x.cpf||'', 'NF':x.nf||'', 'Classe':x.classe||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Aberto em':x.data_solicitacao||'', 'Dias parado':x.dias==null?'':x.dias, 'Valor estimado':x.valor_est||'', 'Responsável':x.usuario||'', 'Canal':x.canal, 'Descrição':x.descricao||'' })), 'a_pagar_nao_retornou');
+function renderNR(){ ['ap','nr'].forEach(renderNRp); }
+function renderNRp(sc){
+  if (!document.getElementById('panel-nr-'+sc)) return;
+  nrSkeleton(sc);
+  const pg = NR_PG[sc], st = NR_ST[sc], todos = NR.filter(x => x.kind===sc);
+  document.getElementById('bdg-nr-'+sc).textContent = todos.length;
+  const f = (x, ign) => { ign = ign||[]; return (ign.includes('sit') || !st.sit || sitKey(x.sit)===st.sit) && (ign.includes('carr') || !st.carrs.size || st.carrs.has(x.carr)) &&
+    (ign.includes('and') || !st.and || (st.and==='sem' ? !x.andamento : !!x.andamento)) && (!st.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(st.q)); };
+  const base = todos.filter(x=>f(x)), soma = a => a.reduce((t,x)=>t+x.valor_est,0);
+  const hojeAtu = base.filter(x => { const d = andData(x); return d && d.dias<=0; }).length;
+  document.getElementById('ph-nr-'+sc).innerHTML = pwHero(pg.kick, pg.titulo, pg.sub,
+    [['Total de casos', base.length, 'no filtro atual'], ['Valor estimado', brl(soma(base)), 'título, nota de saída ou unitário', null, true], ['Sem andamento', base.filter(x=>!x.andamento).length, 'ainda sem registro', `nrSet('${sc}','and','sem')`], ['Atualizados hoje', hojeAtu, 'andamento revisado hoje']]);
+  const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
+  const carrs = [...new Set(todos.map(x=>x.carr))].map(c => ({ c, n:todos.filter(x=>x.carr===c && f(x,['carr'])).length })).sort((a,b)=>b.n-a.n);
+  document.getElementById('nr-fbody-'+sc).innerHTML =
+    `<div class="ind-fr"><b>Situação</b><div>${pg.sits.map(k => chip(st.sit===k, `nrSet('${sc}','sit','${k}')`, NR_TIPOS[k], todos.filter(x=>sitKey(x.sit)===k && f(x,['sit'])).length)).join('')}</div></div>
+     <div class="ind-fr"><b>Andamento</b><div>${chip(!st.and, `nrSet('${sc}','and','')`, 'Todos', todos.filter(x=>f(x,['and'])).length)}${chip(st.and==='sem', `nrSet('${sc}','and','sem')`, 'Sem andamento', todos.filter(x=>!x.andamento && f(x,['and'])).length)}${chip(st.and==='com', `nrSet('${sc}','and','com')`, 'Com andamento', todos.filter(x=>!!x.andamento && f(x,['and'])).length)}</div></div>
+     <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o => chip(st.carrs.has(o.c), `nrSet('${sc}','carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>`;
+  document.getElementById('nr-limpar-'+sc).style.visibility = (st.sit || st.carrs.size || st.and || st.q) ? 'visible' : 'hidden';
+
+  if (window.Chart && document.getElementById('panel-nr-'+sc).classList.contains('on')){
+    const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
+    const cor = sc==='ap' ? '#F43F5E' : '#7C3AED', opt = { responsive:true, maintainAspectRatio:false, animation:{duration:400}, plugins:{ legend:{ display:false } } };
+    const baseC = todos.filter(x=>f(x,['carr'])), cc = carrs.filter(o=>o.n).map(o=>o.c);
+    if (charts['nrCar'+sc]) charts['nrCar'+sc].destroy();
+    charts['nrCar'+sc] = new Chart(document.getElementById('nr-ch-car-'+sc), { type:'bar', data:{ labels:cc, datasets:[{ data:cc.map(c=>baseC.filter(x=>x.carr===c).length), backgroundColor:cor, borderRadius:6 }] },
+      options:{ ...opt, indexAxis:'y', onClick:(e,els)=>{ if (els.length) nrSet(sc,'carr',cc[els[0].index]); }, scales:{ x:{ beginAtZero:true, ticks:{color:tick, precision:0}, grid:{color:grid} }, y:{ ticks:{color:tick}, grid:{display:false} } } } });
+    const baseM = base.filter(x=>x.d), mk = [...new Set(baseM.map(x=>x.ano+'-'+String(x.mes).padStart(2,'0')))].sort();
+    if (charts['nrMes'+sc]) charts['nrMes'+sc].destroy();
+    charts['nrMes'+sc] = new Chart(document.getElementById('nr-ch-mes-'+sc), { type:'bar', data:{ labels:mk.map(k=>MESES[+k.split('-')[1]-1]+'/'+k.slice(2,4)), datasets:[{ data:mk.map(k=>baseM.filter(x=>x.ano+'-'+String(x.mes).padStart(2,'0')===k).length), backgroundColor:cor, borderRadius:6 }] },
+      options:{ ...opt, scales:{ x:{ ticks:{color:tick}, grid:{display:false} }, y:{ beginAtZero:true, ticks:{color:tick, precision:0}, grid:{color:grid} } } } });
+  }
+  const lista = base.slice().sort((a,b)=>(b.dias||0)-(a.dias||0)); NR_LISTA[sc] = lista;
+  document.getElementById('cnt-nr-'+sc).textContent = lista.length + ' caso' + (lista.length!==1?'s':'');
+  const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-nr-'+sc);
+  if (!ativo) document.getElementById('tb-nr-'+sc).innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>
+    <td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td>${x.valor_est?brl(x.valor_est):'—'}</td>
+    <td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>${andCell(x, pg.lista)}</tr>`).join('') + (lista.length>300 ? `<tr><td colspan="11" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '')
+    || '<tr><td colspan="11" style="color:var(--tx3);padding:14px">Nenhum caso. Importe o arquivo de Tratativas Transportadora.</td></tr>';
+}
+function nrExport(sc){
+  const l = NR_LISTA[sc]; if (!l || !l.length){ toast('Nada para exportar.', {type:'warn'}); return; }
+  exportCSV(l.map(x => ({ 'Situação':x.sit, 'Cliente':x.cliente||'', 'CPF':x.cpf||'', 'NF':x.nf||'', 'Classe':x.classe||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Aberto em':x.data_solicitacao||'', 'Dias parado':x.dias==null?'':x.dias, 'Valor estimado':x.valor_est||'', 'Responsável':x.usuario||'', 'Canal':x.canal, 'Andamento':x.andamento||'', 'Andamento atualizado em':andData(x)?andData(x).txt:'', 'Descrição':x.descricao||'' })), sc==='ap' ? 'transportadora_a_pagar' : 'produto_nao_retornou');
 }
 
 // ================= MUNDO PERDAS =================
