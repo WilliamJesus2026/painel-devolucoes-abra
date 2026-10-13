@@ -115,9 +115,7 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 .cube-wrap{perspective:240px;width:38px;height:38px;flex-shrink:0}
 .cube{position:relative;width:38px;height:38px;transform-style:preserve-3d;animation:cubeSpin 16s linear infinite}
 .cube i{position:absolute;inset:0;display:grid;place-items:center;font:800 17px/1 -apple-system,'Segoe UI',sans-serif;font-style:normal;color:#fff;
-  border:1px solid rgba(255,255,255,.6);background:linear-gradient(135deg,#FFC400,#E11D2E);text-shadow:0 1px 2px rgba(0,0,0,.45);backface-visibility:visible}
-.cube .f2,.cube .f4{background:linear-gradient(135deg,#E11D2E,#FFC400)}
-.cube .f5{background:#FFC400}.cube .f6{background:#E11D2E}
+  border:1px solid rgba(255,255,255,.55);background:linear-gradient(135deg,rgba(255,255,255,.28),rgba(46,134,222,.7));backface-visibility:visible}
 .cube .f1{transform:translateZ(19px)} .cube .f2{transform:rotateY(90deg) translateZ(19px)} .cube .f3{transform:rotateY(180deg) translateZ(19px)}
 .cube .f4{transform:rotateY(-90deg) translateZ(19px)} .cube .f5{transform:rotateX(90deg) translateZ(19px)} .cube .f6{transform:rotateX(-90deg) translateZ(19px)}
 @keyframes cubeSpin{from{transform:rotateX(-18deg) rotateY(0)}to{transform:rotateX(-18deg) rotateY(360deg)}}
@@ -660,7 +658,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <span class="fcnt" id="cnt-at"></span><button class="btn-exp" onclick="exportColetas('at')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Situação</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Situação</th><th>Andamento</th><th>Descrição</th></tr></thead>
         <tbody id="tb-at"></tbody></table>
       </div></div>
     </div>
@@ -674,7 +672,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <span class="fcnt" id="cnt-ri"></span><button class="btn-exp" onclick="exportColetas('ri')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Atrasa em</th><th>Coleta</th><th>Situação</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Atrasa em</th><th>Coleta</th><th>Situação</th><th>Andamento</th><th>Descrição</th></tr></thead>
         <tbody id="tb-ri"></tbody></table>
       </div></div>
     </div>
@@ -731,7 +729,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <span class="fcnt" id="cnt-all"></span><button class="btn-exp" onclick="exportColetas('col')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Situação</th><th>Descrição</th></tr></thead>
+        <table><thead><tr><th>NF</th><th>Cliente</th><th>Transportadora</th><th>UF</th><th>Prazo usado</th><th>Prazo</th><th>Coleta</th><th>Situação</th><th>Andamento</th><th>Descrição</th></tr></thead>
         <tbody id="tb-all"></tbody></table>
       </div></div>
     </div>
@@ -902,6 +900,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
 <div id="palette" role="dialog" aria-modal="true" aria-label="Busca rápida"><div class="pal-card"><input class="pal-in" id="pal-in" placeholder="Buscar cliente, NF, CPF, transportadora… ou digitar um comando" autocomplete="off"><div class="pal-list" id="pal-list"></div><div class="pal-foot">↑↓ navegar · Enter abrir · Esc fechar</div></div></div>
 <div id="toasts" aria-live="polite"></div>
+<datalist id="and-list"><option value="Aguardando agendamento"><option value="Coleta agendada"><option value="Cliente ausente"><option value="Transportadora acionada"><option value="Sem retorno do cliente"><option value="Reagendada"><option value="Aguardando chegada no CD"></datalist>
 <div id="dropOverlay"><div class="drop-box"><b>Solte o arquivo aqui</b><span>Coleta Reversa ou Tratativas (.csv / .xlsx)</span></div></div>
 <div id="confirmModal" class="cmodal" role="dialog" aria-modal="true"><div class="cm-card"><div class="cm-title"></div><div class="cm-body"></div><div class="cm-act"><button class="cm-no btn-exp" type="button">Cancelar</button><button class="cm-ok btn-exp" type="button" style="background:var(--acc);color:#fff;border-color:var(--acc)">Confirmar</button></div></div></div>
 <div class="ov" id="ov" onclick="closeDetail()"></div>
@@ -1192,6 +1191,7 @@ function initFiltros(){
 }
 
 function renderCol(tipo){
+  if (document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('and-in')) return;   // nao apaga o que esta sendo digitado
   let rows=[], data=[];
   if(tipo==='at')       data=[...AT];
   else if(tipo==='ri')  data=[...RI];
@@ -1255,6 +1255,7 @@ function renderCol(tipo){
       <td>${stBdg(c.prazo_status)}</td>
       <td>${colBdg(c)}</td>
       <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
+      ${andCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
     document.getElementById('tb-at').innerHTML=rows.join('');
@@ -1268,6 +1269,7 @@ function renderCol(tipo){
       <td>${atrasoEm(c)}</td>
       <td>${colBdg(c)}</td>
       <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
+      ${andCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
     document.getElementById('tb-ri').innerHTML=rows.join('');
@@ -1293,6 +1295,7 @@ function renderCol(tipo){
       <td>${stBdg(c.prazo_status)}</td>
       <td>${colBdg(c)}</td>
       <td style="font-size:11px;color:var(--tx2)">${esc(c.status||'—')}</td>
+      ${andCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
     </tr>`);
     document.getElementById('tb-all').innerHTML=rows.join('');
@@ -1392,6 +1395,7 @@ function openDetail(item){
       ${isColeta ? `<dt>Coleta na casa do cliente</dt><dd>${item.coletaRealizada ? 'Realizada (data exata não registrada na base)' : 'Ainda não realizada'}</dd><dt>Recebimento no CD</dt><dd>${item.recebidoCD ? 'Confirmado (romaneio de entrada)' : 'Não confirmado'}</dd>` : ''}
       ${isColeta ? `<dt>Prazo</dt><dd>20 dias corridos (protocolo → recebimento no CD)</dd>` : `<dt>Prazo</dt><dd>Sem SLA definido para tratativas</dd>`}
       <dt>Status atual (sistema)</dt><dd>${esc(item.status)||'Não informado'}</dd>
+      ${isColeta ? `<dt>Andamento</dt><dd>${esc(item.andamento)||'—'}</dd>` : ''}
       ${!isColeta && item.grupo ? `<dt>O que fazer</dt><dd>${esc(GRUPO_ACAO[item.grupo]||GRUPO_ACAO.outros)}</dd>` : ''}
       <dt>Responsável</dt><dd>${esc(item.usuario)||'Não informado'}</dd>
       <dt>Valor</dt><dd class="mono">${item.valor!=null ? 'R$ '+Math.abs(item.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '—'}</dd>
@@ -1724,6 +1728,21 @@ function exportCSV(dados, nomeArquivo) {
   a.href = url; a.download = nomeArquivo; a.click();
   URL.revokeObjectURL(url);
 }
+// andamento dos casos pendentes: texto livre (com sugestoes) gravado no proprio caso
+const ANDAMENTOS = ['Aguardando agendamento','Coleta agendada','Cliente ausente','Transportadora acionada','Sem retorno do cliente','Reagendada','Aguardando chegada no CD'];
+function andCell(c){
+  const tip = c.andamento_em ? 'Atualizado em ' + new Date(c.andamento_em).toLocaleDateString('pt-BR') : '';
+  return `<td onclick="event.stopPropagation()">${c.id ? `<input class="and-in" list="and-list" data-id="${esc(c.id)}" value="${esc(c.andamento||'')}" placeholder="Informar andamento…" title="${esc(tip)}" onchange="andSet(this.dataset.id,this.value)" style="min-width:170px;padding:4px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}</td>`;
+}
+function andSet(id, v){
+  if (!DB){ toast('Entre com sua conta para gravar o andamento.', {type:'warn'}); return; }
+  const txt = String(v||'').trim();
+  DB.doc('cases/'+id).set({ andamento:txt||null, andamento_em:isoNow() }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
+  DB_CASES[id] = { ...(DB_CASES[id]||{}), andamento:txt||null, andamento_em:isoNow() };
+  toast(txt ? 'Andamento salvo.' : 'Andamento removido.', {type:'ok', ms:1800});
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  scheduleRender();
+}
 function exportColetas(tipo) {
   const hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
   let dados, nome;
@@ -1739,7 +1758,7 @@ function exportColetas(tipo) {
     'UF': c.uf||'', 'Cidade': c.cidade||'', 'Data Programada': c.data_programacao||'',
     'Data Solicitação': c.data_solicitacao||'', 'Dias em aberto': c.dias||0,
     'Status Prazo': c.prazo_status||'', 'Prazo usado (%)': c.prazo_pct||0,
-    'Situação': c.status||'', 'Usuário': c.usuario||'', 'Descrição': c.descricao||'',
+    'Situação': c.status||'', 'Andamento': c.andamento||'', 'Usuário': c.usuario||'', 'Descrição': c.descricao||'',
   }));
   exportCSV(exp, nome);
 }

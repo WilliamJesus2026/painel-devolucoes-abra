@@ -81,3 +81,7 @@ Aba própria (menu **Transportadora**) para as situações *Transportadora a pag
 ## Canais e motivo de apontamento
 
 Canais por usuário: Relacionamento (padrão), Marketplace (Thairiny, João) e Logística (Dayane Costa), editáveis em "Definir usuários por canal" (`config/canais`). No SLA de Apontamento cada caso tem o motivo de não ter atualizado a tarefa (`motivo_apont`), com filtro. No Controle de Situações, pendências criadas antes de 01/07/2026 contam como finalizadas.
+
+## Andamento na Coleta Reversa
+
+Em Atrasados, Em risco e Todos há a coluna **Andamento**, ao lado de Situação: texto livre (com sugestões) para registrar o andamento de cada caso pendente. Fica salvo no caso (ndamento) e vai no CSV e no detalhe.
