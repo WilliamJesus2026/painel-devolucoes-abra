@@ -133,3 +133,11 @@ No SLA de Apontamento, atualizar o andamento (ou marcar '✓ hoje') reinicia o p
 Menu **Administração → Usuários e acessos** (só para administradores; padrão: admin1@abracadabra.com.br, definido no código e nas regras do banco). O administrador cria o login (e-mail @abracadabra.com.br) por uma sessão secundária do Firebase, para não perder a própria sessão, recebe uma senha provisória (mostrada uma vez) e pode enviar e-mail para a pessoa criar a própria senha. Por usuário: papel (usuário/administrador), abas visíveis, pode editar, pode importar, ativo. Perfis rápidos: acesso total, Logística, Perdas/Financeiro e somente consulta. Contas antigas entram na lista no primeiro acesso com acesso total. Os perfis ficam em usuarios/{uid}.
 
 Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia a LEITURA de contas desativadas e só administradores mexem em usuarios. Isolar dados por área (para que ninguém consiga ler outra aba) exigiria separar os dados em coleções por área. Usuários não são excluídos do Firebase Auth pelo painel (só desativados).
+
+## Filtros, detalhamento e desempenho
+
+- Dashboard filtrável por ano, mês, transportadora e canal: números, gráficos e a lista 'Atenção agora' seguem o recorte. SLA de Apontamento também filtra por transportadora e canal. Janeiro a junho aparecem mês a mês no Controle (continuam contados como finalizados).
+- Clicar nos quadradinhos dos indicadores (Dashboard, Controle, SLA, A pagar/Não retornou, Perdas) abre a lista dos casos por trás do número, com busca, ordenação, CSV e clique para abrir o caso; os cartões de transportadora e canal têm 'ver casos'.
+- Desempenho: só a aba aberta é desenhada; o cálculo é reaproveitado até os dados mudarem (DATA_VER); buscas com atraso de 180 ms; tabelas limitadas a 400 linhas.
+- SLA médio precisa da data de finalização: importe uma vez a planilha 'Tarefas em aberto' (xlsx).
+- A cada publicação trocar const BUILD em public/index.html (abas abertas avisam 'Atualizar agora').

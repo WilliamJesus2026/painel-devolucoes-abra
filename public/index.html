@@ -457,6 +457,21 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .hero-chips .hchip{display:none!important}
 .sem-importar .btn-import,.sem-importar .sb-up .up-zone{display:none!important}
 .so-leitura .and-in,.so-leitura .prev-in,.so-leitura .prot-in,.so-leitura .mot-sel,.so-leitura .and-hoje{pointer-events:none;opacity:.55}
+.pw-stat.drillable{position:relative}
+.pw-stat.drillable::after{content:'ver casos ›';position:absolute;right:12px;bottom:9px;font-size:10px;font-weight:700;opacity:0;transition:.15s;color:rgba(255,255,255,.85)}
+.pw-stat.drillable:hover::after,.pw-stat.drillable:focus-visible::after{opacity:1}
+.pw-stat.drillable:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.ind-drill{float:right;border:1px solid var(--bd);background:none;color:var(--tx2);border-radius:6px;font-size:11px;font-weight:700;padding:0 7px;cursor:pointer}
+.ind-drill:hover{border-color:var(--acc);color:var(--acc)}
+.drill{display:none;position:fixed;inset:0;z-index:40;background:rgba(5,10,20,.62);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:18px}
+.drill.on{display:flex}
+.drill-box{background:var(--srf);border:1px solid var(--bd);border-radius:16px;box-shadow:0 30px 80px -20px rgba(0,0,0,.7);width:min(1180px,100%);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.drill-h{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--bd)}
+.drill-h b{font-size:15px}.drill-h small{color:var(--tx3);margin-left:8px}
+.drill-h input{flex:1;min-width:200px;padding:7px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--srf1,var(--srf));color:var(--tx);font-size:13px}
+.drill-b{overflow:auto}
+.drill-b th{cursor:pointer;position:sticky;top:0;background:var(--srf);z-index:1;white-space:nowrap}
+.drill-b th:hover{color:var(--acc)}
 .adm-abas{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
 .adm-abas label{display:flex;gap:6px;align-items:center;font-size:12px;padding:5px 9px;border:1px solid var(--bd);border-radius:8px;cursor:pointer;color:var(--tx2)}
 .adm-abas label:hover{border-color:var(--acc)}
@@ -627,7 +642,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     </label>
     <div class="up-msg" id="up-msg"></div>
     <div id="dbStatus" style="font-size:10px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.5"></div>
-    <div id="contaBox" style="display:none;margin-top:6px;font-size:10.5px;color:rgba(255,255,255,.7)"><div id="contaNome" style="margin-bottom:5px"></div><div style="display:flex;gap:6px"><button class="btn-exp" type="button" onclick="trocarSenha()" style="flex:1;justify-content:center">Trocar senha</button><button class="btn-exp" type="button" onclick="sair()" style="flex:1;justify-content:center">Sair</button></div></div>
+    <div id="contaBox" style="display:none;margin-top:6px;font-size:10.5px;color:rgba(255,255,255,.7)"><div id="contaNome" style="margin-bottom:5px"></div><div style="display:flex;gap:6px"><button class="btn-exp" type="button" onclick="trocarSenha()" style="flex:1;justify-content:center">Trocar senha</button><button class="btn-exp" type="button" onclick="sair()" style="flex:1;justify-content:center">Trocar de usuário</button></div></div>
     <div id="ocultosBox" style="display:none;margin-top:8px"><button class="btn-exp" id="ocultosBtn" type="button" onclick="mostrarOcultos()" style="width:100%;justify-content:center"></button></div>
     <div id="loginBox" style="display:none;margin-top:8px">
       <input type="email" id="login-email" placeholder="seu.email@abracadabra.com.br" class="login-input" autocomplete="username">
@@ -654,6 +669,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
           <span class="tb-ref hc-ref" id="tb-ref">—</span>
         </div>
         <button class="hero-search" type="button" onclick="openPalette()" aria-label="Buscar"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke-width="2" stroke-linecap="round"/></svg><span>Buscar cliente, NF ou CPF</span><kbd>Ctrl K</kbd></button>
+        <button class="hero-search" type="button" id="hero-user" onclick="menuConta()" style="display:none" title="Conta e troca de usuário"><span id="hero-user-n"></span></button>
       </div>
     </div>
   </header>
@@ -673,7 +689,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <div class="filterbar">
         <select class="fsel" id="fat-uf" onchange="renderCol('at')"><option value="">Todas as UFs</option></select>
         <select class="fsel" id="fat-tr" onchange="renderCol('at')"><option value="">Todas as transportadoras</option></select>
-        <input class="fsearch" id="fat-q" placeholder="Buscar nome ou NF..." oninput="renderCol('at')">
+        <input class="fsearch" id="fat-q" placeholder="Buscar nome ou NF..." oninput="debCol('at')">
         <select class="fsel" id="fat-and" onchange="renderCol('at')"><option value="">Todos os andamentos</option></select>
         <span class="fcnt" id="cnt-at"></span><button class="btn-exp" onclick="exportColetas('at')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
@@ -688,7 +704,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <div class="pworld" data-ph="ri"></div>
       <div class="filterbar">
         <select class="fsel" id="fri-uf" onchange="renderCol('ri')"><option value="">Todas as UFs</option></select>
-        <input class="fsearch" id="fri-q" placeholder="Buscar..." oninput="renderCol('ri')">
+        <input class="fsearch" id="fri-q" placeholder="Buscar..." oninput="debCol('ri')">
         <select class="fsel" id="fri-and" onchange="renderCol('ri')"><option value="">Todos os andamentos</option></select>
         <span class="fcnt" id="cnt-ri"></span><button class="btn-exp" onclick="exportColetas('ri')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
@@ -702,7 +718,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <div class="panel" id="panel-em">
       <div class="pworld" data-ph="em"></div>
       <div class="filterbar">
-        <input class="fsearch" id="fem-q" placeholder="Buscar..." oninput="renderCol('em')">
+        <input class="fsearch" id="fem-q" placeholder="Buscar..." oninput="debCol('em')">
         <select class="fsel" id="fem-and" onchange="renderCol('em')"><option value="">Todos os andamentos</option></select>
         <span class="fcnt" id="cnt-em"></span><button class="btn-exp" onclick="exportColetas('em')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
@@ -719,7 +735,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <div class="filterbar">
         <select class="fsel" id="frea-uf" onchange="renderCol('rea')"><option value="">Todas as UFs</option></select>
         <select class="fsel" id="frea-tr" onchange="renderCol('rea')"><option value="">Todas as transportadoras</option></select>
-        <input class="fsearch" id="frea-q" placeholder="Buscar nome ou NF..." oninput="renderCol('rea')">
+        <input class="fsearch" id="frea-q" placeholder="Buscar nome ou NF..." oninput="debCol('rea')">
         <select class="fsel" id="frea-and" onchange="renderCol('rea')"><option value="">Todos os andamentos</option></select>
         <span class="fcnt" id="cnt-rea"></span><button class="btn-exp" onclick="exportColetas('rea')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
@@ -749,7 +765,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         </select>
         <select class="fsel" id="fall-uf" onchange="renderCol('all')"><option value="">Todas as UFs</option></select>
         <select class="fsel" id="fall-tr" onchange="renderCol('all')"><option value="">Todas as transportadoras</option></select>
-        <input class="fsearch" id="fall-q" placeholder="Buscar..." oninput="renderCol('all')">
+        <input class="fsearch" id="fall-q" placeholder="Buscar..." oninput="debCol('all')">
         <select class="fsel" id="fall-and" onchange="renderCol('all')"><option value="">Todos os andamentos</option></select>
         <span class="fcnt" id="cnt-all"></span><button class="btn-exp" onclick="exportColetas('col')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div>
@@ -762,6 +778,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <!-- TRATATIVAS -->
     <div class="panel" id="panel-ind">
       <div class="pworld" id="ph-ind"></div>
+      <details class="ind-f" style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da Dayane.</div></details>
       <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
       <div class="ind-h">Por canal de atendimento</div><div class="ind-sub" id="ind-canais-sub"></div>
       <div class="ind-cars" id="ind-canais" style="margin-bottom:6px"></div>
@@ -773,7 +790,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
           <div class="tbl-scroll" style="max-height:380px"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Motivo</th><th>Qtd.</th></tr></thead><tbody id="tb-ind-pend"></tbody></table></div></div>
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
-      <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — defina o motivo</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
+      <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — andamento e motivo da pendência</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
       <div class="ind-h" style="margin-top:22px">Logística — situações acompanhadas pela Logística</div>
       <div class="ind-f" style="margin:6px 0"><div class="ind-fr" style="border-top:none"><b>Situação</b><div id="ind-log-chips"></div></div></div>
@@ -806,7 +823,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="ind-fr"><b>Filtros</b><div style="flex:1"><div class="filterbar">
         <select class="fsel" id="ftrat-tipo" onchange="renderTrat()"><option value="">Todos os tipos</option></select>
         <select class="fsel" id="ftrat-uf" onchange="renderTrat()"><option value="">Todas as UFs</option></select>
-        <input class="fsearch" id="ftrat-q" placeholder="Buscar cliente, CPF ou NF..." oninput="renderTrat()">
+        <input class="fsearch" id="ftrat-q" placeholder="Buscar cliente, CPF ou NF..." oninput="debTrat()">
         <span class="fcnt" id="cnt-trat"></span><button class="btn-exp" onclick="exportTratativas()"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
       </div></div></div>
       </div>
@@ -1082,6 +1099,7 @@ function deriveTratativaLive(t){
 }
 
 function rebuildData(){
+  DATA_VER++;
   const coletaMap = {};
   SEED_COLETA.forEach(c => coletaMap[coletaKey(c.chave)] = c);
   const tratMap = {};
@@ -1185,11 +1203,7 @@ function ir(id){
   if(panel) panel.classList.add('on');
   if(nav)   nav.classList.add('on');
   document.getElementById('tb-title').textContent = TITLES[id]||id;
-  renderPerdasActive();
-  if (id==='ind') renderInd();
-  if (id==='sla') renderSla();
-  if (id==='nr-ap' || id==='nr-nr') renderNR();
-  if (id==='adm') renderAdm();
+  renderPanel(id);
   window.scrollTo({top:0});
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1303,7 +1317,7 @@ function renderCol(tipo){
 
   if(tipo==='rea'){
     data.sort((a,b)=>(b.dias||0)-(a.dias||0));
-    rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
+    rows=data.slice(0,COL_MAX).map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente)}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -1316,9 +1330,9 @@ function renderCol(tipo){
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
       ${motivoCell(c)}
     </tr>`);
-    document.getElementById('tb-rea').innerHTML=rows.join('');
+    document.getElementById('tb-rea').innerHTML=rows.join('')+capNota(data.length);
   } else if(tipo==='at'){
-    rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
+    rows=data.slice(0,COL_MAX).map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente)}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -1331,9 +1345,9 @@ function renderCol(tipo){
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
       ${motivoCell(c)}
     </tr>`);
-    document.getElementById('tb-at').innerHTML=rows.join('');
+    document.getElementById('tb-at').innerHTML=rows.join('')+capNota(data.length);
   } else if(tipo==='ri'){
-    rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
+    rows=data.slice(0,COL_MAX).map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente)}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -1346,9 +1360,9 @@ function renderCol(tipo){
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
       ${motivoCell(c)}
     </tr>`);
-    document.getElementById('tb-ri').innerHTML=rows.join('');
+    document.getElementById('tb-ri').innerHTML=rows.join('')+capNota(data.length);
   } else if(tipo==='em'){
-    rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
+    rows=data.slice(0,COL_MAX).map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente)}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -1360,9 +1374,9 @@ function renderCol(tipo){
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
       ${motivoCell(c)}
     </tr>`);
-    document.getElementById('tb-em').innerHTML=rows.join('');
+    document.getElementById('tb-em').innerHTML=rows.join('')+capNota(data.length);
   } else {
-    rows=data.map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
+    rows=data.slice(0,COL_MAX).map(c=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...c,__tipo:'coleta'})})">
       <td class="td-nf">${esc(c.nf||'—')}</td>
       <td class="td-nome">${esc(c.cliente)}</td>
       <td>${esc(c.transportadora||'—')}</td>
@@ -1375,7 +1389,7 @@ function renderCol(tipo){
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
       ${motivoCell(c)}
     </tr>`);
-    document.getElementById('tb-all').innerHTML=rows.join('');
+    document.getElementById('tb-all').innerHTML=rows.join('')+capNota(data.length);
   }
 }
 
@@ -1419,7 +1433,7 @@ function renderTrat(){
     if(el) el.textContent=baseGrupo.filter(t=>(t.grupo||'outros')===g).length;
   });
 
-  const rows=data.map(t=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...t,__tipo:'tratativa'})})">
+  const rows=data.slice(0,COL_MAX).map(t=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...t,__tipo:'tratativa'})})">
     <td>${grpBdg(t.tag)}</td>
     <td class="td-nome">${esc(t.cliente)}</td>
     <td style="font-family:monospace;font-size:11px;color:var(--tx3)">${esc(t.cpf)}</td>
@@ -1432,7 +1446,7 @@ function renderTrat(){
     <td class="td-desc" title="${esc(t.descricao)}">${esc(t.descricao)}</td>
     ${motivoCell(t)}
   </tr>`).join('');
-  document.getElementById('tb-trat').innerHTML=rows;
+  document.getElementById('tb-trat').innerHTML=rows+capNota(data.length);
 }
 
 // ================= PAINEL DE DETALHE (slide-over, clicavel a partir de qualquer linha) =================
@@ -1618,26 +1632,39 @@ function renderDash(){
   }
 }
 
+// so a aba aberta e desenhada (as outras sao desenhadas quando voce abre); numeros, menu e avisos atualizam sempre
+function renderPanel(id){
+  switch (id){
+    case 'dash': renderDashBlocks(); break;
+    case 'at': case 'ri': case 'em': case 'rea': initFiltros(); renderCol(id); break;
+    case 'col-all': initFiltros(); renderCol('all'); break;
+    case 'trat': initFiltros(); renderTrat(); break;
+    case 'ind': renderInd(); break;
+    case 'sla': renderSla(); break;
+    case 'nr-ap': case 'nr-nr': renderNR(); break;
+    case 'adm': renderAdm(); break;
+    case 'perdas': case 'p-cli': case 'p-trp': renderPerdasActive(); break;
+    default: break;   // regiao / hist / tipos sao montados em renderDash
+  }
+  document.querySelectorAll('#panel-' + id + ' .tbl-wrap table').forEach(applySort);
+}
 function renderAll(){
   __rowData = [];
   rebuildData();
   renderDash();
-  renderCol('at'); renderCol('ri'); renderCol('em'); renderCol('rea'); renderCol('all');
-  renderTrat();
-  initFiltros();
-  renderCrit();
+  indCalcula(); slaCalcula();
+  { const anos = [...new Set(IND_ALL.map(x=>x.ano))].sort((a,b)=>b-a); if (!anos.includes(IND.ano)) IND.ano = anos[0] || new Date().getFullYear(); }
+  const set = (i, v) => { const e = document.getElementById(i); if (e) e.textContent = v; };
+  set('bdg-ind', IND_ALL.filter(x=>!x.fin).length);
+  set('bdg-sla', SLA_ITENS.filter(x => x.regra && x.regra.n && x.estado==='ATRASO').length);
+  set('bdg-nr-ap', NR.filter(x=>x.kind==='ap').length); set('bdg-nr-nr', NR.filter(x=>x.kind==='nr').length);
   renderPerdasBadges();
-  renderPerdasActive();
-  renderInd();
-  renderAdm();
-  renderSla();
-  renderNR();
   renderProtoHero();
   renderTratHero();
-  renderDashBlocks();
   renderOcultos();
   renderBanner();
-  document.querySelectorAll('.tbl-wrap table').forEach(applySort);
+  const on = document.querySelector('.panel.on');
+  renderPanel(on ? on.id.replace(/^panel-/, '') : 'dash');
 }
 
 function renderCrit(){
@@ -1668,6 +1695,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
+const BUILD = '20261014-114206';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2488,6 +2516,56 @@ async function _initDb(interactive){
 
 
 // ================= HERO NO PADRAO PERDAS (reutilizavel) =================
+// ---- detalhamento: clicar num indicador abre os casos que formam o numero (busca, ordenacao, CSV, clique abre o caso) ----
+const COL_MAX = 400;
+function debCol(t){ clearTimeout(_cT); _cT = setTimeout(() => renderCol(t), 180); }
+function debTrat(){ clearTimeout(_cT); _cT = setTimeout(renderTrat, 180); }
+const capNota = n => n > COL_MAX ? `<tr><td colspan="16" style="color:var(--tx3);padding:10px">Mostrando ${COL_MAX} de ${n}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '';
+const DRILL = new Map(); let _drillN = 0, DR = null;
+function regDrill(titulo, itens, extra){ const k = ++_drillN; DRILL.set(k, { titulo, itens, extra }); if (DRILL.size > 200) DRILL.delete(DRILL.keys().next().value); return k; }
+const DR_COLS = [['Cliente', x=>x.cliente||''], ['NF', x=>x.nf||''], ['Situação', x=>x.sit||x.tipo_devolucao||'Protocolo de Coleta'], ['Transportadora', x=>x.carr||x.transportadora||''],
+  ['Aberto em', x=>x.data_solicitacao||'', x=>{ const d = parseBR(x.data_solicitacao); return d ? +d : 0; }], ['Dias', x=>x.dias==null ? '' : x.dias, x=>x.dias==null ? -1 : x.dias], ['Responsável', x=>x.usuario||''],
+  ['Andamento', x=>x.andamento||''], ['Motivo', x=>x.motivo || (x.id ? motivoEf(x) : '')]];
+function drillCols(){ return DR.extra ? [...DR_COLS, [DR.extra.label, x => DR.extra.fmt ? DR.extra.fmt(DR.extra.fn(x)) : DR.extra.fn(x), DR.extra.fn]] : DR_COLS; }
+function ensureDrill(){
+  if (document.getElementById('drillModal')) return;
+  document.body.insertAdjacentHTML('beforeend', `<div class="drill" id="drillModal" onclick="if(event.target===this)fechaDrill()"><div class="drill-box"><div class="drill-h"><div><b id="drill-t"></b><small id="drill-n"></small></div><input id="drill-q" placeholder="Filtrar nesta lista (cliente, NF, andamento…)" oninput="renderDrill()"><button class="btn-exp" type="button" onclick="drillCsv()">Exportar CSV</button><button class="btn-exp" type="button" onclick="fechaDrill()">✕ Fechar</button></div><div class="drill-b"><table><thead id="drill-th"></thead><tbody id="drill-tb"></tbody></table></div></div></div>`);
+  document.addEventListener('keydown', e => { if (e.key==='Escape' && DR) fechaDrill(); });
+}
+function abreDrill(k){
+  const d = DRILL.get(k); if (!d) return;
+  DR = { titulo:d.titulo, itens:(typeof d.itens==='function' ? d.itens() : d.itens) || [], extra:d.extra, sort:-1, dir:1, vis:[] };
+  ensureDrill(); const q = document.getElementById('drill-q'); q.value = ''; document.getElementById('drillModal').classList.add('on'); renderDrill(); q.focus();
+}
+function fechaDrill(){ const m = document.getElementById('drillModal'); if (m) m.classList.remove('on'); DR = null; }
+function drillSort(i){ if (!DR) return; if (DR.sort===i) DR.dir = -DR.dir; else { DR.sort = i; DR.dir = 1; } renderDrill(); }
+function renderDrill(){
+  if (!DR) return;
+  const cols = drillCols(), q = norm(document.getElementById('drill-q').value||'').trim();
+  let v = DR.itens.filter(x => !q || norm(cols.map(c => c[1](x)).join(' ')).includes(q));
+  if (DR.sort >= 0){ const c = cols[DR.sort], key = c[2] || c[1]; v = v.slice().sort((a,b) => { const A = key(a), B = key(b); return (typeof A==='number' && typeof B==='number' ? A-B : String(A).localeCompare(String(B), 'pt-BR', {numeric:true})) * DR.dir; }); }
+  DR.vis = v;
+  document.getElementById('drill-t').textContent = DR.titulo;
+  document.getElementById('drill-n').textContent = v.length + ' caso' + (v.length!==1 ? 's' : '') + (v.length!==DR.itens.length ? ' (de '+DR.itens.length+')' : '');
+  document.getElementById('drill-th').innerHTML = '<tr>' + cols.map((c,i) => `<th onclick="drillSort(${i})" title="Ordenar">${esc(c[0])}${DR.sort===i ? (DR.dir>0?' ▲':' ▼') : ''}</th>`).join('') + '</tr>';
+  document.getElementById('drill-tb').innerHTML = v.slice(0,500).map((x,i) => `<tr class="clickable" onclick="drillItem(${i})">${cols.map(c => `<td style="font-size:12px">${esc(String(c[1](x)))}</td>`).join('')}</tr>`).join('')
+    + (v.length>500 ? `<tr><td colspan="${cols.length}" style="color:var(--tx3);padding:10px">Mostrando 500 de ${v.length}. Use o filtro ou exporte o CSV para ver todos.</td></tr>` : '')
+    || `<tr><td colspan="${cols.length}" style="color:var(--tx3);padding:18px">Nenhum caso.</td></tr>`;
+}
+function drillItem(i){ if (DR && DR.vis[i]) openDetail(DR.vis[i]); }
+function drillCsv(){
+  if (!DR || !DR.vis.length){ toast('Nada para exportar.', {type:'warn'}); return; }
+  const cols = drillCols(); exportCSV(DR.vis.map(x => Object.fromEntries(cols.map(c => [c[0], c[1](x)]))), 'casos_' + norm(DR.titulo).replace(/[^a-z0-9]+/g,'_').slice(0,40));
+}
+// liga os quadradinhos de um hero aos casos: lista = [[titulo, () => casos, extra?], ...] na ordem dos quadradinhos
+function ligaStats(id, lista){
+  const el = document.getElementById(id); if (!el) return;
+  el.querySelectorAll('.pw-stat').forEach((st, i) => {
+    const d = lista[i]; if (!d) return;
+    st.onclick = () => abreDrill(regDrill(d[0], d[1], d[2])); st.classList.add('drillable'); st.setAttribute('role','button'); st.tabIndex = 0; st.style.cursor = 'pointer';
+    st.title = 'Clique para ver os casos'; st.onkeydown = e => { if (e.key==='Enter') st.click(); };
+  });
+}
 function pwHero(kick, title, sub, stats, acao){
   return `<div class="pw-hero"><div class="pw-top"><div><div class="pw-kick">${kick}</div><h2>${title}</h2><div class="pw-sub">${sub}</div></div>
     <div class="pw-actions no-print">${acao!==undefined ? acao : `<button class="pw-btn btn-import" type="button" onclick="document.getElementById('file-input').click()">⭱ Importar planilha</button>`}</div></div>
@@ -2500,63 +2578,109 @@ function renderProtoHero(){
     ['Aguardando CD', REA.length, 'Coleta feita, falta chegar no CD', "ir('rea')"], ['Total de coletas', K_ALL(), 'todas as linhas da planilha', "ir('col-all')"]];
   document.querySelectorAll('[data-ph]').forEach(el => { el.innerHTML = pwHero('Coleta Reversa', PH_TITLES[el.dataset.ph]||'', `Prazo de ${SLA} dias para a coleta · atualiza sozinho a cada importação.`, stats); });
 }
+// ---- filtros do dashboard: valem para todos os numeros, graficos e listas da pagina ----
+const DF = { ano:null, mes:0, carrs:new Set(), canal:'' };
+const dfDate = x => x.d || x.data || parseBR(x.data_solicitacao) || parseBR(x.data_programacao);
+function dfPass(x, ign){
+  ign = ign || [];
+  const d = dfDate(x), ano = d ? d.getFullYear() : null, mes = d ? d.getMonth()+1 : null;
+  return (ign.includes('ano') || DF.ano==='all' || ano===null || ano===DF.ano) && (ign.includes('mes') || !DF.mes || mes===DF.mes) &&
+    (ign.includes('carr') || !DF.carrs.size || DF.carrs.has(x.carr || indCarr(x))) &&
+    (ign.includes('canal') || !DF.canal || (x.canal || canalCaso({ ...x, sit:x.sit || x.tipo_devolucao })) === DF.canal);
+}
+function dfSet(k, v){
+  if (k==='ano'){ DF.ano = v==='all' ? 'all' : +v; DF.mes = 0; }
+  else if (k==='mes') DF.mes = (DF.mes===+v ? 0 : +v);
+  else if (k==='carr'){ DF.carrs.has(v) ? DF.carrs.delete(v) : DF.carrs.add(v); }
+  else if (k==='canal') DF.canal = (DF.canal===v ? '' : v);
+  else if (k==='limpar'){ DF.mes = 0; DF.carrs.clear(); DF.canal = ''; DF.ano = null; }
+  renderDashBlocks();
+}
 function renderDashBlocks(){
   const el = document.getElementById('dash-blocks'); if (!el) return;
-  const K = D.kpis, hj = new Date();
+  const hj = new Date();
   const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
   const PAL = { rose:'#F43F5E', amb:'#F59E0B', cyan:'#06B6D4', pur:'#7C3AED', gray:'#64748B' };
-  // numeros de cada area
-  const doAno = IND_ALL.filter(x => x.ano===IND.ano && !x.logistica), A = indAgg(doAno);
-  const anosP = pwAnos(), anoP = anosP.includes(hj.getFullYear()) ? hj.getFullYear() : (anosP[0] || hj.getFullYear());
-  const pAno = PERDAS.filter(p => p.ano===anoP), vSum = arr => arr.reduce((t,p)=>t+(p.valorEst||0),0);
-  const slaAt = SLA_ITENS.filter(x=>x.estado==='ATRASO'), slaHj = SLA_ITENS.filter(x=>x.estado==='HOJE').length;
+  const anosAll = [...new Set(IND_ALL.map(x=>x.ano).concat(PERDAS.map(p=>p.ano).filter(Boolean)))].sort((a,b)=>b-a);
+  if (DF.ano==null || (DF.ano!=='all' && !anosAll.includes(DF.ano))) DF.ano = anosAll[0] || hj.getFullYear();
+  const P = x => dfPass(x);
+  const colTodas = COLETAS_ARQ.filter(P), AT_ = AT.filter(P), RI_ = RI.filter(P), EM_ = EM.filter(P), REA_ = REA.filter(P);
+  const indB = IND_ALL.filter(x => !x.logistica && P(x)), A = indAgg(indB);
+  const slaAt = SLA_ITENS.filter(x => x.estado==='ATRASO' && P(x)), slaHj = SLA_ITENS.filter(x => x.estado==='HOJE' && P(x)).length;
+  const pf = PERDAS.filter(P), vSum = arr => arr.reduce((t,p)=>t+(p.valorEst||0),0);
+  const trat_ = TRAT.filter(P);
   const gNomes = { recolhimento:'Recolhimento', barrar:'Barrar', financeiro:'Financeiro', naoretornou:'Não retornou', nova:'Novo / a triar', outros:'Outros' };
-  const grupos = Object.keys(gNomes).map(g => [g, TRAT.filter(t => (t.grupo||'outros')===g).length]).filter(a=>a[1]).sort((a,b)=>b[1]-a[1]);
+  const grupos = Object.keys(gNomes).map(g => [g, trat_.filter(t => (t.grupo||'outros')===g).length]).filter(a=>a[1]).sort((a,b)=>b[1]-a[1]);
+  const rotuloPer = DF.ano==='all' ? 'todos os anos' : (DF.mes ? MESES[DF.mes-1]+'/'+DF.ano : String(DF.ano));
 
-  const hero = pwHero('Visão geral', 'Painel de devoluções', 'Tudo em uma página · clique em qualquer número ou gráfico para abrir o detalhe.', [
-    ['Total de coletas reversas', K.col_all, `${K.at} atrasadas · ${K.ri} em risco · ${K.rea} aguardando CD`, "ir('col-all')"],
-    ['Apontamentos em atraso', slaAt.length, `${slaHj} vencem hoje`, "ir('sla')"],
-    ['Tarefas em aberto', A.aberto, `atendimento de ${IND.ano}: ${fmt1(A.taxa)}%`, "ir('ind')"],
-    [`Perdas ${anoP}`, brl(vSum(pAno)), `${pAno.length} casos`, "ir('perdas')", true],
-    ['Tratativas pendentes', TRAT.length, 'sem prazo fixo', "ir('trat')"]], '');
+  // barra de filtros
+  const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
+  const mesesDisp = [...new Set(IND_ALL.filter(x=>DF.ano==='all' || x.ano===DF.ano).map(x=>x.mes))].sort((a,b)=>a-b);
+  const carrList = [...new Set(IND_ALL.map(x=>x.carr))].map(c => ({ c, n:IND_ALL.filter(x=>!x.logistica && x.carr===c && dfPass(x,['carr'])).length })).sort((a,b)=>b.n-a.n);
+  const temF = DF.mes || DF.carrs.size || DF.canal;
+  const filtros = `<div class="ind-f" style="margin-bottom:14px">
+      <div class="ind-fr" style="border-top:none"><b>Período</b><div><select class="fsel" onchange="dfSet('ano',this.value)"><option value="all"${DF.ano==='all'?' selected':''}>Todos os anos</option>${anosAll.map(a=>`<option${a===DF.ano?' selected':''}>${a}</option>`).join('')}</select>${DF.ano==='all' ? '' : mesesDisp.map(m => chip(DF.mes===m, `dfSet('mes',${m})`, MESES[m-1], IND_ALL.filter(x=>!x.logistica && x.mes===m && x.ano===DF.ano && dfPass(x,['mes'])).length)).join('')}</div></div>
+      <div class="ind-fr"><b>Transportadora</b><div>${carrList.map(o => chip(DF.carrs.has(o.c), `dfSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>
+      <div class="ind-fr"><b>Canal</b><div>${['Marketplace','Relacionamento','Logística'].map(c => chip(DF.canal===c, `dfSet('canal','${c}')`, c, IND_ALL.filter(x=>x.canal===c && dfPass(x,['canal'])).length)).join('')}${temF ? '<button type="button" class="ind-ch" onclick="dfSet(\'limpar\')">Limpar filtros ✕</button>' : ''}</div></div>
+      <div class="ind-f-res">Todos os números e gráficos abaixo seguem estes filtros · <b>${indB.length}</b> tarefas e <b>${colTodas.length}</b> coletas no recorte${temF ? ' · filtros ativos' : ''}</div></div>`;
+
+  const nav = (id, t) => `<button class="pw-btn" type="button" onclick="ir('${id}')">${t}</button>`;
+  const hero = pwHero('Visão geral', 'Painel de devoluções', 'Clique em qualquer número para ver os casos por trás dele; use os filtros acima para recortar.', [
+    ['Coletas reversas', colTodas.length, `${AT_.length} atrasadas · ${RI_.length} em risco · ${REA_.length} aguardando CD`],
+    ['Apontamentos em atraso', slaAt.length, `${slaHj} vencem hoje`],
+    ['Tarefas em aberto', A.aberto, `atendimento de ${rotuloPer}: ${fmt1(A.taxa)}%`],
+    ['SLA médio', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' atendidas com data' : 'importe “Tarefas em aberto”'],
+    [`Perdas ${rotuloPer}`, brl(vSum(pf)), `${pf.length} casos`, null, true],
+    ['Tratativas pendentes', trat_.length, 'sem prazo fixo']],
+    `${nav('col-all','Coleta Reversa')}${nav('ind','Controle')}${nav('sla','SLA')}${nav('perdas','Perdas')}${nav('trat','Tratativas')}`);
   const card = (t, sub, id, extra) => `<div class="pw-card"><h3>${t}</h3><div class="s">${sub}</div>${extra||`<div class="pw-chart"><canvas id="${id}"></canvas></div>`}</div>`;
-
-  // "atencao agora": o que mais pede cobranca, de qualquer area
   const crit = [
-    ...[...AT].sort((a,b)=>(b.dias||0)-(a.dias||0)).slice(0,3).map(c => ({ tag:'Coleta reversa', cor:PAL.rose, nome:c.cliente, det:`${c.transportadora||'—'} · NF ${c.nf||'—'}`, val:`${c.dias} d`, item:{...c,__tipo:'coleta'} })),
+    ...[...AT_].sort((a,b)=>(b.dias||0)-(a.dias||0)).slice(0,3).map(c => ({ tag:'Coleta reversa', cor:PAL.rose, nome:c.cliente, det:`${c.transportadora||'—'} · NF ${c.nf||'—'}`, val:`${c.dias} d`, item:{...c,__tipo:'coleta'} })),
     ...[...slaAt].sort((a,b)=>b.atraso-a.atraso).slice(0,3).map(x => ({ tag:'SLA de apontamento', cor:PAL.amb, nome:x.cliente, det:`${x.sit} · ${x.usuario||'—'}`, val:`${x.estimado?'~':''}+${x.atraso} ${x.regra.util?'d.u.':'d'}`, item:x })),
   ];
   const lista = crit.length ? crit.map(c => `<div class="pw-in" style="cursor:pointer" onclick="openDetailIdx(${regDetail(c.item)})"><i style="background:${c.cor}">!</i><div style="flex:1;min-width:0"><b>${esc((c.nome||'—').slice(0,34))}</b><br><span style="font-size:11px;color:var(--tx3)">${esc(c.tag)} · ${esc(c.det)}</span></div><b style="color:${c.cor}">${esc(c.val)}</b></div>`).join('')
-    : '<div class="pw-empty">Nada atrasado agora.</div>';
+    : '<div class="pw-empty">Nada atrasado neste recorte.</div>';
+  const gloss = `<details class="ind-f" style="margin-top:6px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da Dayane.</div></details>`;
 
-  el.innerHTML = `<div class="pworld">${hero}
-    <div class="pw-grid even">${card('Coleta reversa', `Prazo de ${SLA} dias · clique numa fatia`, 'dc-col')}${card('Atendimento por mês', `Tarefas criadas e % atendido · ${IND.ano}`, 'dc-ate')}</div>
-    <div class="pw-grid even">${card('Perdas por mês', `Valor estimado e acumulado · ${anoP}`, 'dc-per')}${card('SLA de apontamento', 'Casos por tópico: atraso, vence hoje e no prazo', 'dc-sla')}</div>
-    <div class="pw-grid even">${card('Tratativas por grupo', 'Casos pendentes por tipo', 'dc-trat')}${card('Atenção agora', 'O que mais pede cobrança hoje', '', `<div class="pw-ins">${lista}</div>`)}</div></div>`;
+  el.innerHTML = `${filtros}<div class="pworld" id="dash-hero">${hero}
+    <div class="pw-grid even">${card('Coleta reversa', `Prazo de ${SLA} dias · clique numa fatia para abrir a aba`, 'dc-col')}${card('Atendimento por mês', 'Tarefas criadas e % atendido · clique numa barra para filtrar o mês', 'dc-ate')}</div>
+    <div class="pw-grid even">${card('Perdas por mês', 'Valor estimado e acumulado · clique para abrir as Perdas', 'dc-per')}${card('SLA de apontamento', 'Casos por tópico · clique numa barra para abrir o tópico', 'dc-sla')}</div>
+    <div class="pw-grid even">${card('Tratativas por grupo', 'Casos pendentes por tipo · clique para abrir o grupo', 'dc-trat')}${card('Atenção agora', 'O que mais pede cobrança neste recorte', '', `<div class="pw-ins">${lista}</div>`)}</div>${gloss}</div>`;
+
+  ligaStats('dash-hero', [
+    ['Coletas reversas (filtros atuais)', () => colTodas],
+    ['Apontamentos em atraso', () => slaAt.slice().sort((a,b)=>b.atraso-a.atraso), { label:'Atraso', fn:x=>x.atraso }],
+    ['Tarefas em aberto', () => indB.filter(x=>!x.fin)],
+    ['Atendidas com data de finalização (SLA médio)', () => indB.filter(x=>x.fin && x.slaDias!=null).sort((a,b)=>b.slaDias-a.slaDias), { label:'Dias até finalizar', fn:x=>x.slaDias }],
+    ['Perdas (maiores valores primeiro)', () => pf.slice().sort((a,b)=>(b.valorEst||0)-(a.valorEst||0)), { label:'Valor estimado', fn:x=>x.valorEst||0, fmt:v=>v?brl(v):'—' }],
+    ['Tratativas pendentes', () => trat_]]);
 
   if (!window.Chart || !document.getElementById('panel-dash').classList.contains('on')) return;
   const mk = (id, cfg) => { if (charts[id]) charts[id].destroy(); const cv = document.getElementById(id); if (cv) charts[id] = new Chart(cv, cfg); };
-  const base = { responsive:true, maintainAspectRatio:false, animation:{duration:450} };
+  const base = { responsive:true, maintainAspectRatio:false, animation:{duration:400} };
   const eixos = (y1) => ({ x:{ ticks:{color:tick}, grid:{display:false} }, y:{ beginAtZero:true, ticks:{color:tick}, grid:{color:grid} }, ...(y1||{}) });
+  const chavesMes = arr => [...new Set(arr.map(x => { const d = dfDate(x); return d ? d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') : null; }).filter(Boolean))].sort().slice(-12);
+  const rotMes = k => MESES[+k.split('-')[1]-1] + (DF.ano==='all' ? '/' + k.slice(2,4) : '');
+  const ehMes = (x, k) => { const d = dfDate(x); return d && d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')===k; };
+  const corMes = k => (!DF.mes || +k.split('-')[1]===DF.mes) ? 1 : 0.28;
 
-  mk('dc-col', { type:'doughnut', data:{ labels:['Atrasadas','Em risco','No prazo','Aguardando CD'], datasets:[{ data:[K.at,K.ri,K.em,K.rea], backgroundColor:[PAL.rose,PAL.amb,PAL.cyan,PAL.pur], borderWidth:0 }] },
-    options:{ ...base, cutout:'62%', onClick:(e,els)=>{ if (els.length) ir(['at','ri','em','rea'][els[0].index]); }, plugins:{ legend:{ position:'right', labels:{ color:tick, boxWidth:10 } } } } });
+  mk('dc-col', { type:'doughnut', data:{ labels:['Atrasadas','Em risco','No prazo','Aguardando CD'], datasets:[{ data:[AT_.length,RI_.length,EM_.length,REA_.length], backgroundColor:[PAL.rose,PAL.amb,PAL.cyan,PAL.pur], borderWidth:0 }] },
+    options:{ ...base, cutout:'62%', onClick:(e,els)=>{ if (els.length) ir(['at','ri','em','rea'][els[0].index]); }, plugins:{ legend:{ position:'right', labels:{ color:tick, boxWidth:10 } }, tooltip:{ callbacks:{ label:c => ` ${c.label}: ${c.parsed} (${colTodas.length ? Math.round(c.parsed/colTodas.length*100) : 0}% das coletas)` } } } } });
 
-  const mesesA = Array.from({length:12},(_,i)=>i+1).filter(m => doAno.some(x=>x.mes===m));
-  mk('dc-ate', { data:{ labels:mesesA.map(m=>MESES[m-1]), datasets:[
-      { type:'bar', label:'Tarefas', data:mesesA.map(m=>doAno.filter(x=>x.mes===m).length), backgroundColor:PAL.pur, borderRadius:6, yAxisID:'y', order:2 },
-      { type:'line', label:'% atendido', data:mesesA.map(m=>{ const a=doAno.filter(x=>x.mes===m); return a.length?Math.round(a.filter(x=>x.fin).length/a.length*100):null; }), borderColor:PAL.rose, backgroundColor:PAL.rose, tension:.25, pointRadius:3, yAxisID:'y1', order:1 } ] },
-    options:{ ...base, onClick:()=>ir('ind'), plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } }, scales:eixos({ y1:{ position:'right', min:0, max:100, ticks:{color:PAL.rose, callback:v=>v+'%'}, grid:{display:false} } }) } });
+  const itAte = IND_ALL.filter(x => !x.logistica && dfPass(x,['mes'])), kA = chavesMes(itAte);
+  mk('dc-ate', { data:{ labels:kA.map(rotMes), datasets:[
+      { type:'bar', label:'Tarefas', data:kA.map(k=>itAte.filter(x=>ehMes(x,k)).length), backgroundColor:kA.map(k=>`rgba(124,58,237,${corMes(k)})`), borderRadius:6, yAxisID:'y', order:2 },
+      { type:'line', label:'% atendido', data:kA.map(k=>{ const a=itAte.filter(x=>ehMes(x,k)); return a.length?Math.round(a.filter(x=>x.fin).length/a.length*100):null; }), borderColor:PAL.rose, backgroundColor:PAL.rose, tension:.25, pointRadius:3, yAxisID:'y1', order:1 } ] },
+    options:{ ...base, onClick:(e,els)=>{ if (els.length && DF.ano!=='all') dfSet('mes', +kA[els[0].index].split('-')[1]); else ir('ind'); }, plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } }, scales:eixos({ y1:{ position:'right', min:0, max:100, ticks:{color:PAL.rose, callback:v=>v+'%'}, grid:{display:false} } }) } });
 
-  const mP = Array.from({length:12},(_,i)=>i+1).filter(m => m <= (anoP===hj.getFullYear() ? hj.getMonth()+1 : 12));
-  const porMes = mP.map(m => vSum(pAno.filter(p=>p.mes===m))); let ac = 0; const acum = porMes.map(v => (ac += v));
-  mk('dc-per', { data:{ labels:mP.map(m=>MESES[m-1]), datasets:[
-      { type:'bar', label:'Valor no mês', data:porMes, backgroundColor:PAL.rose, borderRadius:6, yAxisID:'y', order:2 },
+  const itPer = PERDAS.filter(p => dfPass(p,['mes'])), kP = chavesMes(itPer), porMes = kP.map(k => vSum(itPer.filter(p=>ehMes(p,k)))); let ac = 0; const acum = porMes.map(v => (ac += v));
+  mk('dc-per', { data:{ labels:kP.map(rotMes), datasets:[
+      { type:'bar', label:'Valor no mês', data:porMes, backgroundColor:kP.map(k=>`rgba(244,63,94,${corMes(k)})`), borderRadius:6, yAxisID:'y', order:2 },
       { type:'line', label:'Acumulado', data:acum, borderColor:PAL.pur, backgroundColor:PAL.pur, tension:.25, pointRadius:3, yAxisID:'y1', order:1 } ] },
-    options:{ ...base, onClick:()=>ir('perdas'), plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } }, tooltip:{ callbacks:{ label:c => ' '+c.dataset.label+': '+brl(c.parsed.y) } } },
+    options:{ ...base, onClick:(e,els)=>{ if (els.length && DF.ano!=='all') dfSet('mes', +kP[els[0].index].split('-')[1]); else ir('perdas'); }, plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } }, tooltip:{ callbacks:{ label:c => ' '+c.dataset.label+': '+brl(c.parsed.y) } } },
       scales:eixos({ y:{ beginAtZero:true, ticks:{color:tick, callback:v=>'R$ '+v.toLocaleString('pt-BR')}, grid:{color:grid} }, y1:{ position:'right', beginAtZero:true, ticks:{color:PAL.pur, callback:v=>'R$ '+v.toLocaleString('pt-BR')}, grid:{display:false} } }) } });
 
-  const cont = (f, e) => SLA_ITENS.filter(x => x.fluxo===f && x.estado===e).length;
+  const cont = (f, e) => SLA_ITENS.filter(x => x.fluxo===f && x.estado===e && P(x)).length;
   mk('dc-sla', { type:'bar', data:{ labels:SLA_FLUXOS.map(a=>a[1].replace(' (rota emergencial)','')), datasets:[
       { label:'Em atraso', data:SLA_FLUXOS.map(a=>cont(a[0],'ATRASO')), backgroundColor:PAL.rose }, { label:'Vence hoje', data:SLA_FLUXOS.map(a=>cont(a[0],'HOJE')), backgroundColor:PAL.amb }, { label:'No prazo', data:SLA_FLUXOS.map(a=>cont(a[0],'PRAZO')), backgroundColor:PAL.cyan } ] },
     options:{ ...base, indexAxis:'y', onClick:(e,els)=>{ if (els.length){ SLA_ST.fluxo = SLA_FLUXOS[els[0].index][0]; SLA_ST.sit=''; SLA_ST.usuario=''; ir('sla'); } },
@@ -2583,9 +2707,11 @@ const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte'
 const motCor = m => IND_COR[m] || MOT_PAL[[...String(m)].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0, 7) % MOT_PAL.length];
 const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', sit:'', usuario:'', and:'' };
 const IND_INICIO = new Date(2026, 6, 1);   // pendencias criadas antes de 01/07/2026 contam como finalizadas; dai em diante a equipe vai sanando
-const IND_CORTE = 7;   // a partir de julho o detalhe mes a mes; antes disso os meses entram como um bloco ja finalizado
+const IND_CORTE = 1;   // todos os meses aparecem separados (jan–jun continuam contados como finalizados por IND_INICIO)
 const indAntigos = () => Array.from({length:IND_CORTE-1},(_,i)=>i+1);
 let IND_ALL = [], IND_ABERTOS = [], IND_FORA = 0;
+let _qT = null, _cT = null;
+let DATA_VER = 0, _indVer = -1, _slaVer = -1;   // versao dos dados: o calculo so refaz quando os dados mudam
 // de/para do tipo de saida -> transportadora (tabela "Resumo" da planilha de tarefas)
 const SAIDA_MAE = { transportadora_fedex:'Fedex', transp_i9:'Hello - I9', transp_i9_sofa:'Hello - I9', transp_i9_encomenda:'Hello - I9', tansp_i9_sofa:'Hello - I9', trans_fedex_encomenda:'Fedex',
   transportadora_total:'Total', transportadora_meli_envio:'Meli', transportadora_shopee:'Shopee', cli_retira_loja_pin:'Hello - I9', cli_ret_loja_anf:'Hello - I9', cli_retira_loja_pin_enc:'Hello - I9',
@@ -2618,6 +2744,7 @@ function indFonte(){
   return out;
 }
 function indCalcula(){
+  if (_indVer === DATA_VER) return; _indVer = DATA_VER;
   const hoje = new Date();
   IND_ALL = indFonte().map(x => {
     const d = parseBR(x.data_solicitacao) || parseBR(x.data_programacao);
@@ -2650,7 +2777,7 @@ function indSet(k,v){
   else if (k==='sit') IND.sit = (IND.sit===v ? '' : v);
   else if (k==='usuario') IND.usuario = v;
   else if (k==='and') IND.and = (IND.and===v ? '' : v);
-  else if (k==='q') IND.q = norm(v).trim();
+  else if (k==='q'){ IND.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderInd, 180); return; }
   else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; IND.canal=''; IND.sit=''; IND.usuario=''; IND.and=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
   renderInd();
 }
@@ -2706,29 +2833,29 @@ function renderInd(){
      <div class="ind-fr"><b>Responsável</b><div>${usrSel}</div></div>
      <div class="ind-fr"><b>Estado</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
      ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Andamento</b><div>${andChips}</div></div><div class="ind-fr"><b>Motivo da pendência</b><div>${motList.map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${escA(m)}`, esc(m), motCont(m))).join('')}</div></div>`}`;
-  document.getElementById('ind-fres').innerHTML = `${IND.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${IND.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio aparece conforme as finalizações forem registradas nas próximas importações</i>');
+  document.getElementById('ind-fres').innerHTML = `${IND.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${IND.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio: importe a planilha “Tarefas em aberto” (xlsx) uma vez — ela traz a data de finalização</i>');
   document.getElementById('ind-limpar').style.visibility = temFiltro ? 'visible' : 'hidden';
   if (IND_FORA) document.getElementById('ind-fres').innerHTML += ` · <span title="Acerto de estoque, sem saída ou transportadora sem de/para">${IND_FORA} casos fora da análise (sem transportadora)</span>`;
 
   // ---- KPIs ----
   const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
   document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', 'Base: planilha Controle de Situações' + (LAST_IMPORT && LAST_IMPORT.importedAt ? ' · última importação: ' + (LAST_IMPORT.filename||'') + ' em ' + new Date(LAST_IMPORT.importedAt).toLocaleDateString('pt-BR') + ' ' + new Date(LAST_IMPORT.importedAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) + ' (' + (LAST_IMPORT.rowCount||0) + ' linhas)' : '') + '. Para atualizar, importe o CSV novo com o botão ao lado.',
-    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'aparece conforme as finalizações forem registradas'], ['Em aberto hoje', A.aberto, `Marketplace ${base.filter(x=>!x.fin&&x.canal==='Marketplace').length} · Relacionamento ${base.filter(x=>!x.fin&&x.canal==='Relacionamento').length} · Logística ${base.filter(x=>!x.fin&&x.canal==='Logística').length}` + (() => { const n = doAnoAll.filter(x=>x.logistica && !x.fin).length; return n ? ` · +${n} com a Logística (abaixo)` : ''; })()]]);
+    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'importe a planilha “Tarefas em aberto” (xlsx) para calcular'], ['Em aberto hoje', A.aberto, `Marketplace ${base.filter(x=>!x.fin&&x.canal==='Marketplace').length} · Relacionamento ${base.filter(x=>!x.fin&&x.canal==='Relacionamento').length} · Logística ${base.filter(x=>!x.fin&&x.canal==='Logística').length}` + (() => { const n = doAnoAll.filter(x=>x.logistica && !x.fin).length; return n ? ` · +${n} com a Logística (abaixo)` : ''; })()]]);
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
   document.getElementById('ind-sub').textContent = `Total, % de atendimento, SLA médio e tarefas em aberto — ${isFinite(mi)?MESES[mi-1].toLowerCase()+' a '+MESES[ma-1].toLowerCase()+'/'+IND.ano:'sem dados'}. Clique num card para filtrar.`;
   const por = new Map(); doAno.filter(x=>f(x,['carr','status','motivo'])).forEach(x => { if(!por.has(x.carr)) por.set(x.carr,[]); por.get(x.carr).push(x); });
-  document.getElementById('ind-cars').innerHTML = [...por.entries()].map(([c,arr])=>({c, a:indAgg(arr)})).sort((x,y)=>y.a.total-x.a.total).map(({c,a}) => {
+  document.getElementById('ind-cars').innerHTML = [...por.entries()].map(([c,arr])=>({c, arr, a:indAgg(arr)})).sort((x,y)=>y.a.total-x.a.total).map(({c,a,arr}) => {
     const cl = a.taxa>=90 ? '' : a.taxa>=75 ? ' am' : ' rd', tcl = a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
-    return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}</h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div></div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
+    return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}<button class="ind-drill" type="button" title="Ver os casos desta transportadora" onclick="event.stopPropagation();abreDrill(${regDrill('Casos — '+c, () => arr)})">ver casos ↗</button></h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div></div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
 
   // ---- por canal (Marketplace x Relacionamento) ----
   document.getElementById('ind-canais-sub').textContent = 'Marketplace e Relacionamento atendem o cliente separadamente · identificados pelo usuário responsável (Marketplace: ' + MKT_USERS.join(', ') + '). Clique para filtrar.';
   document.getElementById('ind-canais').innerHTML = ['Marketplace','Relacionamento','Logística'].map(c => {
     const arr = doAno.filter(x=>x.canal===c && f(x,['canal','status','motivo'])), a = indAgg(arr), tcl = a.taxa==null ? '' : a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
     const us = [...arr.reduce((m,x)=>m.set(x.usuario||'—',(m.get(x.usuario||'—')||0)+1), new Map()).entries()].sort((p,q)=>q[1]-p[1]).slice(0,4).map(([u,n])=>esc(u)+' ('+n+')').join(' · ');
-    return `<div class="ind-c${IND.canal===c?' on':''}" onclick="indSet('canal','${c}')"><h4>${c}</h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div><div style="font-size:10.5px;color:var(--tx3);margin-top:8px">${us||'sem casos'}</div></div>`; }).join('');
+    return `<div class="ind-c${IND.canal===c?' on':''}" onclick="indSet('canal','${c}')"><h4>${c}<button class="ind-drill" type="button" title="Ver os casos deste canal" onclick="event.stopPropagation();abreDrill(${regDrill('Casos — '+c, () => arr)})">ver casos ↗</button></h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div><div style="font-size:10.5px;color:var(--tx3);margin-top:8px">${us||'sem casos'}</div></div>`; }).join('');
 
   // ---- grafico mensal (ignora mes/situacao/motivo para mostrar a serie inteira; meses filtrados ficam destacados) ----
   const doCar = doAno.filter(x=>f(x,['mes','status','motivo']));
@@ -2769,12 +2896,14 @@ function renderInd(){
   const verFin = IND.status==='fin';
   const lista = doAno.filter(x => f(x)).sort((a,b)=>(b.dias||0)-(a.dias||0));
   IND_ABERTOS = lista;
-  document.getElementById('ind-lista-t').textContent = verFin ? 'Tarefas atendidas' : IND.status==='' ? 'Todas as tarefas (atendidas e em aberto)' : 'Casos em aberto — defina o motivo';
+  document.getElementById('ind-lista-t').textContent = verFin ? 'Tarefas atendidas' : IND.status==='' ? 'Todas as tarefas (atendidas e em aberto)' : 'Casos em aberto — andamento e motivo da pendência';
   document.getElementById('cnt-ind').textContent = lista.length + (verFin ? ' atendidas' : IND.status==='' ? ' tarefas' : ' em aberto');
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind');
   if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
     ${x.fin ? '<td><span class="bdg b-grn">Atendida</span></td><td></td><td></td>' : andCell(x, 'and-list-ctl') + motivoCell(x)}</tr>`).join('')
     + (lista.length>300 ? `<tr><td colspan="12" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
+  ligaStats('ph-ind', [['Tarefas de '+IND.ano+' (filtros atuais)', () => base], ['Tarefas atendidas', () => base.filter(x=>x.fin)],
+    ['Tempo até finalizar', () => base.filter(x=>x.fin && x.slaDias!=null).sort((a,b)=>b.slaDias-a.slaDias), { label:'Dias até finalizar', fn:x=>x.slaDias }], ['Casos em aberto hoje', () => base.filter(x=>!x.fin)]]);
   renderIndLog(doAnoAll, f);
 }
 let IND_LOG_LISTA = [], IND_LOG_SIT = '';
@@ -2929,7 +3058,7 @@ Object.keys(SLA_TXT).forEach(f => { SLA_REGRAS[f] = SLA_TXT[f].split('\n').map(l
   const key = sitKey(sit), lg = SLA_LOGISTICA.has(key);
   return { sit, key, n:(m && !lg) ? +m[1] : 0, logistica:lg, util: !!m && m[2]==='u', base:base.trim(), prox:(prox||'').split(';').map(t=>t.trim()).filter(Boolean) }; })
   .filter(r => !/^perdas/.test(r.key) && !NR_TIPOS[r.key]); });   // perdas e a pagar/nao retornou tem aba propria
-const SLA_ST = { fluxo:'rec', estado:'atraso', sit:'', usuario:'', motivo:'', q:'' };
+const SLA_ST = { fluxo:'rec', estado:'atraso', sit:'', usuario:'', motivo:'', q:'', carrs:new Set(), canal:'' };
 let SLA_CLASSES = {}, SLA_LISTA = [], SLA_ITENS = [];
 try { const c = JSON.parse(localStorage.getItem('sla_classes')||'null'); if (c) SLA_CLASSES = c; } catch(e){}
 
@@ -2961,6 +3090,7 @@ function slaFonte(){
   return out.filter(x => !/^perdas/.test(sitKey(x.sit)) && !NR_TIPOS[sitKey(x.sit)]);
 }
 function slaCalcula(){
+  if (_slaVer === DATA_VER) return; _slaVer = DATA_VER;
   const hj = new Date(), hoje = new Date(hj.getFullYear(), hj.getMonth(), hj.getDate());
   SLA_ITENS = slaFonte().map(x => {
     const fluxo = slaFluxoDe(x), regra = fluxo ? SLA_REGRAS[fluxo].find(r => r.key===sitKey(x.sit)) : null;
@@ -2980,7 +3110,7 @@ function slaCalcula(){
         else estado = 'PRAZO';
       }
     }
-    return { ...x, fluxo, regra, estado, venceu, atraso, estimado, atualizado, canal:canalCaso(x) };
+    return { ...x, fluxo, regra, estado, venceu, atraso, estimado, atualizado, carr:indCarr(x), canal:canalCaso(x) };
   });
 }
 function slaSetMotivo(id, v){
@@ -2994,35 +3124,40 @@ function slaSet(k, v){
   else if (k==='sit'){ if (SLA_ST.sit===v) SLA_ST.sit = ''; else { SLA_ST.sit = v; SLA_ST.estado = 'todos'; } }
   else if (k==='sitAtraso'){ SLA_ST.sit = v; SLA_ST.estado = 'atraso'; }
   else if (k==='motivo') SLA_ST.motivo = (SLA_ST.motivo===v ? '' : v);
+  else if (k==='carr'){ SLA_ST.carrs.has(v) ? SLA_ST.carrs.delete(v) : SLA_ST.carrs.add(v); }
+  else if (k==='canal') SLA_ST.canal = (SLA_ST.canal===v ? '' : v);
   else if (k==='usuario') SLA_ST.usuario = v;
-  else if (k==='q') SLA_ST.q = norm(v).trim();
-  else if (k==='limpar'){ SLA_ST.estado='atraso'; SLA_ST.sit=''; SLA_ST.usuario=''; SLA_ST.motivo=''; SLA_ST.q=''; const i=document.getElementById('sla-q'); if (i) i.value=''; }
+  else if (k==='q'){ SLA_ST.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderSla, 180); return; }
+  else if (k==='limpar'){ SLA_ST.estado='atraso'; SLA_ST.sit=''; SLA_ST.usuario=''; SLA_ST.motivo=''; SLA_ST.q=''; SLA_ST.carrs.clear(); SLA_ST.canal=''; const i=document.getElementById('sla-q'); if (i) i.value=''; }
   renderSla();
 }
 function slaSetClasse(cl, f){ if (f) SLA_CLASSES[cl] = f; else delete SLA_CLASSES[cl]; try { localStorage.setItem('sla_classes', JSON.stringify(SLA_CLASSES)); } catch(e){}
   if (DB) DB.doc('config/sla_apontamento').set({ classes:SLA_CLASSES, updatedAt:isoNow() }).catch(err => toast('Não consegui salvar: '+(err.code||err.message), {type:'err'}));
-  renderSla(); }
+  _slaVer = -1; renderSla(); }
 function renderSla(){
   if (!document.getElementById('panel-sla')) return;
   slaCalcula();
-  const comSla = SLA_ITENS.filter(x => x.regra && x.regra.n), at = comSla.filter(x=>x.estado==='ATRASO').length, hj = comSla.filter(x=>x.estado==='HOJE').length, ok = comSla.filter(x=>x.estado==='PRAZO').length;
+  const passCC = x => (!SLA_ST.carrs.size || SLA_ST.carrs.has(x.carr)) && (!SLA_ST.canal || x.canal===SLA_ST.canal), comSla = SLA_ITENS.filter(x => x.regra && x.regra.n && passCC(x)), at = comSla.filter(x=>x.estado==='ATRASO').length, hj = comSla.filter(x=>x.estado==='HOJE').length, ok = comSla.filter(x=>x.estado==='PRAZO').length;
   document.getElementById('bdg-sla').textContent = at;
   document.getElementById('ph-sla').innerHTML = pwHero('SLA de Apontamento', 'Prazo para apontar o próximo passo', 'O responsável precisa lançar a próxima situação dentro do prazo. Aqui está quem passou do prazo, para cobrança.',
-    [['Em atraso', at, 'passaram do prazo de apontamento'], ['Vencem hoje', hj, 'último dia para apontar'], ['No prazo', ok, 'ainda dentro do prazo'], ['Fora do SLA', SLA_ITENS.length-comSla.length, 'situações com prazo 0 ou sem regra', null, true]]);
+    [['Em atraso', at, 'passaram do prazo de apontamento'], ['Vencem hoje', hj, 'último dia para apontar'], ['No prazo', ok, 'ainda dentro do prazo'], ['Fora do SLA', SLA_ITENS.filter(passCC).length-comSla.length, 'situações com prazo 0 ou sem regra', null, true]]);
 
   const doFluxo = SLA_ITENS.filter(x => x.fluxo===SLA_ST.fluxo), semFluxo = SLA_ITENS.filter(x => !x.fluxo).length;
   const usuarios = [...new Set(doFluxo.filter(x=>x.estado==='ATRASO'||x.estado==='HOJE').map(x=>x.usuario||'—'))].sort();
-  const f = (x, ign) => { ign = ign||[]; return x.fluxo===SLA_ST.fluxo && (ign.includes('sit') || !SLA_ST.sit || sitKey(x.sit)===SLA_ST.sit) &&
+  const f = (x, ign) => { ign = ign||[]; return x.fluxo===SLA_ST.fluxo && passCC(x) && (ign.includes('sit') || !SLA_ST.sit || sitKey(x.sit)===SLA_ST.sit) &&
     (ign.includes('estado') || SLA_ST.estado==='todos' || (SLA_ST.estado==='atraso' && x.estado==='ATRASO') || (SLA_ST.estado==='hoje' && x.estado==='HOJE') || (SLA_ST.estado==='prazo' && x.estado==='PRAZO')) &&
     (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario) && (ign.includes('motivo') || !SLA_ST.motivo || motivoEf(x)===SLA_ST.motivo) && (!SLA_ST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(SLA_ST.q)); };
   const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
   const nEst = e => SLA_ITENS.filter(x => x.fluxo===SLA_ST.fluxo && (e==='todos' || x.estado===e) && (!SLA_ST.usuario || (x.usuario||'—')===SLA_ST.usuario)).length;
+  const carrsSla = [...new Set(SLA_ITENS.map(x=>x.carr))].filter(c=>c && !SEM_ANALISE.has(c)).map(c => ({ c, n:SLA_ITENS.filter(x=>x.carr===c && x.fluxo===SLA_ST.fluxo && x.estado==='ATRASO').length })).sort((a,b)=>b.n-a.n);
   document.getElementById('sla-fbody').innerHTML =
     `<div class="ind-fr"><b>Tópico</b><div>${SLA_FLUXOS.map(([k,n]) => chip(SLA_ST.fluxo===k, `slaSet('fluxo','${k}')`, n, SLA_ITENS.filter(x=>x.fluxo===k && x.estado==='ATRASO').length+' em atraso')).join('')}</div></div>
+     <div class="ind-fr"><b>Transportadora</b><div>${carrsSla.map(o => chip(SLA_ST.carrs.has(o.c), `slaSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n+' em atraso')).join('')}</div></div>
+     <div class="ind-fr"><b>Canal</b><div>${['Marketplace','Relacionamento','Logística'].map(c => chip(SLA_ST.canal===c, `slaSet('canal','${c}')`, c, SLA_ITENS.filter(x=>x.canal===c && x.fluxo===SLA_ST.fluxo && x.estado==='ATRASO').length+' em atraso')).join('')}</div></div>
      <div class="ind-fr"><b>Estado</b><div>${chip(SLA_ST.estado==='atraso', "slaSet('estado','atraso')", 'Em atraso', nEst('ATRASO'))}${chip(SLA_ST.estado==='hoje', "slaSet('estado','hoje')", 'Vence hoje', nEst('HOJE'))}${chip(SLA_ST.estado==='prazo', "slaSet('estado','prazo')", 'No prazo', nEst('PRAZO'))}${chip(SLA_ST.estado==='todos', "slaSet('estado','todos')", 'Todos', nEst('todos'))}</div></div>
      <div class="ind-fr"><b>Motivo da pendência</b><div>${chip(!SLA_ST.motivo, "slaSet('motivo','')", 'Todos', SLA_ITENS.filter(x=>f(x,['motivo'])).length)}${MOTIVOS_PEND.map(m => chip(SLA_ST.motivo===m, `slaSet('motivo',this.dataset.m)" data-m="${m}`, m, SLA_ITENS.filter(x=>f(x,['motivo']) && motivoEf(x)===m).length)).join('')}</div></div>
      <div class="ind-fr"><b>Responsável</b><div><select class="fsel" onchange="slaSet('usuario',this.value)"><option value="">Todos</option>${usuarios.map(u=>`<option${SLA_ST.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select></div></div>`;
-  document.getElementById('sla-limpar').style.visibility = (SLA_ST.estado!=='atraso' || SLA_ST.sit || SLA_ST.usuario || SLA_ST.motivo || SLA_ST.q) ? 'visible' : 'hidden';
+  document.getElementById('sla-limpar').style.visibility = (SLA_ST.estado!=='atraso' || SLA_ST.sit || SLA_ST.usuario || SLA_ST.motivo || SLA_ST.q || SLA_ST.carrs.size || SLA_ST.canal) ? 'visible' : 'hidden';
 
   // tabela por situacao (regra + contagens)
   document.getElementById('sla-t-fluxo').textContent = (SLA_FLUXOS.find(a=>a[0]===SLA_ST.fluxo)||[])[1] || '';
@@ -3054,6 +3189,8 @@ function renderSla(){
   const cl = new Map(); SLA_ITENS.forEach(x => { const k = norm(x.classe||'').trim(); if (k){ if(!cl.has(k)) cl.set(k,{nome:x.classe,n:0,f:x.fluxo}); cl.get(k).n++; } });
   document.getElementById('sla-classes').innerHTML = [...cl.entries()].map(([k,o]) => `<div style="display:flex;gap:10px;align-items:center;padding:4px 0;font-size:12px"><span style="flex:1"><b>${esc(o.nome)}</b> <small style="color:var(--tx3)">${o.n} casos</small></span><select class="fsel" data-k="${esc(k)}" onchange="slaSetClasse(this.dataset.k,this.value)"><option value="">automático (${o.f?(SLA_FLUXOS.find(a=>a[0]===o.f)||[])[1]:'sem fluxo'})</option>${SLA_FLUXOS.map(([id,n])=>`<option value="${id}"${SLA_CLASSES[k]===id?' selected':''}>${n}</option>`).join('')}</select></div>`).join('')
     + (semFluxo ? `<p style="font-size:11.5px;color:var(--tx3);margin-top:6px">${semFluxo} caso(s) com classe sem fluxo definido.</p>` : '') || '<i>Reimporte o arquivo para o painel ler a CLASSE de cada caso.</i>';
+  ligaStats('ph-sla', [['Em atraso de apontamento', () => comSla.filter(x=>x.estado==='ATRASO').sort((a,b)=>b.atraso-a.atraso), { label:'Atraso', fn:x=>x.atraso }], ['Vencem hoje', () => comSla.filter(x=>x.estado==='HOJE')],
+    ['Dentro do prazo', () => comSla.filter(x=>x.estado==='PRAZO')], ['Fora do SLA (prazo 0 ou sem regra)', () => SLA_ITENS.filter(x=>!(x.regra && x.regra.n) && passCC(x))]]);
 }
 const fmtD2 = d => String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
 function slaExport(){
@@ -3078,7 +3215,7 @@ function nrSet(sc, k, v){
   if (k==='sit') st.sit = (st.sit===v ? '' : v);
   else if (k==='carr'){ st.carrs.has(v) ? st.carrs.delete(v) : st.carrs.add(v); }
   else if (k==='and') st.and = (st.and===v ? '' : v);
-  else if (k==='q') st.q = norm(v).trim();
+  else if (k==='q'){ st.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderNR, 180); return; }
   else if (k==='limpar'){ st.sit=''; st.carrs.clear(); st.and=''; st.q=''; const i=document.getElementById('nr-q-'+sc); if (i) i.value=''; }
   renderNR();
 }
@@ -3129,6 +3266,8 @@ function renderNRp(sc){
     <td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td>${x.valor_est?brl(x.valor_est):'—'}</td>
     <td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>${andCell(x, pg.lista)}${motivoCell(x)}</tr>`).join('') + (lista.length>300 ? `<tr><td colspan="12" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '')
     || '<tr><td colspan="12" style="color:var(--tx3);padding:14px">Nenhum caso. Importe o arquivo de Tratativas Transportadora.</td></tr>';
+  ligaStats('ph-nr-'+sc, [[pg.titulo+' — casos no filtro', () => base], ['Valor estimado (maiores primeiro)', () => base.slice().sort((a,b)=>b.valor_est-a.valor_est), { label:'Valor', fn:x=>x.valor_est||0, fmt:v=>v?brl(v):'—' }],
+    ['Sem andamento', () => base.filter(x=>!x.andamento)], ['Andamento atualizado hoje', () => base.filter(x => { const d = andData(x); return d && d.dias<=0; })]]);
 }
 function nrExport(sc){
   const l = NR_LISTA[sc]; if (!l || !l.length){ toast('Nada para exportar.', {type:'warn'}); return; }
@@ -3172,6 +3311,7 @@ function aplicaPerfil(){
   });
   fecha();
   document.getElementById('contaNome').textContent = nomeDe(CUR_EMAIL) + (souAdmin() ? ' · administrador' : (PERFIL && PERFIL.editar===false ? ' · consulta' : ''));
+  { const hu = document.getElementById('hero-user'); if (hu){ hu.style.display = 'inline-flex'; document.getElementById('hero-user-n').textContent = '👤 ' + nomeDe(CUR_EMAIL) + ' · trocar'; } }
   const ativo = document.querySelector('.panel.on'); const idAtivo = ativo ? ativo.id.replace(/^panel-/,'') : '';
   if (idAtivo && !podeAba(idAtivo)){ const prim = ABAS_CAT.map(a=>a[0]).find(podeAba); if (prim) ir(prim); }
 }
@@ -3270,6 +3410,20 @@ async function admSenha(email){
   try { const { authMod, auth } = await loadFirebase(); await authMod.sendPasswordResetEmail(auth, email); toast('E-mail de nova senha enviado para ' + email + '.', {type:'ok', ms:6000}); }
   catch(err){ toast('Não consegui enviar: ' + (err.code||err.message), {type:'err'}); }
 }
+
+async function menuConta(){
+  const ok = await askConfirm('Sua conta', `<p><b>${esc(nomeDe(CUR_EMAIL))}</b><br><span style="color:var(--tx3);font-size:12px">${esc(CUR_EMAIL)}</span></p><p style="margin-top:10px">Para entrar com outro usuário, saia desta conta: o painel vai pedir e-mail e senha.</p>`, 'Sair e trocar de usuário');
+  if (ok) sair();
+}
+let _avisouVersao = false;
+async function checaVersao(){
+  try {
+    const r = await fetch(location.pathname + '?_v=' + Date.now(), { cache:'no-store' }), m = /const BUILD = '([^']+)'/.exec(await r.text());
+    if (m && m[1] !== BUILD && !_avisouVersao){ _avisouVersao = true; toast('Há uma versão nova do painel.', { type:'warn', ms:120000, actionLabel:'Atualizar agora', onAction:() => location.reload() }); }
+  } catch(e){}
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checaVersao(); });
+setInterval(checaVersao, 10*60*1000); setTimeout(checaVersao, 20000);
 
 // ================= MUNDO PERDAS =================
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -3607,6 +3761,8 @@ function renderPerdas(scope){
     pcharts[scope+'dn'] = new Chart(dn, { type:'doughnut', data:{ labels:segs.map(s=>s[0]), datasets:[{ data:segs.map(s=>s[1]), backgroundColor:segs.map(s=>s[2]), borderColor:css.getPropertyValue('--srf').trim()||'#fff', borderWidth:3, hoverOffset:6 }] },
       options:{ responsive:true, maintainAspectRatio:false, cutout:'66%', plugins:{ legend:{ position:'right', labels:{ boxWidth:10, boxHeight:10, usePointStyle:true } } } } });
   }
+  ligaStats('pw-'+scope, [['Perdas — '+SCOPE_NAME[scope], () => items], ['Perdas Cliente', () => cli], ['Perdas Transportadora', () => trp],
+    ['Maiores valores estimados', () => items.slice().sort((a,b)=>(b.valorEst||0)-(a.valorEst||0)), { label:'Valor estimado', fn:x=>x.valorEst||0, fmt:v=>v?brl(v):'—' }]]);
   // contagem animada nos destaques
   root.querySelectorAll('[data-count]').forEach(el=>{
     const to = +el.dataset.count, money = !!el.dataset.money, t0 = performance.now();
