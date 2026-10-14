@@ -159,3 +159,9 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - **Colunas** ▾: esconder/mostrar colunas da lista (preferência guardada no navegador); no celular as menos importantes já saem sozinhas.
 - **Visões**: filtros prontos e **💾 Salvar visão** com nome (guardadas no navegador de quem salvou).
 - **Linha do tempo** no detalhe do caso: andamentos, mudanças de status, motivo e “✓ hoje”, com quem e quando (campo `alt_hist`, últimos 15).
+
+## SLA Transportadora (14/10/2026)
+- **Nova aba Coleta Reversa → SLA Transportadora.** Prazo de 20 dias corridos da programação do protocolo até a chegada no CD (romaneio de entrada). Mostra média/mediana, % no prazo, a caminho, atrasados, ranking por transportadora, chegadas por mês, funil (criação → protocolo → coleta no cliente → CD) e lista de casos com farol.
+- **Previsão no CD sempre preenchida:** a informada vale; sem ela o painel estima = programação + mediana da transportadora nos últimos 90 dias (selo “estimada”).
+- **Datas gravadas na importação:** `recebido_cd_em` (primeira importação com romaneio), `recolhido_em` (virou “Prod Recolhido no Cliente”), `sit_desde` na troca de aba; também editáveis na tabela. A primeira importação depois desta versão é a linha de base; antes disso a chegada aparece como “aprox.”.
+- **Controle de Situações:** colunas “Previsão no CD” e “Além da previsão”, alerta “Coleta além da previsão no CD”, linha de SLA de coleta nos cards por transportadora e item no detalhe do caso.
