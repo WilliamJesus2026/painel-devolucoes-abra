@@ -148,3 +148,7 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Importar a planilha de tarefas (**Tarefa….csv** com Último Apontamento / Criada / média, ou o xlsx 'Tarefas em aberto') cruza por chave: grava ultimo_apontamento, media_dias, finalizado_em (encerrados) e sit_desde (em aberto). A coluna **Média (dias)** aparece no Controle e a aba **Média e cruzamento** detalha por situação e transportadora.
 - **Histórico** = banco de casos encerrados que nunca é apagado: Finalizado, Cancelado, Saiu da planilha e Perda (as perdas também ficam na aba Perdas). Busca por cliente/NF/CPF/situação/andamento e filtros por estado, ano e transportadora.
 - Casos que saem da planilha sem finalizar deixam o Controle e vão para o Histórico.
+
+## Status do caso editável e SLA por mês (14/10/2026)
+- Controle de Situações, bloco Logística e Histórico: coluna **Status do caso** (Automático / Em aberto / Finalizado / Cancelado) em todas as linhas, inclusive as já atendidas. Campo `status_manual` no caso; vale também na Coleta Reversa, nos Perdas e no Histórico (Em aberto reabre o caso). Andamento e Motivo da pendência agora também são editáveis nos casos atendidos.
+- Nova tabela **SLA médio por mês de criação** (abaixo do gráfico mensal): criadas, finalizadas, % atendimento, SLA médio das finalizadas, média de dias de todas as tarefas e dos casos em aberto. Assim outubro aparece mesmo com poucas finalizadas.
