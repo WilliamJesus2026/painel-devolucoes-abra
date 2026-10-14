@@ -358,7 +358,9 @@ body.loading .kpi-v,body.loading .kpi-s{color:transparent!important;background:l
 .tl{border-left:2px solid var(--bd);margin-left:6px;padding-left:14px}
 .tl-i{position:relative;padding:0 0 10px;font-size:12px}
 .tl-i::before{content:"";position:absolute;left:-20px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--acc)}
-@media(max-width:700px){#tbl-ind-main tr:not(.cap) > :nth-child(1),#tbl-ind-main tr:not(.cap) > :nth-child(3),#tbl-ind-main tr:not(.cap) > :nth-child(4),#tbl-ind-main tr:not(.cap) > :nth-child(5),#tbl-ind-main tr:not(.cap) > :nth-child(9){display:none}}
+#tbl-ind-main tr:not(.cap) > :nth-child(1){position:sticky;left:0;z-index:2;background:var(--srf);box-shadow:2px 0 0 var(--bd)}
+#tbl-ind-main thead tr:not(.cap) > th:nth-child(1){z-index:4;background:var(--srf1)}
+@media(max-width:700px){#tbl-ind-main tr:not(.cap) > :nth-child(3),#tbl-ind-main tr:not(.cap) > :nth-child(5),#tbl-ind-main tr:not(.cap) > :nth-child(6),#tbl-ind-main tr:not(.cap) > :nth-child(7),#tbl-ind-main tr:not(.cap) > :nth-child(9){display:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ===================== MUNDO PERDAS ===================== */
@@ -578,6 +580,11 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="12" x2="21" y2="12" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="18" x2="21" y2="18" stroke-width="1.5" stroke-linecap="round"/><circle cx="3" cy="6" r="1.5" fill="currentColor"/><circle cx="3" cy="12" r="1.5" fill="currentColor"/><circle cx="3" cy="18" r="1.5" fill="currentColor"/></svg>
       Todos
       <span class="bdg" id="bdg-col-all">0</span>
+    </button>
+    <button class="nav" onclick="ir('colsla')" id="nav-colsla">
+      <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" stroke-width="1.5"/><polyline points="12 9 12 13 15 15" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3h6" stroke-width="1.6" stroke-linecap="round"/></svg>
+      SLA Transportadora
+      <span class="bdg" id="bdg-colsla">0</span>
     </button>
 
     <div class="sb-grp">Tratativas Transportadora</div>
@@ -802,7 +809,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <div class="pworld" id="ph-ind"></div>
       <details class="ind-f" style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da Dayane.</div></details>
       <div class="alerta-bar" id="ind-alertas"></div>
-      <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button><select class="fsel" id="ind-views" onchange="indView(this.value)" title="Visões prontas e as que você salvou"></select><button class="btn-exp" type="button" onclick="indSalvaView()" title="Guarda os filtros atuais com um nome (neste navegador)">💾 Salvar visão</button><button class="btn-exp" type="button" onclick="indApagaView()">Excluir visão</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
+      <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button><select class="fsel" id="ind-views" onchange="indView(this.value)" title="Visões prontas e as que você salvou"></select><button class="btn-exp" type="button" onclick="indSalvaView()" title="Guarda os filtros atuais com um nome, na sua conta">💾 Salvar visão</button><button class="btn-exp" type="button" onclick="indApagaView()">Excluir visão</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
       <div class="ind-h">Por canal de atendimento</div><div class="ind-sub" id="ind-canais-sub"></div>
       <div class="ind-cars" id="ind-canais" style="margin-bottom:6px"></div>
       <div class="ind-h">Indicadores por transportadora</div><div class="ind-sub" id="ind-sub"></div>
@@ -815,7 +822,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — andamento e motivo da pendência</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button><span class="col-menu" id="col-menu"><button class="btn-exp" type="button" onclick="colsMenu(event)">Colunas ▾</button><div class="col-pop" id="col-pop"></div></span></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-main"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-main"><thead><tr><th>Cliente</th><th>NF</th><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th><th title="Data prevista de chegada no CD: informada ou estimada pela mediana da transportadora">Previsão no CD</th><th>Além da previsão</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
       <div class="ind-h" style="margin-top:22px">Logística — situações acompanhadas pela Logística</div>
       <div class="ind-f" style="margin:6px 0"><div class="ind-fr" style="border-top:none"><b>Situação</b><div id="ind-log-chips"></div></div></div>
       <div class="ind-sub" id="ind-log-sub"></div>
@@ -883,6 +890,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <div class="panel" id="panel-adm"></div>
 
     <div class="panel" id="panel-media"></div>
+    <div class="panel" id="panel-colsla"></div>
 
     <div class="panel" id="panel-regiao">
       <div class="g2">
@@ -1136,7 +1144,7 @@ function rebuildData(){
     porChave.forEach(arr => { if (arr.length < 2) return;
       const ult = arr.filter(d => d.andamento_em).sort((p,q) => String(q.andamento_em).localeCompare(String(p.andamento_em)))[0];
       if (ult) arr.forEach(d => { if (d !== ult){ d.andamento = ult.andamento; d.andamento_em = ult.andamento_em; d.andamento_por = ult.andamento_por; d.andamento_origem = ult.andamento_origem; d.andamento_hist = ult.andamento_hist; } });
-      ['previsao_coleta','protocolo_hello','motivo_pend','status_manual'].forEach(k => { const v = arr.map(d => d[k]).find(Boolean); if (v) arr.forEach(d => { if (!d[k]) d[k] = v; }); }); });
+      ['previsao_coleta','protocolo_hello','motivo_pend','status_manual','recebido_cd_em','recolhido_em'].forEach(k => { const v = arr.map(d => d[k]).find(Boolean); if (v) arr.forEach(d => { if (!d[k]) d[k] = v; }); }); });
   }
   OCULTOS = [];
   const visivel = x => { if (statusIgnorado(x.status)){ OCULTOS.push(x); return false; } return true; };
@@ -1213,7 +1221,7 @@ const TITLES = {
   dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Coleta Reversa — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
-  ind:'Controle de Situações', sla:'SLA de Apontamento', adm:'Usuários e acessos', media:'Média e cruzamento', 'nr-ap':'Transportadora a pagar', 'nr-nr':'Produto não retornou', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
+  colsla:'SLA Transportadora — prazo de coleta até o CD', ind:'Controle de Situações', sla:'SLA de Apontamento', adm:'Usuários e acessos', media:'Média e cruzamento', 'nr-ap':'Transportadora a pagar', 'nr-nr':'Produto não retornou', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
 };
 function ir(id){
   if (!podeAba(id)){ toast('Você não tem acesso a esta aba.', {type:'warn'}); return; }
@@ -1509,6 +1517,7 @@ function openDetail(item){
       ${isColeta ? `<dt>Coleta na casa do cliente</dt><dd>${item.coletaRealizada ? 'Realizada (data exata não registrada na base)' : 'Ainda não realizada'}</dd><dt>Recebimento no CD</dt><dd>${item.recebidoCD ? 'Confirmado (romaneio de entrada)' : 'Não confirmado'}</dd>` : ''}
       ${isColeta ? `<dt>Prazo</dt><dd>20 dias corridos (protocolo → recebimento no CD)</dd>` : `<dt>Prazo</dt><dd>Sem SLA definido para tratativas</dd>`}
       <dt>Status atual (sistema)</dt><dd>${esc(item.status)||'Não informado'}</dd>
+      ${colslaDetalhe(item)}
       ${isColeta ? `<dt>Andamento</dt><dd>${esc(item.andamento)||'—'}</dd><dt>Andamento atualizado em</dt><dd class="mono">${andData(item) ? andData(item).txt : '—'} <small>(registro da equipe)</small></dd>${ehHello(item) ? `<dt>Protocolo Hello</dt><dd class="mono">${esc(item.protocolo_hello)||'—'}</dd>` : ''}<dt>Previsão de coleta (transportadora)</dt><dd class=\"mono\">${item.previsao_coleta ? item.previsao_coleta.split('-').reverse().join('/') : '—'}</dd>` : ''}
       ${!isColeta && item.grupo ? `<dt>O que fazer</dt><dd>${esc(GRUPO_ACAO[item.grupo]||GRUPO_ACAO.outros)}</dd>` : ''}
       <dt>Responsável</dt><dd>${esc(item.usuario)||'Não informado'}</dd>
@@ -1666,6 +1675,7 @@ function renderPanel(id){
     case 'adm': renderAdm(); break;
     case 'hist': renderHist(); break;
     case 'media': renderMedia(); break;
+    case 'colsla': renderColSla(); break;
     case 'perdas': case 'p-cli': case 'p-trp': renderPerdasActive(); break;
     default: break;   // regiao / hist / tipos sao montados em renderDash
   }
@@ -1682,6 +1692,7 @@ function renderAll(){
   set('bdg-sla', SLA_ITENS.filter(x => x.regra && x.regra.n && x.estado==='ATRASO').length);
   set('bdg-hist', histItens().length);
   set('bdg-media', IND_ALL.filter(x=>x.media!=null).length);
+  set('bdg-colsla', COLSLA.filter(i => !i.chegou && i.farol==='Atrasado').length);
   set('bdg-nr-ap', NR.filter(x=>x.kind==='ap').length); set('bdg-nr-nr', NR.filter(x=>x.kind==='nr').length);
   renderPerdasBadges();
   renderProtoHero();
@@ -1720,7 +1731,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261014-161959';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261014-163733';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -1728,10 +1739,10 @@ const souAdmin = () => SUPER_ADMINS.includes(String(CUR_EMAIL).toLowerCase()) ||
 const podeAba = id => { if (id==='adm') return souAdmin(); if (!PERFIL || souAdmin()) return true; const a = PERFIL.abas || ['*']; return a.includes('*') || a.includes(id); };
 const podeEditar = () => souAdmin() || !PERFIL || PERFIL.editar!==false;
 const podeImportar = () => souAdmin() || !PERFIL || PERFIL.importar!==false;
-const ABAS_CAT = [['dash','Dashboard','Visão geral'],['at','Atrasados','Coleta Reversa'],['ri','Em risco','Coleta Reversa'],['em','No prazo','Coleta Reversa'],['rea','Coleta realizada','Coleta Reversa'],['col-all','Todos os protocolos','Coleta Reversa'],
+const ABAS_CAT = [['dash','Dashboard','Visão geral'],['at','Atrasados','Coleta Reversa'],['ri','Em risco','Coleta Reversa'],['em','No prazo','Coleta Reversa'],['rea','Coleta realizada','Coleta Reversa'],['col-all','Todos os protocolos','Coleta Reversa'],['colsla','SLA Transportadora','Coleta Reversa'],
   ['trat','Tratativas por grupo','Tratativas'],['ind','Controle de Situações','Controle'],['sla','SLA de Apontamento','Controle'],['media','Média e cruzamento','Controle'],['nr-ap','Transportadora a pagar','Transportadora'],['nr-nr','Produto não retornou','Transportadora'],
   ['perdas','Perdas — Panorama','Perdas'],['p-cli','Perdas Cliente','Perdas'],['p-trp','Perdas Transportadora','Perdas'],['regiao','Atrasos por região','Análise'],['hist','Histórico','Análise'],['tipos','Tipos de devolução','Análise']];
-const PRESETS = { total:{ abas:['*'], editar:true, importar:true }, logistica:{ abas:['dash','at','ri','em','rea','col-all','trat','ind','sla'], editar:true, importar:false },
+const PRESETS = { total:{ abas:['*'], editar:true, importar:true }, logistica:{ abas:['dash','at','ri','em','rea','col-all','colsla','trat','ind','sla'], editar:true, importar:false },
   perdas:{ abas:['dash','perdas','p-cli','p-trp','nr-ap','nr-nr'], editar:true, importar:false }, consulta:{ abas:['*'], editar:false, importar:false } };
 let NOMES = {};   // e-mail -> nome de exibicao (config/usuarios)
 const nomeKey = e => String(e||'').toLowerCase().replace(/\./g,'_');
@@ -1952,35 +1963,58 @@ function diasTd(n, fin){
 }
 function alertaOk(x, k){
   k = k || IND.alerta; if (x.fin) return false; const d = x.dias || 0;
-  return k==='60' ? d>=60 : k==='30' ? (d>=30 && d<60) : k==='sem' ? !x.andamento : true;
+  return k==='60' ? d>=60 : k==='30' ? (d>=30 && d<60) : k==='sem' ? !x.andamento : k==='prev' ? (x.atrasoPrev>0) : true;
 }
+const prevCdTds = x => {
+  if (!x.prevCd) return '<td style="color:var(--tx3)">—</td><td style="color:var(--tx3)">—</td>';
+  const a = x.atrasoPrev;
+  return `<td style="white-space:nowrap"><b>${fmtDt(x.prevCd)}</b><br><small style="color:var(--tx3)">${x.prevTipo}</small></td><td>${a>0 ? `<b style="color:var(--st-bad)">+${a} d</b>` : a===0 ? '<b style="color:var(--st-warn)">hoje</b>' : `<span style="color:var(--st-ok)">${-a} d p/ vencer</span>`}</td>`;
+};
 const deltaH = d => d==null ? '—' : Math.abs(d)<0.05 ? '=' : `<b style="color:${d>0?'var(--st-bad)':'var(--st-ok)'}" title="${d>0?'piorou':'melhorou'} contra o mês anterior">${d>0?'▲':'▼'} ${fmt1(Math.abs(d))} d</b>`;
 // colunas da lista do Controle (preferencia pessoal, guardada no navegador) e visoes de filtros
-const IND_COLS = ['Mês','Transportadora','Situação','Classe','Tipo de saída','Cliente','NF','Dias','Média (dias)','Responsável','Andamento','Andamento atualizado em','Motivo da pendência','Status do caso'];
+const IND_COLS = ['Cliente','NF','Mês','Transportadora','Situação','Classe','Tipo de saída','Dias','Média (dias)','Responsável','Andamento','Andamento atualizado em','Motivo da pendência','Status do caso','Previsão no CD','Além da previsão'];
 function lsGet(k, vazio){ try { const v = JSON.parse(localStorage.getItem(k)||'null'); return v==null ? vazio : v; } catch(e){ return vazio; } }
 function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
+let PREFS = {}, _prefSub = false;
+const prefGet = (k, vazio) => PREFS[k]!==undefined ? PREFS[k] : lsGet(k, vazio);
+function prefSet(k, v){
+  PREFS[k] = v; const ok = lsSet(k, v);
+  if (DB && CUR_UID) DB.doc('preferencias/'+CUR_UID).set({ [k]:v, atualizadoEm:isoNow() }, true).catch(e => console.warn('preferencias', e));
+  return ok || !!(DB && CUR_UID);
+}
+function iniciaPrefs(){
+  if (_prefSub || !DB || !CUR_UID) return; _prefSub = true;
+  const vazio = v => v==null || (Array.isArray(v) && !v.length) || (typeof v==='object' && !Array.isArray(v) && !Object.keys(v).length);
+  DB.doc('preferencias/'+CUR_UID).onSnapshot(snap => {
+    const d = snap.exists ? snap.data() : {}, mig = {};
+    ['ind_cols2','ind_views'].forEach(k => { if (d[k]===undefined){ const v = lsGet(k, null); if (!vazio(v)) mig[k] = v; } });   // o que ja estava so neste navegador sobe para a conta
+    PREFS = { ...d, ...mig };
+    if (Object.keys(mig).length) DB.doc('preferencias/'+CUR_UID).set({ ...mig, atualizadoEm:isoNow() }, true).catch(e => console.warn('preferencias', e));
+    colsAplica(); indViewsRender();
+  }, err => console.warn('preferencias', err));
+}
 function colsAplica(){
-  const o = lsGet('ind_cols', []); let st = document.getElementById('col-style');
+  const o = prefGet('ind_cols2', []); let st = document.getElementById('col-style');
   if (!st){ st = document.createElement('style'); st.id = 'col-style'; document.head.appendChild(st); }
   st.textContent = o.length ? o.map(i => `#tbl-ind-main tr:not(.cap) > :nth-child(${i+1})`).join(',') + '{display:none}' : '';
   const p = document.getElementById('col-pop');
   if (p) p.innerHTML = IND_COLS.map((n,i) => `<label><input type="checkbox" ${o.includes(i)?'':'checked'} onchange="colsToggle(${i},this.checked)"> ${esc(n)}</label>`).join('') + '<button type="button" class="btn-exp" style="margin-top:6px" onclick="colsReset()">Mostrar todas</button>';
 }
 function colsMenu(e){ e.stopPropagation(); document.getElementById('col-menu').classList.toggle('open'); }
-function colsToggle(i, on){ const o = new Set(lsGet('ind_cols', [])); on ? o.delete(i) : o.add(i); lsSet('ind_cols', [...o]); colsAplica(); }
-function colsReset(){ lsSet('ind_cols', []); colsAplica(); }
+function colsToggle(i, on){ const o = new Set(prefGet('ind_cols2', [])); on ? o.delete(i) : o.add(i); prefSet('ind_cols2', [...o]); colsAplica(); }
+function colsReset(){ prefSet('ind_cols2', []); colsAplica(); }
 document.addEventListener('click', e => { const m = document.getElementById('col-menu'); if (m && !e.target.closest('#col-menu')) m.classList.remove('open'); });
-const IND_PRESETS = { 'p:limpar':'Em aberto (padrão)', 'p:60':'Abertos há 60+ dias', 'p:30':'Abertos há 30 a 59 dias', 'p:sem':'Sem andamento' };
+const IND_PRESETS = { 'p:limpar':'Em aberto (padrão)', 'p:60':'Abertos há 60+ dias', 'p:30':'Abertos há 30 a 59 dias', 'p:sem':'Sem andamento', 'p:prev':'Coleta além da previsão no CD' };
 function indViewsRender(){
   const el = document.getElementById('ind-views'); if (!el) return;
-  const u = Object.keys(lsGet('ind_views', {}));
+  const u = Object.keys(prefGet('ind_views', {}));
   el.innerHTML = '<option value="">Visões…</option><optgroup label="Prontas">' + Object.entries(IND_PRESETS).map(([k,n]) => `<option value="${k}">${n}</option>`).join('') + '</optgroup>' + (u.length ? '<optgroup label="Minhas visões">' + u.map(n => `<option value="u:${escA(n)}">${esc(n)}</option>`).join('') + '</optgroup>' : '');
 }
 function indView(v){
   if (!v) return;
   if (v==='p:limpar'){ indSet('limpar'); return; }
   if (v.startsWith('p:')){ indSet('limpar'); IND.alerta = v.slice(2); IND.status = 'aberto'; renderInd(); return; }
-  const sv = lsGet('ind_views', {})[v.slice(2)]; if (!sv) return;
+  const sv = prefGet('ind_views', {})[v.slice(2)]; if (!sv) return;
   IND.meses = new Set(sv.meses||[]); IND.carrs = new Set(sv.carrs||[]); IND.motivos = new Set(sv.motivos||[]);
   IND.status = sv.status==null ? 'aberto' : sv.status; ['q','canal','sit','usuario','and','alerta'].forEach(k => IND[k] = sv[k]||'');
   const i = document.getElementById('ind-q'); if (i) i.value = IND.q;
@@ -1988,13 +2022,13 @@ function indView(v){
 }
 function indSalvaView(){
   const n = (prompt('Nome da visão (guarda os filtros atuais):')||'').trim(); if (!n) return;
-  const u = lsGet('ind_views', {}); u[n] = { meses:[...IND.meses], carrs:[...IND.carrs], motivos:[...IND.motivos], status:IND.status, q:IND.q, canal:IND.canal, sit:IND.sit, usuario:IND.usuario, and:IND.and, alerta:IND.alerta };
-  toast(lsSet('ind_views', u) ? 'Visão “'+n+'” salva neste navegador.' : 'Não foi possível salvar neste navegador.', {type:'ok', ms:2400}); indViewsRender();
+  const u = prefGet('ind_views', {}); u[n] = { meses:[...IND.meses], carrs:[...IND.carrs], motivos:[...IND.motivos], status:IND.status, q:IND.q, canal:IND.canal, sit:IND.sit, usuario:IND.usuario, and:IND.and, alerta:IND.alerta };
+  toast(prefSet('ind_views', u) ? 'Visão “'+n+'” salva na sua conta.' : 'Não foi possível salvar a visão.', {type:'ok', ms:2400}); indViewsRender();
 }
 function indApagaView(){
-  const u = lsGet('ind_views', {}), nomes = Object.keys(u); if (!nomes.length){ toast('Você ainda não salvou visões.', {type:'warn'}); return; }
+  const u = prefGet('ind_views', {}), nomes = Object.keys(u); if (!nomes.length){ toast('Você ainda não salvou visões.', {type:'warn'}); return; }
   const n = (prompt('Excluir qual visão?\n' + nomes.join('\n'))||'').trim(); if (!n || !u[n]) return;
-  delete u[n]; lsSet('ind_views', u); toast('Visão excluída.', {type:'ok', ms:1800}); indViewsRender();
+  delete u[n]; prefSet('ind_views', u); toast('Visão excluída.', {type:'ok', ms:1800}); indViewsRender();
 }
 const STATUS_NOMES = { ab:'Em aberto', fin:'Finalizado', canc:'Cancelado' };
 const statusAutoDe = x => x.finAuto != null ? (x.finAuto ? 'Finalizado' : 'Em aberto') : (x.estado || 'Em aberto');
@@ -2235,7 +2269,7 @@ function detectAndNormalize(rows){
     }
     return { id:tratKey(chave), origem:'tratativa', chave, nf, cpf, cliente, status:casos, classe: cellAt(r, col.classe) || null, andamento_arq: cellAt(r, col.andamento) || null,
       tipo_devolucao:tipoRaw, grupo:groupOf(tipoRaw), transportadora, uf, cidade,
-      data_solicitacao:dt, data_programacao:prog, valor, usuario, descricao,
+      data_solicitacao:dt, data_programacao:prog, valor, usuario, descricao, recebido_cd: !!romaneio,
       tag_raw: cellAt(r, col.tagraw) || null, transp_nova: cellAt(r, col.transpnova) || null,
       valor_titulo: parseMoney(cellAt(r, col.valortit)), nota_peca: cellAt(r, col.notapeca) || null,
       valor_nota_saida: parseMoney(cellAt(r, col.vnota)), valor_unitario: parseMoney(cellAt(r, col.vunit)), qtd_devolvida: parseMoney(cellAt(r, col.qtdev)) };
@@ -2244,6 +2278,7 @@ function detectAndNormalize(rows){
 }
 
 function isoNow(){ return new Date().toISOString(); }
+function hojeBR(){ const n = new Date(); return String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
 
 let IMPORTING = false;
 
@@ -2337,6 +2372,15 @@ async function importFile(file){
       const prev = DB_CASES[r.id];
       // data em que o caso entrou na situacao atual (so sabemos quando a situacao MUDA entre duas importacoes)
       if (prev && prev.tipo_devolucao && prev.tipo_devolucao !== r.tipo_devolucao){ const n = new Date(); r.sit_desde = String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
+      // datas do caminho da coleta (so sabemos quando o estado MUDA entre duas importacoes; o caso pode ter mudado de aba, entao olhamos o "irmao" de mesma chave)
+      { const sib = prev || DB_CASES[(r.origem==='coleta' ? 'trat_' : 'coleta_') + r.chave] || null;
+        if (!prev && sib && sib.tipo_devolucao && sib.tipo_devolucao !== r.tipo_devolucao) r.sit_desde = hojeBR();
+        if (sib){
+          if (sib.recebido_cd_em) r.recebido_cd_em = sib.recebido_cd_em;
+          else if (sib.recebido_cd===false && r.recebido_cd) r.recebido_cd_em = hojeBR();   // o romaneio de entrada apareceu agora: chegou no CD
+          if (sib.recolhido_em) r.recolhido_em = sib.recolhido_em;
+          else if (/recolhido no cliente/.test(norm(r.tipo_devolucao||'')) && sib.tipo_devolucao && norm(sib.tipo_devolucao)!==norm(r.tipo_devolucao)) r.recolhido_em = hojeBR();   // virou "Recolhido no Cliente" agora
+        } }
       // coluna "em andamento" da planilha: entra como andamento do caso, mas o que foi digitado no painel tem prioridade
       { const arq = r.andamento_arq; delete r.andamento_arq;
         if (arq){
@@ -2597,6 +2641,7 @@ async function _initDb(interactive){
   }
   if (statusEl) statusEl.innerHTML = 'Conectado — importações ficam salvas para todos.';
   if (!_perfilSub){ _perfilSub = true; iniciaPerfil(); }
+  iniciaPrefs();
   if (_casesSub) return;
   _casesSub = true;
 
@@ -2874,6 +2919,72 @@ function indCalcula(){
   });
   IND_FORA = IND_ALL.filter(x => SEM_ANALISE.has(x.carr)).length;
   IND_ALL = IND_ALL.filter(x => !SEM_ANALISE.has(x.carr));
+  colslaCalcula();
+}
+// ---- SLA da transportadora: do protocolo (programacao) ate o produto chegar no CD (romaneio de entrada) ----
+let COLSLA = [], COLSLA_MAP = new Map(), COLSLA_CARR = new Map();
+const COLSLA_RX = /protocolo de coleta|recolhido no cliente/;
+const fmtDt = d => d ? d.toLocaleDateString('pt-BR') : '—';
+const medianaDe = a => { if (!a.length) return null; const t = [...a].sort((p,q)=>p-q), m = t.length>>1; return t.length%2 ? t[m] : (t[m-1]+t[m])/2; };
+const mediaArr = a => a.length ? a.reduce((p,q)=>p+q,0)/a.length : null;
+function colslaAgg(arr){
+  const ch = arr.filter(i => i.diasTotal!=null), tr = arr.filter(i => !i.chegou);
+  return { n:arr.length, chegaram:ch.length, media:mediaArr(ch.map(i=>i.diasTotal)), mediana:medianaDe(ch.map(i=>i.diasTotal)), dentro:ch.filter(i=>i.diasTotal<=SLA).length,
+    transito:tr.length, atrasados:tr.filter(i=>i.farol==='Atrasado').length, comPrevInf:tr.filter(i=>i.prevTipo==='informada').length, atrasoPrev:tr.filter(i=>i.atrasoPrev>0).length };
+}
+function colslaCalcula(){
+  const hoje = new Date(), h0 = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const iso2d = v => v ? parseBR(String(v).slice(8,10)+'/'+String(v).slice(5,7)+'/'+String(v).slice(0,4)) : null;
+  const porChave = new Map();
+  IND_ALL.forEach(x => {
+    if (!x.chave || !COLSLA_RX.test(norm(x.sit||'')) || x.cancelada || x.status_manual==='canc') return;
+    const rec = /recolhido no cliente/.test(norm(x.sit)), chegou = !!(x.recebido_cd || x.recebidoCD);
+    if (!chegou && (x.concluidoAuto || x.concluido_auto)) return;   // saiu da planilha sem romaneio: nao da para medir
+    const score = (rec ? 2 : 0) + (x.concluidoAuto || x.concluido_auto ? 0 : 1), o = porChave.get(x.chave);
+    if (!o || score > o.score) porChave.set(x.chave, { x, score, rec, chegou });
+  });
+  const itens = [];
+  porChave.forEach(({ x, rec, chegou }) => {
+    const prog = parseBR(x.data_programacao) || x.d; if (!prog) return;
+    const cri = x.d, rcl = parseBR(x.recolhido_em), exata = parseBR(x.recebido_cd_em);
+    const aprox = chegou && !exata ? (parseBR(x.finalizado_em) || parseBR(x.ultimo_apontamento)) : null, fim = chegou ? (exata || aprox) : null;
+    const diasAberto = Math.max(0, daysBetween(prog, h0)), diasTotal = fim ? Math.max(0, daysBetween(prog, fim)) : null;
+    const it = { x, id:x.id, chave:x.chave, carr:x.carr, cri, prog, rcl, fim, fimTipo: exata ? 'exata' : (aprox ? 'aprox.' : null), chegou, estagio: chegou ? 'No CD' : ((rec || x.coletaRealizada) ? 'A caminho do CD' : 'Aguardando coleta'),
+      diasAberto, diasTotal, diasCriProg: cri ? Math.max(0, daysBetween(cri, prog)) : null, diasProtColeta: rcl ? Math.max(0, daysBetween(prog, rcl)) : null, diasColetaCd: (rcl && fim) ? Math.max(0, daysBetween(rcl, fim)) : null,
+      diasCriFim: (cri && fim) ? Math.max(0, daysBetween(cri, fim)) : null };
+    it.farol = chegou ? (diasTotal<=SLA ? 'Dentro do prazo' : 'Fora do prazo') : (diasAberto>SLA ? 'Atrasado' : diasAberto>=SLA-CONFIG.RISCO_JANELA_DIAS ? 'Em risco' : 'No prazo');
+    itens.push(it);
+  });
+  // previsao: a informada vale; sem ela, estimamos = programacao + mediana recente da transportadora (cai para a geral e, sem historico, para o prazo)
+  const recentes = itens.filter(i => i.diasTotal!=null && i.fim && daysBetween(i.fim, h0) <= 90);
+  const medC = new Map(); recentes.forEach(i => { if (!medC.has(i.carr)) medC.set(i.carr, []); medC.get(i.carr).push(i.diasTotal); });
+  const medG = recentes.length >= 3 ? medianaDe(recentes.map(i=>i.diasTotal)) : null;
+  itens.forEach(it => {
+    if (it.chegou) return;
+    const inf = iso2d(it.x.previsao_coleta), mc = (medC.get(it.carr)||[]).length >= 3 ? medianaDe(medC.get(it.carr)) : null;
+    if (inf){ it.prevData = inf; it.prevTipo = 'informada'; }
+    else { const base = mc!=null ? mc : (medG!=null ? medG : SLA); it.prevData = new Date(it.prog.getTime() + Math.round(base)*86400000); it.prevTipo = 'estimada'; it.prevBase = mc!=null ? 'transportadora' : (medG!=null ? 'geral' : 'prazo'); }
+    it.atrasoPrev = daysBetween(it.prevData, h0);
+  });
+  COLSLA = itens; COLSLA_MAP = new Map(itens.map(i => [i.chave, i]));
+  COLSLA_CARR = new Map(); [...new Set(itens.map(i=>i.carr))].forEach(c => COLSLA_CARR.set(c, colslaAgg(itens.filter(i=>i.carr===c))));
+  IND_ALL.forEach(x => { const it = COLSLA_MAP.get(x.chave); if (it && !it.chegou){ x.prevCd = it.prevData; x.prevTipo = it.prevTipo; x.atrasoPrev = it.atrasoPrev; } });
+}
+function colslaLinha(c){
+  const a = COLSLA_CARR.get(c); if (!a || !a.n) return '';
+  return `<div style="font-size:10.5px;color:var(--tx3);margin-top:8px;border-top:1px solid var(--bd);padding-top:6px" title="Do protocolo até a chegada no CD (prazo ${SLA} dias)">Coleta → CD: ${a.media==null ? 'sem chegadas medidas' : '<b style="color:var(--tx)">'+fmt1(a.media)+' d</b> · '+Math.round(a.dentro/a.chegaram*100)+'% no prazo'} · ${a.transito} a caminho${a.atrasados ? ' · <b style="color:var(--st-bad)">'+a.atrasados+' atrasados</b>' : ''}</div>`;
+}
+function colslaDetalhe(it){
+  const c = COLSLA_MAP.get(it.chave); if (!c) return '';
+  const t = c.chegou ? `Chegou no CD${c.fim ? ' em '+fmtDt(c.fim)+(c.fimTipo==='exata' ? '' : ' (aprox.)') : ''} · ${c.diasTotal==null ? '—' : c.diasTotal+' dias do protocolo'} (prazo ${SLA})` : `${c.estagio} · ${c.diasAberto} dias desde o protocolo (prazo ${SLA}) · previsão no CD ${fmtDt(c.prevData)} (${c.prevTipo})`;
+  return `<dt>SLA da transportadora</dt><dd>${t}</dd>`;
+}
+function dataSetBR(id, campo, v){
+  const br = v ? v.slice(8,10)+'/'+v.slice(5,7)+'/'+v.slice(0,4) : null, nome = campo==='recebido_cd_em' ? 'Chegada no CD' : 'Coleta no cliente';
+  if (!gravaCaso(id, { [campo]:br, alt_hist:altHist(id, nome + (br ? ': '+br : ' removida')) })) return;
+  toast(nome + (br ? ' salva.' : ' removida.'), {type:'ok', ms:1800});
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  scheduleRender();
 }
 function indAgg(arr){
   const fin = arr.filter(x=>x.fin), sl = fin.filter(x=>x.slaDias!=null);
@@ -2964,7 +3075,7 @@ function renderInd(){
   const por = new Map(); doAno.filter(x=>f(x,['carr','status','motivo'])).forEach(x => { if(!por.has(x.carr)) por.set(x.carr,[]); por.get(x.carr).push(x); });
   document.getElementById('ind-cars').innerHTML = [...por.entries()].map(([c,arr])=>({c, arr, a:indAgg(arr)})).sort((x,y)=>y.a.total-x.a.total).map(({c,a,arr}) => {
     const cl = a.taxa>=90 ? '' : a.taxa>=75 ? ' am' : ' rd', tcl = a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
-    return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}<button class="ind-drill" type="button" title="Ver os casos desta transportadora" onclick="event.stopPropagation();abreDrill(${regDrill('Casos — '+c, () => arr)})">ver casos ↗</button></h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div></div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
+    return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}<button class="ind-drill" type="button" title="Ver os casos desta transportadora" onclick="event.stopPropagation();abreDrill(${regDrill('Casos — '+c, () => arr)})">ver casos ↗</button></h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div>${colslaLinha(c)}</div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
 
   // ---- por canal (Marketplace x Relacionamento) ----
   document.getElementById('ind-canais-sub').textContent = 'Marketplace e Relacionamento atendem o cliente separadamente · identificados pelo usuário responsável (Marketplace: ' + MKT_USERS.join(', ') + '). Clique para filtrar.';
@@ -2988,7 +3099,7 @@ function renderInd(){
   }).join('') || '<tr><td colspan="9" style="color:var(--tx3);padding:12px">Sem dados.</td></tr>';
   { // faixa de alertas: o que precisa de acao + mes atual contra o anterior
     const b = doAno.filter(x => f(x,['status','motivo','alerta']) && !x.fin);
-    const al = [['60','Abertos há 60+ dias','r'],['30','Abertos há 30 a 59 dias','w'],['sem','Sem andamento informado','w']].map(([k,t,cl]) => { const n = b.filter(x=>alertaOk(x,k)).length; return `<button type="button" class="alerta ${n?cl:''}${IND.alerta===k?' on':''}${n?'':' z'}" onclick="indSet('alerta','${k}')" title="Clique para filtrar a lista"><b>${n}</b><span>${t}</span></button>`; });
+    const al = [['60','Abertos há 60+ dias','r'],['30','Abertos há 30 a 59 dias','w'],['sem','Sem andamento informado','w'],['prev','Coleta além da previsão no CD','r']].map(([k,t,cl]) => { const n = b.filter(x=>alertaOk(x,k)).length; return `<button type="button" class="alerta ${n?cl:''}${IND.alerta===k?' on':''}${n?'':' z'}" onclick="indSet('alerta','${k}')" title="Clique para filtrar a lista"><b>${n}</b><span>${t}</span></button>`; });
     const ult = meses.filter(m=>m>0).slice(-2);
     if (ult.length===2){ const m1 = mediaDe(doCar.filter(noGrupo(ult[1]))), m0 = mediaDe(doCar.filter(noGrupo(ult[0]))), d = (m1!=null && m0!=null) ? m1-m0 : null;
       al.push(`<div class="alerta${d!=null&&d>0.05?' r':''}" style="cursor:default"><b>${fd(m1)}</b><span>Média de dias em ${MESES[ult[1]-1]} · ${deltaH(d)} vs ${MESES[ult[0]-1]}</span></div>`); }
@@ -3030,9 +3141,9 @@ function renderInd(){
   document.getElementById('ind-lista-t').textContent = verFin ? 'Tarefas atendidas' : IND.status==='' ? 'Todas as tarefas (atendidas e em aberto)' : 'Casos em aberto — andamento e motivo da pendência';
   document.getElementById('cnt-ind').textContent = lista.length + (verFin ? ' atendidas' : IND.status==='' ? ' tarefas' : ' em aberto');
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind');
-  if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>${diasTd(x.dias, x.fin)}${diasTd(x.media, x.fin)}<td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
-    ${andCell(x, 'and-list-ctl')}${motivoCell(x)}${statusCell(x)}</tr>`).join('')
-    + (lista.length>300 ? `<tr class="cap"><td colspan="14" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
+  if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td>${diasTd(x.dias, x.fin)}${diasTd(x.media, x.fin)}<td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
+    ${andCell(x, 'and-list-ctl')}${motivoCell(x)}${statusCell(x)}${prevCdTds(x)}</tr>`).join('')
+    + (lista.length>300 ? `<tr class="cap"><td colspan="16" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
   ligaStats('ph-ind', [['Tarefas de '+IND.ano+' (filtros atuais)', () => base], ['Tarefas atendidas', () => base.filter(x=>x.fin)],
     ['Tempo até finalizar', () => base.filter(x=>x.fin && x.slaDias!=null).sort((a,b)=>b.slaDias-a.slaDias), { label:'Dias até finalizar', fn:x=>x.slaDias }], ['Casos em aberto hoje', () => base.filter(x=>!x.fin)]]);
   renderIndLog(doAnoAll, f);
@@ -3684,6 +3795,92 @@ function renderMedia(){
 function mdCsv(){
   if (!MD_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
   exportCSV(MD_LISTA.map(x => ({ 'Cliente':x.cliente||'', 'NF':x.nf||'', 'Situação':x.sit, 'Transportadora':x.carr, 'Criada em':x.data_solicitacao||'', 'Último apontamento':x.ultimo_apontamento||'', 'Média (dias)':x.media, 'Estado':x.fin?'Atendida':'Em aberto', 'Andamento':x.andamento||'' })), 'media_e_cruzamento');
+}
+
+// ---- SLA Transportadora (Coleta Reversa): protocolo -> coleta na casa do cliente -> chegada no CD ----
+const CS = { carrs:new Set(), est:'', farol:'', q:'' };
+function csSet(k, v){
+  if (k==='carr'){ CS.carrs.has(v) ? CS.carrs.delete(v) : CS.carrs.add(v); }
+  else if (k==='est') CS.est = (CS.est===v ? '' : v);
+  else if (k==='farol') CS.farol = (CS.farol===v ? '' : v);
+  else if (k==='q'){ CS.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderColSla, 180); return; }
+  else if (k==='limpar'){ CS.carrs.clear(); CS.est=''; CS.farol=''; CS.q=''; const i = document.getElementById('cs-q'); if (i) i.value=''; }
+  renderColSla();
+}
+let CS_LISTA = [], _csOk = false;
+const FAROL_COR = { 'Atrasado':'var(--st-bad)', 'Em risco':'var(--st-warn)', 'No prazo':'var(--st-ok)', 'Fora do prazo':'var(--st-bad)', 'Dentro do prazo':'var(--st-ok)' };
+function csPrevCell(it){
+  if (it.chegou) return '<td style="color:var(--tx3)">—</td>';
+  const x = it.x, v = x.previsao_coleta || '', a = it.atrasoPrev;
+  const rel = a>0 ? `<small style="color:var(--st-bad)">passou há ${a} d</small>` : a===0 ? '<small style="color:var(--st-warn)">é hoje</small>' : `<small style="color:var(--st-ok)">em ${-a} d</small>`;
+  const est = it.prevTipo==='estimada' ? `<small style="color:var(--tx3)" title="Programação + mediana ${it.prevBase==='transportadora' ? 'da transportadora' : it.prevBase==='geral' ? 'geral das transportadoras' : '(sem histórico: usa o prazo)'}; informe a data real para substituir">estimada ${fmtDt(it.prevData)}</small> · ` : '';
+  return `<td onclick="event.stopPropagation()" style="white-space:nowrap">${x.id ? `<input type="date" data-id="${esc(x.id)}" value="${esc(v)}" onchange="prevSet(this.dataset.id,this.value)" style="padding:3px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : ''}<br>${est}${rel}</td>`;
+}
+function csDataCell(it, campo){
+  const x = it.x, br = x[campo] || '', iso = /^\d{2}\/\d{2}\/\d{4}$/.test(br) ? br.slice(6,10)+'-'+br.slice(3,5)+'-'+br.slice(0,2) : '';
+  const aprox = (!iso && campo==='recebido_cd_em' && it.fim && it.fimTipo==='aprox.') ? `<br><small style="color:var(--tx3)" title="Estimada pela última movimentação da planilha de tarefas; informe a data real">aprox. ${fmtDt(it.fim)}</small>` : '';
+  return `<td onclick="event.stopPropagation()" style="white-space:nowrap">${x.id ? `<input type="date" data-id="${esc(x.id)}" data-c="${campo}" value="${iso}" onchange="dataSetBR(this.dataset.id,this.dataset.c,this.value)" style="padding:3px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}${aprox}</td>`;
+}
+function renderColSla(){
+  const el = document.getElementById('panel-colsla'); if (!el) return;
+  indCalcula();
+  if (!_csOk){ _csOk = true;
+    el.innerHTML = `<div class="pworld" id="ph-cs"></div>
+      <div class="ind-f"><div class="ind-f-top"><input id="cs-q" placeholder="Buscar cliente, NF ou CPF..." oninput="csSet('q',this.value)"><button class="btn-exp" type="button" id="cs-limpar" onclick="csSet('limpar')">Limpar filtros</button></div><div id="cs-fbody"></div></div>
+      <div class="ind-h">Do protocolo até o CD — onde o tempo é gasto</div><div class="ind-sub" id="cs-funil-sub"></div>
+      <div class="alerta-bar" id="cs-funil"></div>
+      <div class="pworld"><div class="pw-grid even"><div class="pw-card"><h3>Média de dias até o CD por transportadora</h3><div class="s">Protocolo → chegada no CD · linha vermelha = prazo de ${SLA} dias</div><div class="pw-chart"><canvas id="cs-ch"></canvas></div></div>
+        <div class="pw-card"><h3>Chegadas por mês</h3><div class="s">Mês em que o produto chegou no CD · clique para ver os casos</div><div class="tbl-scroll" style="max-height:260px"><table><thead><tr><th>Mês</th><th>Chegadas</th><th>Média</th><th>Mediana</th><th>% no prazo</th></tr></thead><tbody id="tb-cs-mes"></tbody></table></div></div></div></div>
+      <div class="card" style="margin-bottom:14px"><div class="card-title">Ranking por transportadora</div><div class="card-sub">Clique numa linha para filtrar · a previsão estimada usa a mediana de cada transportadora (últimos 90 dias)</div><div style="overflow:auto"><table class="tbl"><thead><tr><th>Transportadora</th><th>Casos</th><th>Chegaram</th><th>Média</th><th>Mediana</th><th>% no prazo</th><th>A caminho</th><th>Atrasados</th><th>Previsão informada</th><th>Além da previsão</th></tr></thead><tbody id="tb-cs-rank"></tbody></table></div></div>
+      <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos do SLA</b><span class="fcnt" id="cnt-cs"></span><button class="btn-exp" onclick="csCsv()">Exportar CSV</button></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Transportadora</th><th>Cliente</th><th>NF</th><th>Criação</th><th>Protocolo</th><th>Dias</th><th>Farol</th><th>Estágio</th><th>Previsão no CD</th><th>Coleta no cliente</th><th>Chegada no CD</th><th>Total (dias)</th><th>Andamento</th></tr></thead><tbody id="tb-cs"></tbody></table></div></div>`; }
+  const todos = COLSLA;
+  const f = (it, ign) => { ign = ign||[]; return (ign.includes('carr') || !CS.carrs.size || CS.carrs.has(it.carr)) && (ign.includes('est') || !CS.est || it.estagio===CS.est) && (ign.includes('farol') || !CS.farol || it.farol===CS.farol) &&
+    (!CS.q || norm((it.x.cliente||'')+' '+(it.x.nf||'')+' '+(it.x.cpf||'')).includes(CS.q)); };
+  const vis = todos.filter(i=>f(i)), A = colslaAgg(vis), pc = (a,b) => b ? Math.round(a/b*100)+'%' : '—';
+  document.getElementById('bdg-colsla').textContent = todos.filter(i => !i.chegou && i.farol==='Atrasado').length;
+  document.getElementById('ph-cs').innerHTML = pwHero('Coleta Reversa', 'SLA da transportadora', todos.length ? `Prazo de ${SLA} dias corridos, contados da programação do protocolo até a chegada no CD (romaneio de entrada). Sem previsão informada, o painel estima pela mediana da transportadora.` : 'Ainda não há casos de Protocolo de Coleta / Recolhido no Cliente. Importe o Controle de Situações.',
+    [['Média protocolo → CD', A.media==null ? '—' : fmt1(A.media)+' dias', `${A.chegaram} que já chegaram · mediana ${A.mediana==null?'—':fmt1(A.mediana)}`], [`No prazo (${SLA} d)`, pc(A.dentro, A.chegaram), `${A.dentro} de ${A.chegaram} que chegaram`],
+     ['A caminho / aguardando', A.transito, `${A.atrasados} além dos ${SLA} dias`], ['Com previsão informada', A.comPrevInf, `de ${A.transito} · o restante é estimado`], ['Além da previsão', A.atrasoPrev, 'passaram da data prevista no CD']], '');
+  ligaStats('ph-cs', [['Casos do SLA', () => vis.map(i=>i.x)], ['Chegaram no CD', () => vis.filter(i=>i.chegou).map(i=>i.x)], ['A caminho / aguardando', () => vis.filter(i=>!i.chegou).map(i=>i.x)], ['Atrasados', () => vis.filter(i=>i.farol==='Atrasado').map(i=>i.x)], ['Além da previsão', () => vis.filter(i=>i.atrasoPrev>0).map(i=>i.x)]]);
+  const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
+  const carrs = [...new Set(todos.map(i=>i.carr))].map(c => ({ c, n:todos.filter(i=>i.carr===c && f(i,['carr'])).length })).filter(o=>o.n).sort((a,b)=>b.n-a.n);
+  document.getElementById('cs-fbody').innerHTML =
+    `<div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o => chip(CS.carrs.has(o.c), `csSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>
+     <div class="ind-fr"><b>Estágio</b><div>${['Aguardando coleta','A caminho do CD','No CD'].map(e => chip(CS.est===e, `csSet('est','${e}')`, e, todos.filter(i=>i.estagio===e && f(i,['est'])).length)).join('')}</div></div>
+     <div class="ind-fr"><b>Farol</b><div>${['Atrasado','Em risco','No prazo','Fora do prazo','Dentro do prazo'].map(e => chip(CS.farol===e, `csSet('farol','${e}')`, e, todos.filter(i=>i.farol===e && f(i,['farol'])).length)).join('')}</div></div>`;
+  document.getElementById('cs-limpar').style.visibility = (CS.carrs.size || CS.est || CS.farol || CS.q) ? 'visible' : 'hidden';
+  // funil: onde o tempo e gasto
+  const cp = vis.filter(i=>i.diasCriProg!=null), tot = vis.filter(i=>i.diasCriFim!=null), pcol = vis.filter(i=>i.diasProtColeta!=null), cd = vis.filter(i=>i.diasColetaCd!=null);
+  const caixa = (t, v, n, sub, cl) => `<div class="alerta ${cl||''}" style="cursor:default"><b>${v==null ? '—' : fmt1(v)+' d'}</b><span>${t}<br><small style="color:var(--tx3)">${n} caso${n===1?'':'s'}${sub ? ' · '+sub : ''}</small></span></div>`;
+  document.getElementById('cs-funil-sub').textContent = 'Criação → Protocolo (aceite da transportadora) → Coleta na casa do cliente → Chegada no CD. As etapas de coleta passam a ser medidas conforme as datas forem gravadas nas importações (ou informadas na tabela).';
+  document.getElementById('cs-funil').innerHTML = caixa('Criação → Protocolo', mediaArr(cp.map(i=>i.diasCriProg)), cp.length, '', '') + caixa('Protocolo → Coleta no cliente', mediaArr(pcol.map(i=>i.diasProtColeta)), pcol.length, pcol.length ? '' : 'sem datas ainda', 'w') +
+    caixa('Coleta → Chegada no CD', mediaArr(cd.map(i=>i.diasColetaCd)), cd.length, cd.length ? '' : 'sem datas ainda', 'w') + caixa('Protocolo → Chegada no CD (SLA)', A.media, A.chegaram, `prazo ${SLA} d`, A.media!=null && A.media>SLA ? 'r' : '') + caixa('Criação → Chegada no CD (total)', mediaArr(tot.map(i=>i.diasCriFim)), tot.length, '', '');
+  // ranking
+  const rk = [...new Set(todos.filter(i=>f(i,['carr'])).map(i=>i.carr))].map(c => ({ c, a:colslaAgg(todos.filter(i=>i.carr===c && f(i,['carr']))) })).sort((p,q)=>q.a.n-p.a.n);
+  document.getElementById('tb-cs-rank').innerHTML = rk.map(({c,a}) => `<tr class="clickable${CS.carrs.has(c)?' sel':''}" data-c="${esc(c)}" onclick="csSet('carr',this.dataset.c)"><td><b>${esc(c)}</b></td><td>${a.n}</td><td>${a.chegaram}</td><td>${a.media==null?'—':'<b style="color:'+(a.media>SLA?'var(--st-bad)':'var(--st-ok)')+'">'+fmt1(a.media)+' d</b>'}</td><td>${a.mediana==null?'—':fmt1(a.mediana)+' d'}</td><td>${pc(a.dentro,a.chegaram)}</td><td>${a.transito}</td><td>${a.atrasados ? '<b style="color:var(--st-bad)">'+a.atrasados+'</b>' : 0}</td><td>${a.comPrevInf} de ${a.transito}</td><td>${a.atrasoPrev ? '<b style="color:var(--st-bad)">'+a.atrasoPrev+'</b>' : 0}</td></tr>`).join('') || '<tr><td colspan="10" style="color:var(--tx3);padding:12px">Sem dados.</td></tr>';
+  // chegadas por mes
+  const mm = new Map(); vis.filter(i=>i.chegou && i.fim && i.diasTotal!=null).forEach(i => { const k = i.fim.getFullYear()*100 + i.fim.getMonth(); if (!mm.has(k)) mm.set(k, []); mm.get(k).push(i.diasTotal); });
+  document.getElementById('tb-cs-mes').innerHTML = [...mm.entries()].sort((a,b)=>b[0]-a[0]).slice(0,12).map(([k,a]) => `<tr><td>${MESES[k%100]}/${Math.floor(k/100)}</td><td>${a.length}</td><td><b>${fmt1(mediaArr(a))} d</b></td><td>${fmt1(medianaDe(a))} d</td><td>${pc(a.filter(d=>d<=SLA).length, a.length)}</td></tr>`).join('') || '<tr><td colspan="5" style="color:var(--tx3);padding:12px">Nenhuma chegada com data ainda: a data de chegada é gravada na importação em que o romaneio de entrada aparece.</td></tr>';
+  if (window.Chart && document.getElementById('panel-colsla').classList.contains('on')){
+    const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim(), top = rk.filter(o=>o.a.media!=null).slice(0,10);
+    if (charts.cs) charts.cs.destroy();
+    charts.cs = new Chart(document.getElementById('cs-ch'), { data:{ labels:top.map(o=>o.c), datasets:[
+      { type:'bar', data:top.map(o=>+o.a.media.toFixed(1)), backgroundColor:top.map(o=>o.a.media>SLA ? '#DC2626' : '#16A34A'), borderRadius:6, order:2 },
+      { type:'line', data:top.map(()=>SLA), borderColor:'#F43F5E', borderDash:[6,4], pointRadius:0, order:1 } ] },
+      options:{ responsive:true, maintainAspectRatio:false, animation:{duration:350}, plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:c => c.dataset.type==='line' ? ` prazo ${SLA} dias` : ` média ${c.parsed.y} dias · ${top[c.dataIndex].a.chegaram} chegadas` } } },
+        scales:{ x:{ ticks:{color:tick}, grid:{display:false} }, y:{ beginAtZero:true, ticks:{color:tick}, grid:{color:grid}, title:{display:true,text:'Dias',color:tick} } } } });
+  }
+  const lista = vis.slice().sort((a,b) => (a.chegou - b.chegou) || (a.chegou ? (+(b.fim||0)) - (+(a.fim||0)) : b.diasAberto - a.diasAberto)); CS_LISTA = lista;
+  document.getElementById('cnt-cs').textContent = lista.length + ' caso' + (lista.length!==1 ? 's' : '');
+  document.getElementById('tb-cs').innerHTML = lista.slice(0,400).map(it => { const x = it.x; return `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td style="font-size:11px">${esc(it.carr)}</td><td class="td-nome">${esc(x.cliente||'—')}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${fmtDt(it.cri)}</td><td>${fmtDt(it.prog)}</td>
+    <td><b>${it.diasAberto} d</b></td><td><b style="color:${FAROL_COR[it.farol]}">${it.farol}</b></td><td style="font-size:11px">${it.estagio}</td>${csPrevCell(it)}${csDataCell(it,'recolhido_em')}${csDataCell(it,'recebido_cd_em')}<td>${it.diasTotal==null ? '—' : '<b>'+it.diasTotal+' d</b>'}</td><td style="font-size:11px">${esc(x.andamento||'—')}</td></tr>`; }).join('') + capNota(lista.length)
+    || '<tr><td colspan="13" style="color:var(--tx3);padding:16px">Nenhum caso com esses filtros.</td></tr>';
+}
+function csCsv(){
+  if (!CS_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
+  exportCSV(CS_LISTA.map(it => ({ 'Transportadora':it.carr, 'Cliente':it.x.cliente||'', 'CPF':it.x.cpf||'', 'NF':it.x.nf||'', 'Criação':fmtDt(it.cri), 'Protocolo':fmtDt(it.prog), 'Dias desde o protocolo':it.diasAberto, 'Farol':it.farol, 'Estágio':it.estagio,
+    'Previsão no CD':it.chegou ? '' : fmtDt(it.prevData), 'Tipo da previsão':it.chegou ? '' : it.prevTipo, 'Dias além da previsão':(!it.chegou && it.atrasoPrev>0) ? it.atrasoPrev : '', 'Coleta no cliente':it.rcl ? fmtDt(it.rcl) : '', 'Chegada no CD':it.fim ? fmtDt(it.fim) : '', 'Precisão da chegada':it.fimTipo||'', 'Total (dias)':it.diasTotal==null ? '' : it.diasTotal, 'Andamento':it.x.andamento||'' })), 'sla_transportadora');
 }
 
 // ================= MUNDO PERDAS =================
