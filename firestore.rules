@@ -8,14 +8,36 @@ function isAbraUser() {
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ---- perfis de acesso (colecao usuarios, um documento por uid) ----
+    function perfilPath() { return /databases/$(database)/documents/usuarios/$(request.auth.uid); }
+    function temPerfil() { return exists(perfilPath()); }
+    function perfil() { return get(perfilPath()).data; }
+    // conta desativada pelo administrador: nao le mais nada
+    function bloqueado() { return temPerfil() && perfil().get('ativo', true) == false; }
+    function isSuperAdmin() { return isAbraUser() && request.auth.token.email in ['admin1@abracadabra.com.br']; }
+    function isAdmin() { return isSuperAdmin() || (isAbraUser() && temPerfil() && perfil().get('papel', 'usuario') == 'admin' && perfil().get('ativo', true) != false); }
+
+    // leitura exige conta ativa; escrita fica so com o dominio (importacoes gravam centenas de documentos por lote,
+    // por isso a regra de escrita nao consulta o perfil)
     match /cases/{caseId} {
-      allow read, write: if isAbraUser();
+      allow read: if isAbraUser() && !bloqueado();
+      allow write: if isAbraUser();
     }
     match /imports/{importId} {
-      allow read, write: if isAbraUser();
+      allow read: if isAbraUser() && !bloqueado();
+      allow write: if isAbraUser();
     }
     match /config/{configId} {
-      allow read, write: if isAbraUser();
+      allow read: if isAbraUser() && !bloqueado();
+      allow write: if isAbraUser();
+    }
+    match /usuarios/{uid} {
+      allow read: if isAbraUser() && (request.auth.uid == uid || isAdmin());
+      allow create: if isAbraUser() && (
+        (request.auth.uid == uid && request.resource.data.papel == 'usuario' && request.resource.data.ativo == true && request.resource.data.email == request.auth.token.email)
+        || isAdmin());
+      allow update, delete: if isAdmin();
     }
   }
 }

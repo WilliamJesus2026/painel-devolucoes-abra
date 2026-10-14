@@ -127,3 +127,9 @@ Andamento, data/nome da atualização, previsão de coleta, protocolo Hello e mo
 ## SLA reinicia com a atualização; Logística ampliada
 
 No SLA de Apontamento, atualizar o andamento (ou marcar '✓ hoje') reinicia o prazo do caso: sai de atrasado e só volta se o prazo passar de novo sem nova atualização. A Logística (LOG_SITS) agora cobre Recol P/ Acomp Cliente, Recol P/Acomp Transportad / Transp 2, Recol Acomp C/Reenvio Tra e Cobrança Realizada (1 e 2); o bloco da Logística tem filtro por situação. 'Sem andamento' = caso em aberto sem texto na coluna F.
+
+## Usuários e acessos (administração)
+
+Menu **Administração → Usuários e acessos** (só para administradores; padrão: admin1@abracadabra.com.br, definido no código e nas regras do banco). O administrador cria o login (e-mail @abracadabra.com.br) por uma sessão secundária do Firebase, para não perder a própria sessão, recebe uma senha provisória (mostrada uma vez) e pode enviar e-mail para a pessoa criar a própria senha. Por usuário: papel (usuário/administrador), abas visíveis, pode editar, pode importar, ativo. Perfis rápidos: acesso total, Logística, Perdas/Financeiro e somente consulta. Contas antigas entram na lista no primeiro acesso com acesso total. Os perfis ficam em usuarios/{uid}.
+
+Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia a LEITURA de contas desativadas e só administradores mexem em usuarios. Isolar dados por área (para que ninguém consiga ler outra aba) exigiria separar os dados em coleções por área. Usuários não são excluídos do Firebase Auth pelo painel (só desativados).

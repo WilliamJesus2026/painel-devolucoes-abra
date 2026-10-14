@@ -455,6 +455,12 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .ind-f-res{font-size:12px;color:var(--tx3);margin-top:8px}.ind-f-res b{color:var(--tx)}
 @media(max-width:700px){.ind-fr{flex-direction:column}.ind-fr>b{padding-top:0}}
 .hero-chips .hchip{display:none!important}
+.sem-importar .btn-import,.sem-importar .sb-up .up-zone{display:none!important}
+.so-leitura .and-in,.so-leitura .prev-in,.so-leitura .prot-in,.so-leitura .mot-sel,.so-leitura .and-hoje{pointer-events:none;opacity:.55}
+.adm-abas{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.adm-abas label{display:flex;gap:6px;align-items:center;font-size:12px;padding:5px 9px;border:1px solid var(--bd);border-radius:8px;cursor:pointer;color:var(--tx2)}
+.adm-abas label:hover{border-color:var(--acc)}
+.adm-in{padding:8px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--srf1,var(--srf));color:var(--tx);font-size:13px;min-width:260px}
 .and-hoje{border:1px solid var(--bd);background:none;color:var(--tx2);border-radius:6px;padding:1px 6px;font-size:10px;font-weight:700;cursor:pointer}
 .and-hoje:hover{border-color:#16A34A;color:#16A34A}
 .dsec .pw-hero{padding:18px 22px 18px;margin-bottom:14px}
@@ -606,6 +612,11 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><line x1="12" y1="8" x2="12" y2="12" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
       Tipos de devolução
     </button>
+    <div class="sb-grp" id="grp-adm" style="display:none">Administração</div>
+    <button class="nav" onclick="ir('adm')" id="nav-adm" style="display:none">
+      <svg class="ic" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5" stroke-width="1.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5" stroke-width="1.5" stroke-linecap="round"/><path d="M17 8v6M14 11h6" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Usuários e acessos
+    </button>
   </nav>
 
   <div class="sb-up">
@@ -616,6 +627,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     </label>
     <div class="up-msg" id="up-msg"></div>
     <div id="dbStatus" style="font-size:10px;color:rgba(255,255,255,.55);margin-top:8px;line-height:1.5"></div>
+    <div id="contaBox" style="display:none;margin-top:6px;font-size:10.5px;color:rgba(255,255,255,.7)"><div id="contaNome" style="margin-bottom:5px"></div><div style="display:flex;gap:6px"><button class="btn-exp" type="button" onclick="trocarSenha()" style="flex:1;justify-content:center">Trocar senha</button><button class="btn-exp" type="button" onclick="sair()" style="flex:1;justify-content:center">Sair</button></div></div>
     <div id="ocultosBox" style="display:none;margin-top:8px"><button class="btn-exp" id="ocultosBtn" type="button" onclick="mostrarOcultos()" style="width:100%;justify-content:center"></button></div>
     <div id="loginBox" style="display:none;margin-top:8px">
       <input type="email" id="login-email" placeholder="seu.email@abracadabra.com.br" class="login-input" autocomplete="username">
@@ -826,6 +838,8 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <div class="panel" id="panel-nr-ap"></div>
 
     <div class="panel" id="panel-nr-nr"></div>
+
+    <div class="panel" id="panel-adm"></div>
 
     <div class="panel" id="panel-regiao">
       <div class="g2">
@@ -1160,9 +1174,10 @@ const TITLES = {
   dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Coleta Reversa — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
-  ind:'Controle de Situações', sla:'SLA de Apontamento', 'nr-ap':'Transportadora a pagar', 'nr-nr':'Produto não retornou', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
+  ind:'Controle de Situações', sla:'SLA de Apontamento', adm:'Usuários e acessos', 'nr-ap':'Transportadora a pagar', 'nr-nr':'Produto não retornou', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
 };
 function ir(id){
+  if (!podeAba(id)){ toast('Você não tem acesso a esta aba.', {type:'warn'}); return; }
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nav').forEach(b=>b.classList.remove('on'));
   const panel = document.getElementById('panel-'+id);
@@ -1174,6 +1189,7 @@ function ir(id){
   if (id==='ind') renderInd();
   if (id==='sla') renderSla();
   if (id==='nr-ap' || id==='nr-nr') renderNR();
+  if (id==='adm') renderAdm();
   window.scrollTo({top:0});
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1613,6 +1629,7 @@ function renderAll(){
   renderPerdasBadges();
   renderPerdasActive();
   renderInd();
+  renderAdm();
   renderSla();
   renderNR();
   renderProtoHero();
@@ -1651,7 +1668,18 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-let CUR_EMAIL = '';
+let CUR_EMAIL = '', CUR_UID = '';
+const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
+let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
+const souAdmin = () => SUPER_ADMINS.includes(String(CUR_EMAIL).toLowerCase()) || !!(PERFIL && PERFIL.papel==='admin' && PERFIL.ativo!==false);
+const podeAba = id => { if (id==='adm') return souAdmin(); if (!PERFIL || souAdmin()) return true; const a = PERFIL.abas || ['*']; return a.includes('*') || a.includes(id); };
+const podeEditar = () => souAdmin() || !PERFIL || PERFIL.editar!==false;
+const podeImportar = () => souAdmin() || !PERFIL || PERFIL.importar!==false;
+const ABAS_CAT = [['dash','Dashboard','Visão geral'],['at','Atrasados','Coleta Reversa'],['ri','Em risco','Coleta Reversa'],['em','No prazo','Coleta Reversa'],['rea','Coleta realizada','Coleta Reversa'],['col-all','Todos os protocolos','Coleta Reversa'],
+  ['trat','Tratativas por grupo','Tratativas'],['ind','Controle de Situações','Controle'],['sla','SLA de Apontamento','Controle'],['nr-ap','Transportadora a pagar','Transportadora'],['nr-nr','Produto não retornou','Transportadora'],
+  ['perdas','Perdas — Panorama','Perdas'],['p-cli','Perdas Cliente','Perdas'],['p-trp','Perdas Transportadora','Perdas'],['regiao','Atrasos por região','Análise'],['hist','Histórico','Análise'],['tipos','Tipos de devolução','Análise']];
+const PRESETS = { total:{ abas:['*'], editar:true, importar:true }, logistica:{ abas:['dash','at','ri','em','rea','col-all','trat','ind','sla'], editar:true, importar:false },
+  perdas:{ abas:['dash','perdas','p-cli','p-trp','nr-ap','nr-nr'], editar:true, importar:false }, consulta:{ abas:['*'], editar:false, importar:false } };
 let NOMES = {};   // e-mail -> nome de exibicao (config/usuarios)
 const nomeKey = e => String(e||'').toLowerCase().replace(/\./g,'_');
 const nomeDe = e => { if (!e) return ''; if (NOMES[nomeKey(e)]) return NOMES[nomeKey(e)]; return String(e).split('@')[0].split(/[._-]/).map(p => p ? p[0].toUpperCase()+p.slice(1) : '').join(' '); };
@@ -1824,6 +1852,7 @@ function andCell(c, lista){
 // ---- gravacao unica: o que a equipe escreve vale para o caso em TODAS as abas e para as copias dele (mesma chave) ----
 function irmaosDe(id){ const ch = (DB_CASES[id]||{}).chave; return ch ? Object.keys(DB_CASES).filter(k => DB_CASES[k].chave===ch) : [id]; }
 function gravaCaso(id, campos){
+  if (!podeEditar()){ toast('Seu acesso é somente de consulta: não é possível editar.', {type:'warn'}); return false; }
   if (!DB){ toast('Entre com sua conta para gravar.', {type:'warn'}); return false; }
   [...new Set([id, ...irmaosDe(id)])].forEach(k => {
     DB.doc('cases/'+k).set(campos, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
@@ -2127,6 +2156,7 @@ async function importTarefas(rows, file, say){
 async function importFile(file){
   const msg = document.getElementById('up-msg');
   const say = t => { msg.style.display='block'; msg.textContent = t; };
+  if (!podeImportar()){ toast('Seu acesso não permite importar planilhas.', {type:'warn'}); return; }
   if (IMPORTING){ toast('Já existe uma importação em andamento.', {type:'warn'}); return; }
   if (!DB){
     say('Banco indisponível — entre com sua conta antes de importar.');
@@ -2290,6 +2320,7 @@ function makeFirestoreShim(db, fs){
       async get(){ const snap = await fs.getDoc(ref); return { exists: snap.exists(), data: () => snap.data() }; },
       async set(data, merge){ return merge ? fs.setDoc(ref, data, {merge:true}) : fs.setDoc(ref, data); },
       async update(data){ return fs.updateDoc(ref, data); },
+      onSnapshot(onNext, onErr){ return fs.onSnapshot(ref, snap => onNext({ exists: snap.exists(), data: () => snap.data() }), onErr); },
     };
   }
   function collectionRef(path, constraints){
@@ -2339,14 +2370,14 @@ let _fb = null; // { authMod, auth, db, fsMod, storage, stMod } - carregado uma 
 let _casesSub = false; // evita assinar o snapshot de 'cases' mais de uma vez
 async function loadFirebase(){
   if (_fb) return _fb;
-  const [{ initializeApp }, fsMod, authMod, stMod] = await Promise.all([
+  const [appMod, fsMod, authMod, stMod] = await Promise.all([
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js'),
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js'),
     import('https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js'),
   ]);
-  const app = initializeApp(FIREBASE_CONFIG);
-  _fb = { authMod, auth: authMod.getAuth(app), db: fsMod.getFirestore(app), fsMod, storage: stMod.getStorage(app), stMod };
+  const app = appMod.initializeApp(FIREBASE_CONFIG);
+  _fb = { appMod, authMod, auth: authMod.getAuth(app), db: fsMod.getFirestore(app), fsMod, storage: stMod.getStorage(app), stMod };
   return _fb;
 }
 
@@ -2415,6 +2446,7 @@ async function _initDb(interactive){
     CUR_EMAIL = currentUser.email || '';
     DB = makeFirestoreShim(db, fsMod);
     ASSETS = makeStorageShim(storage, stMod);
+    CUR_UID = currentUser.uid || '';
   } catch(e){
     console.warn('initDb falhou', e);
     DB = null; ASSETS = null;
@@ -2425,6 +2457,7 @@ async function _initDb(interactive){
     return;
   }
   if (statusEl) statusEl.innerHTML = 'Conectado — importações ficam salvas para todos.';
+  if (!_perfilSub){ _perfilSub = true; iniciaPerfil(); }
   if (_casesSub) return;
   _casesSub = true;
 
@@ -2457,7 +2490,7 @@ async function _initDb(interactive){
 // ================= HERO NO PADRAO PERDAS (reutilizavel) =================
 function pwHero(kick, title, sub, stats, acao){
   return `<div class="pw-hero"><div class="pw-top"><div><div class="pw-kick">${kick}</div><h2>${title}</h2><div class="pw-sub">${sub}</div></div>
-    <div class="pw-actions no-print">${acao!==undefined ? acao : `<button class="pw-btn" type="button" onclick="document.getElementById('file-input').click()">⭱ Importar planilha</button>`}</div></div>
+    <div class="pw-actions no-print">${acao!==undefined ? acao : `<button class="pw-btn btn-import" type="button" onclick="document.getElementById('file-input').click()">⭱ Importar planilha</button>`}</div></div>
     <div class="pw-stats">${stats.map(([l,v,n,go,sm]) => `<div class="pw-stat"${go?` onclick="${go}" style="cursor:pointer"`:''}><div class="l">${l}</div><div class="v${sm?' sm':''}">${v}</div><div class="n">${n||''}</div></div>`).join('')}</div></div>`;
 }
 const PH_TITLES = { at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD', 'col-all':'Todos os protocolos' };
@@ -3100,6 +3133,142 @@ function renderNRp(sc){
 function nrExport(sc){
   const l = NR_LISTA[sc]; if (!l || !l.length){ toast('Nada para exportar.', {type:'warn'}); return; }
   exportCSV(l.map(x => ({ 'Situação':x.sit, 'Cliente':x.cliente||'', 'CPF':x.cpf||'', 'NF':x.nf||'', 'Classe':x.classe||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Aberto em':x.data_solicitacao||'', 'Dias parado':x.dias==null?'':x.dias, 'Valor estimado':x.valor_est||'', 'Responsável':x.usuario||'', 'Canal':x.canal, 'Andamento':x.andamento||'', 'Andamento atualizado em':andData(x)?andData(x).txt:'', 'Descrição':x.descricao||'' })), sc==='ap' ? 'transportadora_a_pagar' : 'produto_nao_retornou');
+}
+
+// ================= USUARIOS E ACESSOS =================
+function iniciaPerfil(){
+  document.getElementById('contaBox').style.display = 'block';
+  DB.doc('usuarios/'+CUR_UID).onSnapshot(snap => {
+    PERFIL = snap.exists ? snap.data() : null;
+    if (!snap.exists){ criaPerfilInicial(); }
+    else if (PERFIL.ativo === false){ acessoDesativado(); return; }
+    aplicaPerfil();
+    if (souAdmin() && !_admSub){
+      _admSub = true;
+      DB.collection('usuarios').onSnapshot(sn => { USUARIOS = sn.docs.map(d => ({ uid:d.id, ...d.data() })); USUARIOS.forEach(u => { if (u.email && u.nome) NOMES[nomeKey(u.email)] = u.nome; }); renderAdm(); scheduleRender(); }, err => console.warn('usuarios', err));
+    }
+    scheduleRender();
+  }, err => console.warn('perfil', err));
+}
+async function criaPerfilInicial(){   // primeiro acesso de uma conta que ja existia: entra com acesso total e aparece na lista do administrador
+  const adm = SUPER_ADMINS.includes(String(CUR_EMAIL).toLowerCase());
+  try { await DB.doc('usuarios/'+CUR_UID).set({ email:CUR_EMAIL, nome:nomeDe(CUR_EMAIL), papel: adm ? 'admin' : 'usuario', ativo:true, abas:['*'], editar:true, importar:true, criadoPor:'primeiro acesso', criadoEm:isoNow() }); }
+  catch(err){ console.warn('perfil inicial', err); }
+}
+async function acessoDesativado(){
+  try { const { authMod, auth } = await loadFirebase(); await authMod.signOut(auth); } catch(e){}
+  DB = null; DB_CASES = {}; PERFIL = null; scheduleRender();
+  showLoginBox('Acesso desativado. Fale com o administrador do painel.');
+  toast('Seu acesso foi desativado.', {type:'err'});
+}
+function aplicaPerfil(){
+  document.body.classList.toggle('so-leitura', !podeEditar());
+  document.body.classList.toggle('sem-importar', !podeImportar());
+  let grpAtual = null, visiveis = 0;
+  const fecha = () => { if (grpAtual) grpAtual.style.display = visiveis ? '' : 'none'; };
+  [...document.querySelectorAll('.sb-nav > *, nav > *')].forEach(el => {
+    if (el.classList.contains('sb-grp')){ fecha(); grpAtual = el; visiveis = 0; }
+    else if (el.classList.contains('nav')){ const ok = podeAba(el.id.replace(/^nav-/,'')); el.style.display = ok ? '' : 'none'; if (ok) visiveis++; }
+  });
+  fecha();
+  document.getElementById('contaNome').textContent = nomeDe(CUR_EMAIL) + (souAdmin() ? ' · administrador' : (PERFIL && PERFIL.editar===false ? ' · consulta' : ''));
+  const ativo = document.querySelector('.panel.on'); const idAtivo = ativo ? ativo.id.replace(/^panel-/,'') : '';
+  if (idAtivo && !podeAba(idAtivo)){ const prim = ABAS_CAT.map(a=>a[0]).find(podeAba); if (prim) ir(prim); }
+}
+async function trocarSenha(){
+  try { const { authMod, auth } = await loadFirebase(); await authMod.sendPasswordResetEmail(auth, CUR_EMAIL); toast('Enviamos um e-mail para '+CUR_EMAIL+' com o link para criar uma nova senha.', {type:'ok', ms:7000}); }
+  catch(err){ toast('Não consegui enviar o e-mail: '+(err.code||err.message), {type:'err'}); }
+}
+async function sair(){ try { const { authMod, auth } = await loadFirebase(); await authMod.signOut(auth); } catch(e){} location.reload(); }
+
+const senhaProvisoria = () => { const c = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789', a = new Uint32Array(12); crypto.getRandomValues(a); return [...a].map(n => c[n % c.length]).join(''); };
+function admChecks(sel){
+  const todas = !sel || sel.includes('*');
+  return [...new Set(ABAS_CAT.map(a=>a[2]))].map(g => `<div><div style="font-size:10.5px;color:var(--tx3);font-weight:700;margin:8px 0 4px">${g}</div><div class="adm-abas">${ABAS_CAT.filter(a=>a[2]===g).map(a => `<label><input type="checkbox" data-aba="${a[0]}"${todas || sel.includes(a[0]) ? ' checked' : ''}> ${a[1]}</label>`).join('')}</div></div>`).join('');
+}
+const admLerAbas = root => { const b = [...root.querySelectorAll('input[data-aba]')]; return b.every(x=>x.checked) ? ['*'] : b.filter(x=>x.checked).map(x=>x.dataset.aba); };
+function admPreset(root, k){
+  const p = PRESETS[k]; if (!p) return;
+  root.querySelectorAll('input[data-aba]').forEach(b => { b.checked = p.abas.includes('*') || p.abas.includes(b.dataset.aba); });
+  const e = root.querySelector('[data-f=editar]'), i = root.querySelector('[data-f=importar]'); if (e) e.checked = p.editar; if (i) i.checked = p.importar;
+}
+const admOpcoes = (u) => `<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:8px 0">
+    <label>Perfil rápido <select class="fsel" onchange="admPreset(this.closest('[data-root]'),this.value)"><option value="">— escolher —</option><option value="total">Acesso total</option><option value="logistica">Logística</option><option value="perdas">Perdas / Financeiro</option><option value="consulta">Somente consulta</option></select></label>
+    <label>Papel <select class="fsel" data-f="papel"><option value="usuario"${u && u.papel==='admin' ? '' : ' selected'}>Usuário</option><option value="admin"${u && u.papel==='admin' ? ' selected' : ''}>Administrador</option></select></label>
+    <label><input type="checkbox" data-f="editar"${!u || u.editar!==false ? ' checked' : ''}> Pode editar andamento, motivo e previsão</label>
+    <label><input type="checkbox" data-f="importar"${!u || u.importar!==false ? ' checked' : ''}> Pode importar planilhas</label></div>${admChecks(u ? u.abas : ['*'])}`;
+let _admOk = false;
+function admSkeleton(){
+  const el = document.getElementById('panel-adm'); if (!el || _admOk) return; _admOk = true;
+  el.innerHTML = `<div class="pworld" id="ph-adm"></div>
+    <div class="ind-f" id="adm-novo" data-root="1"><div class="ind-f-top"><b style="font-size:14px">Novo usuário</b></div>
+      <div class="ind-fr"><b>Nome</b><div><input id="adm-nome" class="adm-in" placeholder="Nome e sobrenome"></div></div>
+      <div class="ind-fr"><b>E-mail</b><div><input id="adm-email" class="adm-in" placeholder="nome.sobrenome@abracadabra.com.br" autocomplete="off"></div></div>
+      <div class="ind-fr"><b>Acessos</b><div style="flex:1">${admOpcoes(null)}<label style="display:block;margin:8px 0"><input type="checkbox" data-f="enviar" checked> Enviar e-mail para a pessoa criar a própria senha</label><button class="btn-exp" type="button" id="adm-criar" onclick="admCriar()">Criar usuário</button></div></div>
+    </div>
+    <div class="ind-h">Usuários cadastrados</div><div class="ind-sub">Quem já usava o painel entra na lista no primeiro acesso, com acesso total. Desativar bloqueia a conta no painel e no banco de dados.</div>
+    <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Papel</th><th>Status</th><th>Abas</th><th>Editar</th><th>Importar</th><th>Criado</th><th>Ações</th></tr></thead><tbody id="tb-adm"></tbody></table></div></div>`;
+}
+function renderAdm(){
+  const el = document.getElementById('panel-adm'); if (!el) return;
+  if (!souAdmin()){ return; }
+  admSkeleton();
+  const at = USUARIOS.filter(u=>u.ativo!==false), adm = USUARIOS.filter(u=>u.papel==='admin' && u.ativo!==false);
+  document.getElementById('ph-adm').innerHTML = pwHero('Administração', 'Usuários e acessos', 'Crie logins e escolha o que cada pessoa pode ver e fazer. Tudo que ela editar fica registrado com o nome dela.',
+    [['Usuários ativos', at.length, 'com login'], ['Administradores', adm.length, 'gerenciam os acessos'], ['Somente consulta', at.filter(u=>u.editar===false).length, 'não editam'], ['Desativados', USUARIOS.length-at.length, 'sem acesso']], '');
+  const fmt = iso => iso ? new Date(iso).toLocaleDateString('pt-BR') : '—';
+  document.getElementById('tb-adm').innerHTML = USUARIOS.slice().sort((a,b)=>String(a.nome||a.email).localeCompare(String(b.nome||b.email))).map(u => {
+    const eu = u.uid === CUR_UID, abas = (u.abas||['*']).includes('*') ? 'Todas' : (u.abas.length + ' de ' + ABAS_CAT.length);
+    return `<tr><td class="td-nome">${esc(u.nome||nomeDe(u.email))}${eu?' <small style="color:var(--tx3)">(você)</small>':''}</td><td style="font-size:11px">${esc(u.email||'')}</td><td>${u.papel==='admin'?'<span class="bdg b-acc">Administrador</span>':'Usuário'}</td>
+      <td>${u.ativo===false?'<span class="bdg b-red">Desativado</span>':'<span class="bdg b-grn">Ativo</span>'}</td><td>${abas}</td><td>${u.editar===false?'não':'sim'}</td><td>${u.importar===false?'não':'sim'}</td><td style="font-size:11px">${fmt(u.criadoEm)}</td>
+      <td style="white-space:nowrap"><button class="btn-exp" type="button" onclick="admEditar('${esc(u.uid)}')">Acessos</button> <button class="btn-exp" type="button" onclick="admSenha('${esc(u.email||'')}')" title="Enviar e-mail para criar nova senha">Senha</button>${eu?'':` <button class="btn-exp" type="button" onclick="admToggle('${esc(u.uid)}')">${u.ativo===false?'Reativar':'Desativar'}</button>`}</td></tr>`; }).join('')
+    || '<tr><td colspan="9" style="color:var(--tx3);padding:14px">Nenhum usuário cadastrado ainda.</td></tr>';
+}
+async function admCriar(){
+  if (!souAdmin() || !DB) return;
+  const root = document.getElementById('adm-novo'), nome = root.querySelector('#adm-nome').value.trim(), email = root.querySelector('#adm-email').value.trim().toLowerCase();
+  if (!nome){ toast('Informe o nome da pessoa.', {type:'warn'}); return; }
+  if (!/^[^@\s]+@abracadabra\.com\.br$/.test(email)){ toast('Use um e-mail @abracadabra.com.br.', {type:'warn'}); return; }
+  const abas = admLerAbas(root); if (!abas.length){ toast('Marque ao menos uma aba.', {type:'warn'}); return; }
+  const papel = root.querySelector('[data-f=papel]').value, editar = root.querySelector('[data-f=editar]').checked, importar = root.querySelector('[data-f=importar]').checked, enviar = root.querySelector('[data-f=enviar]').checked;
+  const btn = root.querySelector('#adm-criar'); btn.disabled = true;
+  try {
+    const { appMod, authMod } = await loadFirebase();
+    const sec = appMod.getApps().find(a => a.name==='cadastro') || appMod.initializeApp(FIREBASE_CONFIG, 'cadastro');   // sessao a parte: a do administrador continua aberta
+    const secAuth = authMod.getAuth(sec), senha = senhaProvisoria();
+    const cred = await authMod.createUserWithEmailAndPassword(secAuth, email, senha), uid = cred.user.uid;
+    let enviado = false; if (enviar){ try { await authMod.sendPasswordResetEmail(secAuth, email); enviado = true; } catch(e){ console.warn('e-mail de senha', e); } }
+    await authMod.signOut(secAuth);
+    await DB.doc('usuarios/'+uid).set({ email, nome, papel, ativo:true, abas, editar, importar, criadoPor:CUR_EMAIL, criadoEm:isoNow() });
+    NOMES[nomeKey(email)] = nome; DB.doc('config/usuarios').set({ nomes:{ [nomeKey(email)]: nome }, updatedAt:isoNow() }, true).catch(()=>{});
+    root.querySelector('#adm-nome').value = ''; root.querySelector('#adm-email').value = '';
+    await askConfirm('Usuário criado', `<p><b>${esc(nome)}</b> já pode entrar com <b>${esc(email)}</b>.</p><p style="margin-top:8px">Senha provisória (aparece só agora): <code style="font-size:14px;background:var(--srf1);padding:3px 8px;border-radius:6px;user-select:all">${esc(senha)}</code></p><p style="margin-top:8px;font-size:11.5px;color:var(--tx3)">${enviado ? 'Também enviamos um e-mail com o link para a pessoa criar a própria senha.' : 'Passe a senha à pessoa e peça para trocar em "Trocar senha" no menu.'}</p>`, 'Ok');
+  } catch(err){
+    const msg = { 'auth/email-already-in-use':'Esse e-mail já tem login. Peça para a pessoa entrar uma vez no painel: ela aparece na lista e você configura os acessos aqui.', 'auth/weak-password':'Senha provisória fraca (tente de novo).', 'auth/invalid-email':'E-mail inválido.', 'auth/operation-not-allowed':'O cadastro por e-mail/senha está desativado no Firebase.' }[err.code] || ('Não consegui criar o usuário: ' + (err.code||err.message));
+    toast(msg, {type:'err', ms:9000});
+  } finally { btn.disabled = false; }
+}
+async function admEditar(uid){
+  const u = USUARIOS.find(x => x.uid===uid); if (!u || !DB) return;
+  const ok = await askConfirm('Acessos de ' + (u.nome||u.email), `<div data-root="1"><p style="font-size:12px;color:var(--tx3)">${esc(u.email||'')}</p>${admOpcoes(u)}</div>`, 'Salvar');
+  if (!ok) return;
+  const root = document.querySelector('#confirmModal .cm-body [data-root]'), abas = admLerAbas(root); if (!abas.length){ toast('Marque ao menos uma aba.', {type:'warn'}); return; }
+  let papel = root.querySelector('[data-f=papel]').value; if (uid===CUR_UID && u.papel==='admin') papel = 'admin';   // ninguem tira o proprio acesso de administrador
+  await DB.doc('usuarios/'+uid).set({ papel, abas, editar:root.querySelector('[data-f=editar]').checked, importar:root.querySelector('[data-f=importar]').checked, alteradoPor:CUR_EMAIL, alteradoEm:isoNow() }, true);
+  toast('Acessos de ' + (u.nome||u.email) + ' atualizados.', {type:'ok'});
+}
+async function admToggle(uid){
+  const u = USUARIOS.find(x => x.uid===uid); if (!u || uid===CUR_UID || !DB) return;
+  const novo = u.ativo === false;
+  const ok = await askConfirm(novo ? 'Reativar acesso' : 'Desativar acesso', `<p>${novo ? 'Reativar' : 'Desativar'} o acesso de <b>${esc(u.nome||u.email)}</b>?${novo ? '' : ' A pessoa será desconectada e não consegue mais ler nem gravar dados.'}</p>`, novo ? 'Reativar' : 'Desativar');
+  if (!ok) return;
+  await DB.doc('usuarios/'+uid).set({ ativo:novo, alteradoPor:CUR_EMAIL, alteradoEm:isoNow() }, true);
+  toast(novo ? 'Acesso reativado.' : 'Acesso desativado.', {type:'ok'});
+}
+async function admSenha(email){
+  if (!email) return;
+  try { const { authMod, auth } = await loadFirebase(); await authMod.sendPasswordResetEmail(auth, email); toast('E-mail de nova senha enviado para ' + email + '.', {type:'ok', ms:6000}); }
+  catch(err){ toast('Não consegui enviar: ' + (err.code||err.message), {type:'err'}); }
 }
 
 // ================= MUNDO PERDAS =================
