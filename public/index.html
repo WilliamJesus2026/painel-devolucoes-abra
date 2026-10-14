@@ -343,6 +343,22 @@ body.loading .kpi-v,body.loading .kpi-s{color:transparent!important;background:l
 .pal-it .pi-s{font-size:11px;color:var(--tx3)}
 .pal-h{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);padding:8px 12px 4px}
 .pal-foot{padding:8px 14px;border-top:1px solid var(--bd);font-size:10.5px;color:var(--tx3)}
+:root{--st-ok:#16A34A;--st-warn:#D97706;--st-bad:#DC2626}
+.alerta-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px}
+.alerta{border:1px solid var(--bd);border-left:4px solid var(--st-ok);background:var(--srf);border-radius:12px;padding:10px 14px;cursor:pointer;text-align:left;color:var(--tx);box-shadow:var(--sh);font:inherit;transition:.15s}
+.alerta:hover{transform:translateY(-2px)}
+.alerta b{display:block;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.2}
+.alerta>span{font-size:11px;color:var(--tx2)}
+.alerta.w{border-left-color:var(--st-warn)}.alerta.r{border-left-color:var(--st-bad)}.alerta.on{outline:2px solid var(--acc)}.alerta.z{opacity:.55}
+.ind-f-top{flex-wrap:wrap;gap:8px}
+.col-menu{position:relative;display:inline-block}
+.col-pop{display:none;position:absolute;right:0;top:100%;z-index:20;background:var(--srf);border:1px solid var(--bd);border-radius:10px;padding:8px 12px;box-shadow:var(--sh);min-width:210px;margin-top:4px}
+.col-menu.open .col-pop{display:block}
+.col-pop label{display:block;font-size:12px;padding:3px 0;cursor:pointer;color:var(--tx)}
+.tl{border-left:2px solid var(--bd);margin-left:6px;padding-left:14px}
+.tl-i{position:relative;padding:0 0 10px;font-size:12px}
+.tl-i::before{content:"";position:absolute;left:-20px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--acc)}
+@media(max-width:700px){#tbl-ind-main tr:not(.cap) > :nth-child(1),#tbl-ind-main tr:not(.cap) > :nth-child(3),#tbl-ind-main tr:not(.cap) > :nth-child(4),#tbl-ind-main tr:not(.cap) > :nth-child(5),#tbl-ind-main tr:not(.cap) > :nth-child(9){display:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* ===================== MUNDO PERDAS ===================== */
@@ -785,20 +801,21 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <div class="panel" id="panel-ind">
       <div class="pworld" id="ph-ind"></div>
       <details class="ind-f" style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da Dayane.</div></details>
-      <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
+      <div class="alerta-bar" id="ind-alertas"></div>
+      <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button><select class="fsel" id="ind-views" onchange="indView(this.value)" title="Visões prontas e as que você salvou"></select><button class="btn-exp" type="button" onclick="indSalvaView()" title="Guarda os filtros atuais com um nome (neste navegador)">💾 Salvar visão</button><button class="btn-exp" type="button" onclick="indApagaView()">Excluir visão</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
       <div class="ind-h">Por canal de atendimento</div><div class="ind-sub" id="ind-canais-sub"></div>
       <div class="ind-cars" id="ind-canais" style="margin-bottom:6px"></div>
       <div class="ind-h">Indicadores por transportadora</div><div class="ind-sub" id="ind-sub"></div>
       <div class="ind-cars" id="ind-cars"></div>
       <div class="card" style="margin-bottom:14px"><div class="card-title">Volume de tarefas e % de atendimento por mês de criação</div><div class="card-sub">Barras = tarefas criadas · linha = % já atendidas · clique numa barra para filtrar o mês</div><div style="height:320px"><canvas id="ch-ind"></canvas></div></div>
-      <div class="card" style="margin-bottom:14px"><div class="card-title">SLA médio por mês de criação</div><div class="card-sub">SLA = dias até finalizar (só finalizadas). Meses recentes têm poucas finalizadas, então mostramos também a média de dias de todas as tarefas do mês (a mesma coluna “Média (dias)” do Controle). Clique numa linha para filtrar o mês.</div><div style="overflow:auto"><table class="tbl"><thead><tr><th>Mês</th><th>Criadas</th><th>Finalizadas</th><th>% atend.</th><th>SLA médio (finalizadas)</th><th>Média de dias (todas)</th><th>Em aberto</th><th>Média de dias (em aberto)</th></tr></thead><tbody id="tb-sla-mes"></tbody></table></div></div>
+      <div class="card" style="margin-bottom:14px"><div class="card-title">SLA médio por mês de criação</div><div class="card-sub">SLA = dias até finalizar (só finalizadas). Meses recentes têm poucas finalizadas, então mostramos também a média de dias de todas as tarefas do mês (a mesma coluna “Média (dias)” do Controle). Clique numa linha para filtrar o mês.</div><div style="overflow:auto"><table class="tbl"><thead><tr><th>Mês</th><th>Criadas</th><th>Finalizadas</th><th>% atend.</th><th>SLA médio (finalizadas)</th><th>Média de dias (todas)</th><th title="Variação da média de dias contra o mês anterior (subir é pior)">Δ vs mês anterior</th><th>Em aberto</th><th>Média de dias (em aberto)</th></tr></thead><tbody id="tb-sla-mes"></tbody></table></div></div>
       <div class="g2">
         <div class="card"><div class="card-title">Pendências por mês, transportadora e motivo</div><div class="card-sub">Gerado dos casos em aberto · clique numa linha para ver os casos</div>
           <div class="tbl-scroll" style="max-height:380px"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Motivo</th><th>Qtd.</th></tr></thead><tbody id="tb-ind-pend"></tbody></table></div></div>
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
-      <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — andamento e motivo da pendência</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
+      <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — andamento e motivo da pendência</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button><span class="col-menu" id="col-menu"><button class="btn-exp" type="button" onclick="colsMenu(event)">Colunas ▾</button><div class="col-pop" id="col-pop"></div></span></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-main"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
       <div class="ind-h" style="margin-top:22px">Logística — situações acompanhadas pela Logística</div>
       <div class="ind-f" style="margin:6px 0"><div class="ind-fr" style="border-top:none"><b>Situação</b><div id="ind-log-chips"></div></div></div>
       <div class="ind-sub" id="ind-log-sub"></div>
@@ -1495,7 +1512,7 @@ function openDetail(item){
       ${isColeta ? `<dt>Andamento</dt><dd>${esc(item.andamento)||'—'}</dd><dt>Andamento atualizado em</dt><dd class="mono">${andData(item) ? andData(item).txt : '—'} <small>(registro da equipe)</small></dd>${ehHello(item) ? `<dt>Protocolo Hello</dt><dd class="mono">${esc(item.protocolo_hello)||'—'}</dd>` : ''}<dt>Previsão de coleta (transportadora)</dt><dd class=\"mono\">${item.previsao_coleta ? item.previsao_coleta.split('-').reverse().join('/') : '—'}</dd>` : ''}
       ${!isColeta && item.grupo ? `<dt>O que fazer</dt><dd>${esc(GRUPO_ACAO[item.grupo]||GRUPO_ACAO.outros)}</dd>` : ''}
       <dt>Responsável</dt><dd>${esc(item.usuario)||'Não informado'}</dd>
-      ${item.andamento_hist && item.andamento_hist.length ? `<dt>Histórico do andamento</dt><dd>${item.andamento_hist.slice().reverse().map(h => `${esc(new Date(h.em).toLocaleDateString('pt-BR'))} · ${esc(nomeDe(h.por)||'—')}: <b>${esc(h.t||'(apagado)')}</b>`).join('<br>')}</dd>` : ''}
+      ${timelineHtml(item)}
       <dt>Valor</dt><dd class="mono">${item.valor!=null ? 'R$ '+Math.abs(item.valor).toLocaleString('pt-BR',{minimumFractionDigits:2}) : '—'}</dd>
       <dt>Descrição</dt><dd>${esc(item.descricao)||'Não informado'}</dd>
     </dl>
@@ -1703,7 +1720,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261014-154323';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261014-161959';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -1921,6 +1938,64 @@ function motivoCell(x){
   const man = motivoManual(x);
   return `<td onclick="event.stopPropagation()"><select class="mot-sel" data-id="${esc(x.id)}" onchange="motivoSet(this.dataset.id,this.value)" title="Preenchido automaticamente; escolha outro para fixar" style="padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px;max-width:170px"><option value=""${man?'':' selected'}>Automático: ${esc(motivoAuto(x))}</option>${MOTIVOS_PEND.map(m=>`<option${m===man?' selected':''}>${m}</option>`).join('')}</select></td>`;
 }
+const altHist = (id, t) => [...((DB_CASES[id]||{}).alt_hist||[]), { t, em:isoNow(), por:CUR_EMAIL||null }].slice(-15);
+function timelineHtml(it){
+  const ev = (it.andamento_hist||[]).map(h => ({ em:h.em, por:h.por, tx:'Andamento: <b>'+esc(h.t||'(apagado)')+'</b>' })).concat((it.alt_hist||[]).map(h => ({ em:h.em, por:h.por, tx:esc(h.t) })));
+  if (!ev.length) return '';
+  ev.sort((a,b) => String(b.em).localeCompare(String(a.em)));
+  return `<dt>Linha do tempo</dt><dd><div class="tl">${ev.map(e => { const d = new Date(e.em); return `<div class="tl-i"><small style="color:var(--tx3)">${isNaN(d) ? '—' : d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} · ${esc(nomeDe(e.por)||'—')}</small><br>${e.tx}</div>`; }).join('')}</div></dd>`;
+}
+function diasTd(n, fin){
+  if (n==null) return '<td>—</td>';
+  if (fin) return `<td>${n} d</td>`;
+  return `<td><b style="color:${n>=30 ? 'var(--st-bad)' : n>=15 ? 'var(--st-warn)' : 'var(--st-ok)'}">${n} d</b></td>`;
+}
+function alertaOk(x, k){
+  k = k || IND.alerta; if (x.fin) return false; const d = x.dias || 0;
+  return k==='60' ? d>=60 : k==='30' ? (d>=30 && d<60) : k==='sem' ? !x.andamento : true;
+}
+const deltaH = d => d==null ? '—' : Math.abs(d)<0.05 ? '=' : `<b style="color:${d>0?'var(--st-bad)':'var(--st-ok)'}" title="${d>0?'piorou':'melhorou'} contra o mês anterior">${d>0?'▲':'▼'} ${fmt1(Math.abs(d))} d</b>`;
+// colunas da lista do Controle (preferencia pessoal, guardada no navegador) e visoes de filtros
+const IND_COLS = ['Mês','Transportadora','Situação','Classe','Tipo de saída','Cliente','NF','Dias','Média (dias)','Responsável','Andamento','Andamento atualizado em','Motivo da pendência','Status do caso'];
+function lsGet(k, vazio){ try { const v = JSON.parse(localStorage.getItem(k)||'null'); return v==null ? vazio : v; } catch(e){ return vazio; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
+function colsAplica(){
+  const o = lsGet('ind_cols', []); let st = document.getElementById('col-style');
+  if (!st){ st = document.createElement('style'); st.id = 'col-style'; document.head.appendChild(st); }
+  st.textContent = o.length ? o.map(i => `#tbl-ind-main tr:not(.cap) > :nth-child(${i+1})`).join(',') + '{display:none}' : '';
+  const p = document.getElementById('col-pop');
+  if (p) p.innerHTML = IND_COLS.map((n,i) => `<label><input type="checkbox" ${o.includes(i)?'':'checked'} onchange="colsToggle(${i},this.checked)"> ${esc(n)}</label>`).join('') + '<button type="button" class="btn-exp" style="margin-top:6px" onclick="colsReset()">Mostrar todas</button>';
+}
+function colsMenu(e){ e.stopPropagation(); document.getElementById('col-menu').classList.toggle('open'); }
+function colsToggle(i, on){ const o = new Set(lsGet('ind_cols', [])); on ? o.delete(i) : o.add(i); lsSet('ind_cols', [...o]); colsAplica(); }
+function colsReset(){ lsSet('ind_cols', []); colsAplica(); }
+document.addEventListener('click', e => { const m = document.getElementById('col-menu'); if (m && !e.target.closest('#col-menu')) m.classList.remove('open'); });
+const IND_PRESETS = { 'p:limpar':'Em aberto (padrão)', 'p:60':'Abertos há 60+ dias', 'p:30':'Abertos há 30 a 59 dias', 'p:sem':'Sem andamento' };
+function indViewsRender(){
+  const el = document.getElementById('ind-views'); if (!el) return;
+  const u = Object.keys(lsGet('ind_views', {}));
+  el.innerHTML = '<option value="">Visões…</option><optgroup label="Prontas">' + Object.entries(IND_PRESETS).map(([k,n]) => `<option value="${k}">${n}</option>`).join('') + '</optgroup>' + (u.length ? '<optgroup label="Minhas visões">' + u.map(n => `<option value="u:${escA(n)}">${esc(n)}</option>`).join('') + '</optgroup>' : '');
+}
+function indView(v){
+  if (!v) return;
+  if (v==='p:limpar'){ indSet('limpar'); return; }
+  if (v.startsWith('p:')){ indSet('limpar'); IND.alerta = v.slice(2); IND.status = 'aberto'; renderInd(); return; }
+  const sv = lsGet('ind_views', {})[v.slice(2)]; if (!sv) return;
+  IND.meses = new Set(sv.meses||[]); IND.carrs = new Set(sv.carrs||[]); IND.motivos = new Set(sv.motivos||[]);
+  IND.status = sv.status==null ? 'aberto' : sv.status; ['q','canal','sit','usuario','and','alerta'].forEach(k => IND[k] = sv[k]||'');
+  const i = document.getElementById('ind-q'); if (i) i.value = IND.q;
+  renderInd();
+}
+function indSalvaView(){
+  const n = (prompt('Nome da visão (guarda os filtros atuais):')||'').trim(); if (!n) return;
+  const u = lsGet('ind_views', {}); u[n] = { meses:[...IND.meses], carrs:[...IND.carrs], motivos:[...IND.motivos], status:IND.status, q:IND.q, canal:IND.canal, sit:IND.sit, usuario:IND.usuario, and:IND.and, alerta:IND.alerta };
+  toast(lsSet('ind_views', u) ? 'Visão “'+n+'” salva neste navegador.' : 'Não foi possível salvar neste navegador.', {type:'ok', ms:2400}); indViewsRender();
+}
+function indApagaView(){
+  const u = lsGet('ind_views', {}), nomes = Object.keys(u); if (!nomes.length){ toast('Você ainda não salvou visões.', {type:'warn'}); return; }
+  const n = (prompt('Excluir qual visão?\n' + nomes.join('\n'))||'').trim(); if (!n || !u[n]) return;
+  delete u[n]; lsSet('ind_views', u); toast('Visão excluída.', {type:'ok', ms:1800}); indViewsRender();
+}
 const STATUS_NOMES = { ab:'Em aberto', fin:'Finalizado', canc:'Cancelado' };
 const statusAutoDe = x => x.finAuto != null ? (x.finAuto ? 'Finalizado' : 'Em aberto') : (x.estado || 'Em aberto');
 function statusCell(x){
@@ -1929,13 +2004,13 @@ function statusCell(x){
   return `<td onclick="event.stopPropagation()"><select class="mot-sel" data-id="${esc(x.id)}" onchange="statusSet(this.dataset.id,this.value)" title="Muda o caso de lugar em todo o painel; Automático volta ao que a planilha indica" style="padding:4px 6px;border:1px solid ${man?'var(--acc)':'var(--bd)'};border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px;max-width:150px"><option value=""${man?'':' selected'}>Automático: ${esc(statusAutoDe(x))}</option>${Object.entries(STATUS_NOMES).map(([k,n])=>`<option value="${k}"${k===man?' selected':''}>${n}</option>`).join('')}</select></td>`;
 }
 function statusSet(id, v){
-  if (!gravaCaso(id, { status_manual:v||null, status_manual_em:isoNow(), status_manual_por:CUR_EMAIL||null })) return;
+  if (!gravaCaso(id, { status_manual:v||null, status_manual_em:isoNow(), status_manual_por:CUR_EMAIL||null, alt_hist:altHist(id, v ? 'Status alterado para '+STATUS_NOMES[v] : 'Status voltou ao automático') })) return;
   toast(v ? 'Status alterado para ' + STATUS_NOMES[v] + '.' : 'Status voltou para o automático.', {type:'ok', ms:2200});
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   scheduleRender();
 }
 function motivoSet(id, v){
-  if (!gravaCaso(id, { motivo_pend:v||null, motivo_pend_em:isoNow(), motivo_pend_por:CUR_EMAIL||null })) return;
+  if (!gravaCaso(id, { motivo_pend:v||null, motivo_pend_em:isoNow(), motivo_pend_por:CUR_EMAIL||null, alt_hist:altHist(id, v ? 'Motivo da pendência: '+v : 'Motivo voltou ao automático') })) return;
   toast(v ? 'Motivo da pendência salvo.' : 'Motivo voltou para o automático.', {type:'ok', ms:1800});
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   scheduleRender();
@@ -1976,7 +2051,7 @@ function andSet(id, v){
   garanteNome(); scheduleRender();
 }
 function andHoje(id){
-  if (!gravaCaso(id, { andamento_em:isoNow(), andamento_por:CUR_EMAIL||null })) return;
+  if (!gravaCaso(id, { andamento_em:isoNow(), andamento_por:CUR_EMAIL||null, alt_hist:altHist(id, 'Andamento revisado (✓ hoje)') })) return;
   toast('Marcado como revisado hoje.', {type:'ok', ms:1800}); scheduleRender();
 }
 function exportColetas(tipo) {
@@ -2741,7 +2816,7 @@ const MOT_PAL = ['#06B6D4','#7C3AED','#F59E0B','#F43F5E','#10B981','#3B82F6','#E
 const escA = t => esc(t).replace(/"/g,'&quot;');
 const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'Fiscal':'#10B981', 'A classificar':'#64748B', 'Sem andamento':'#64748B', 'Logística':'#EAB308', 'Esquecimento de apontamento':'#EF4444', 'Problema no Innovaro':'#94A3B8', 'Outro':'#64748B' };
 const motCor = m => IND_COR[m] || MOT_PAL[[...String(m)].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0, 7) % MOT_PAL.length];
-const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', sit:'', usuario:'', and:'' };
+const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', sit:'', usuario:'', and:'', alerta:'' };
 const IND_INICIO = new Date(2026, 6, 1);   // pendencias criadas antes de 01/07/2026 contam como finalizadas; dai em diante a equipe vai sanando
 const IND_CORTE = 1;   // todos os meses aparecem separados (jan–jun continuam contados como finalizados por IND_INICIO)
 const indAntigos = () => Array.from({length:IND_CORTE-1},(_,i)=>i+1);
@@ -2816,8 +2891,9 @@ function indSet(k,v){
   else if (k==='sit') IND.sit = (IND.sit===v ? '' : v);
   else if (k==='usuario') IND.usuario = v;
   else if (k==='and') IND.and = (IND.and===v ? '' : v);
+  else if (k==='alerta'){ IND.alerta = (IND.alerta===v ? '' : v); if (IND.alerta) IND.status = 'aberto'; }
   else if (k==='q'){ IND.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderInd, 180); return; }
-  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; IND.canal=''; IND.sit=''; IND.usuario=''; IND.and=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
+  else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; IND.canal=''; IND.sit=''; IND.usuario=''; IND.and=''; IND.alerta=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
   renderInd();
 }
 function indSetMotivo(id, v){
@@ -2842,6 +2918,7 @@ function renderInd(){
       (ign.includes('and') || !IND.and || x.andRaw===IND.and) &&
       (ign.includes('sit') || !IND.sit || sitKey(x.sit)===IND.sit) &&
       (ign.includes('resp') || !IND.usuario || (x.usuario||'—')===IND.usuario) &&
+      (ign.includes('alerta') || !IND.alerta || alertaOk(x)) &&
       (!IND.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(IND.q)); };
   const base = doAno.filter(x=>f(x,['status','motivo']));
   const A = indAgg(base);
@@ -2863,7 +2940,7 @@ function renderInd(){
   const sitList = [...new Set(doAno.map(x=>x.sit))].map(n => ({ n, k:sitKey(n), c:cnt(doAno.filter(x=>sitKey(x.sit)===sitKey(n)),['sit']) })).sort((a,b)=>b.c[1]-a.c[1] || b.c[0]-a.c[0]);
   const sitChips = sitList.map(o => chip(IND.sit===o.k, `indSet('sit',this.dataset.k)" data-k="${o.k}`, esc(o.n), o.c[0], o.c[1])).join('');
   const usrs = [...new Set(doAno.filter(x=>!x.fin).map(x=>x.usuario||'—'))].sort(), usrSel = `<select class="fsel" onchange="indSet('usuario',this.value)"><option value="">Todos</option>${usrs.map(u=>`<option${IND.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select>`;
-  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q || IND.canal || IND.sit || IND.usuario || IND.and;
+  const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q || IND.canal || IND.sit || IND.usuario || IND.and || IND.alerta;
   document.getElementById('ind-fbody').innerHTML =
     `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${antChip}${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join('')}</div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join('')}</div></div>
@@ -2905,10 +2982,19 @@ function renderInd(){
   const mesLbl = m => m===0 ? MESES[0]+'–'+MESES[IND_CORTE-2]+' (finalizados)' : MESES[m-1];
   const mediaDe = a => { const v = a.map(x => x.media != null ? x.media : x.dias).filter(n => n != null && isFinite(n)); return v.length ? v.reduce((p,q)=>p+q,0)/v.length : null; };
   const fd = v => v == null ? '—' : fmt1(v) + ' d';
-  document.getElementById('tb-sla-mes').innerHTML = meses.map(m => {
-    const a = doCar.filter(noGrupo(m)), ag = indAgg(a), ab = a.filter(x=>!x.fin);
-    return `<tr style="cursor:pointer" onclick="indSet('mes',${m})"><td><b>${esc(mesLbl(m))}</b></td><td>${ag.total}</td><td>${ag.fin}</td><td>${ag.taxa==null?'—':fmt1(ag.taxa)+'%'}</td><td>${ag.sla==null?'—':'<b>'+fd(ag.sla)+'</b> <span style="color:var(--tx3);font-size:10.5px">('+ag.nsla+')</span>'}</td><td><b>${fd(mediaDe(a))}</b></td><td>${ab.length}</td><td>${fd(mediaDe(ab))}</td></tr>`;
-  }).join('') || '<tr><td colspan="8" style="color:var(--tx3);padding:12px">Sem dados.</td></tr>';
+  document.getElementById('tb-sla-mes').innerHTML = meses.map((m,i) => {
+    const a = doCar.filter(noGrupo(m)), ag = indAgg(a), ab = a.filter(x=>!x.fin), mm = mediaDe(a), pm = (m>0 && i>0 && meses[i-1]>0) ? mediaDe(doCar.filter(noGrupo(meses[i-1]))) : null, dl = (mm!=null && pm!=null) ? mm-pm : null;
+    return `<tr style="cursor:pointer" onclick="indSet('mes',${m})"><td><b>${esc(mesLbl(m))}</b></td><td>${ag.total}</td><td>${ag.fin}</td><td>${ag.taxa==null?'—':fmt1(ag.taxa)+'%'}</td><td>${ag.sla==null?'—':'<b>'+fd(ag.sla)+'</b> <span style="color:var(--tx3);font-size:10.5px">('+ag.nsla+')</span>'}</td><td><b>${fd(mm)}</b></td><td>${deltaH(dl)}</td><td>${ab.length}</td><td>${fd(mediaDe(ab))}</td></tr>`;
+  }).join('') || '<tr><td colspan="9" style="color:var(--tx3);padding:12px">Sem dados.</td></tr>';
+  { // faixa de alertas: o que precisa de acao + mes atual contra o anterior
+    const b = doAno.filter(x => f(x,['status','motivo','alerta']) && !x.fin);
+    const al = [['60','Abertos há 60+ dias','r'],['30','Abertos há 30 a 59 dias','w'],['sem','Sem andamento informado','w']].map(([k,t,cl]) => { const n = b.filter(x=>alertaOk(x,k)).length; return `<button type="button" class="alerta ${n?cl:''}${IND.alerta===k?' on':''}${n?'':' z'}" onclick="indSet('alerta','${k}')" title="Clique para filtrar a lista"><b>${n}</b><span>${t}</span></button>`; });
+    const ult = meses.filter(m=>m>0).slice(-2);
+    if (ult.length===2){ const m1 = mediaDe(doCar.filter(noGrupo(ult[1]))), m0 = mediaDe(doCar.filter(noGrupo(ult[0]))), d = (m1!=null && m0!=null) ? m1-m0 : null;
+      al.push(`<div class="alerta${d!=null&&d>0.05?' r':''}" style="cursor:default"><b>${fd(m1)}</b><span>Média de dias em ${MESES[ult[1]-1]} · ${deltaH(d)} vs ${MESES[ult[0]-1]}</span></div>`); }
+    document.getElementById('ind-alertas').innerHTML = al.join('');
+  }
+  colsAplica(); indViewsRender();
   const mesOn = m => m===0 ? indAntigos().every(k=>IND.meses.has(k)) : IND.meses.has(m);
   const cs = getComputedStyle(document.documentElement), tick = (cs.getPropertyValue('--tx2')||'#667').trim(), grid = (cs.getPropertyValue('--bd')||'#ddd').trim();
   const vis = document.getElementById('panel-ind').classList.contains('on') && window.Chart;
@@ -2944,9 +3030,9 @@ function renderInd(){
   document.getElementById('ind-lista-t').textContent = verFin ? 'Tarefas atendidas' : IND.status==='' ? 'Todas as tarefas (atendidas e em aberto)' : 'Casos em aberto — andamento e motivo da pendência';
   document.getElementById('cnt-ind').textContent = lista.length + (verFin ? ' atendidas' : IND.status==='' ? ' tarefas' : ' em aberto');
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind');
-  if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${x.dias==null?'—':x.dias+' d'}</td><td>${x.media==null?'—':x.media+' d'}</td><td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
+  if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>${diasTd(x.dias, x.fin)}${diasTd(x.media, x.fin)}<td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
     ${andCell(x, 'and-list-ctl')}${motivoCell(x)}${statusCell(x)}</tr>`).join('')
-    + (lista.length>300 ? `<tr><td colspan="14" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
+    + (lista.length>300 ? `<tr class="cap"><td colspan="14" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
   ligaStats('ph-ind', [['Tarefas de '+IND.ano+' (filtros atuais)', () => base], ['Tarefas atendidas', () => base.filter(x=>x.fin)],
     ['Tempo até finalizar', () => base.filter(x=>x.fin && x.slaDias!=null).sort((a,b)=>b.slaDias-a.slaDias), { label:'Dias até finalizar', fn:x=>x.slaDias }], ['Casos em aberto hoje', () => base.filter(x=>!x.fin)]]);
   renderIndLog(doAnoAll, f);

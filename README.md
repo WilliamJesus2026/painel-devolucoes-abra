@@ -152,3 +152,10 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 ## Status do caso editável e SLA por mês (14/10/2026)
 - Controle de Situações, bloco Logística e Histórico: coluna **Status do caso** (Automático / Em aberto / Finalizado / Cancelado) em todas as linhas, inclusive as já atendidas. Campo `status_manual` no caso; vale também na Coleta Reversa, nos Perdas e no Histórico (Em aberto reabre o caso). Andamento e Motivo da pendência agora também são editáveis nos casos atendidos.
 - Nova tabela **SLA médio por mês de criação** (abaixo do gráfico mensal): criadas, finalizadas, % atendimento, SLA médio das finalizadas, média de dias de todas as tarefas e dos casos em aberto. Assim outubro aparece mesmo com poucas finalizadas.
+
+## Melhorias de design do Controle (14/10/2026)
+- **Faixa de alertas** no topo do Controle: abertos há 60+ dias, 30 a 59 dias, sem andamento (clicáveis, filtram a lista) e a média de dias do mês atual contra o anterior.
+- **Dias coloridos** na lista (verde < 15, âmbar 15–29, vermelho 30+ para casos em aberto) e coluna **Δ vs mês anterior** na tabela de SLA por mês (▲ pior, ▼ melhor).
+- **Colunas** ▾: esconder/mostrar colunas da lista (preferência guardada no navegador); no celular as menos importantes já saem sozinhas.
+- **Visões**: filtros prontos e **💾 Salvar visão** com nome (guardadas no navegador de quem salvou).
+- **Linha do tempo** no detalhe do caso: andamentos, mudanças de status, motivo e “✓ hoje”, com quem e quando (campo `alt_hist`, últimos 15).
