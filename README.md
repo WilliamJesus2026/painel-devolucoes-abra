@@ -141,3 +141,10 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Desempenho: só a aba aberta é desenhada; o cálculo é reaproveitado até os dados mudarem (DATA_VER); buscas com atraso de 180 ms; tabelas limitadas a 400 linhas.
 - SLA médio precisa da data de finalização: importe uma vez a planilha 'Tarefas em aberto' (xlsx).
 - A cada publicação trocar const BUILD em public/index.html (abas abertas avisam 'Atualizar agora').
+
+## Cruzamento Controle x Tarefas, Histórico e Média
+
+- Importar o CSV do Controle de Situações (coluna **Andamento** ou 'em andamento') atualiza o andamento dos casos quando a PLANILHA muda de um dia para o outro; o que a equipe digitou no painel fica protegido até a planilha trazer um valor novo. O andamento continua editável.
+- Importar a planilha de tarefas (**Tarefa….csv** com Último Apontamento / Criada / média, ou o xlsx 'Tarefas em aberto') cruza por chave: grava ultimo_apontamento, media_dias, finalizado_em (encerrados) e sit_desde (em aberto). A coluna **Média (dias)** aparece no Controle e a aba **Média e cruzamento** detalha por situação e transportadora.
+- **Histórico** = banco de casos encerrados que nunca é apagado: Finalizado, Cancelado, Saiu da planilha e Perda (as perdas também ficam na aba Perdas). Busca por cliente/NF/CPF/situação/andamento e filtros por estado, ano e transportadora.
+- Casos que saem da planilha sem finalizar deixam o Controle e vão para o Histórico.
