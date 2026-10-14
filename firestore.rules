@@ -32,10 +32,6 @@ service cloud.firestore {
       allow read: if isAbraUser() && !bloqueado();
       allow write: if isAbraUser();
     }
-    // preferencias de tela de cada usuario (colunas, visoes salvas): so o proprio dono le e grava
-    match /preferencias/{uid} {
-      allow read, write: if isAbraUser() && request.auth.uid == uid && !bloqueado();
-    }
     match /usuarios/{uid} {
       allow read: if isAbraUser() && (request.auth.uid == uid || isAdmin());
       allow create: if isAbraUser() && (
