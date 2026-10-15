@@ -820,7 +820,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Casos em aberto — andamento e motivo da pendência</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button><span class="col-menu" id="col-menu"><button class="btn-exp" type="button" onclick="colsMenu(event)">Colunas ▾</button><div class="col-pop" id="col-pop"></div></span></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-main"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th><th title="Data prevista de chegada no CD: informada ou estimada pela mediana da transportadora">Previsão no CD</th><th>Além da previsão</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-main"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th><th title="Data prevista de chegada no CD: informada ou estimada pela mediana da transportadora">Previsão no CD</th><th>Além da previsão</th><th title="Dias além do prazo em cada etapa: criação → protocolo e protocolo → CD">Atraso SLA coleta</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
       <div class="ind-h" style="margin-top:22px">Logística — situações acompanhadas pela Logística</div>
       <div class="ind-f" style="margin:6px 0"><div class="ind-fr" style="border-top:none"><b>Situação</b><div id="ind-log-chips"></div></div></div>
       <div class="ind-sub" id="ind-log-sub"></div>
@@ -991,6 +991,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 const CONFIG = {
   SLA_COLETA_DIAS: 20,
   RISCO_JANELA_DIAS: 6,
+  PRAZO_PROTOCOLO_DIAS: 5,   // etapa 1: criacao da tarefa -> protocolo de coleta (valor provisorio, a definir com a transportadora)
 };
 const SLA = CONFIG.SLA_COLETA_DIAS;
 
@@ -1729,7 +1730,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261014-170011';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261015-020546';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -1963,14 +1964,20 @@ function alertaOk(x, k){
   k = k || IND.alerta; if (x.fin) return false; const d = x.dias || 0;
   return k==='60' ? d>=60 : k==='30' ? (d>=30 && d<60) : k==='sem' ? !x.andamento : k==='prev' ? (x.atrasoPrev>0) : true;
 }
-const prevCdTds = x => {
+const slaAtrasoTd = x => {
+  if (x.atrasoProt==null && x.atrasoCd==null) return '<td style="color:var(--tx3)">—</td>';
+  const p = x.atrasoProt>0 ? `<span style="color:var(--st-bad)">protocolo +${x.atrasoProt} d</span>` : '', c = x.atrasoCd>0 ? `<span style="color:var(--st-bad)">CD +${x.atrasoCd} d</span>` : '';
+  return `<td style="white-space:nowrap;font-size:11px">${p}${p&&c ? '<br>' : ''}${c || (p ? '' : '<span style="color:var(--st-ok)">no prazo</span>')}</td>`;
+};
+const prevCdTds = x => prevCdTds2(x) + slaAtrasoTd(x);
+const prevCdTds2 = x => {
   if (!x.prevCd) return '<td style="color:var(--tx3)">—</td><td style="color:var(--tx3)">—</td>';
   const a = x.atrasoPrev;
   return `<td style="white-space:nowrap"><b>${fmtDt(x.prevCd)}</b><br><small style="color:var(--tx3)">${x.prevTipo}</small></td><td>${a>0 ? `<b style="color:var(--st-bad)">+${a} d</b>` : a===0 ? '<b style="color:var(--st-warn)">hoje</b>' : `<span style="color:var(--st-ok)">${-a} d p/ vencer</span>`}</td>`;
 };
 const deltaH = d => d==null ? '—' : Math.abs(d)<0.05 ? '=' : `<b style="color:${d>0?'var(--st-bad)':'var(--st-ok)'}" title="${d>0?'piorou':'melhorou'} contra o mês anterior">${d>0?'▲':'▼'} ${fmt1(Math.abs(d))} d</b>`;
 // colunas da lista do Controle (preferencia pessoal, guardada no navegador) e visoes de filtros
-const IND_COLS = ['Mês','Transportadora','Situação','Classe','Tipo de saída','Cliente','NF','Dias','Média (dias)','Responsável','Andamento','Andamento atualizado em','Motivo da pendência','Status do caso','Previsão no CD','Além da previsão'];
+const IND_COLS = ['Mês','Transportadora','Situação','Classe','Tipo de saída','Cliente','NF','Dias','Média (dias)','Responsável','Andamento','Andamento atualizado em','Motivo da pendência','Status do caso','Previsão no CD','Além da previsão','Atraso SLA coleta'];
 function lsGet(k, vazio){ try { const v = JSON.parse(localStorage.getItem(k)||'null'); return v==null ? vazio : v; } catch(e){ return vazio; } }
 function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
 function colsAplica(){
@@ -2909,7 +2916,9 @@ const mediaArr = a => a.length ? a.reduce((p,q)=>p+q,0)/a.length : null;
 function colslaAgg(arr){
   const ch = arr.filter(i => i.diasTotal!=null), tr = arr.filter(i => !i.chegou);
   return { n:arr.length, chegaram:ch.length, media:mediaArr(ch.map(i=>i.diasTotal)), mediana:medianaDe(ch.map(i=>i.diasTotal)), dentro:ch.filter(i=>i.diasTotal<=SLA).length,
-    transito:tr.length, atrasados:tr.filter(i=>i.farol==='Atrasado').length, comPrevInf:tr.filter(i=>i.prevTipo==='informada').length, atrasoPrev:tr.filter(i=>i.atrasoPrev>0).length };
+    transito:tr.length, atrasados:tr.filter(i=>i.farol==='Atrasado').length, comPrevInf:tr.filter(i=>i.prevTipo==='informada').length, atrasoPrev:tr.filter(i=>i.atrasoPrev>0).length,
+    ...(() => { const cp = arr.filter(i=>i.atrasoProt!=null), fp = cp.filter(i=>i.atrasoProt>0), cc = arr.filter(i=>i.atrasoCd!=null), fc = cc.filter(i=>i.atrasoCd>0);
+      return { protN:cp.length, protFora:fp.length, protAtrasoMed:mediaArr(fp.map(i=>i.atrasoProt)), protMedia:mediaArr(cp.map(i=>i.diasCriProg)), cdN:cc.length, cdFora:fc.length, cdAtrasoMed:mediaArr(fc.map(i=>i.atrasoCd)), cdForaTransito:fc.filter(i=>!i.chegou).length }; })() };
 }
 function colslaCalcula(){
   const hoje = new Date(), h0 = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
@@ -2931,6 +2940,8 @@ function colslaCalcula(){
     const it = { x, id:x.id, chave:x.chave, carr:x.carr, cri, prog, rcl, fim, fimTipo: exata ? 'exata' : (aprox ? 'aprox.' : null), chegou, estagio: chegou ? 'No CD' : ((rec || x.coletaRealizada) ? 'A caminho do CD' : 'Aguardando coleta'),
       diasAberto, diasTotal, diasCriProg: cri ? Math.max(0, daysBetween(cri, prog)) : null, diasProtColeta: rcl ? Math.max(0, daysBetween(prog, rcl)) : null, diasColetaCd: (rcl && fim) ? Math.max(0, daysBetween(rcl, fim)) : null,
       diasCriFim: (cri && fim) ? Math.max(0, daysBetween(cri, fim)) : null };
+    it.atrasoProt = it.diasCriProg!=null ? Math.max(0, it.diasCriProg - CONFIG.PRAZO_PROTOCOLO_DIAS) : null;   // etapa 1
+    it.atrasoCd = chegou ? (diasTotal!=null ? Math.max(0, diasTotal - SLA) : null) : Math.max(0, diasAberto - SLA);   // etapa 2 (a caminho: dias ja passados alem do prazo)
     it.farol = chegou ? (diasTotal<=SLA ? 'Dentro do prazo' : 'Fora do prazo') : (diasAberto>SLA ? 'Atrasado' : diasAberto>=SLA-CONFIG.RISCO_JANELA_DIAS ? 'Em risco' : 'No prazo');
     itens.push(it);
   });
@@ -2947,16 +2958,17 @@ function colslaCalcula(){
   });
   COLSLA = itens; COLSLA_MAP = new Map(itens.map(i => [i.chave, i]));
   COLSLA_CARR = new Map(); [...new Set(itens.map(i=>i.carr))].forEach(c => COLSLA_CARR.set(c, colslaAgg(itens.filter(i=>i.carr===c))));
-  IND_ALL.forEach(x => { const it = COLSLA_MAP.get(x.chave); if (it && !it.chegou){ x.prevCd = it.prevData; x.prevTipo = it.prevTipo; x.atrasoPrev = it.atrasoPrev; } });
+  IND_ALL.forEach(x => { const it = COLSLA_MAP.get(x.chave); if (!it) return; x.atrasoProt = it.atrasoProt; x.atrasoCd = it.atrasoCd; if (!it.chegou){ x.prevCd = it.prevData; x.prevTipo = it.prevTipo; x.atrasoPrev = it.atrasoPrev; } });
 }
 function colslaLinha(c){
   const a = COLSLA_CARR.get(c); if (!a || !a.n) return '';
-  return `<div style="font-size:10.5px;color:var(--tx3);margin-top:8px;border-top:1px solid var(--bd);padding-top:6px" title="Do protocolo até a chegada no CD (prazo ${SLA} dias)">Coleta → CD: ${a.media==null ? 'sem chegadas medidas' : '<b style="color:var(--tx)">'+fmt1(a.media)+' d</b> · '+Math.round(a.dentro/a.chegaram*100)+'% no prazo'} · ${a.transito} a caminho${a.atrasados ? ' · <b style="color:var(--st-bad)">'+a.atrasados+' atrasados</b>' : ''}</div>`;
+  return `<div style="font-size:10.5px;color:var(--tx3);margin-top:8px;border-top:1px solid var(--bd);padding-top:6px" title="Do protocolo até a chegada no CD (prazo ${SLA} dias)">Coleta → CD: ${a.media==null ? 'sem chegadas medidas' : '<b style="color:var(--tx)">'+fmt1(a.media)+' d</b> · '+Math.round(a.dentro/a.chegaram*100)+'% no prazo'} · ${a.transito} a caminho${a.atrasados ? ' · <b style="color:var(--st-bad)">'+a.atrasados+' atrasados</b>' : ''}${a.protN ? ' · protocolo: <b style="color:var(--tx)">'+Math.round(a.protFora/a.protN*100)+'%</b> fora do prazo' : ''}</div>`;
 }
 function colslaDetalhe(it){
   const c = COLSLA_MAP.get(it.chave); if (!c) return '';
   const t = c.chegou ? `Chegou no CD${c.fim ? ' em '+fmtDt(c.fim)+(c.fimTipo==='exata' ? '' : ' (aprox.)') : ''} · ${c.diasTotal==null ? '—' : c.diasTotal+' dias do protocolo'} (prazo ${SLA})` : `${c.estagio} · ${c.diasAberto} dias desde o protocolo (prazo ${SLA}) · previsão no CD ${fmtDt(c.prevData)} (${c.prevTipo})`;
-  return `<dt>SLA da transportadora</dt><dd>${t}</dd>`;
+  const e1 = c.diasCriProg==null ? '—' : c.diasCriProg + ' dias' + (c.atrasoProt>0 ? ' (+' + c.atrasoProt + ' além do prazo de ' + CONFIG.PRAZO_PROTOCOLO_DIAS + ')' : ' (no prazo)');
+  return `<dt>SLA da transportadora</dt><dd>${t}<br>Criação → protocolo: ${e1}</dd>`;
 }
 function dataSetBR(id, campo, v){
   const br = v ? v.slice(8,10)+'/'+v.slice(5,7)+'/'+v.slice(0,4) : null, nome = campo==='recebido_cd_em' ? 'Chegada no CD' : 'Coleta no cliente';
@@ -3122,7 +3134,7 @@ function renderInd(){
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind');
   if (!ativo) document.getElementById('tb-ind').innerHTML = lista.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>${diasTd(x.dias, x.fin)}${diasTd(x.media, x.fin)}<td style="font-size:11px">${esc(x.usuario||'—')} ${canalBdg(x.canal)}</td>
     ${andCell(x, 'and-list-ctl')}${motivoCell(x)}${statusCell(x)}${prevCdTds(x)}</tr>`).join('')
-    + (lista.length>300 ? `<tr class="cap"><td colspan="16" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
+    + (lista.length>300 ? `<tr class="cap"><td colspan="17" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros.</td></tr>` : '');
   ligaStats('ph-ind', [['Tarefas de '+IND.ano+' (filtros atuais)', () => base], ['Tarefas atendidas', () => base.filter(x=>x.fin)],
     ['Tempo até finalizar', () => base.filter(x=>x.fin && x.slaDias!=null).sort((a,b)=>b.slaDias-a.slaDias), { label:'Dias até finalizar', fn:x=>x.slaDias }], ['Casos em aberto hoje', () => base.filter(x=>!x.fin)]]);
   renderIndLog(doAnoAll, f);
@@ -3777,17 +3789,19 @@ function mdCsv(){
 }
 
 // ---- SLA Transportadora (Coleta Reversa): protocolo -> coleta na casa do cliente -> chegada no CD ----
-const CS = { carrs:new Set(), est:'', farol:'', q:'' };
+const CS = { carrs:new Set(), est:'', farol:'', atr:'', q:'' };
 function csSet(k, v){
   if (k==='carr'){ CS.carrs.has(v) ? CS.carrs.delete(v) : CS.carrs.add(v); }
   else if (k==='est') CS.est = (CS.est===v ? '' : v);
   else if (k==='farol') CS.farol = (CS.farol===v ? '' : v);
+  else if (k==='atr') CS.atr = (CS.atr===v ? '' : v);
   else if (k==='q'){ CS.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderColSla, 180); return; }
-  else if (k==='limpar'){ CS.carrs.clear(); CS.est=''; CS.farol=''; CS.q=''; const i = document.getElementById('cs-q'); if (i) i.value=''; }
+  else if (k==='limpar'){ CS.carrs.clear(); CS.est=''; CS.farol=''; CS.atr=''; CS.q=''; const i = document.getElementById('cs-q'); if (i) i.value=''; }
   renderColSla();
 }
 let CS_LISTA = [], _csOk = false;
 const FAROL_COR = { 'Atrasado':'var(--st-bad)', 'Em risco':'var(--st-warn)', 'No prazo':'var(--st-ok)', 'Fora do prazo':'var(--st-bad)', 'Dentro do prazo':'var(--st-ok)' };
+const etapaTd = (d, a) => d==null ? '—' : (a>0 ? '<b style="color:var(--st-bad)">'+d+' d</b> <small style="color:var(--st-bad)">+'+a+'</small>' : '<span style="color:var(--st-ok)">'+d+' d</span>');
 function csPrevCell(it){
   if (it.chegou) return '<td style="color:var(--tx3)">—</td>';
   const x = it.x, v = x.previsao_coleta || '', a = it.atrasoPrev;
@@ -3808,13 +3822,15 @@ function renderColSla(){
       <div class="ind-f"><div class="ind-f-top"><input id="cs-q" placeholder="Buscar cliente, NF ou CPF..." oninput="csSet('q',this.value)"><button class="btn-exp" type="button" id="cs-limpar" onclick="csSet('limpar')">Limpar filtros</button></div><div id="cs-fbody"></div></div>
       <div class="ind-h">Do protocolo até o CD — onde o tempo é gasto</div><div class="ind-sub" id="cs-funil-sub"></div>
       <div class="alerta-bar" id="cs-funil"></div>
+      <div class="ind-h">Atraso por etapa</div><div class="ind-sub" id="cs-etapas-sub"></div>
+      <div class="alerta-bar" id="cs-etapas"></div>
       <div class="pworld"><div class="pw-grid even"><div class="pw-card"><h3>Média de dias até o CD por transportadora</h3><div class="s">Protocolo → chegada no CD · linha vermelha = prazo de ${SLA} dias</div><div class="pw-chart"><canvas id="cs-ch"></canvas></div></div>
         <div class="pw-card"><h3>Chegadas por mês</h3><div class="s">Mês em que o produto chegou no CD · clique para ver os casos</div><div class="tbl-scroll" style="max-height:260px"><table><thead><tr><th>Mês</th><th>Chegadas</th><th>Média</th><th>Mediana</th><th>% no prazo</th></tr></thead><tbody id="tb-cs-mes"></tbody></table></div></div></div></div>
-      <div class="card" style="margin-bottom:14px"><div class="card-title">Ranking por transportadora</div><div class="card-sub">Clique numa linha para filtrar · a previsão estimada usa a mediana de cada transportadora (últimos 90 dias)</div><div style="overflow:auto"><table class="tbl"><thead><tr><th>Transportadora</th><th>Casos</th><th>Chegaram</th><th>Média</th><th>Mediana</th><th>% no prazo</th><th>A caminho</th><th>Atrasados</th><th>Previsão informada</th><th>Além da previsão</th></tr></thead><tbody id="tb-cs-rank"></tbody></table></div></div>
+      <div class="card" style="margin-bottom:14px"><div class="card-title">Ranking por transportadora</div><div class="card-sub">Clique numa linha para filtrar · a previsão estimada usa a mediana de cada transportadora (últimos 90 dias)</div><div style="overflow:auto"><table class="tbl"><thead><tr><th>Transportadora</th><th>Casos</th><th>Chegaram</th><th>Média</th><th>Mediana</th><th>% no prazo</th><th>A caminho</th><th>Atrasados</th><th>Previsão informada</th><th>Além da previsão</th><th title="Criação → protocolo">Protocolo fora do prazo</th><th>Atraso médio no protocolo</th><th>Atraso médio até o CD</th></tr></thead><tbody id="tb-cs-rank"></tbody></table></div></div>
       <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos do SLA</b><span class="fcnt" id="cnt-cs"></span><button class="btn-exp" onclick="csCsv()">Exportar CSV</button></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Transportadora</th><th>Cliente</th><th>NF</th><th>Criação</th><th>Protocolo</th><th>Dias</th><th>Farol</th><th>Estágio</th><th>Previsão no CD</th><th>Coleta no cliente</th><th>Chegada no CD</th><th>Total (dias)</th><th>Andamento</th></tr></thead><tbody id="tb-cs"></tbody></table></div></div>`; }
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Transportadora</th><th>Cliente</th><th>NF</th><th>Criação</th><th>Protocolo</th><th title="Dias entre a criação da tarefa e o protocolo">Criação → Protocolo</th><th>Dias</th><th>Farol</th><th title="Dias além do prazo até a chegada no CD">Atraso até o CD</th><th>Estágio</th><th>Previsão no CD</th><th>Coleta no cliente</th><th>Chegada no CD</th><th>Total (dias)</th><th>Andamento</th></tr></thead><tbody id="tb-cs"></tbody></table></div></div>`; }
   const todos = COLSLA;
-  const f = (it, ign) => { ign = ign||[]; return (ign.includes('carr') || !CS.carrs.size || CS.carrs.has(it.carr)) && (ign.includes('est') || !CS.est || it.estagio===CS.est) && (ign.includes('farol') || !CS.farol || it.farol===CS.farol) &&
+  const f = (it, ign) => { ign = ign||[]; return (ign.includes('carr') || !CS.carrs.size || CS.carrs.has(it.carr)) && (ign.includes('est') || !CS.est || it.estagio===CS.est) && (ign.includes('farol') || !CS.farol || it.farol===CS.farol) && (ign.includes('atr') || !CS.atr || (CS.atr==='prot' ? it.atrasoProt>0 : it.atrasoCd>0)) &&
     (!CS.q || norm((it.x.cliente||'')+' '+(it.x.nf||'')+' '+(it.x.cpf||'')).includes(CS.q)); };
   const vis = todos.filter(i=>f(i)), A = colslaAgg(vis), pc = (a,b) => b ? Math.round(a/b*100)+'%' : '—';
   document.getElementById('bdg-colsla').textContent = todos.filter(i => !i.chegou && i.farol==='Atrasado').length;
@@ -3827,17 +3843,26 @@ function renderColSla(){
   document.getElementById('cs-fbody').innerHTML =
     `<div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o => chip(CS.carrs.has(o.c), `csSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>
      <div class="ind-fr"><b>Estágio</b><div>${['Aguardando coleta','A caminho do CD','No CD'].map(e => chip(CS.est===e, `csSet('est','${e}')`, e, todos.filter(i=>i.estagio===e && f(i,['est'])).length)).join('')}</div></div>
-     <div class="ind-fr"><b>Farol</b><div>${['Atrasado','Em risco','No prazo','Fora do prazo','Dentro do prazo'].map(e => chip(CS.farol===e, `csSet('farol','${e}')`, e, todos.filter(i=>i.farol===e && f(i,['farol'])).length)).join('')}</div></div>`;
-  document.getElementById('cs-limpar').style.visibility = (CS.carrs.size || CS.est || CS.farol || CS.q) ? 'visible' : 'hidden';
+     <div class="ind-fr"><b>Farol</b><div>${['Atrasado','Em risco','No prazo','Fora do prazo','Dentro do prazo'].map(e => chip(CS.farol===e, `csSet('farol','${e}')`, e, todos.filter(i=>i.farol===e && f(i,['farol'])).length)).join('')}</div></div>
+     <div class="ind-fr"><b>Atraso por etapa</b><div>${chip(CS.atr==='prot', "csSet('atr','prot')", 'Protocolo fora do prazo (+' + CONFIG.PRAZO_PROTOCOLO_DIAS + ' d)', todos.filter(i=>i.atrasoProt>0 && f(i,['atr'])).length)}${chip(CS.atr==='cd', "csSet('atr','cd')", 'Além do prazo até o CD (+' + SLA + ' d)', todos.filter(i=>i.atrasoCd>0 && f(i,['atr'])).length)}</div></div>`;
+  document.getElementById('cs-limpar').style.visibility = (CS.carrs.size || CS.est || CS.farol || CS.atr || CS.q) ? 'visible' : 'hidden';
   // funil: onde o tempo e gasto
   const cp = vis.filter(i=>i.diasCriProg!=null), tot = vis.filter(i=>i.diasCriFim!=null), pcol = vis.filter(i=>i.diasProtColeta!=null), cd = vis.filter(i=>i.diasColetaCd!=null);
   const caixa = (t, v, n, sub, cl) => `<div class="alerta ${cl||''}" style="cursor:default"><b>${v==null ? '—' : fmt1(v)+' d'}</b><span>${t}<br><small style="color:var(--tx3)">${n} caso${n===1?'':'s'}${sub ? ' · '+sub : ''}</small></span></div>`;
   document.getElementById('cs-funil-sub').textContent = 'Criação → Protocolo (aceite da transportadora) → Coleta na casa do cliente → Chegada no CD. As etapas de coleta passam a ser medidas conforme as datas forem gravadas nas importações (ou informadas na tabela).';
   document.getElementById('cs-funil').innerHTML = caixa('Criação → Protocolo', mediaArr(cp.map(i=>i.diasCriProg)), cp.length, '', '') + caixa('Protocolo → Coleta no cliente', mediaArr(pcol.map(i=>i.diasProtColeta)), pcol.length, pcol.length ? '' : 'sem datas ainda', 'w') +
     caixa('Coleta → Chegada no CD', mediaArr(cd.map(i=>i.diasColetaCd)), cd.length, cd.length ? '' : 'sem datas ainda', 'w') + caixa('Protocolo → Chegada no CD (SLA)', A.media, A.chegaram, `prazo ${SLA} d`, A.media!=null && A.media>SLA ? 'r' : '') + caixa('Criação → Chegada no CD (total)', mediaArr(tot.map(i=>i.diasCriFim)), tot.length, '', '');
+  // atraso por etapa
+  { const PP = CONFIG.PRAZO_PROTOCOLO_DIAS, cx = (t, big, sub, cl, k) => `<button type="button" class="alerta ${cl}${k && CS.atr===k ? ' on' : ''}" onclick="${k ? `csSet('atr','${k}')` : 'void 0'}" ${k ? '' : 'style="cursor:default"'}><b>${big}</b><span>${t}<br><small style="color:var(--tx3)">${sub}</small></span></button>`, fm = v => v==null ? '—' : fmt1(v) + ' d';
+    document.getElementById('cs-etapas-sub').textContent = `Etapa 1: criação da tarefa → protocolo de coleta (prazo provisório de ${PP} dias, a definir com a transportadora). Etapa 2: protocolo → chegada no CD (prazo de ${SLA} dias; nos casos a caminho contam os dias já passados). Clique para filtrar a lista.`;
+    document.getElementById('cs-etapas').innerHTML =
+      cx('Etapa 1 · fora do prazo', pc(A.protFora, A.protN), `${A.protFora} de ${A.protN} casos · atraso médio ${fm(A.protAtrasoMed)}`, A.protN && A.protFora/A.protN>0.3 ? 'r' : 'w', 'prot') +
+      cx('Etapa 1 · tempo médio até o protocolo', fm(A.protMedia), `prazo ${PP} d · ${A.protN} casos`, A.protMedia!=null && A.protMedia>PP ? 'r' : '', '') +
+      cx('Etapa 2 · fora do prazo', pc(A.cdFora, A.cdN), `${A.cdFora} de ${A.cdN} casos · atraso médio ${fm(A.cdAtrasoMed)}`, A.cdN && A.cdFora/A.cdN>0.3 ? 'r' : 'w', 'cd') +
+      cx('Etapa 2 · a caminho e já atrasados', A.cdForaTransito, `passaram dos ${SLA} dias sem chegar ao CD`, A.cdForaTransito ? 'r' : '', 'cd'); }
   // ranking
   const rk = [...new Set(todos.filter(i=>f(i,['carr'])).map(i=>i.carr))].map(c => ({ c, a:colslaAgg(todos.filter(i=>i.carr===c && f(i,['carr']))) })).sort((p,q)=>q.a.n-p.a.n);
-  document.getElementById('tb-cs-rank').innerHTML = rk.map(({c,a}) => `<tr class="clickable${CS.carrs.has(c)?' sel':''}" data-c="${esc(c)}" onclick="csSet('carr',this.dataset.c)"><td><b>${esc(c)}</b></td><td>${a.n}</td><td>${a.chegaram}</td><td>${a.media==null?'—':'<b style="color:'+(a.media>SLA?'var(--st-bad)':'var(--st-ok)')+'">'+fmt1(a.media)+' d</b>'}</td><td>${a.mediana==null?'—':fmt1(a.mediana)+' d'}</td><td>${pc(a.dentro,a.chegaram)}</td><td>${a.transito}</td><td>${a.atrasados ? '<b style="color:var(--st-bad)">'+a.atrasados+'</b>' : 0}</td><td>${a.comPrevInf} de ${a.transito}</td><td>${a.atrasoPrev ? '<b style="color:var(--st-bad)">'+a.atrasoPrev+'</b>' : 0}</td></tr>`).join('') || '<tr><td colspan="10" style="color:var(--tx3);padding:12px">Sem dados.</td></tr>';
+  document.getElementById('tb-cs-rank').innerHTML = rk.map(({c,a}) => `<tr class="clickable${CS.carrs.has(c)?' sel':''}" data-c="${esc(c)}" onclick="csSet('carr',this.dataset.c)"><td><b>${esc(c)}</b></td><td>${a.n}</td><td>${a.chegaram}</td><td>${a.media==null?'—':'<b style="color:'+(a.media>SLA?'var(--st-bad)':'var(--st-ok)')+'">'+fmt1(a.media)+' d</b>'}</td><td>${a.mediana==null?'—':fmt1(a.mediana)+' d'}</td><td>${pc(a.dentro,a.chegaram)}</td><td>${a.transito}</td><td>${a.atrasados ? '<b style="color:var(--st-bad)">'+a.atrasados+'</b>' : 0}</td><td>${a.comPrevInf} de ${a.transito}</td><td>${a.atrasoPrev ? '<b style="color:var(--st-bad)">'+a.atrasoPrev+'</b>' : 0}</td><td>${a.protN ? pc(a.protFora, a.protN) : '—'}</td><td>${a.protAtrasoMed==null ? '—' : fmt1(a.protAtrasoMed)+' d'}</td><td>${a.cdAtrasoMed==null ? '—' : fmt1(a.cdAtrasoMed)+' d'}</td></tr>`).join('') || '<tr><td colspan="13" style="color:var(--tx3);padding:12px">Sem dados.</td></tr>';
   // chegadas por mes
   const mm = new Map(); vis.filter(i=>i.chegou && i.fim && i.diasTotal!=null).forEach(i => { const k = i.fim.getFullYear()*100 + i.fim.getMonth(); if (!mm.has(k)) mm.set(k, []); mm.get(k).push(i.diasTotal); });
   document.getElementById('tb-cs-mes').innerHTML = [...mm.entries()].sort((a,b)=>b[0]-a[0]).slice(0,12).map(([k,a]) => `<tr><td>${MESES[k%100]}/${Math.floor(k/100)}</td><td>${a.length}</td><td><b>${fmt1(mediaArr(a))} d</b></td><td>${fmt1(medianaDe(a))} d</td><td>${pc(a.filter(d=>d<=SLA).length, a.length)}</td></tr>`).join('') || '<tr><td colspan="5" style="color:var(--tx3);padding:12px">Nenhuma chegada com data ainda: a data de chegada é gravada na importação em que o romaneio de entrada aparece.</td></tr>';
@@ -3852,13 +3877,13 @@ function renderColSla(){
   }
   const lista = vis.slice().sort((a,b) => (a.chegou - b.chegou) || (a.chegou ? (+(b.fim||0)) - (+(a.fim||0)) : b.diasAberto - a.diasAberto)); CS_LISTA = lista;
   document.getElementById('cnt-cs').textContent = lista.length + ' caso' + (lista.length!==1 ? 's' : '');
-  document.getElementById('tb-cs').innerHTML = lista.slice(0,400).map(it => { const x = it.x; return `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td style="font-size:11px">${esc(it.carr)}</td><td class="td-nome">${esc(x.cliente||'—')}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${fmtDt(it.cri)}</td><td>${fmtDt(it.prog)}</td>
-    <td><b>${it.diasAberto} d</b></td><td><b style="color:${FAROL_COR[it.farol]}">${it.farol}</b></td><td style="font-size:11px">${it.estagio}</td>${csPrevCell(it)}${csDataCell(it,'recolhido_em')}${csDataCell(it,'recebido_cd_em')}<td>${it.diasTotal==null ? '—' : '<b>'+it.diasTotal+' d</b>'}</td><td style="font-size:11px">${esc(x.andamento||'—')}</td></tr>`; }).join('') + capNota(lista.length)
-    || '<tr><td colspan="13" style="color:var(--tx3);padding:16px">Nenhum caso com esses filtros.</td></tr>';
+  document.getElementById('tb-cs').innerHTML = lista.slice(0,400).map(it => { const x = it.x; return `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td style="font-size:11px">${esc(it.carr)}</td><td class="td-nome">${esc(x.cliente||'—')}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${fmtDt(it.cri)}</td><td>${fmtDt(it.prog)}</td><td>${etapaTd(it.diasCriProg, it.atrasoProt)}</td>
+    <td><b>${it.diasAberto} d</b></td><td><b style="color:${FAROL_COR[it.farol]}">${it.farol}</b></td><td>${it.atrasoCd==null ? '—' : it.atrasoCd>0 ? '<b style="color:var(--st-bad)">+'+it.atrasoCd+' d</b>' : '<span style="color:var(--st-ok)">no prazo</span>'}</td><td style="font-size:11px">${it.estagio}</td>${csPrevCell(it)}${csDataCell(it,'recolhido_em')}${csDataCell(it,'recebido_cd_em')}<td>${it.diasTotal==null ? '—' : '<b>'+it.diasTotal+' d</b>'}</td><td style="font-size:11px">${esc(x.andamento||'—')}</td></tr>`; }).join('') + capNota(lista.length)
+    || '<tr><td colspan="15" style="color:var(--tx3);padding:16px">Nenhum caso com esses filtros.</td></tr>';
 }
 function csCsv(){
   if (!CS_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(CS_LISTA.map(it => ({ 'Transportadora':it.carr, 'Cliente':it.x.cliente||'', 'CPF':it.x.cpf||'', 'NF':it.x.nf||'', 'Criação':fmtDt(it.cri), 'Protocolo':fmtDt(it.prog), 'Dias desde o protocolo':it.diasAberto, 'Farol':it.farol, 'Estágio':it.estagio,
+  exportCSV(CS_LISTA.map(it => ({ 'Transportadora':it.carr, 'Cliente':it.x.cliente||'', 'CPF':it.x.cpf||'', 'NF':it.x.nf||'', 'Criação':fmtDt(it.cri), 'Protocolo':fmtDt(it.prog), 'Criação → Protocolo (dias)':it.diasCriProg==null ? '' : it.diasCriProg, 'Atraso no protocolo (dias)':it.atrasoProt>0 ? it.atrasoProt : '', 'Atraso até o CD (dias)':it.atrasoCd>0 ? it.atrasoCd : '', 'Dias desde o protocolo':it.diasAberto, 'Farol':it.farol, 'Estágio':it.estagio,
     'Previsão no CD':it.chegou ? '' : fmtDt(it.prevData), 'Tipo da previsão':it.chegou ? '' : it.prevTipo, 'Dias além da previsão':(!it.chegou && it.atrasoPrev>0) ? it.atrasoPrev : '', 'Coleta no cliente':it.rcl ? fmtDt(it.rcl) : '', 'Chegada no CD':it.fim ? fmtDt(it.fim) : '', 'Precisão da chegada':it.fimTipo||'', 'Total (dias)':it.diasTotal==null ? '' : it.diasTotal, 'Andamento':it.x.andamento||'' })), 'sla_transportadora');
 }
 
