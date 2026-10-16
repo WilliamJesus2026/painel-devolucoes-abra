@@ -991,7 +991,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 const CONFIG = {
   SLA_COLETA_DIAS: 20,
   RISCO_JANELA_DIAS: 6,
-  PRAZO_PROTOCOLO_DIAS: 5,   // etapa 1: criacao da tarefa -> protocolo de coleta (valor provisorio, a definir com a transportadora)
+  PRAZO_PROTOCOLO_DIAS: 3,   // etapa 1: criacao da tarefa -> protocolo de coleta (maximo de 3 dias, definido pela equipe em 16/10/2026)
 };
 const SLA = CONFIG.SLA_COLETA_DIAS;
 
@@ -1730,7 +1730,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261015-020546';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261016-094236';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -3854,7 +3854,7 @@ function renderColSla(){
     caixa('Coleta → Chegada no CD', mediaArr(cd.map(i=>i.diasColetaCd)), cd.length, cd.length ? '' : 'sem datas ainda', 'w') + caixa('Protocolo → Chegada no CD (SLA)', A.media, A.chegaram, `prazo ${SLA} d`, A.media!=null && A.media>SLA ? 'r' : '') + caixa('Criação → Chegada no CD (total)', mediaArr(tot.map(i=>i.diasCriFim)), tot.length, '', '');
   // atraso por etapa
   { const PP = CONFIG.PRAZO_PROTOCOLO_DIAS, cx = (t, big, sub, cl, k) => `<button type="button" class="alerta ${cl}${k && CS.atr===k ? ' on' : ''}" onclick="${k ? `csSet('atr','${k}')` : 'void 0'}" ${k ? '' : 'style="cursor:default"'}><b>${big}</b><span>${t}<br><small style="color:var(--tx3)">${sub}</small></span></button>`, fm = v => v==null ? '—' : fmt1(v) + ' d';
-    document.getElementById('cs-etapas-sub').textContent = `Etapa 1: criação da tarefa → protocolo de coleta (prazo provisório de ${PP} dias, a definir com a transportadora). Etapa 2: protocolo → chegada no CD (prazo de ${SLA} dias; nos casos a caminho contam os dias já passados). Clique para filtrar a lista.`;
+    document.getElementById('cs-etapas-sub').textContent = `Etapa 1: criação da tarefa → protocolo de coleta (prazo máximo de ${PP} dias). Etapa 2: protocolo → chegada no CD (prazo de ${SLA} dias; nos casos a caminho contam os dias já passados). Clique para filtrar a lista.`;
     document.getElementById('cs-etapas').innerHTML =
       cx('Etapa 1 · fora do prazo', pc(A.protFora, A.protN), `${A.protFora} de ${A.protN} casos · atraso médio ${fm(A.protAtrasoMed)}`, A.protN && A.protFora/A.protN>0.3 ? 'r' : 'w', 'prot') +
       cx('Etapa 1 · tempo médio até o protocolo', fm(A.protMedia), `prazo ${PP} d · ${A.protN} casos`, A.protMedia!=null && A.protMedia>PP ? 'r' : '', '') +
