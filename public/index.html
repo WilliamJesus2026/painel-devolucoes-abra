@@ -805,6 +805,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <!-- TRATATIVAS -->
     <div class="panel" id="panel-ind">
       <div class="pworld" id="ph-ind"></div>
+      <div id="ind-sla-coleta" style="margin-bottom:14px"></div>
       <details class="ind-f" style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da Dayane.</div></details>
       <div class="alerta-bar" id="ind-alertas"></div>
       <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button><select class="fsel" id="ind-views" onchange="indView(this.value)" title="Visões prontas e as que você salvou"></select><button class="btn-exp" type="button" onclick="indSalvaView()" title="Guarda os filtros atuais com um nome (neste navegador)">💾 Salvar visão</button><button class="btn-exp" type="button" onclick="indApagaView()">Excluir visão</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
@@ -1730,7 +1731,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261016-094236';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261016-121248';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -1962,7 +1963,7 @@ function diasTd(n, fin){
 }
 function alertaOk(x, k){
   k = k || IND.alerta; if (x.fin) return false; const d = x.dias || 0;
-  return k==='60' ? d>=60 : k==='30' ? (d>=30 && d<60) : k==='sem' ? !x.andamento : k==='prev' ? (x.atrasoPrev>0) : true;
+  return k==='60' ? d>=60 : k==='30' ? (d>=30 && d<60) : k==='sem' ? !x.andamento : k==='prev' ? (x.atrasoPrev>0) : k==='atrp' ? (x.atrasoProt>0) : k==='atrcd' ? (x.atrasoCd>0) : true;
 }
 const slaAtrasoTd = x => {
   if (x.atrasoProt==null && x.atrasoCd==null) return '<td style="color:var(--tx3)">—</td>';
@@ -1991,7 +1992,7 @@ function colsMenu(e){ e.stopPropagation(); document.getElementById('col-menu').c
 function colsToggle(i, on){ const o = new Set(lsGet('ind_cols', [])); on ? o.delete(i) : o.add(i); lsSet('ind_cols', [...o]); colsAplica(); }
 function colsReset(){ lsSet('ind_cols', []); colsAplica(); }
 document.addEventListener('click', e => { const m = document.getElementById('col-menu'); if (m && !e.target.closest('#col-menu')) m.classList.remove('open'); });
-const IND_PRESETS = { 'p:limpar':'Em aberto (padrão)', 'p:60':'Abertos há 60+ dias', 'p:30':'Abertos há 30 a 59 dias', 'p:sem':'Sem andamento', 'p:prev':'Coleta além da previsão no CD' };
+const IND_PRESETS = { 'p:limpar':'Em aberto (padrão)', 'p:60':'Abertos há 60+ dias', 'p:30':'Abertos há 30 a 59 dias', 'p:sem':'Sem andamento', 'p:prev':'Coleta além da previsão no CD', 'p:atrp':'Protocolo fora do prazo', 'p:atrcd':'Além de 20 dias até o CD' };
 function indViewsRender(){
   const el = document.getElementById('ind-views'); if (!el) return;
   const u = Object.keys(lsGet('ind_views', {}));
@@ -3095,6 +3096,20 @@ function renderInd(){
     if (ult.length===2){ const m1 = mediaDe(doCar.filter(noGrupo(ult[1]))), m0 = mediaDe(doCar.filter(noGrupo(ult[0]))), d = (m1!=null && m0!=null) ? m1-m0 : null;
       al.push(`<div class="alerta${d!=null&&d>0.05?' r':''}" style="cursor:default"><b>${fd(m1)}</b><span>Média de dias em ${MESES[ult[1]-1]} · ${deltaH(d)} vs ${MESES[ult[0]-1]}</span></div>`); }
     document.getElementById('ind-alertas').innerHTML = al.join('');
+  }
+  { // SLA da coleta (transportadora) no topo dos indicadores: etapa 1 criacao -> protocolo, etapa 2 protocolo -> CD
+    const box = document.getElementById('ind-sla-coleta'), its = COLSLA.filter(it => it.x.ano===IND.ano && f(it.x, ['status','motivo','alerta']));
+    if (!its.length){ box.innerHTML = ''; }
+    else {
+      const A2 = colslaAgg(its), PP = CONFIG.PRAZO_PROTOCOLO_DIAS, pc = (a,b) => b ? Math.round(a/b*100)+'%' : '—', fm = v => v==null ? '—' : fmt1(v)+' d';
+      const nP = its.filter(i=>!i.x.fin && i.atrasoProt>0).length, nC = its.filter(i=>!i.x.fin && i.atrasoCd>0).length;
+      const cx = (t, big, sub, cl, k) => `<button type="button" class="alerta ${cl}${k && IND.alerta===k ? ' on' : ''}" ${k ? `onclick="indSet('alerta','${k}')" title="Clique para filtrar a lista pelos casos em aberto"` : 'style="cursor:default"'}><b>${big}</b><span>${t}<br><small style="color:var(--tx3)">${sub}</small></span></button>`;
+      box.innerHTML = `<div class="ind-h" style="display:flex;align-items:center;gap:10px">SLA da coleta — transportadora <button class="btn-exp" type="button" onclick="ir('colsla')">Ver detalhes ↗</button></div>
+        <div class="alerta-bar">${cx(`Etapa 1 · criação → protocolo fora do prazo (máx. ${PP} d)`, pc(A2.protFora, A2.protN), `${A2.protFora} de ${A2.protN} casos · atraso médio ${fm(A2.protAtrasoMed)} · ${nP} em aberto`, A2.protN && A2.protFora/A2.protN>0.3 ? 'r' : 'w', 'atrp')}
+        ${cx(`Etapa 2 · protocolo → CD fora do prazo (${SLA} d corridos)`, pc(A2.cdFora, A2.cdN), `${A2.cdFora} de ${A2.cdN} casos · atraso médio ${fm(A2.cdAtrasoMed)} · ${nC} em aberto`, A2.cdN && A2.cdFora/A2.cdN>0.3 ? 'r' : 'w', 'atrcd')}
+        ${cx('Média criação → protocolo', fm(A2.protMedia), `prazo máx. ${PP} d · ${A2.protN} casos`, A2.protMedia!=null && A2.protMedia>PP ? 'r' : '', '')}
+        ${cx('Média protocolo → CD', fm(A2.media), `${A2.chegaram} chegaram · prazo ${SLA} d`, A2.media!=null && A2.media>SLA ? 'r' : '', '')}</div>`;
+    }
   }
   colsAplica(); indViewsRender();
   const mesOn = m => m===0 ? indAntigos().every(k=>IND.meses.has(k)) : IND.meses.has(m);

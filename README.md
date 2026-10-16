@@ -170,3 +170,6 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - **Etapa 1: criação da tarefa → protocolo de coleta.** Prazo máximo de 3 dias (`CONFIG.PRAZO_PROTOCOLO_DIAS`, definido pela equipe em 16/10/2026). **Etapa 2: protocolo → chegada no CD**, prazo de 20 dias (casos a caminho contam os dias já passados).
 - Aba SLA Transportadora: bloco "Atraso por etapa" (% fora do prazo e atraso médio de cada etapa, a caminho já atrasados), filtro "Atraso por etapa", colunas "Criação → Protocolo" e "Atraso até o CD" na lista, 3 colunas novas no ranking e no CSV.
 - Controle de Situações: coluna "Atraso SLA coleta" (protocolo +N d / CD +N d), linha de "protocolo fora do prazo" nos cards por transportadora e as duas etapas no detalhe do caso.
+
+## SLA da coleta no topo do Controle de Situações (16/10/2026)
+- Faixa "SLA da coleta — transportadora" logo abaixo do cabeçalho de indicadores: % fora do prazo da etapa 1 (criação → protocolo, máx. 3 dias) e da etapa 2 (protocolo → CD, 20 dias corridos), com atraso médio e quantos seguem em aberto, mais as duas médias. Os dois primeiros cartões filtram a lista (alertas `atrp` e `atrcd`) e há atalhos nas visões prontas. Acompanha os filtros do Controle (ano, mês, transportadora, canal...).
