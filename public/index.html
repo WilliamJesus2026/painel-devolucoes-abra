@@ -692,7 +692,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="hero-chips">
           <button class="hchip hc-red" type="button" onclick="ir('at')" title="Ver atrasadas"><b id="hc-at">0</b> atrasadas</button>
           <button class="hchip hc-amb" type="button" onclick="ir('ri')" title="Ver em risco"><b id="hc-ri">0</b> em risco</button>
-          <button class="hchip hc-pur" type="button" onclick="ir('rea')" title="Coletas já realizadas na casa do cliente"><b id="hc-rea">0</b> realizadas</button>
+          <button class="hchip hc-pur" type="button" onclick="ir('rea')" title="Coleta feita, aguardando o CD"><b id="hc-rea">0</b> aguardando CD</button>
           <span class="tb-ref hc-ref" id="tb-ref">—</span>
         </div>
         <button class="hero-search" type="button" onclick="openPalette()" aria-label="Buscar"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke-width="2" stroke-linecap="round"/></svg><span>Buscar cliente, NF ou CPF</span><kbd>Ctrl K</kbd></button>
@@ -755,10 +755,10 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       </div></div>
     </div>
 
-    <!-- COLETA REALIZADA -->
+    <!-- COLETA REALIZADA (aguardando CD) -->
     <div class="panel" id="panel-rea">
       <div class="pworld" data-ph="rea"></div>
-      <div class="dica"><strong>Coleta realizada:</strong> a transportadora já retirou o produto na casa do cliente. Todas as coletas realizadas ficam só aqui (aguardando CD ou já recebidas no CD) e não aparecem em Atrasados, Em risco, No prazo nem em Todos. A coluna "Dias" mostra há quanto tempo o protocolo foi aberto, para você cobrar o retorno ao CD se demorar.</div>
+      <div class="dica"><strong>Coleta realizada:</strong> a transportadora já retirou o produto na casa do cliente. Estes casos saíram de Atrasados/Em risco/No prazo e ficam aqui até a chegada no CD (romaneio de entrada) — aí vão para o Histórico. A coluna "Dias" mostra há quanto tempo o protocolo foi aberto, para você cobrar o retorno ao CD se demorar.</div>
       <div class="filterbar">
         <select class="fsel" id="frea-uf" onchange="renderCol('rea')"><option value="">Todas as UFs</option></select>
         <select class="fsel" id="frea-tr" onchange="renderCol('rea')"><option value="">Todas as transportadoras</option></select>
@@ -781,10 +781,13 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
           <option value="ATRASADO">Atrasado</option>
           <option value="RISCO">Em risco</option>
           <option value="NO PRAZO">No prazo</option>
+          <option value="REALIZADA">Coleta realizada</option>
         </select>
         <select class="fsel" id="fall-col" onchange="renderCol('all')">
           <option value="">Coleta: todas</option>
           <option value="pendente">Coleta pendente</option>
+          <option value="realizada">Coleta realizada (aguardando CD)</option>
+          <option value="cd">Recebido no CD</option>
           <option value="cancelada">Cancelada</option>
         </select>
         <select class="fsel" id="fall-uf" onchange="renderCol('all')"><option value="">Todas as UFs</option></select>
@@ -1062,7 +1065,6 @@ let LAST_IMPORT = null;
 let REF = new Date().toLocaleDateString('pt-BR');
 
 let COL = [];       // coletas pendentes de coleta (nao realizadas, nao canceladas, nao recebidas no CD)
-let REA_TAB = [];   // aba Coleta realizada: todas as coletas feitas (aguardando CD e ja recebidas no CD)
 let REA = [];       // coleta realizada na casa do cliente, aguardando chegada no CD
 let COLETAS_ARQ = [];   // todas as coletas da planilha atual
 let HIST = [];       // coletas historico (canceladas ou realizadas)
@@ -1148,10 +1150,9 @@ function rebuildData(){
   const visivel = x => { if (statusIgnorado(x.status)){ OCULTOS.push(x); return false; } return true; };
   const allColetas = Object.values(coletaMap).map(deriveColetaLive);   // coleta nao e escondida por status: todas as linhas da planilha entram
   COL = allColetas.filter(c => !c.cancelada && !c.realizada && !c.coletaRealizada);
-  REA = allColetas.filter(c => !c.cancelada && !c.realizada && c.coletaRealizada);   // so as que ainda aguardam o CD (base do Controle e dos SLAs)
-  REA_TAB = allColetas.filter(c => !c.cancelada && c.coletaRealizada);
+  REA = allColetas.filter(c => !c.cancelada && !c.realizada && c.coletaRealizada);
   HIST = allColetas.filter(c => c.cancelada || c.realizada);
-  COLETAS_ARQ = allColetas.filter(c => !c.concluidoAuto && !c.coletaRealizada);   // 'Todos' nao repete as realizadas: elas ficam so na aba Coleta realizada   // todas as coletas que estao na ultima planilha importada (pendentes, realizadas, no CD e canceladas)
+  COLETAS_ARQ = allColetas.filter(c => !c.concluidoAuto);   // todas as coletas que estao na ultima planilha importada (pendentes, realizadas, no CD e canceladas)
   const allTrat = Object.values(tratMap).filter(visivel).map(deriveTratativaLive);
   // Perdas sao fato historico (indice mensal) e vivem na propria aba: nao saem do controle por sumirem do arquivo.
   PERDAS = allTrat.filter(t => t.grupo==='perdas').map(derivePerda);
@@ -1168,7 +1169,7 @@ function rebuildData(){
   AT_FORA = AT.filter(c=>c.uf && c.uf.toUpperCase()!=='SP');
 
   D.kpis = {
-    col_total: COL.length, col_all: COLETAS_ARQ.length, rea: REA_TAB.length, at: AT.length, ri: RI.length, em: EM.length,
+    col_total: COL.length, col_all: COLETAS_ARQ.length, rea: REA.length, at: AT.length, ri: RI.length, em: EM.length,
     hist: HIST.length + TRAT_HIST.length, trat_total: TRAT.length,
     valor_at: AT.reduce((s,c)=>s+Math.abs(c.valor||0),0),
   };
@@ -1217,7 +1218,7 @@ function toggleTheme(){
 let GRP = '';
 let charts = {};
 const TITLES = {
-  dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada',
+  dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Coleta Reversa — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
   colsla:'SLA Transportadora — prazo de coleta até o CD', ind:'Controle de Situações', sla:'SLA de Apontamento', adm:'Usuários e acessos', media:'Média e cruzamento', 'nr-ap':'Transportadora a pagar', 'nr-nr':'Produto não retornou', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
@@ -1302,7 +1303,7 @@ function renderCol(tipo){
   if(tipo==='at')       data=[...AT];
   else if(tipo==='ri')  data=[...RI];
   else if(tipo==='em')  data=[...EM];
-  else if(tipo==='rea') data=[...REA_TAB];
+  else if(tipo==='rea') data=[...REA];
   else                  data=[...COLETAS_ARQ];   // 'Todos' = tudo que veio na planilha
   { const sel = document.getElementById(`f${tipo}-and`);   // filtro por andamento (as opcoes vem do que a equipe escreveu)
     if (sel){ const vals = [...new Set(data.map(c => String(c.andamento||'').trim()).filter(Boolean))].sort(), cur = sel.value;
@@ -1352,8 +1353,8 @@ function renderCol(tipo){
       ${protCell(c)}
       <td><span class="bdg b-acc">${esc(c.uf)}</span></td>
       <td><span class="bdg b-dk">${c.temData ? c.dias+'d' : '—'}</span></td>
-      <td>${c.prazo_status ? stBdg(c.prazo_status) : '—'}</td>
-      <td>${c.recebidoCD ? '<span class="bdg b-grn" title="Chegou no CD (romaneio de entrada)">Recebido no CD</span>' : '<span class="bdg b-amb" title="Coleta feita, ainda sem romaneio de entrada no CD">Aguardando CD</span>'}</td>
+      <td>${stBdg(c.prazo_status)}</td>
+      <td><span class="bdg b-amb" title="Coleta feita, ainda sem romaneio de entrada no CD">Aguardando CD</span></td>
       ${andCell(c)}${prevCell(c)}
       <td class="td-desc" title="${esc(c.descricao)}">${esc(c.descricao)}</td>
       ${motivoCell(c)}
@@ -1730,7 +1731,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261020-122310';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261020-113849';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -1802,7 +1803,7 @@ document.addEventListener('click', e => {
 const norm = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const PAL_CMDS = [
   ['Ir para Dashboard',()=>ir('dash')], ['Ir para Atrasadas',()=>ir('at')], ['Ir para Em risco',()=>ir('ri')],
-  ['Ir para Coleta realizada',()=>ir('rea')], ['Ir para Perdas — Panorama',()=>ir('perdas')], ['Ir para Perdas Cliente',()=>ir('p-cli')], ['Ir para Perdas Transportadora',()=>ir('p-trp')], ['Ir para Tratativas',()=>ir('trat')], ['Ir para Histórico',()=>ir('hist')],
+  ['Ir para Coleta realizada (aguardando CD)',()=>ir('rea')], ['Ir para Perdas — Panorama',()=>ir('perdas')], ['Ir para Perdas Cliente',()=>ir('p-cli')], ['Ir para Perdas Transportadora',()=>ir('p-trp')], ['Ir para Tratativas',()=>ir('trat')], ['Ir para Histórico',()=>ir('hist')],
   ['Importar arquivo…',()=>document.getElementById('file-input').click()], ['Alternar modo claro/escuro',()=>toggleTheme()],
 ];
 let palSel = 0, palItems = [];
@@ -2081,7 +2082,7 @@ function exportColetas(tipo) {
   if(tipo==='at')      { dados=AT;  nome=`Coletas_Atrasadas_${hoje}.csv`; }
   else if(tipo==='ri') { dados=RI;  nome=`Coletas_Risco_${hoje}.csv`; }
   else if(tipo==='em') { dados=EM;  nome=`Coletas_NoPrazo_${hoje}.csv`; }
-  else if(tipo==='rea'){ dados=REA_TAB; nome=`Coletas_Realizadas_${hoje}.csv`; }
+  else if(tipo==='rea'){ dados=REA; nome=`Coletas_Realizadas_${hoje}.csv`; }
   else if(tipo==='hist'){ dados=HIST; nome=`Coletas_Historico_${hoje}.csv`; }
   else                 { dados=[...COLETAS_ARQ]; nome=`Coletas_Todas_${hoje}.csv`; }
 
@@ -2725,11 +2726,11 @@ function pwHero(kick, title, sub, stats, acao){
     <div class="pw-actions no-print">${acao!==undefined ? acao : `<button class="pw-btn btn-import" type="button" onclick="document.getElementById('file-input').click()">⭱ Importar planilha</button>`}</div></div>
     <div class="pw-stats">${stats.map(([l,v,n,go,sm]) => `<div class="pw-stat"${go?` onclick="${go}" style="cursor:pointer"`:''}><div class="l">${l}</div><div class="v${sm?' sm':''}">${v}</div><div class="n">${n||''}</div></div>`).join('')}</div></div>`;
 }
-const PH_TITLES = { at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada', 'col-all':'Todos os protocolos (sem as realizadas)' };
+const PH_TITLES = { at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD', 'col-all':'Todos os protocolos' };
 const K_ALL = () => COLETAS_ARQ.length;
 function renderProtoHero(){
   const stats = [['Atrasadas', AT.length, `Prazo > ${SLA} dias`, "ir('at')"], ['Em risco', RI.length, 'Entram em atraso em breve', "ir('ri')"], ['No prazo', EM.length, `Dentro dos ${SLA} dias`, "ir('em')"],
-    ['Coletas realizadas', REA_TAB.length, `${REA.length} aguardando CD · ${REA_TAB.length-REA.length} já no CD`, "ir('rea')"], ['Total de coletas', K_ALL(), 'sem as já realizadas', "ir('col-all')"]];
+    ['Aguardando CD', REA.length, 'Coleta feita, falta chegar no CD', "ir('rea')"], ['Total de coletas', K_ALL(), 'todas as linhas da planilha', "ir('col-all')"]];
   document.querySelectorAll('[data-ph]').forEach(el => { el.innerHTML = pwHero('Coleta Reversa', PH_TITLES[el.dataset.ph]||'', `Prazo de ${SLA} dias para a coleta · atualiza sozinho a cada importação.`, stats); });
 }
 // ---- filtros do dashboard: valem para todos os numeros, graficos e listas da pagina ----
@@ -3689,10 +3690,10 @@ function histEstado(x){
   const sit = x.tipo_devolucao || x.sit || '', k = sitKey(sit), an = norm(x.andamento||''), sm = x.status_manual;
   if (sm==='ab') return null;
   if (sm==='canc') return 'Cancelado';
-  if (sm==='fin') return 'Finalizado';
+  if (sm==='fin') return x.grupo==='perdas' ? 'Perda' : 'Finalizado';
   if (x.cancelada || /^cancelad/.test(k) || /(^|\s)cancelad/.test(an)) return 'Cancelado';
   if (x.__tipo==='coleta'){ if (x.recebidoCD) return 'Finalizado'; if (x.concluidoAuto) return 'Saiu da planilha'; return null; }
-  if (x.grupo==='perdas') return 'Finalizado';   // perda = caso finalizado; os dados seguem alimentando a aba Perdas
+  if (x.grupo==='perdas') return 'Perda';
   if (sitClasseDe(sit)==='Finalizada' || /^finalizad/.test(an)) return 'Finalizado';
   if (x.concluido_auto) return 'Saiu da planilha';
   return null;
@@ -3708,7 +3709,7 @@ function histItens(){
     const k = x.chave || x.id; if (vistos.has(k)) return; vistos.add(k);
     const d = parseBR(x.data_solicitacao) || parseBR(x.data_programacao);
     const fim = parseBR(x.finalizado_em) || parseBR(x.ultimo_apontamento) || (x.concluidoEm ? new Date(x.concluidoEm) : (x.concluido_em ? new Date(x.concluido_em) : null));
-    _hist.push({ ...x, estado:e, ehPerda:x.grupo==='perdas', carr:indCarr(x), d, ano:d ? d.getFullYear() : null, fim: fim && !isNaN(fim) ? fim : null, media:(x.media_dias!=null && x.media_dias!=='' && !isNaN(+x.media_dias)) ? +x.media_dias : null });
+    _hist.push({ ...x, estado:e, carr:indCarr(x), d, ano:d ? d.getFullYear() : null, fim: fim && !isNaN(fim) ? fim : null, media:(x.media_dias!=null && x.media_dias!=='' && !isNaN(+x.media_dias)) ? +x.media_dias : null });
   });
   return _hist;
 }
@@ -3734,14 +3735,14 @@ function renderHist(){
   const f = (x, ign) => { ign = ign||[]; return (ign.includes('est') || !HST.est || x.estado===HST.est) && (ign.includes('carr') || !HST.carrs.size || HST.carrs.has(x.carr)) &&
     (ign.includes('ano') || HST.ano==='all' || x.ano===+HST.ano) && (!HST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')+' '+(x.sit||'')+' '+(x.andamento||'')).includes(HST.q)); };
   const vis = todos.filter(x=>f(x));
-  document.getElementById('ph-hist').innerHTML = pwHero('Histórico', 'Banco de casos encerrados', 'Tudo que foi finalizado (inclusive as perdas), cancelado ou saiu da planilha fica guardado aqui, mesmo que suma das outras abas.',
-    [['Total guardado', todos.length, 'no banco de dados'], ['Finalizados', cont('Finalizado'), 'atendidos'], ['Cancelados', cont('Cancelado'), 'cancelados'], ['Saíram da planilha', cont('Saiu da planilha'), 'removidos do arquivo'], ['Perdas', todos.filter(x=>x.ehPerda).length, 'finalizadas · também na aba Perdas']], '');
-  ligaStats('ph-hist', [['Histórico — todos', () => todos], ['Finalizados', () => todos.filter(x=>x.estado==='Finalizado')], ['Cancelados', () => todos.filter(x=>x.estado==='Cancelado')], ['Saíram da planilha', () => todos.filter(x=>x.estado==='Saiu da planilha')], ['Perdas', () => todos.filter(x=>x.ehPerda)]]);
+  document.getElementById('ph-hist').innerHTML = pwHero('Histórico', 'Banco de casos encerrados', 'Tudo que foi finalizado, cancelado, virou perda ou saiu da planilha fica guardado aqui, mesmo que suma das outras abas.',
+    [['Total guardado', todos.length, 'no banco de dados'], ['Finalizados', cont('Finalizado'), 'atendidos'], ['Cancelados', cont('Cancelado'), 'cancelados'], ['Saíram da planilha', cont('Saiu da planilha'), 'removidos do arquivo'], ['Perdas', cont('Perda'), 'também na aba Perdas']], '');
+  ligaStats('ph-hist', [['Histórico — todos', () => todos], ['Finalizados', () => todos.filter(x=>x.estado==='Finalizado')], ['Cancelados', () => todos.filter(x=>x.estado==='Cancelado')], ['Saíram da planilha', () => todos.filter(x=>x.estado==='Saiu da planilha')], ['Perdas', () => todos.filter(x=>x.estado==='Perda')]]);
   const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
   const anos = [...new Set(todos.map(x=>x.ano).filter(Boolean))].sort((a,b)=>b-a);
   const carrs = [...new Set(todos.map(x=>x.carr))].map(c => ({ c, n:todos.filter(x=>x.carr===c && f(x,['carr'])).length })).sort((a,b)=>b.n-a.n);
   document.getElementById('hist-fbody').innerHTML =
-    `<div class="ind-fr"><b>Estado</b><div>${chip(!HST.est, "histSet('est','')", 'Todos', todos.filter(x=>f(x,['est'])).length)}${['Finalizado','Cancelado','Saiu da planilha'].map(e => chip(HST.est===e, `histSet('est',this.dataset.e)" data-e="${e}`, e, todos.filter(x=>x.estado===e && f(x,['est'])).length)).join('')}</div></div>
+    `<div class="ind-fr"><b>Estado</b><div>${chip(!HST.est, "histSet('est','')", 'Todos', todos.filter(x=>f(x,['est'])).length)}${['Finalizado','Cancelado','Saiu da planilha','Perda'].map(e => chip(HST.est===e, `histSet('est',this.dataset.e)" data-e="${e}`, e, todos.filter(x=>x.estado===e && f(x,['est'])).length)).join('')}</div></div>
      <div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="histSet('ano',this.value)"><option value="all">Todos os anos</option>${anos.map(a=>`<option${String(a)===String(HST.ano)?' selected':''}>${a}</option>`).join('')}</select></div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o => chip(HST.carrs.has(o.c), `histSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>`;
   document.getElementById('hist-limpar').style.visibility = (HST.est || HST.carrs.size || HST.ano!=='all' || HST.q) ? 'visible' : 'hidden';

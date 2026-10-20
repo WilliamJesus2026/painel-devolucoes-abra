@@ -177,7 +177,3 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 ## Importação: Andamento da planilha com aviso e escolha (20/10/2026)
 - A importação agora mostra no final quantos Andamentos foram atualizados pela planilha, quantos ficaram como no painel e quantos vieram sem texto; avisa se a coluna "Andamento" não for encontrada (aceita variações do nome).
 - Quando a planilha traz um Andamento diferente do painel mas o painel guarda o que a equipe digitou (planilha igual à última importação, ou primeira vez que a coluna chega), o painel pergunta se deve **atualizar com a planilha** (com a data de hoje) ou manter o painel, em vez de decidir sozinho.
-
-## Coleta realizada só na sua aba; Perdas finalizadas (20/10/2026)
-- **Coleta Reversa → Coleta realizada** passa a listar todas as coletas realizadas (aguardando CD e já recebidas no CD, com selo por linha). Elas deixam de aparecer em Todos, Atrasados, Em risco e No prazo. Internamente `REA` segue sendo "aguardando CD" (base do Controle e dos SLAs) e `REA_TAB` alimenta a aba.
-- **Perdas** contam como **Finalizado** no Histórico (a estatística "Perdas" continua, filtrando as que também estão na aba Perdas). A aba Perdas segue sendo alimentada por todas as linhas de Perdas da planilha, inclusive as que saem do arquivo.
