@@ -1731,7 +1731,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261016-121248';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261020-113849';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2214,7 +2214,7 @@ function detectAndNormalize(rows){
     solicitante: findCol(header,'SOLICITANTE'), casos: findCol(header,/^CASOS/), situacao: findCol(header,'SITUACAO'),
     nf: findCol(header,'NUMERO DA NOTA'), valor: findCol(header,'VALOR DA NOTA'), romaneio: findCol(header,'ROMANEIO_ENTRADA'),
     tiposaida: findCol(header,'TIPOSAIDA'), uf: findCol(header,'UF'), cidade: findCol(header,'CIDADE'),
-    usuario: findCol(header,'USUARIO'), descricao: findCol(header,'DESCRICAO'), classe: findCol(header,'CLASSE'), andamento: findCol(header,'EM ANDAMENTO','ANDAMENTO'),
+    usuario: findCol(header,'USUARIO'), descricao: findCol(header,'DESCRICAO'), classe: findCol(header,'CLASSE'), andamento: findCol(header,'EM ANDAMENTO','ANDAMENTO',/ANDAMENTO/),
     tagraw: findCol(header,'NUMERO'), transpnova: findCol(header,'TIPO_SAIDA_NOVA_SAIDA'),
     valortit: findCol(header,'VALOR_TITULO'), notapeca: findCol(header,'NUMERO_NOTA_PECA'),
     vnota: findCol(header,'VALOR_NOTA_SAIDA'), vunit: findCol(header,'VALOR UNITARIO'), qtdev: findCol(header,'QUANTIDADE DEVOLVIDA'),
@@ -2262,7 +2262,7 @@ function detectAndNormalize(rows){
       valor_titulo: parseMoney(cellAt(r, col.valortit)), nota_peca: cellAt(r, col.notapeca) || null,
       valor_nota_saida: parseMoney(cellAt(r, col.vnota)), valor_unitario: parseMoney(cellAt(r, col.vunit)), qtd_devolvida: parseMoney(cellAt(r, col.qtdev)) };
   });
-  return { tipo:tipoDetectado, rows:normalized };
+  return { tipo:tipoDetectado, rows:normalized, andCol:col.andamento };
 }
 
 function isoNow(){ return new Date().toISOString(); }
@@ -2352,10 +2352,19 @@ async function importFile(file){
       if (!ok){ say('Importação cancelada.'); return; }
     }
 
+    if (result.andCol === -1) toast('Atenção: não encontrei a coluna "Andamento" neste arquivo, então o Andamento dos casos NÃO será atualizado. Confira o nome da coluna (Andamento / Em andamento).', {type:'warn', ms:14000});
+    let forcarAnd = false;
+    { const conf = result.rows.filter(r => { const arq = r.andamento_arq; if (!arq) return false; const pv = DB_CASES[r.id] || {}, ant = pv.andamento_arq_ult; return pv.andamento !== arq && (arq === ant || (pv.andamento_origem === 'painel' && ant === undefined)); });
+      if (conf.length){
+        forcarAnd = await askConfirm('Andamento: planilha × painel',
+          `<p><b>${conf.length}</b> casos têm na planilha um Andamento diferente do que está no painel, mas o painel guarda o texto que a equipe digitou (a planilha não mudou desde a última importação, ou é a primeira vez que a coluna chega).</p>
+           <p style="margin-top:8px">Quer <b>atualizar esses casos com o Andamento da planilha</b>, com a data de hoje?</p>
+           <p style="margin-top:8px;color:var(--tx3)">“Cancelar” mantém o texto do painel. Nos dois casos a importação continua.</p>`, 'Atualizar com a planilha');
+      } }
     say(`Salvando ${result.rows.length} linhas...`);
     const importId = 'imp_' + Date.now();
     const now = isoNow();
-    const ops = [];
+    const ops = [], AND = { upd:0, prot:0, vazio:0 };
     result.rows.forEach(r => {
       const prev = DB_CASES[r.id];
       // data em que o caso entrou na situacao atual (so sabemos quando a situacao MUDA entre duas importacoes)
@@ -2375,11 +2384,13 @@ async function importFile(file){
           const pv = prev || {}, ant = pv.andamento_arq_ult;
           r.andamento_arq_ult = arq;   // ultimo valor que veio da planilha: so atualiza o painel quando a PLANILHA muda
           const painelProtegido = pv.andamento_origem === 'painel' && ant === undefined;   // primeira vez que a coluna chega: nao apaga o que a equipe ja digitou
-          if (arq !== ant && !painelProtegido && pv.andamento !== arq){
+          if (pv.andamento !== arq && ((arq !== ant && !painelProtegido) || forcarAnd)){
             r.andamento = arq; r.andamento_origem = 'planilha'; r.andamento_em = now; r.andamento_por = CUR_EMAIL || null;
             r.andamento_hist = [...(pv.andamento_hist||[]), { t:arq, em:now, por:CUR_EMAIL||null, o:'planilha' }].slice(-10);
-          } else if (pv.andamento === arq && !pv.andamento_por && CUR_EMAIL) r.andamento_por = CUR_EMAIL;
-        } }
+            AND.upd++;
+          } else if (pv.andamento === arq){ if (!pv.andamento_por && CUR_EMAIL) r.andamento_por = CUR_EMAIL; }
+          else AND.prot++;
+        } else AND.vazio++; }
       const ehFin = o => o.origem==='coleta' ? !!o.recebido_cd : sitClasseDe(o.tipo_devolucao||'')==='Finalizada';
       if (prev && !prev.finalizado_em && !ehFin(prev) && ehFin(r)){ const n = new Date(); r.finalizado_em = String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
       const prevHistory = prev && Array.isArray(prev.history) ? prev.history : [];
@@ -2387,6 +2398,7 @@ async function importFile(file){
       ops.push({ type:'set', merge:true, path:'cases/'+r.id, data:{ ...r, history, concluido_auto:false, concluidoEm:null, updatedAt: now, lastImportId: importId } });
     });
     toClose.forEach(id => ops.push({ type:'update', path:'cases/'+id, data:{ concluido_auto:true, concluidoEm: now, concluidoPorImport: importId } }));
+    const andTxt = ` · Andamento: ${AND.upd} atualizados pela planilha` + (AND.prot ? `, ${AND.prot} mantidos como no painel` : '') + (AND.vazio ? `, ${AND.vazio} sem texto na planilha` : '');
     await DB.batchCommit(ops);
 
     await DB.collection('imports').doc(importId).set({
@@ -2402,8 +2414,8 @@ async function importFile(file){
         .catch(err => console.warn('upload asset falhou', err));
     }
 
-    say(`Importação concluída: ${result.rows.length} linhas · ${novos} novas · ${toClose.length} saíram do controle${xtra}.`);
-    toast(`${tipoLabel}: ${result.rows.length} linhas lidas · ${novos} novas${reabertos?` · ${reabertos} reabertas`:''} · ${toClose.length} saíram do controle${xtra}`, {
+    say(`Importação concluída: ${result.rows.length} linhas · ${novos} novas · ${toClose.length} saíram do controle${xtra}${andTxt}.`);
+    toast(`${tipoLabel}: ${result.rows.length} linhas lidas · ${novos} novas${reabertos?` · ${reabertos} reabertas`:''} · ${toClose.length} saíram do controle${xtra}${andTxt}`, {
       type:'ok', ms: toClose.length ? 20000 : 6000,
       actionLabel: toClose.length ? 'Desfazer' : null,
       onAction: async () => {

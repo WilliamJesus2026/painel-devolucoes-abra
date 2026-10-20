@@ -173,3 +173,7 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 
 ## SLA da coleta no topo do Controle de Situações (16/10/2026)
 - Faixa "SLA da coleta — transportadora" logo abaixo do cabeçalho de indicadores: % fora do prazo da etapa 1 (criação → protocolo, máx. 3 dias) e da etapa 2 (protocolo → CD, 20 dias corridos), com atraso médio e quantos seguem em aberto, mais as duas médias. Os dois primeiros cartões filtram a lista (alertas `atrp` e `atrcd`) e há atalhos nas visões prontas. Acompanha os filtros do Controle (ano, mês, transportadora, canal...).
+
+## Importação: Andamento da planilha com aviso e escolha (20/10/2026)
+- A importação agora mostra no final quantos Andamentos foram atualizados pela planilha, quantos ficaram como no painel e quantos vieram sem texto; avisa se a coluna "Andamento" não for encontrada (aceita variações do nome).
+- Quando a planilha traz um Andamento diferente do painel mas o painel guarda o que a equipe digitou (planilha igual à última importação, ou primeira vez que a coluna chega), o painel pergunta se deve **atualizar com a planilha** (com a data de hoje) ou manter o painel, em vez de decidir sozinho.
