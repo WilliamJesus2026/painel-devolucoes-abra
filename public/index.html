@@ -1731,7 +1731,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261020-122947';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261020-164127';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2273,10 +2273,12 @@ let IMPORTING = false;
 // ---- planilha "Tarefas em aberto - recol cliente": enriquece os casos que ja existem (nao cria caso novo) ----
 const normH = rows => (rows[0]||[]).map(c => norm(String(c||'')).trim());
 const isTarefasCsv = rows => { const h = normH(rows); return h.some(x => x.startsWith('ultimo apo')) && h.includes('criada') && h.some(x => x.startsWith('media')) && !h.includes('situacao') && !h.includes('chave'); };
-const isTarefasXlsx = rows => { const h = normH(rows); return isTarefasCsv(rows) || (h.includes('chave') && h.includes('ultimo apontamento') && h.includes('tipo de saida mae')); };
+const isTarefasNova = rows => { const h = normH(rows); return h.includes('chave') && h.includes('ultimo apontamento') && h.includes('data') && h.includes('programacao') && h.includes('situacao') && !h.includes('tipo de saida mae') && !h.includes('numero da nota'); };
+const isTarefasXlsx = rows => { const h = normH(rows); return isTarefasCsv(rows) || isTarefasNova(rows) || (h.includes('chave') && h.includes('ultimo apontamento') && h.includes('tipo de saida mae')); };
 async function importTarefas(rows, file, say){
-  const csv = isTarefasCsv(rows), h = normH(rows), ix = n => h.indexOf(n), px = p => h.findIndex(x => x.startsWith(p));
-  const C = csv ? { chave:0, ult:px('ultimo apo'), media:px('media'), criada:ix('criada') }
+  const csv = isTarefasCsv(rows), nova = !csv && isTarefasNova(rows), h = normH(rows), ix = n => h.indexOf(n), px = p => h.findIndex(x => x.startsWith(p));
+  const C = nova ? { chave:ix('chave'), sit:ix('situacao'), ult:ix('ultimo apontamento'), criada:ix('data'), media:-1 }
+                : csv ? { chave:0, ult:px('ultimo apo'), media:px('media'), criada:ix('criada') }
                 : { chave:ix('chave'), sit:ix('situacao'), ult:ix('ultimo apontamento'), fin:ix('finalizados'), media:px('com o transp'), motivo:ix('motivo'), nfe:ix('nfe pendente'), unid:ix('unidade'), col:ix('n. coleta') };
   const toBR = v => { const d = parseBR(v); return d ? String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear() : null; };
   const val = (r, i) => (i>=0 && r[i]!=null) ? String(r[i]).trim() : '';
@@ -2288,14 +2290,15 @@ async function importTarefas(rows, file, say){
     achados++;
     const ult = toBR(r[C.ult]), cs = DB_CASES[id], data = { ultimo_apontamento_em: now };
     const m = parseFloat(String(val(r, C.media)).replace(',','.')); if (!isNaN(m)){ data.media_dias = m; comMedia++; }
+    else if (nova){ const dc = parseBR(val(r, C.criada)), du = parseBR(val(r, C.ult)); if (dc && du){ data.media_dias = Math.max(0, daysBetween(dc, du)); comMedia++; } }   // este formato nao traz a media: calculamos criacao -> ultimo apontamento
     if (ult){
       data.ultimo_apontamento = ult;
-      const encerrado = csv ? (sitClasseDe(cs.tipo_devolucao||'')==='Finalizada' || /^finalizad/.test(norm(cs.andamento||'')))
+      const encerrado = (csv || nova) ? (sitClasseDe(cs.tipo_devolucao||'')==='Finalizada' || /^finalizad/.test(norm(cs.andamento||'')))
                             : val(r, C.fin)==='1';
       if (encerrado){ if (!cs.finalizado_em) data.finalizado_em = ult; fin++; }
-      else if (csv || !C.sit || sitKey(val(r, C.sit)) === sitKey(cs.tipo_devolucao||'')){ data.sit_desde = ult; abertos++; }
+      else if (csv || nova || !C.sit || sitKey(val(r, C.sit)) === sitKey(cs.tipo_devolucao||'')){ data.sit_desde = ult; abertos++; }
     }
-    if (!csv){
+    if (!csv && !nova){
       if (val(r, C.col) && !cs.protocolo_hello) data.protocolo_hello = val(r, C.col);
       if (val(r, C.motivo)) data.motivo_planilha = val(r, C.motivo);
       if (val(r, C.nfe)) data.nfe_pendente = val(r, C.nfe);

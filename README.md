@@ -180,3 +180,6 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 
 ## Perdas finalizadas no Histórico (20/10/2026)
 - Perdas contam como **Finalizado** no Histórico (o cartão "Perdas" continua, filtrando as que também estão na aba Perdas). A aba Perdas segue alimentada por todas as linhas de Perdas da planilha. A mudança de "Coleta realizada" feita no mesmo dia foi desfeita a pedido (as abas de Coleta Reversa voltaram ao comportamento anterior).
+
+## Importação: terceiro formato da planilha de tarefas (20/10/2026)
+- O arquivo "Tarefa (data_hora).xlsx" com colunas **Chave | Situação | Entidade | Último Apontamento | Programação | Data | Hora** passa a ser aceito. Cruza por chave com os casos do painel, grava o último apontamento (e a data desde que o caso está na situação) e calcula a média de dias = Data (criação) → Último Apontamento, já que esse formato não traz a coluna de média. Antes o painel respondia "faltam CHAVE e/ou SITUACAO" porque só reconhecia o Controle de Situações e os dois formatos antigos de tarefas.
