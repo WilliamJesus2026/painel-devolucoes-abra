@@ -1731,7 +1731,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261020-113849';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261020-122947';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -3690,10 +3690,10 @@ function histEstado(x){
   const sit = x.tipo_devolucao || x.sit || '', k = sitKey(sit), an = norm(x.andamento||''), sm = x.status_manual;
   if (sm==='ab') return null;
   if (sm==='canc') return 'Cancelado';
-  if (sm==='fin') return x.grupo==='perdas' ? 'Perda' : 'Finalizado';
+  if (sm==='fin') return 'Finalizado';
   if (x.cancelada || /^cancelad/.test(k) || /(^|\s)cancelad/.test(an)) return 'Cancelado';
   if (x.__tipo==='coleta'){ if (x.recebidoCD) return 'Finalizado'; if (x.concluidoAuto) return 'Saiu da planilha'; return null; }
-  if (x.grupo==='perdas') return 'Perda';
+  if (x.grupo==='perdas') return 'Finalizado';   // perda = caso finalizado; os dados seguem alimentando a aba Perdas
   if (sitClasseDe(sit)==='Finalizada' || /^finalizad/.test(an)) return 'Finalizado';
   if (x.concluido_auto) return 'Saiu da planilha';
   return null;
@@ -3709,7 +3709,7 @@ function histItens(){
     const k = x.chave || x.id; if (vistos.has(k)) return; vistos.add(k);
     const d = parseBR(x.data_solicitacao) || parseBR(x.data_programacao);
     const fim = parseBR(x.finalizado_em) || parseBR(x.ultimo_apontamento) || (x.concluidoEm ? new Date(x.concluidoEm) : (x.concluido_em ? new Date(x.concluido_em) : null));
-    _hist.push({ ...x, estado:e, carr:indCarr(x), d, ano:d ? d.getFullYear() : null, fim: fim && !isNaN(fim) ? fim : null, media:(x.media_dias!=null && x.media_dias!=='' && !isNaN(+x.media_dias)) ? +x.media_dias : null });
+    _hist.push({ ...x, estado:e, ehPerda:x.grupo==='perdas', carr:indCarr(x), d, ano:d ? d.getFullYear() : null, fim: fim && !isNaN(fim) ? fim : null, media:(x.media_dias!=null && x.media_dias!=='' && !isNaN(+x.media_dias)) ? +x.media_dias : null });
   });
   return _hist;
 }
@@ -3735,14 +3735,14 @@ function renderHist(){
   const f = (x, ign) => { ign = ign||[]; return (ign.includes('est') || !HST.est || x.estado===HST.est) && (ign.includes('carr') || !HST.carrs.size || HST.carrs.has(x.carr)) &&
     (ign.includes('ano') || HST.ano==='all' || x.ano===+HST.ano) && (!HST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')+' '+(x.sit||'')+' '+(x.andamento||'')).includes(HST.q)); };
   const vis = todos.filter(x=>f(x));
-  document.getElementById('ph-hist').innerHTML = pwHero('Histórico', 'Banco de casos encerrados', 'Tudo que foi finalizado, cancelado, virou perda ou saiu da planilha fica guardado aqui, mesmo que suma das outras abas.',
-    [['Total guardado', todos.length, 'no banco de dados'], ['Finalizados', cont('Finalizado'), 'atendidos'], ['Cancelados', cont('Cancelado'), 'cancelados'], ['Saíram da planilha', cont('Saiu da planilha'), 'removidos do arquivo'], ['Perdas', cont('Perda'), 'também na aba Perdas']], '');
-  ligaStats('ph-hist', [['Histórico — todos', () => todos], ['Finalizados', () => todos.filter(x=>x.estado==='Finalizado')], ['Cancelados', () => todos.filter(x=>x.estado==='Cancelado')], ['Saíram da planilha', () => todos.filter(x=>x.estado==='Saiu da planilha')], ['Perdas', () => todos.filter(x=>x.estado==='Perda')]]);
+  document.getElementById('ph-hist').innerHTML = pwHero('Histórico', 'Banco de casos encerrados', 'Tudo que foi finalizado (inclusive as perdas), cancelado ou saiu da planilha fica guardado aqui, mesmo que suma das outras abas.',
+    [['Total guardado', todos.length, 'no banco de dados'], ['Finalizados', cont('Finalizado'), 'atendidos'], ['Cancelados', cont('Cancelado'), 'cancelados'], ['Saíram da planilha', cont('Saiu da planilha'), 'removidos do arquivo'], ['Perdas', todos.filter(x=>x.ehPerda).length, 'finalizadas · também na aba Perdas']], '');
+  ligaStats('ph-hist', [['Histórico — todos', () => todos], ['Finalizados', () => todos.filter(x=>x.estado==='Finalizado')], ['Cancelados', () => todos.filter(x=>x.estado==='Cancelado')], ['Saíram da planilha', () => todos.filter(x=>x.estado==='Saiu da planilha')], ['Perdas', () => todos.filter(x=>x.ehPerda)]]);
   const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
   const anos = [...new Set(todos.map(x=>x.ano).filter(Boolean))].sort((a,b)=>b-a);
   const carrs = [...new Set(todos.map(x=>x.carr))].map(c => ({ c, n:todos.filter(x=>x.carr===c && f(x,['carr'])).length })).sort((a,b)=>b.n-a.n);
   document.getElementById('hist-fbody').innerHTML =
-    `<div class="ind-fr"><b>Estado</b><div>${chip(!HST.est, "histSet('est','')", 'Todos', todos.filter(x=>f(x,['est'])).length)}${['Finalizado','Cancelado','Saiu da planilha','Perda'].map(e => chip(HST.est===e, `histSet('est',this.dataset.e)" data-e="${e}`, e, todos.filter(x=>x.estado===e && f(x,['est'])).length)).join('')}</div></div>
+    `<div class="ind-fr"><b>Estado</b><div>${chip(!HST.est, "histSet('est','')", 'Todos', todos.filter(x=>f(x,['est'])).length)}${['Finalizado','Cancelado','Saiu da planilha'].map(e => chip(HST.est===e, `histSet('est',this.dataset.e)" data-e="${e}`, e, todos.filter(x=>x.estado===e && f(x,['est'])).length)).join('')}</div></div>
      <div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="histSet('ano',this.value)"><option value="all">Todos os anos</option>${anos.map(a=>`<option${String(a)===String(HST.ano)?' selected':''}>${a}</option>`).join('')}</select></div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o => chip(HST.carrs.has(o.c), `histSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>`;
   document.getElementById('hist-limpar').style.visibility = (HST.est || HST.carrs.size || HST.ano!=='all' || HST.q) ? 'visible' : 'hidden';

@@ -177,3 +177,6 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 ## Importação: Andamento da planilha com aviso e escolha (20/10/2026)
 - A importação agora mostra no final quantos Andamentos foram atualizados pela planilha, quantos ficaram como no painel e quantos vieram sem texto; avisa se a coluna "Andamento" não for encontrada (aceita variações do nome).
 - Quando a planilha traz um Andamento diferente do painel mas o painel guarda o que a equipe digitou (planilha igual à última importação, ou primeira vez que a coluna chega), o painel pergunta se deve **atualizar com a planilha** (com a data de hoje) ou manter o painel, em vez de decidir sozinho.
+
+## Perdas finalizadas no Histórico (20/10/2026)
+- Perdas contam como **Finalizado** no Histórico (o cartão "Perdas" continua, filtrando as que também estão na aba Perdas). A aba Perdas segue alimentada por todas as linhas de Perdas da planilha. A mudança de "Coleta realizada" feita no mesmo dia foi desfeita a pedido (as abas de Coleta Reversa voltaram ao comportamento anterior).
