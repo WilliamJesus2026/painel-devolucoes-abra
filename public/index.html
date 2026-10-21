@@ -1144,7 +1144,7 @@ function rebuildData(){
     porChave.forEach(arr => { if (arr.length < 2) return;
       const ult = arr.filter(d => d.andamento_em).sort((p,q) => String(q.andamento_em).localeCompare(String(p.andamento_em)))[0];
       if (ult) arr.forEach(d => { if (d !== ult){ d.andamento = ult.andamento; d.andamento_em = ult.andamento_em; d.andamento_por = ult.andamento_por; d.andamento_origem = ult.andamento_origem; d.andamento_hist = ult.andamento_hist; } });
-      ['previsao_coleta','protocolo_hello','motivo_pend','status_manual','recebido_cd_em','recolhido_em'].forEach(k => { const v = arr.map(d => d[k]).find(Boolean); if (v) arr.forEach(d => { if (!d[k]) d[k] = v; }); }); });
+      ['previsao_coleta','protocolo_hello','motivo_pend','status_manual','recebido_cd_em','recolhido_em','protocolo_em','criada_em'].forEach(k => { const v = arr.map(d => d[k]).find(Boolean); if (v) arr.forEach(d => { if (!d[k]) d[k] = v; }); }); });
   }
   OCULTOS = [];
   const visivel = x => { if (statusIgnorado(x.status)){ OCULTOS.push(x); return false; } return true; };
@@ -1731,7 +1731,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261020-164127';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261021-155545';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2274,8 +2274,40 @@ let IMPORTING = false;
 const normH = rows => (rows[0]||[]).map(c => norm(String(c||'')).trim());
 const isTarefasCsv = rows => { const h = normH(rows); return h.some(x => x.startsWith('ultimo apo')) && h.includes('criada') && h.some(x => x.startsWith('media')) && !h.includes('situacao') && !h.includes('chave'); };
 const isTarefasNova = rows => { const h = normH(rows); return h.includes('chave') && h.includes('ultimo apontamento') && h.includes('data') && h.includes('programacao') && h.includes('situacao') && !h.includes('tipo de saida mae') && !h.includes('numero da nota'); };
-const isTarefasXlsx = rows => { const h = normH(rows); return isTarefasCsv(rows) || isTarefasNova(rows) || (h.includes('chave') && h.includes('ultimo apontamento') && h.includes('tipo de saida mae')); };
+const isApontamentos = rows => { const h = normH(rows); return h.includes('chave') && h.includes('apontamento') && h.includes('data') && h.includes('hora') && h.includes('recurso') && h.includes('observacao'); };
+const isTarefasXlsx = rows => { const h = normH(rows); return isTarefasCsv(rows) || isTarefasNova(rows) || isApontamentos(rows) || (h.includes('chave') && h.includes('ultimo apontamento') && h.includes('tipo de saida mae')); };
+// ---- planilha "Apontamentos de Tarefas": historico de movimentacoes; cada linha traz a situacao e a data em que a tarefa entrou nela ----
+const hmsMs = t => { const m = /(\d{1,2}):(\d{2})(?::(\d{2}))?/.exec(String(t||'')); return m ? ((+m[1])*3600 + (+m[2])*60 + (+(m[3]||0)))*1000 : 0; };
+async function importApontamentos(rows, file, say){
+  const h = normH(rows), ix = n => h.indexOf(n), C = { chave:ix('chave'), ap:ix('apontamento'), data:ix('data'), hora:ix('hora'), sit:h.lastIndexOf('situacao') };   // 'situacao' aparece duas vezes: vale a ultima (a que tem as situacoes do fluxo)
+  const val = (r, i) => (i>=0 && r[i]!=null) ? String(r[i]).trim() : '';
+  const por = new Map(); let linhas = 0;
+  rows.slice(1).forEach(r => { const ch = val(r, C.chave), d = parseBR(val(r, C.data)); if (!/^\d+$/.test(ch) || !d) return; linhas++;
+    if (!por.has(ch)) por.set(ch, []); por.get(ch).push({ d, t:d.getTime() + hmsMs(val(r, C.hora)), ap:+val(r, C.ap) || 0, sit:val(r, C.sit) }); });
+  const toBR = d => String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+  const now = isoNow(), ops = []; let achados = 0, fora = 0, comProt = 0, comRec = 0;
+  por.forEach((l, chave) => {
+    const ids = ['trat_','coleta_'].map(p => p+chave).filter(i => DB_CASES[i]);
+    if (!ids.length){ fora++; return; }
+    achados++;
+    l.sort((a,b) => (a.t - b.t) || (a.ap - b.ap));
+    const first = rx => l.find(a => rx.test(norm(a.sit))), cri = first(/^criada$/) || l[0], prot = first(/^protocolo de coleta/), rec = first(/^produto recolhido no cliente/), ult = l[l.length-1];
+    const data = { ultimo_apontamento: toBR(ult.d), ultimo_apontamento_em: now, criada_em: toBR(cri.d), media_dias: Math.max(0, daysBetween(cri.d, ult.d)), apont_sit: ult.sit };
+    if (prot){ data.protocolo_em = toBR(prot.d); comProt++; }
+    if (rec){ data.recolhido_em = toBR(rec.d); comRec++; }
+    let j = l.length-1; while (j>0 && norm(l[j-1].sit) === norm(ult.sit)) j--;   // inicio da situacao atual
+    ids.forEach(id => { const cs = DB_CASES[id], mesma = norm(cs.tipo_devolucao||'').slice(0,14) === norm(ult.sit).slice(0,14), d2 = { ...data };
+      if (mesma) d2.sit_desde = toBR(l[j].d);
+      if (sitClasseDe(ult.sit) === 'Finalizada' && !cs.finalizado_em) d2.finalizado_em = toBR(ult.d);
+      ops.push({ type:'set', merge:true, path:'cases/'+id, data:d2 }); });
+  });
+  say(`Salvando datas de ${achados} casos...`);
+  await DB.batchCommit(ops);
+  const msg = `Apontamentos: ${linhas} movimentações de ${por.size} tarefas lidas · ${achados} casos do painel atualizados (${comProt} com data de inclusão do protocolo, ${comRec} com data de recolhimento no cliente)` + (fora ? ` · ${fora} tarefas do arquivo não estão no painel (histórico antigo ou falta importar o Controle de Situações antes)` : '') + '.';
+  say(msg); toast(msg, {type:'ok', ms:12000});
+}
 async function importTarefas(rows, file, say){
+  if (isApontamentos(rows)) return importApontamentos(rows, file, say);
   const csv = isTarefasCsv(rows), nova = !csv && isTarefasNova(rows), h = normH(rows), ix = n => h.indexOf(n), px = p => h.findIndex(x => x.startsWith(p));
   const C = nova ? { chave:ix('chave'), sit:ix('situacao'), ult:ix('ultimo apontamento'), criada:ix('data'), media:-1 }
                 : csv ? { chave:0, ult:px('ultimo apo'), media:px('media'), criada:ix('criada') }
@@ -2949,11 +2981,11 @@ function colslaCalcula(){
   });
   const itens = [];
   porChave.forEach(({ x, rec, chegou }) => {
-    const prog = parseBR(x.data_programacao) || x.d; if (!prog) return;
-    const cri = x.d, rcl = parseBR(x.recolhido_em), exata = parseBR(x.recebido_cd_em);
-    const aprox = chegou && !exata ? (parseBR(x.finalizado_em) || parseBR(x.ultimo_apontamento)) : null, fim = chegou ? (exata || aprox) : null;
+    const prog = parseBR(x.protocolo_em) || parseBR(x.data_programacao) || x.d; if (!prog) return;   // protocolo_em = data da movimentacao 'Protocolo de Coleta' (planilha de apontamentos)
+    const cri = parseBR(x.criada_em) || x.d, rcl = parseBR(x.recolhido_em), exata = parseBR(x.recebido_cd_em);
+    const cand = chegou && !exata ? (parseBR(x.finalizado_em) || parseBR(x.ultimo_apontamento)) : null, aprox = (cand && (!rcl || cand > rcl)) ? cand : null, fim = chegou ? (exata || aprox) : null;   // so aceita a data aproximada se for depois da coleta (senao seria a propria coleta)
     const diasAberto = Math.max(0, daysBetween(prog, h0)), diasTotal = fim ? Math.max(0, daysBetween(prog, fim)) : null;
-    const it = { x, id:x.id, chave:x.chave, carr:x.carr, cri, prog, rcl, fim, fimTipo: exata ? 'exata' : (aprox ? 'aprox.' : null), chegou, estagio: chegou ? 'No CD' : ((rec || x.coletaRealizada) ? 'A caminho do CD' : 'Aguardando coleta'),
+    const it = { x, id:x.id, chave:x.chave, carr:x.carr, cri, prog, rcl, fim, fimTipo: exata ? 'exata' : (aprox ? 'aprox.' : null), chegou, estagio: chegou ? 'No CD' : ((rec || x.coletaRealizada || rcl) ? 'A caminho do CD' : 'Aguardando coleta'),
       diasAberto, diasTotal, diasCriProg: cri ? Math.max(0, daysBetween(cri, prog)) : null, diasProtColeta: rcl ? Math.max(0, daysBetween(prog, rcl)) : null, diasColetaCd: (rcl && fim) ? Math.max(0, daysBetween(rcl, fim)) : null,
       diasCriFim: (cri && fim) ? Math.max(0, daysBetween(cri, fim)) : null };
     it.atrasoProt = it.diasCriProg!=null ? Math.max(0, it.diasCriProg - CONFIG.PRAZO_PROTOCOLO_DIAS) : null;   // etapa 1
