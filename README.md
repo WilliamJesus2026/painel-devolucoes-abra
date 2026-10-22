@@ -223,3 +223,8 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - **Aba Tratativas por grupo refeita no mesmo layout do Controle de Situações:** indicadores no topo, barra de filtros (Período, Transportadora, Canal, **Grupo**, Situação, Responsável, Estado, Andamento, Motivo), cartões por canal, lista principal com as mesmas colunas (mais "Grupo"), bloco "Relacionamento — Criadas pela Dayane (Ana Motta)" e, por último, o bloco da Logística. Filtro estilo Excel em todas as tabelas.
 - **A Logística não entra nos números** da aba (nem no "Em aberto" nem no contador do menu): fica só no último quadro. A "Criada" aberta pela Dayane aparece no bloco da Ana Motta, igual ao Controle.
 - Importação continua por arquivo: Controle (depois de entregue), Tratativas Transportadora e Apontamentos alimentam os mesmos casos pela chave; cada aba mostra a sua visão com o mesmo padrão.
+
+## Uma tabela de casos por setor; sem o bloco "Criadas pela Dayane" (22/10/2026)
+- **Controle de Situações e Tratativas Transportadora** agora têm uma tabela de casos para cada setor, nesta ordem: **Relacionamento**, **Marketplace** e, por último, **Logística** (o SLA de Apontamento já era assim). Cada tabela tem as mesmas colunas, o filtro estilo Excel e o menu de colunas.
+- **Removido** o bloco/tópico "Criadas pela Dayane — Ana Motta atualizar" (e o botão de copiar lista). A "Criada" aberta pela Dayane fica **dentro da tabela do Relacionamento**, com o Responsável "Ana Motta" e a observação "criada por Dayane.Costa" embaixo.
+- Textos enxutos na aba Tratativas: o cartão "Em aberto" não tem mais a descrição "sem a Logística".
