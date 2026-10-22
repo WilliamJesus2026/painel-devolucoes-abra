@@ -344,9 +344,15 @@ body.loading .kpi-v,body.loading .kpi-s{color:transparent!important;background:l
 .pal-h{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);padding:8px 12px 4px}
 .pal-foot{padding:8px 14px;border-top:1px solid var(--bd);font-size:10.5px;color:var(--tx3)}
 :root{--st-ok:#16A34A;--st-warn:#D97706;--st-bad:#DC2626}
-.cf-row td{position:sticky;top:30px;z-index:1;background:var(--srf1);padding:3px 6px;border-bottom:1px solid var(--bd)}
-.cf-in{width:100%;min-width:70px;box-sizing:border-box;padding:3px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11px;font-weight:400}
-.cf-in:focus{outline:2px solid var(--acc);outline-offset:-1px}
+.cf-btn{margin-left:5px;padding:0 4px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--tx3);font-size:10px;line-height:15px;cursor:pointer;vertical-align:middle}
+.cf-btn:hover{background:var(--srf);border-color:var(--bd);color:var(--tx)}
+.cf-btn.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#cf-pop{position:fixed;z-index:200;width:260px;max-height:70vh;display:flex;flex-direction:column;background:var(--srf);border:1px solid var(--bd);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.35);padding:10px;font-size:12px;color:var(--tx)}
+#cf-pop input[type=search]{width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--srf1);color:var(--tx);margin-bottom:8px}
+#cf-pop .cf-lista{overflow:auto;flex:1;min-height:80px;max-height:300px;border:1px solid var(--bd);border-radius:6px;padding:4px 6px;background:var(--srf1)}
+#cf-pop label{display:flex;gap:6px;align-items:center;padding:3px 0;cursor:pointer}
+#cf-pop label span.n{margin-left:auto;color:var(--tx3);font-size:10.5px}
+#cf-pop .cf-bt{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
 .cf-info{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:12px;font-weight:700;color:var(--acc)}
 .cf-info[hidden]{display:none}
 .alerta-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px}
@@ -1753,7 +1759,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261022-114559';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261022-120723';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -1801,15 +1807,14 @@ function focusLogin(){
   if (i){ i.scrollIntoView({block:'center'}); i.focus(); }
 }
 
-// ================= FILTRO POR COLUNA EM TODAS AS TABELAS DE CASOS =================
-// Cada tabela de casos (tem coluna Cliente) ganha uma linha de filtros sob o cabecalho: digite em qualquer coluna (Mes, Transportadora,
-// Situacao, Classe, Tipo de saida, Cliente, NF, Responsavel, Andamento...). Varias palavras = todas precisam aparecer. Enquanto houver filtro,
-// o limite de linhas das listas e retirado para achar qualquer caso; os filtros sobrevivem aos recalculos da tela.
+// ================= FILTRO POR COLUNA EM TODAS AS TABELAS DE CASOS (igual ao Excel) =================
+// Cada tabela de casos (tem coluna Cliente) ganha uma setinha ▾ no cabecalho de cada coluna. Ela abre a lista de valores da coluna (com busca e contagem);
+// marque/desmarque e clique OK. As colunas se combinam. Enquanto houver filtro (ou a lista aberta), o limite de linhas das listas e retirado.
 let CF_ALL = false;
 const CAP = n => CF_ALL ? 5000 : n;
-const CF = {}, CF_FOCUS = { k:null, i:-1, p:0, t:0 };
-let _cfT = 0, _cfR = 0;
-const cfAtivo = () => Object.values(CF).some(o => Object.values(o).some(Boolean));
+const CF = {};   // chave da tabela -> { coluna: Set de valores permitidos }
+let _cfT = 0, CF_POP = null;
+const cfAtivo = () => Object.values(CF).some(o => Object.keys(o).length);
 const cfNorm = x => norm(x).replace(/\s+/g,' ').trim();
 function cfTexto(n){
   if (n.nodeType===3) return n.data;
@@ -1819,73 +1824,89 @@ function cfTexto(n){
   if (n.tagName==='BUTTON' || n.tagName==='DATALIST' || n.tagName==='STYLE') return '';
   return [...n.childNodes].map(cfTexto).join(' ');
 }
+const cfVal = c => cfNorm(c ? cfTexto(c) : '');
+const cfRotulo = c => (c ? cfTexto(c) : '').replace(/\s+/g,' ').trim();
+const cfDados = r => ![...r.cells].some(c => c.colSpan>1);   // avisos ("Mostrando 300 de...", "Nenhum caso") nao entram
 function cfKey(t){ const b = t.tBodies[0]; if (b && b.id) return b.id; const p = t.closest('.panel'), l = p ? [...p.querySelectorAll('.tbl-wrap table')] : []; return (p ? p.id : 'x') + '#' + l.indexOf(t); }
 function cfSetup(t){
   if (t.dataset.cf) return;
   const head = t.tHead; if (!head || head.rows.length!==1) return;
   const ths = [...head.rows[0].cells]; if (ths.length<5 || !ths.some(th => /^cliente/i.test(th.textContent.trim()))) return;
-  const key = cfKey(t); t.dataset.cf = '1'; t.dataset.cfk = key;
-  const tr = document.createElement('tr'); tr.className = 'cf-row';
-  tr.innerHTML = ths.map((th,i) => `<td><input class="cf-in" type="search" data-i="${i}" placeholder="filtrar…" title="Filtrar: ${escA(th.textContent.replace(/\s+/g,' ').trim())}" autocomplete="off"></td>`).join('');
-  head.appendChild(tr);
-  const salvo = CF[key] || {};
-  tr.querySelectorAll('input').forEach(inp => { inp.value = salvo[inp.dataset.i] || '';
-    if (CF_FOCUS.k===key && CF_FOCUS.i===+inp.dataset.i && Date.now()-CF_FOCUS.t < 1500){ inp.focus(); try { inp.setSelectionRange(CF_FOCUS.p, CF_FOCUS.p); } catch(e){} } });
+  t.dataset.cf = '1'; t.dataset.cfk = cfKey(t);
+  ths.forEach((th,i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'cf-btn'; b.dataset.i = i; b.title = 'Filtrar esta coluna'; b.textContent = '▾'; th.appendChild(b); });
   const wrap = t.closest('.tbl-wrap');
   if (wrap && !(wrap.previousElementSibling && wrap.previousElementSibling.classList.contains('cf-info'))){
     const info = document.createElement('div'); info.className = 'cf-info'; info.hidden = true;
-    info.innerHTML = '<span></span><button type="button" class="btn-exp" onclick="cfLimpa(this)">Limpar filtros das colunas</button>';
+    info.innerHTML = '<span></span><button type="button" class="btn-exp" onclick="cfLimpa(this)">Limpar todos os filtros da tabela</button>';
     wrap.parentNode.insertBefore(info, wrap);
   }
 }
-function cfDatalist(t){
-  const body = t.tBodies[0]; if (!body) return;
-  let cont = document.getElementById('cf-dl'); if (!cont){ cont = document.createElement('div'); cont.id = 'cf-dl'; cont.style.display = 'none'; document.body.appendChild(cont); }
-  t.tHead.querySelectorAll('.cf-in').forEach(inp => {
-    const i = +inp.dataset.i, vals = new Set();
-    for (const r of body.rows){ if (r.cells.length<=i || [...r.cells].some(c => c.colSpan>1)) continue; const v = cfTexto(r.cells[i]).replace(/\s+/g,' ').trim(); if (v && v.length<=40) vals.add(v); if (vals.size>40) break; }
-    const id = 'cfl-' + t.dataset.cfk.replace(/[^a-z0-9]/gi,'_') + '-' + i;
-    if (vals.size && vals.size<=40){
-      let dl = document.getElementById(id); const sig = [...vals].sort().join('|');
-      if (!dl){ dl = document.createElement('datalist'); dl.id = id; cont.appendChild(dl); }
-      if (dl.dataset.sig !== sig){ dl.dataset.sig = sig; dl.innerHTML = [...vals].sort().map(v => `<option value="${escA(v)}">`).join(''); }
-      inp.setAttribute('list', id);
-    } else inp.removeAttribute('list');
-  });
-}
 function cfApply(t){
   const body = t.tBodies[0]; if (!body) return;
-  const f = CF[t.dataset.cfk] || {}, act = Object.entries(f).filter(([,v]) => v).map(([i,v]) => [+i, cfNorm(v).split(' ')]);
+  const f = CF[t.dataset.cfk] || {}, act = Object.entries(f);
   let total = 0, shown = 0;
   [...body.rows].forEach(r => {
-    if ([...r.cells].some(c => c.colSpan>1)){ r.style.display = ''; return; }   // avisos ("Mostrando 300 de...", "Nenhum caso")
+    if (!cfDados(r)){ r.style.display = ''; return; }
     total++;
-    const ok = !act.length || act.every(([i,ws]) => { const tx = cfNorm(cfTexto(r.cells[i] || document.createTextNode(''))); return ws.every(w => tx.includes(w)); });
+    const ok = act.every(([i,sel]) => sel.has(cfVal(r.cells[+i])));
     r.style.display = ok ? '' : 'none'; if (ok) shown++;
   });
+  t.tHead.querySelectorAll('.cf-btn').forEach(b => b.classList.toggle('on', !!f[b.dataset.i]));
   const wrap = t.closest('.tbl-wrap'), info = wrap && wrap.previousElementSibling;
-  if (info && info.classList.contains('cf-info')){ info.hidden = !act.length; if (act.length) info.firstElementChild.textContent = `Filtro por coluna: ${shown} de ${total} linha${total!==1?'s':''}`; }
-  const h = t.tHead.rows[0].offsetHeight; if (h) t.tHead.querySelectorAll('.cf-row td').forEach(td => td.style.top = h + 'px');
+  if (info && info.classList.contains('cf-info')){ info.hidden = !act.length; if (act.length) info.firstElementChild.textContent = `Filtro em ${act.length} coluna${act.length>1?'s':''}: ${shown} de ${total} linha${total!==1?'s':''}`; }
 }
 function cfScan(){
   document.querySelectorAll('.tbl-wrap table').forEach(t => {
     const p = t.closest('.panel'); if (p && !p.classList.contains('on')) return;   // so a aba aberta
-    cfSetup(t); if (t.dataset.cf){ cfDatalist(t); cfApply(t); }
+    cfSetup(t); if (t.dataset.cf) cfApply(t);
   });
 }
-function cfSync(){ const on = cfAtivo(); if (on !== CF_ALL){ CF_ALL = on; const p = document.querySelector('.panel.on'); if (p){ try { renderPanel(p.id.replace(/^panel-/,'')); } catch(e){ console.warn(e); } } } }
+function cfRerender(){ const p = document.querySelector('.panel.on'); if (p){ try { renderPanel(p.id.replace(/^panel-/,'')); } catch(e){ console.warn(e); } } }
+function cfSync(){ const on = cfAtivo() || !!CF_POP; if (on !== CF_ALL){ CF_ALL = on; cfRerender(); } }
 function cfLimpa(btn){
   const info = btn.closest('.cf-info'), t = info.nextElementSibling && info.nextElementSibling.querySelector('table'); if (!t) return;
-  CF[t.dataset.cfk] = {}; t.tHead.querySelectorAll('.cf-in').forEach(i => i.value = ''); cfApply(t); cfSync();
+  delete CF[t.dataset.cfk]; cfApply(t); cfSync();
 }
-document.addEventListener('input', e => {
-  const inp = e.target.closest && e.target.closest('.cf-in'); if (!inp) return;
-  const t = inp.closest('table'), key = t.dataset.cfk; (CF[key] = CF[key] || {})[inp.dataset.i] = inp.value;
-  CF_FOCUS.k = key; CF_FOCUS.i = +inp.dataset.i; CF_FOCUS.p = inp.selectionStart == null ? inp.value.length : inp.selectionStart; CF_FOCUS.t = Date.now();
-  cfApply(t); clearTimeout(_cfR); _cfR = setTimeout(cfSync, 250);
+function cfFecha(){ if (CF_POP){ CF_POP.remove(); CF_POP = null; } cfSync(); }
+function cfAbrir(btn){
+  const key = btn.closest('table').dataset.cfk, i = +btn.dataset.i;
+  if (CF_POP){ CF_POP.remove(); CF_POP = null; }
+  if (!CF_ALL){ CF_ALL = true; cfRerender(); setTimeout(() => cfPopup(key, i), 150); } else cfPopup(key, i);   // carrega todas as linhas para a lista ter todos os valores
+}
+function cfPopup(key, i){
+  const t = document.querySelector('table[data-cfk="' + key + '"]'); if (!t) return;
+  const body = t.tBodies[0], f = CF[key] || {}, outros = Object.entries(f).filter(([k]) => +k !== i), cont = new Map();
+  [...body.rows].forEach(r => { if (!cfDados(r) || !outros.every(([k,sel]) => sel.has(cfVal(r.cells[+k])))) return;
+    const v = cfVal(r.cells[i]), o = cont.get(v) || { v, label: cfRotulo(r.cells[i]) || '(Em branco)', n:0 }; o.n++; cont.set(v, o); });
+  const itens = [...cont.values()].sort((a,b) => a.label.localeCompare(b.label, 'pt-BR', { numeric:true, sensitivity:'base' }));
+  const atual = f[i], marc = new Set(atual ? itens.filter(o => atual.has(o.v)).map(o => o.v) : itens.map(o => o.v));
+  const th = t.tHead.rows[0].cells[i], nome = th.textContent.replace('▾','').replace(/\s+/g,' ').trim();
+  const pop = document.createElement('div'); pop.id = 'cf-pop';
+  pop.innerHTML = `<div style="font-weight:700;margin-bottom:6px">Filtrar: ${esc(nome)}</div><input type="search" placeholder="Pesquisar…" autocomplete="off"><div class="cf-lista"></div>
+    <div class="cf-bt"><button type="button" class="btn-exp" data-a="limpar">Limpar filtro</button><button type="button" class="btn-exp" data-a="cancelar">Cancelar</button><button type="button" class="btn-exp" data-a="ok" style="background:var(--acc);color:#fff">OK</button></div>`;
+  const lista = pop.querySelector('.cf-lista'), busca = pop.querySelector('input'); let termo = '';
+  const vis = () => itens.filter(o => !termo || cfNorm(o.label).includes(termo));
+  const desenha = () => { const v = vis(), todos = v.length && v.every(o => marc.has(o.v));
+    lista.innerHTML = `<label><input type="checkbox" data-t="1"${todos ? ' checked' : ''}> <b>(Selecionar tudo${termo ? ' da pesquisa' : ''})</b><span class="n">${v.length}</span></label>` + v.slice(0,300).map(o => `<label><input type="checkbox" data-v="${escA(o.v)}"${marc.has(o.v) ? ' checked' : ''}> ${esc(o.label)}<span class="n">${o.n}</span></label>`).join('') + (v.length>300 ? `<div style="color:var(--tx3);padding:4px 0">…e mais ${v.length-300}. Refine a pesquisa.</div>` : '') + (!v.length ? '<div style="color:var(--tx3);padding:4px 0">Nada encontrado.</div>' : ''); };
+  desenha();
+  busca.addEventListener('input', () => { termo = cfNorm(busca.value); marc.clear(); (termo ? vis() : itens).forEach(o => marc.add(o.v)); desenha(); });   // como no Excel: a pesquisa marca so os resultados
+  lista.addEventListener('change', e => { const c = e.target; if (c.dataset.t){ vis().forEach(o => c.checked ? marc.add(o.v) : marc.delete(o.v)); } else if (c.dataset.v !== undefined){ c.checked ? marc.add(c.dataset.v) : marc.delete(c.dataset.v); } desenha(); });
+  pop.addEventListener('click', e => { const a = e.target.dataset && e.target.dataset.a; if (!a) return;
+    if (a==='ok'){ const todos = itens.every(o => marc.has(o.v)); CF[key] = CF[key] || {}; if (todos) delete CF[key][i]; else CF[key][i] = new Set(marc); if (!Object.keys(CF[key]).length) delete CF[key]; cfApply(t); }
+    else if (a==='limpar'){ if (CF[key]){ delete CF[key][i]; if (!Object.keys(CF[key]).length) delete CF[key]; } cfApply(t); }
+    cfFecha(); });
+  document.body.appendChild(pop); CF_POP = pop;
+  const r = th.getBoundingClientRect(); pop.style.left = Math.max(8, Math.min(r.left, innerWidth - 276)) + 'px'; pop.style.top = Math.max(8, Math.min(r.bottom + 4, innerHeight - pop.offsetHeight - 8)) + 'px';
+  busca.focus();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('.cf-btn');
+  if (b){ e.stopImmediatePropagation(); e.preventDefault(); cfAbrir(b); return; }   // nao ordena a coluna ao abrir o filtro
+  if (CF_POP && !e.target.closest('#cf-pop')) cfFecha();
 });
+document.addEventListener('keydown', e => { if (e.key==='Escape' && CF_POP) cfFecha(); });
 new MutationObserver(recs => {
-  if (recs.every(r => { const n = r.target.nodeType===1 ? r.target : r.target.parentElement; return !n || !n.closest || n.closest('#cf-dl, .cf-row, .cf-info, #toasts'); })) return;
+  if (recs.every(r => { const n = r.target.nodeType===1 ? r.target : r.target.parentElement; return !n || !n.closest || n.closest('#cf-pop, .cf-info, #toasts, .cf-btn'); })) return;
   clearTimeout(_cfT); _cfT = setTimeout(cfScan, 30);
 }).observe(document.body, { childList:true, subtree:true });
 setTimeout(cfScan, 600);
@@ -2021,10 +2042,18 @@ function andData(c){
   const h = new Date(), dias = Math.round((new Date(h.getFullYear(),h.getMonth(),h.getDate()) - new Date(d.getFullYear(),d.getMonth(),d.getDate()))/86400000);
   return { txt:d.toLocaleDateString('pt-BR'), dias };
 }
+// Andamento "programado/programação": a data de programacao da planilha e o dia em que a proxima situacao deve andar (ex.: o fiscal emite a NF-e)
+const andProgramado = x => /programad|programac/.test(norm(x.andamento||''));
+function progTag(c){
+  if (!c.andamento || !andProgramado(c)) return '';
+  const d = parseBR(c.data_programacao); if (!d) return '<br><small style="color:var(--st-warn)">programado: sem data de programação na planilha</small>';
+  const h = new Date(), dias = Math.round((d - new Date(h.getFullYear(), h.getMonth(), h.getDate()))/86400000);
+  return `<br><small style="color:${dias<0 ? 'var(--st-bad)' : 'var(--st-ok)'}" title="Data de programação da planilha: dia em que a próxima situação deve andar">📅 programado p/ ${fmtD2(d)} · ${dias<0 ? 'venceu há '+(-dias)+' d' : dias===0 ? 'é hoje' : 'em '+dias+' d'}</small>`;
+}
 function andCell(c, lista){
   const dt = andData(c), cor = !dt ? 'var(--tx3)' : dt.dias<=0 ? '#16A34A' : dt.dias<=2 ? '#D97706' : '#DC2626';
   const rel = !dt ? 'sem atualização' : dt.dias<=0 ? 'hoje' : dt.dias===1 ? 'ontem' : 'há '+dt.dias+' dias';
-  return `<td onclick="event.stopPropagation()">${c.id ? `<input class="and-in" list="${lista||'and-list'}" data-id="${esc(c.id)}" value="${esc(c.andamento||'')}" placeholder="Informar andamento…" onchange="andSet(this.dataset.id,this.value)" style="min-width:170px;padding:4px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}</td>
+  return `<td onclick="event.stopPropagation()">${c.id ? `<input class="and-in" list="${lista||'and-list'}" data-id="${esc(c.id)}" value="${esc(c.andamento||'')}" placeholder="Informar andamento…" onchange="andSet(this.dataset.id,this.value)" style="min-width:170px;padding:4px 8px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}${progTag(c)}</td>
     <td onclick="event.stopPropagation()" style="white-space:nowrap" title="Data em que a equipe atualizou o andamento (não é data do Innovaro)"><b style="color:${cor}">${dt ? dt.txt : '—'}</b><br><small style="color:var(--tx3)">${rel}${c.andamento_por ? ' · por '+esc(nomeDe(c.andamento_por)) : ''}</small>${c.id && c.andamento ? ` <button type="button" class="and-hoje" title="Confirmar que revisei hoje (mantém o texto, só atualiza a data)" onclick="andHoje('${esc(c.id)}')">✓ hoje</button>` : ''}</td>`;
 }
 // ---- gravacao unica: o que a equipe escreve vale para o caso em TODAS as abas e para as copias dele (mesma chave) ----
@@ -2044,6 +2073,7 @@ const MOT_LEGADO = { 'Aguardando cliente':'Cliente', 'Aguardando transportadora'
 function motivoAuto(x){
   const an = norm(x.andamento||''), sit = sitKey(x.sit || x.tipo_devolucao || '');
   if (an){
+    { const dpg = /programad|programac/.test(an) ? parseBR(x.data_programacao) : null, h0 = new Date(); if (dpg && dpg >= new Date(h0.getFullYear(), h0.getMonth(), h0.getDate())) return 'No prazo'; }   // programado e a data ainda nao chegou: esta no prazo
     if (!/\b(nao|fora)\b.*\bprazo\b/.test(an) && /\bno prazo\b/.test(an)) return 'No prazo';
     if (/esquec/.test(an)) return 'Esquecimento de apontamento';
     if (/innovaro|sistema/.test(an)) return 'Problema no Innovaro';
@@ -2423,7 +2453,7 @@ async function importApontamentos(rows, file, say){
 async function importTarefas(rows, file, say){
   if (isApontamentos(rows)) return importApontamentos(rows, file, say);
   const csv = isTarefasCsv(rows), nova = !csv && isTarefasNova(rows), h = normH(rows), ix = n => h.indexOf(n), px = p => h.findIndex(x => x.startsWith(p));
-  const C = nova ? { chave:ix('chave'), sit:ix('situacao'), ult:ix('ultimo apontamento'), criada:ix('data'), media:-1 }
+  const C = nova ? { chave:ix('chave'), sit:ix('situacao'), ult:ix('ultimo apontamento'), criada:ix('data'), prog:ix('programacao'), media:-1 }
                 : csv ? { chave:0, ult:px('ultimo apo'), media:px('media'), criada:ix('criada') }
                 : { chave:ix('chave'), sit:ix('situacao'), ult:ix('ultimo apontamento'), fin:ix('finalizados'), media:px('com o transp'), motivo:ix('motivo'), nfe:ix('nfe pendente'), unid:ix('unidade'), col:ix('n. coleta') };
   const toBR = v => { const d = parseBR(v); return d ? String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear() : null; };
@@ -2437,6 +2467,7 @@ async function importTarefas(rows, file, say){
     const ult = toBR(r[C.ult]), cs = DB_CASES[id], data = { ultimo_apontamento_em: now };
     const m = parseFloat(String(val(r, C.media)).replace(',','.')); if (!isNaN(m)){ data.media_dias = m; comMedia++; }
     else if (nova){ const dc = parseBR(val(r, C.criada)), du = parseBR(val(r, C.ult)); if (dc && du){ data.media_dias = Math.max(0, daysBetween(dc, du)); comMedia++; } }   // este formato nao traz a media: calculamos criacao -> ultimo apontamento
+    if (nova){ const pg = parseBR(val(r, C.prog)); if (pg && pg.getFullYear() >= 2000) data.data_programacao = toBR(val(r, C.prog)); }   // programacao do arquivo: dia em que a proxima situacao deve andar
     if (ult){
       data.ultimo_apontamento = ult;
       const encerrado = (csv || nova) ? (sitClasseDe(cs.tipo_devolucao||'')==='Finalizada' || /^finalizad/.test(norm(cs.andamento||'')))
@@ -3537,12 +3568,13 @@ function slaCalcula(){
     if (regra && regra.n){
       const d1 = parseBR(x.data_solicitacao), d2 = parseBR(x.data_programacao), d3 = parseBR(x.sit_desde);
       const dP = regra.key==='protocolo_de_coleta' ? parseBR(x.protocolo_em) : null;   // data real de inclusao do protocolo (planilha de apontamentos)
-      const base = regra.base==='data' ? (d1||d2) : regra.base==='prog' ? (d2||d3||d1) : (dP||d3||d2||d1);
+      const prg = andProgramado(x) ? d2 : null;   // programado: o prazo conta da data de programacao
+      const base = prg || (regra.base==='data' ? (d1||d2) : regra.base==='prog' ? (d2||d3||d1) : (dP||d3||d2||d1));
       // atualizar o andamento (ou marcar "✓ hoje") reinicia o prazo: o caso sai de atrasado e so volta se passar o prazo de novo sem nova atualizacao
       const au = x.andamento_em ? new Date(x.andamento_em) : null, dAu = (au && !isNaN(au)) ? new Date(au.getFullYear(), au.getMonth(), au.getDate()) : null;
-      atualizado = !!(dAu && base && dAu >= base);
+      atualizado = !!(!prg && dAu && base && dAu >= base);
       const baseEf = atualizado ? dAu : base;
-      estimado = regra.base==='sit' && !d3 && !dP && !atualizado;
+      estimado = regra.base==='sit' && !d3 && !dP && !prg && !atualizado;
       if (baseEf){
         venceu = slaSomaDias(baseEf, regra.n, regra.util);
         if (hoje > venceu){ estado = 'ATRASO'; atraso = slaDifDias(venceu, hoje, regra.util); }
@@ -3630,7 +3662,7 @@ function renderSla(){
       <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">${tituloLista} — ${c}</b><span class="fcnt">${lista.length} caso${lista.length!==1?'s':''}</span><button class="btn-exp" onclick="slaExport('${c}')">Exportar CSV</button></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Venceu em</th><th>Atraso</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>Motivo da pendência</th></tr></thead><tbody id="tb-sla-${key}">${lista.slice(0,CAP(300)).map(linha).join('') + (lista.length>CAP(300) ? `<tr><td colspan="12" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '') || '<tr><td colspan="12" style="color:var(--tx3);padding:14px">Nenhum caso neste filtro.</td></tr>'}</tbody></table></div></div>`;
   };
-  const ativoSla = document.activeElement && document.activeElement.closest && document.activeElement.closest('#sla-secoes') && !document.activeElement.classList.contains('cf-in');
+  const ativoSla = document.activeElement && document.activeElement.closest && document.activeElement.closest('#sla-secoes') && !document.activeElement.classList.contains('cf-btn');
   if (!ativoSla) document.getElementById('sla-secoes').innerHTML = canaisVis.length ? canaisVis.map(secao).join('') : '<p style="color:var(--tx3);padding:14px">Seu acesso não inclui nenhum setor do SLA de Apontamento.</p>';
 
   // mapeamento de classes
