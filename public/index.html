@@ -846,36 +846,19 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 
     <div class="panel" id="panel-trat">
       <div class="pworld" id="ph-trat"></div>
-      <div class="ind-f">
-        <div class="ind-fr"><b>Grupo</b><div style="flex:1"><div class="minitabs" id="minitabs-trat">
-        <button class="minitab on" onclick="setGrupoTab('')">Todos <span class="mt-n" id="mtn-todos"></span></button>
-        <button class="minitab" onclick="setGrupoTab('recolhimento')">Recolhimento <span class="mt-n" id="mtn-recolhimento"></span></button>
-        <button class="minitab" onclick="setGrupoTab('barrar')">Barrar <span class="mt-n" id="mtn-barrar"></span></button>
-        <button class="minitab" onclick="setGrupoTab('financeiro')">Financeiro <span class="mt-n" id="mtn-financeiro"></span></button>
-        <button class="minitab" onclick="setGrupoTab('nova')">Novo / a triar <span class="mt-n" id="mtn-nova"></span></button>
-        <button class="minitab" onclick="setGrupoTab('outros')">Outros <span class="mt-n" id="mtn-outros"></span></button>
-      </div></div></div>
-        <div class="ind-fr"><b>Transportadora</b><div style="flex:1"><div class="chips" id="chips-trat">
-        <span class="chip ch-all on" onclick="setGrupo('')">Todos</span>
-        <span class="chip ch-i9" onclick="setGrupo('I9')">I9 <span id="ct-i9"></span></span>
-        <span class="chip ch-fedex" onclick="setGrupo('FEDEX')">Fedex <span id="ct-fedex"></span></span>
-        <span class="chip ch-movvi" onclick="setGrupo('MOVVI')">Movvi <span id="ct-movvi"></span></span>
-        <span class="chip ch-total" onclick="setGrupo('TOTAL')">Total <span id="ct-total"></span></span>
-        <span class="chip ch-hello" onclick="setGrupo('HELLO')">Hello <span id="ct-hello"></span></span>
-        <span class="chip ch-generoso" onclick="setGrupo('GENEROSO')">Generoso <span id="ct-generoso"></span></span>
-        <span class="chip ch-outros" onclick="setGrupo('OUTROS')">Outros <span id="ct-outros"></span></span>
-      </div></div></div>
-        <div class="ind-fr"><b>Filtros</b><div style="flex:1"><div class="filterbar">
-        <select class="fsel" id="ftrat-tipo" onchange="renderTrat()"><option value="">Todos os tipos</option></select>
-        <select class="fsel" id="ftrat-uf" onchange="renderTrat()"><option value="">Todas as UFs</option></select>
-        <input class="fsearch" id="ftrat-q" placeholder="Buscar cliente, CPF ou NF..." oninput="debTrat()">
-        <span class="fcnt" id="cnt-trat"></span><button class="btn-exp" onclick="exportTratativas()"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 13 7 8"/><line x1="12" y1="3" x2="12" y2="13"/></svg> Exportar CSV</button>
-      </div></div></div>
-      </div>
-      <div class="tbl-wrap"><div class="tbl-scroll">
-        <table><thead><tr><th>Grupo</th><th>Cliente</th><th>CPF</th><th>NF</th><th>Tipo</th><th>UF</th><th>Situação</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Descrição</th><th>Motivo da pendência</th></tr></thead>
-        <tbody id="tb-trat"></tbody></table>
-      </div></div>
+      <div class="ind-f"><div class="ind-f-top"><input id="trat-q" placeholder="Buscar cliente, NF ou CPF..." oninput="tfSet('q',this.value)"><button class="btn-exp" type="button" id="trat-limpar" onclick="tfSet('limpar')">Limpar filtros</button></div><div id="trat-fbody"></div><div class="ind-f-res" id="trat-fres"></div></div>
+      <div class="ind-h">Por canal de atendimento</div><div class="ind-sub" id="trat-canais-sub"></div>
+      <div class="ind-cars" id="trat-canais" style="margin-bottom:6px"></div>
+      <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="trat-lista-t">Casos em aberto — andamento e motivo da pendência</b><span class="fcnt" id="cnt-trat"></span><button class="btn-exp" onclick="exportTratativas()">Exportar CSV</button></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-trat-main"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Grupo</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th></tr></thead><tbody id="tb-trat"></tbody></table></div></div>
+      <div class="ind-h" style="margin-top:22px">Relacionamento — “Criadas” pela Dayane, para a Ana Motta atualizar</div>
+      <div class="ind-sub" id="trat-ana-sub"></div>
+      <div class="filters" style="margin:6px 0 8px"><span class="fcnt" id="cnt-trat-ana"></span><button class="btn-exp" onclick="anaCopiar()" title="Copia uma mensagem pronta com os casos para enviar à Ana">📋 Copiar lista para encaminhar</button><button class="btn-exp" onclick="anaExport()">Exportar CSV</button></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Cliente</th><th>NF</th><th>Criada em</th><th>Dias</th><th>Criada por</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th></tr></thead><tbody id="tb-trat-ana"></tbody></table></div></div>
+      <div class="ind-h" style="margin-top:22px">Logística — situações que só a Dayane atualiza</div>
+      <div class="ind-sub" id="trat-log-sub"></div>
+      <div class="filters" style="margin:6px 0 8px"><span class="fcnt" id="cnt-trat-log"></span><button class="btn-exp" onclick="tfLogExport()">Exportar CSV</button></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Tipo de saída</th><th>Aberto em</th><th title="Dias desde a última movimentação no Innovaro (ou da programação)">Dias parado</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th></tr></thead><tbody id="tb-trat-log"></tbody></table></div></div>
     </div>
 
     <!-- PERDAS (mundo proprio) -->
@@ -1450,60 +1433,119 @@ function renderCol(tipo){
   }
 }
 
-function setGrupo(g){
-  GRP=g;
-  document.querySelectorAll('.chips .chip').forEach(c=>c.classList.remove('on'));
-  if (typeof event!=='undefined' && event.target) event.target.classList.add('on');
-  renderTrat();
-}
-let GRUPOTAB = '';
-function setGrupoTab(g){
-  GRUPOTAB = g;
-  document.querySelectorAll('#minitabs-trat .minitab').forEach(b=>b.classList.remove('on'));
-  if (typeof event!=='undefined' && event.target) event.target.closest('.minitab').classList.add('on');
-  renderTrat();
-}
 const OUTROS_TAGS=['TOTAL EXPRESS','TRANSLOVATO','FEDEX OR','SHOPEE','ROTEIRO','OUTROS'];
+// ---- Tratativas Transportadora: mesmo layout do Controle de Situacoes (filtros, canais, lista, bloco da Ana e, por ultimo, a Logistica) ----
+const TF = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', grupo:'', sit:'', usuario:'', and:'' };
+const TF_GRUPOS = [['recolhimento','Recolhimento'], ['barrar','Barrar'], ['financeiro','Financeiro'], ['nova','Novo / a triar'], ['outros','Outros']];
+const tfGrupoNome = g => (TF_GRUPOS.find(a => a[0]===(g||'outros'))||[])[1] || g || 'Outros';
+let TF_LISTA = [], TF_LOG_LISTA = [];
+function tfSet(k, v){
+  const tg = (set,x) => set.has(x) ? set.delete(x) : set.add(x);
+  if (k==='ano'){ TF.ano = +v; TF.meses.clear(); }
+  else if (k==='mes') tg(TF.meses, +v);
+  else if (k==='carr') tg(TF.carrs, v);
+  else if (k==='motivo'){ tg(TF.motivos, v); if (TF.motivos.size) TF.status = 'aberto'; }
+  else if (k==='status'){ TF.status = v; if (v==='fin') TF.motivos.clear(); }
+  else if (k==='canal') TF.canal = (TF.canal===v ? '' : v);
+  else if (k==='grupo') TF.grupo = (TF.grupo===v ? '' : v);
+  else if (k==='sit') TF.sit = (TF.sit===v ? '' : v);
+  else if (k==='usuario') TF.usuario = v;
+  else if (k==='and') TF.and = (TF.and===v ? '' : v);
+  else if (k==='q'){ TF.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderTrat, 180); return; }
+  else if (k==='limpar'){ TF.meses.clear(); TF.carrs.clear(); TF.motivos.clear(); TF.status='aberto'; TF.q=''; TF.canal=''; TF.grupo=''; TF.sit=''; TF.usuario=''; TF.and=''; const i = document.getElementById('trat-q'); if (i) i.value=''; }
+  renderTrat();
+}
+function setGrupoTab(g){ TF.grupo = g || ''; renderTrat(); }   // atalho usado pelo Dashboard
 function renderTrat(){
-  let data=[...TRAT];
-  if(GRP==='OUTROS') data=data.filter(t=>OUTROS_TAGS.includes(t.tag));
-  else if(GRP==='I9') data=data.filter(t=>t.tag==='HELLO');
-  else if(GRP)       data=data.filter(t=>t.tag===GRP);
-  if(GRUPOTAB) data=data.filter(t=>(t.grupo||'outros')===GRUPOTAB);
-  const tipo=(document.getElementById('ftrat-tipo')?.value||'');
-  const uf  =(document.getElementById('ftrat-uf')?.value||'');
-  const q   =(document.getElementById('ftrat-q')?.value||'').toLowerCase();
-  if(tipo) data=data.filter(t=>t.tipo_devolucao===tipo);
-  if(uf)   data=data.filter(t=>t.uf===uf);
-  if(q)    data=data.filter(t=>(t.cliente||'').toLowerCase().includes(q)||(t.nf||'').includes(q)||(t.cpf||'').includes(q));
-  const cnt=document.getElementById('cnt-trat');
-  if(cnt) cnt.textContent=data.length+' resultado'+(data.length!==1?'s':'');
+  if (!document.getElementById('panel-trat')) return;
+  indCalcula();
+  const todos = IND_ALL.filter(x => x.__tipo==='tratativa');
+  const anos = [...new Set(todos.map(x=>x.ano))].sort((a,b)=>b-a);
+  if (!anos.includes(TF.ano)) TF.ano = anos[0] || new Date().getFullYear();
+  const doAnoAll = todos.filter(x => x.ano===TF.ano);
+  const doAno = TF.canal==='Logística' ? doAnoAll : doAnoAll.filter(x => x.canal!=='Logística');   // a Logistica tem bloco proprio, no fim: nao entra nos nossos numeros
+  const f = (x, ign) => { ign = ign||[];
+    return (ign.includes('mes') || !TF.meses.size || TF.meses.has(x.mes)) &&
+      (ign.includes('carr') || !TF.carrs.size || TF.carrs.has(x.carr)) &&
+      (ign.includes('status') || !TF.status || (TF.status==='fin') === x.fin) &&
+      (ign.includes('motivo') || !TF.motivos.size || (!x.fin && TF.motivos.has(x.motivo))) &&
+      (ign.includes('canal') || !TF.canal || x.canal===TF.canal) &&
+      (ign.includes('grupo') || !TF.grupo || (x.grupo||'outros')===TF.grupo) &&
+      (ign.includes('and') || !TF.and || x.andRaw===TF.and) &&
+      (ign.includes('sit') || !TF.sit || sitKey(x.sit)===TF.sit) &&
+      (ign.includes('resp') || !TF.usuario || respDe(x)===TF.usuario) &&
+      (!TF.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(TF.q)); };
+  const base = doAno.filter(x => f(x,['status','motivo'])), A = indAgg(base);
+  document.getElementById('bdg-trat').textContent = todos.filter(x => !x.fin && x.canal!=='Logística').length;
 
-  // Contadores das mini-abas (respeitam o filtro de transportadora/carrier, mas nao o proprio grupo)
-  let baseGrupo=[...TRAT];
-  if(GRP==='OUTROS') baseGrupo=baseGrupo.filter(t=>OUTROS_TAGS.includes(t.tag));
-  else if(GRP==='I9') baseGrupo=baseGrupo.filter(t=>t.tag==='HELLO');
-  else if(GRP)       baseGrupo=baseGrupo.filter(t=>t.tag===GRP);
-  const mtn=document.getElementById('mtn-todos'); if(mtn) mtn.textContent=baseGrupo.length;
-  ['recolhimento','barrar','financeiro','naoretornou','nova','outros'].forEach(g=>{
-    const el=document.getElementById('mtn-'+g);
-    if(el) el.textContent=baseGrupo.filter(t=>(t.grupo||'outros')===g).length;
-  });
+  // ---- barra de filtros (igual a do Controle) ----
+  const chip = (on, onclick, label, n, ab) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${onclick}">${label}${n==null?'':`<small>${n}${ab!=null?` · ${ab} em aberto`:''}</small>`}</button>`;
+  const cnt = (arr, ign) => [arr.filter(x=>f(x,ign.concat(['status','motivo']))).length, arr.filter(x=>!x.fin && f(x,ign.concat(['status','motivo']))).length];
+  const mesCont = m => cnt(doAno.filter(x=>x.mes===m),['mes']);
+  const meses12 = Array.from({length:12},(_,i)=>i+1).filter(m => doAno.some(x=>x.mes===m));
+  const carrs = [...new Set(doAno.map(x=>x.carr))].map(c => { const k = cnt(doAno.filter(x=>x.carr===c),['carr']); return { c, n:k[0], ab:k[1] }; }).sort((a,b)=>b.n-a.n);
+  const grupoChips = TF_GRUPOS.map(([g,n]) => { const k = cnt(doAno.filter(x=>(x.grupo||'outros')===g),['grupo']); return chip(TF.grupo===g, `tfSet('grupo','${g}')`, n, k[0], k[1]); }).join('');
+  const nFin = doAno.filter(x=>x.fin && f(x,['status','motivo'])).length, nAb = doAno.filter(x=>!x.fin && f(x,['status','motivo'])).length;
+  const motCont = m => doAno.filter(x=>!x.fin && x.motivo===m && f(x,['status','motivo'])).length;
+  const motList = [...doAno.filter(x=>!x.fin).reduce((mp,x)=>mp.set(x.motivo,(mp.get(x.motivo)||0)+1), new Map()).entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  const andList = [...doAno.filter(x=>!x.fin).reduce((mp,x)=>mp.set(x.andRaw,(mp.get(x.andRaw)||0)+1), new Map()).entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  const andChips = andList.map(m => chip(TF.and===m, `tfSet('and',this.dataset.m)" data-m="${escA(m)}`, esc(m), doAno.filter(x=>!x.fin && x.andRaw===m && f(x,['status','motivo','and'])).length)).join('');
+  const sitList = [...new Set(doAno.map(x=>x.sit))].map(n => ({ n, k:sitKey(n), c:cnt(doAno.filter(x=>sitKey(x.sit)===sitKey(n)),['sit']) })).sort((a,b)=>b.c[1]-a.c[1] || b.c[0]-a.c[0]);
+  const sitChips = sitList.map(o => chip(TF.sit===o.k, `tfSet('sit',this.dataset.k)" data-k="${o.k}`, esc(o.n), o.c[0], o.c[1])).join('');
+  const usrs = [...new Set(doAno.filter(x=>!x.fin).map(respDe))].sort(), usrSel = `<select class="fsel" onchange="tfSet('usuario',this.value)"><option value="">Todos</option>${usrs.map(u=>`<option${TF.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select>`;
+  const temFiltro = TF.meses.size || TF.carrs.size || TF.motivos.size || TF.status!=='aberto' || TF.q || TF.canal || TF.grupo || TF.sit || TF.usuario || TF.and;
+  document.getElementById('trat-fbody').innerHTML =
+    `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="tfSet('ano',this.value)">${anos.map(a=>`<option${a===TF.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${meses12.map(m=>chip(TF.meses.has(m), `tfSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join('')}</div></div>
+     <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(TF.carrs.has(o.c), `tfSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join('')}</div></div>
+     <div class="ind-fr"><b>Canal</b><div>${chip(!TF.canal, "tfSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Relacionamento','Marketplace','Logística'].map(c => { const k = cnt((c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c),['canal']); return chip(TF.canal===c, `tfSet('canal','${c}')`, c, k[0], k[1]); }).join('')}</div></div>
+     <div class="ind-fr"><b>Grupo</b><div>${grupoChips}</div></div>
+     <div class="ind-fr"><b>Situação do caso</b><div>${sitChips}</div></div>
+     <div class="ind-fr"><b>Responsável</b><div>${usrSel}</div></div>
+     <div class="ind-fr"><b>Estado</b><div>${chip(!TF.status, "tfSet('status','')", 'Todas', nFin+nAb)}${chip(TF.status==='fin', "tfSet('status','fin')", 'Atendidas', nFin)}${chip(TF.status==='aberto', "tfSet('status','aberto')", 'Em aberto', nAb)}</div></div>
+     ${TF.status==='fin' ? '' : `<div class="ind-fr"><b>Andamento</b><div>${andChips}</div></div><div class="ind-fr"><b>Motivo da pendência</b><div>${motList.map(m=>chip(TF.motivos.has(m), `tfSet('motivo',this.dataset.m)" data-m="${escA(m)}`, esc(m), motCont(m))).join('')}</div></div>`}`;
+  document.getElementById('trat-fres').innerHTML = `${TF.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${TF.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + ' · <i>a Logística (Dayane) fica no último quadro e não entra nestes números</i>';
+  document.getElementById('trat-limpar').style.visibility = temFiltro ? 'visible' : 'hidden';
 
-  const rows=data.slice(0,CAP(COL_MAX)).map(t=>`<tr class="clickable" onclick="openDetailIdx(${regDetail({...t,__tipo:'tratativa'})})">
-    <td>${grpBdg(t.tag)}</td>
-    <td class="td-nome">${esc(t.cliente)}</td>
-    <td style="font-family:monospace;font-size:11px;color:var(--tx3)">${esc(t.cpf)}</td>
-    <td class="td-nf">${esc(t.nf||'—')}</td>
-    <td><span class="bdg b-dk" style="font-size:10px">${esc(t.tipo_devolucao||'—')}</span></td>
-    <td><span class="bdg b-acc">${esc(t.uf||'—')}</span></td>
-    <td style="font-size:11px;color:var(--tx2)">${esc(t.status||'—')}</td>
-    <td style="font-size:11px;color:var(--tx3)">${esc(t.usuario||'—')}</td>
-    ${andCell(t,'and-list-ctl')}
-    <td class="td-desc" title="${esc(t.descricao)}">${esc(t.descricao)}</td>
-    ${motivoCell(t)}
-  </tr>`).join('');
-  document.getElementById('tb-trat').innerHTML=rows+capNota(data.length);
+  // ---- indicadores ----
+  const logAb = doAnoAll.filter(x => x.canal==='Logística' && !x.fin), anaAb = doAnoAll.filter(x => x.criadaLog && !x.fin);
+  document.getElementById('ph-trat').innerHTML = pwHero('Tratativas Transportadora', 'Tratativas por grupo', 'Mesmo layout do Controle de Situações, com as tratativas da transportadora. Os casos da Logística (Dayane) ficam no último quadro e não entram nos números do Relacionamento.',
+    [['Em aberto', A.aberto, 'sem a Logística'], ['Tarefas no período', A.total, `criadas em ${TF.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['Logística em aberto', logAb.length, 'acompanhado pela Dayane · fora dos números'], ['Criadas pela Dayane', anaAb.length, 'a Ana Motta atualiza']]);
+  ligaStats('ph-trat', [['Em aberto (sem a Logística)', () => base.filter(x=>!x.fin)], ['Tarefas do período', () => base], ['Atendidas', () => base.filter(x=>x.fin)], ['Logística em aberto', () => logAb], ['Criadas pela Dayane (Ana Motta)', () => anaAb]]);
+
+  document.getElementById('trat-canais-sub').textContent = 'Relacionamento e Marketplace atendem o cliente separadamente; a Logística é definida pela situação (Cobrança Realizada, Recol P/ Acomp…, Mercadoria Danificada, Barrar Entrega, Recol Acomp C/ Reenvio) e atualizada pela Dayane. Clique para filtrar.';
+  document.getElementById('trat-canais').innerHTML = ['Relacionamento','Marketplace','Logística'].map(c => {
+    const arr = (c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c && f(x,['canal','status','motivo'])), a = indAgg(arr), tcl = a.taxa==null ? '' : a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
+    const us = [...arr.reduce((m,x)=>m.set(respDe(x),(m.get(respDe(x))||0)+1), new Map()).entries()].sort((p,q)=>q[1]-p[1]).slice(0,4).map(([u,n])=>esc(u)+' ('+n+')').join(' · ');
+    return `<div class="ind-c${TF.canal===c?' on':''}" onclick="tfSet('canal','${c}')"><h4>${c}</h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div><div style="font-size:10.5px;color:var(--tx3);margin-top:8px">${us||'sem casos'}</div></div>`; }).join('');
+
+  // ---- lista principal ----
+  const lista = doAno.filter(x => f(x)).sort((a,b)=>(b.dias||0)-(a.dias||0)); TF_LISTA = lista;
+  document.getElementById('trat-lista-t').textContent = TF.status==='fin' ? 'Tarefas atendidas' : !TF.status ? 'Todas as tarefas (atendidas e em aberto)' : 'Casos em aberto — andamento e motivo da pendência';
+  document.getElementById('cnt-trat').textContent = lista.length + (TF.status==='fin' ? ' atendidas' : !TF.status ? ' tarefas' : ' em aberto');
+  const ativo = id => document.activeElement && document.activeElement.closest && document.activeElement.closest('#'+id);
+  if (!ativo('tb-trat')) document.getElementById('tb-trat').innerHTML = lista.slice(0,CAP(300)).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td>${MESES[x.mes-1]}/${x.ano}</td><td>${esc(x.carr)}</td><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td style="font-size:11px">${esc(tfGrupoNome(x.grupo))}</td><td style="font-size:11px">${esc(x.classe||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>${diasTd(x.dias, x.fin)}${diasTd(x.media, x.fin)}<td style="font-size:11px">${respCel(x)} ${canalBdg(x.canal)}</td>${andCell(x,'and-list-ctl')}${motivoCell(x)}${statusCell(x)}</tr>`).join('')
+    + (lista.length>CAP(300) ? `<tr class="cap"><td colspan="15" style="color:var(--tx3);padding:10px">Mostrando ${CAP(300)} de ${lista.length}. Refine pelos filtros.</td></tr>` : '')
+    || '<tr><td colspan="15" style="color:var(--tx3);padding:14px">Nenhum caso com esses filtros.</td></tr>';
+
+  // ---- Relacionamento: criadas pela Dayane, para a Ana Motta ----
+  const ana = anaAb.filter(x => f(x,['status','motivo','canal','sit','resp','grupo'])).sort(anaOrdena);
+  document.getElementById('trat-ana-sub').textContent = `A situação “Criada” aberta pela Logística é para a ${RESP_CRIADA_LOG} seguir: entra no Relacionamento, com ela como responsável. ` + (ana.length ? `${ana.length} em aberto · ${ana.filter(x=>!x.andamento).length} sem andamento.` : 'Nenhum caso em aberto nessa situação.');
+  document.getElementById('cnt-trat-ana').textContent = ana.length + ' em aberto';
+  if (!ativo('tb-trat-ana')) document.getElementById('tb-trat-ana').innerHTML = ana.slice(0,300).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td>${diasTd(x.dias, false)}<td style="font-size:11px">${esc(x.usuario||'—')}</td><td style="font-size:11px">${esc(RESP_CRIADA_LOG)} ${canalBdg('Relacionamento')}</td>${andCell(x,'and-list-ctl')}${motivoCell(x)}${statusCell(x)}</tr>`).join('')
+    || '<tr><td colspan="10" style="color:var(--tx3);padding:14px">Nenhuma tarefa “Criada” aberta pela Logística.</td></tr>';
+
+  // ---- Logistica (por ultimo) ----
+  const hoje = new Date(), log = logAb.filter(x => f(x,['status','motivo','canal','sit','resp','grupo']));
+  log.forEach(x => { const b = parseBR(x.sit_desde) || parseBR(x.ultimo_apontamento) || parseBR(x.data_programacao) || x.d; x.parado = b ? Math.max(0, daysBetween(b, hoje)) : null; });
+  log.sort((a,b) => (b.parado||0)-(a.parado||0)); TF_LOG_LISTA = log;
+  document.getElementById('trat-log-sub').textContent = `Responsável: ${LOG_RESP} (Logística) — Cobrança Realizada, Recol P/ Acomp, Mercadoria Danificada, Barrar Entrega e Recol Acomp C/ Reenvio. ` + (log.length ? `${log.length} em aberto · ${log.filter(x=>!x.andamento).length} sem andamento · maior tempo parado: ${log.reduce((m,x)=>Math.max(m,x.parado||0),0)} dias.` : 'Nenhum caso em aberto nessas situações.');
+  document.getElementById('cnt-trat-log').textContent = log.length + ' em aberto';
+  if (!ativo('tb-trat-log')) document.getElementById('tb-trat-log').innerHTML = log.slice(0,CAP(300)).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td><td>${x.parado==null?'—':x.parado+' d'}</td><td style="font-size:11px">${respCel(x)} ${canalBdg('Logística')}</td>${andCell(x,'and-list-log')}${motivoCell(x)}${statusCell(x)}</tr>`).join('')
+    || '<tr><td colspan="11" style="color:var(--tx3);padding:14px">Nenhum caso em aberto nas situações da Logística.</td></tr>';
+}
+function tfLogExport(){
+  if (!TF_LOG_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
+  exportCSV(TF_LOG_LISTA.map(x => ({ 'Situação':x.sit, 'Cliente':x.cliente||'', 'CPF':x.cpf||'', 'NF':x.nf||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Aberto em':x.data_solicitacao||'', 'Dias parado':x.parado==null?'':x.parado, 'Responsável':respDe(x), 'Usuário na planilha':x.usuario||'', 'Andamento':x.andamento||'', 'Andamento atualizado em':andData(x)?andData(x).txt:'', 'Motivo da pendência':x.motivo||'' })), 'tratativas_logistica');
 }
 
 // ================= PAINEL DE DETALHE (slide-over, clicavel a partir de qualquer linha) =================
@@ -1717,6 +1759,7 @@ function renderAll(){
   { const anos = [...new Set(IND_ALL.map(x=>x.ano))].sort((a,b)=>b-a); if (!anos.includes(IND.ano)) IND.ano = anos[0] || new Date().getFullYear(); }
   const set = (i, v) => { const e = document.getElementById(i); if (e) e.textContent = v; };
   set('bdg-ind', IND_ALL.filter(x=>!x.fin).length);
+  set('bdg-trat', IND_ALL.filter(x => x.__tipo==='tratativa' && !x.fin && x.canal!=='Logística').length);
   set('bdg-sla', SLA_ITENS.filter(x => x.regra && x.regra.n && x.estado==='ATRASO' && podeSecaoSla(x.canal)).length);
   set('bdg-hist', histItens().length);
   set('bdg-media', IND_ALL.filter(x=>x.media!=null).length);
@@ -1759,7 +1802,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261022-120723';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261022-144855';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2239,25 +2282,9 @@ function exportColetas(tipo) {
   }));
   exportCSV(exp, nome);
 }
-function exportTratativas() {
-  const hoje = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
-  let dados = [...TRAT];
-  if(GRP==='OUTROS') dados=dados.filter(t=>OUTROS_TAGS.includes(t.tag));
-  else if(GRP==='I9') dados=dados.filter(t=>t.tag==='HELLO');
-  else if(GRP)       dados=dados.filter(t=>t.tag===GRP);
-  const tipo=(document.getElementById('ftrat-tipo')?.value||'');
-  const uf  =(document.getElementById('ftrat-uf')?.value||'');
-  const q   =(document.getElementById('ftrat-q')?.value||'').toLowerCase();
-  if(tipo) dados=dados.filter(t=>t.tipo_devolucao===tipo);
-  if(uf)   dados=dados.filter(t=>t.uf===uf);
-  if(q)    dados=dados.filter(t=>(t.cliente||'').toLowerCase().includes(q)||(t.nf||'').includes(q)||(t.cpf||'').includes(q));
-
-  const exp = dados.map(t=>({
-    'Grupo': t.tag||'', 'Cliente': t.cliente||'', 'CPF': t.cpf||'', 'NF': t.nf||'',
-    'Tipo Devolução': t.tipo_devolucao||'', 'Transportadora': t.transportadora||'', 'UF': t.uf||'',
-    'Cidade': t.cidade||'', 'Situação': t.status||'', 'Responsável': t.usuario||'', 'Descrição': t.descricao||'',
-  }));
-  exportCSV(exp, `Tratativas_${GRP||'Todas'}_${hoje}.csv`);
+function exportTratativas(){
+  if (!TF_LISTA.length){ toast('Nada para exportar.', {type:'warn'}); return; }
+  exportCSV(TF_LISTA.map(x => ({ 'Mês':MESES[x.mes-1]+'/'+x.ano, 'Transportadora':x.carr, 'Situação':x.sit, 'Grupo':tfGrupoNome(x.grupo), 'Classe':x.classe||'', 'Tipo de saída':x.transportadoraOriginal||x.transportadora||'', 'Cliente':x.cliente||'', 'CPF':x.cpf||'', 'NF':x.nf||'', 'Dias':x.dias==null?'':x.dias, 'Média (dias)':x.media==null?'':x.media, 'Responsável':respDe(x), 'Usuário na planilha':(x.resp && x.resp!==x.usuario) ? (x.usuario||'') : '', 'Canal':x.canal, 'Andamento':x.andamento||'', 'Andamento atualizado em':andData(x)?andData(x).txt:'', 'Motivo da pendência':x.motivo||'' })), 'tratativas_transportadora');
 }
 
 // ================= IMPORTACAO ROBUSTA (header-name based, CSV ; ou XLSX) -> grava no Firestore =================
@@ -3026,13 +3053,7 @@ function renderDashBlocks(){
     options:{ ...base, indexAxis:'y', onClick:(e,els)=>{ if (els.length){ ir('trat'); setGrupoTab(grupos[els[0].index][0]); } }, plugins:{ legend:{ display:false } },
       scales:{ x:{ beginAtZero:true, ticks:{color:tick, precision:0}, grid:{color:grid} }, y:{ ticks:{color:tick}, grid:{display:false} } } } });
 }
-function renderTratHero(){
-  const el = document.getElementById('ph-trat'); if (!el) return;
-  const c = g => TRAT.filter(t => (t.grupo||'outros')===g).length;
-  el.innerHTML = pwHero('Tratativas Transportadora', 'Tratativas por grupo', 'Casos acompanhados por tipo, sem prazo fixo · clique num grupo para filtrar.',
-    [['Em aberto', TRAT.length, 'todas as tratativas', "setGrupoTab('')"], ['Recolhimento', c('recolhimento'), '', "setGrupoTab('recolhimento')"], ['Barrar', c('barrar'), '', "setGrupoTab('barrar')"],
-     ['Financeiro', c('financeiro'), '', "setGrupoTab('financeiro')"], ['Novo / a triar', c('nova'), '', "setGrupoTab('nova')"]]);
-}
+function renderTratHero(){}   // a aba Tratativas pinta o proprio hero em renderTrat()
 
 // ================= CONTROLE DE SITUACOES (indicadores por transportadora) =================
 const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente','Fiscal'];
@@ -4191,7 +4212,7 @@ let MKT_USERS = (() => { try { const a = JSON.parse(localStorage.getItem('mkt_us
 let LOG_USERS = (() => { try { const a = JSON.parse(localStorage.getItem('log_users')||'null'); if (Array.isArray(a)) return a; } catch(e){} return ['dayane.costa']; })();   // usuarios da Logistica
 function canalOf(u){ const n = norm(u||'').trim(); return LOG_USERS.some(k => n.startsWith(k)) ? 'Logística' : MKT_USERS.some(k => n.startsWith(k)) ? 'Marketplace' : 'Relacionamento'; }
 // roteamento automatico por situacao: estas situacoes sao da Logistica (quem acompanha: Dayane.Costa), qualquer que seja o usuario que aparece na planilha
-const LOG_SITS = new Set(['recol_p_acomp_cliente','recol_p_acomp_transportad','recol_p_acomp_transp_2','recol_acomp_c_reenvio_tra','cobranca_realizada','cobranca_realizada_2','mercadoria_danificada','mercadoria_danificada_2']);
+const LOG_SITS = new Set(['recol_p_acomp_cliente','recol_p_acomp_transportad','recol_p_acomp_transp_2','recol_acomp_c_reenvio_tra','cobranca_realizada','cobranca_realizada_2','mercadoria_danificada','mercadoria_danificada_2','barrar_entrega_seguir_rec','barrar_entrega_e_seguir_recolhimento']);
 const LOG_RESP = 'Dayane.Costa';
 const ehLogSit = x => LOG_SITS.has(sitKey(x.sit || x.tipo_devolucao || ''));
 // situacao "Criada" aberta pela Logistica (ex.: Dayane.Costa) e para a Ana Motta seguir: entra no Relacionamento, nao na Logistica
