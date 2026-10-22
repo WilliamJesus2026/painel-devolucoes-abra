@@ -1088,12 +1088,13 @@ function deriveColetaLive(c){
   const an = normStatus(c.andamento || '');
   const aCD   = /\b(recebid\w*|chegou|entregue)\b.*\bcd\b/.test(an) && !/\b(nao|sem|aguardando)\b/.test(an);
   const aCanc = /\bcancelad/.test(an) && !/\bnao\b/.test(an);
+  const aFin = /^finalizad/.test(an);   // Andamento 'Finalizada': caso encerrado
   const aReal = !aCanc && (/\b(coleta|coletad\w*)\s+(foi\s+)?(realizad\w*|feita|efetuad\w*)\b/.test(an) || /\baguardando\b.*\bcd\b/.test(an)) && !/\b(nao|sem)\b.*\brealizad/.test(an);
-  const col_manual = aCD || aCanc || aReal;
+  const col_manual = aCD || aCanc || aReal || aFin;
   const sm = c.status_manual;   // status escolhido na mao: Finalizado / Cancelado / Em aberto (reabre)
   const cancelada = sm==='ab' ? false : (sm==='canc' || bucket==='cancelada' || aCanc);
-  const coletaRealizada = sm==='ab' ? false : (sm==='fin' || bucket==='realizada' || !!c.recebido_cd || aReal || aCD);
-  const recebidoCD = sm==='ab' ? false : (sm==='fin' || !!c.recebido_cd || aCD);
+  const coletaRealizada = sm==='ab' ? false : (sm==='fin' || bucket==='realizada' || !!c.recebido_cd || aReal || aCD || aFin);
+  const recebidoCD = sm==='ab' ? false : (sm==='fin' || !!c.recebido_cd || aCD || aFin);
   const concluidoAuto = sm==='ab' ? false : !!c.concluido_auto; // sumiu do arquivo mais recente => nao esta mais em aberto no Innovaro
   const realizada = recebidoCD || concluidoAuto; // concluido = recebido no CD ou saiu do arquivo
 
@@ -1746,7 +1747,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261022-091336';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261022-091545';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;

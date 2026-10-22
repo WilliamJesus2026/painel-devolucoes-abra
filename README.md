@@ -198,3 +198,8 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Situação **Criada** cujo usuário é da Logística (Dayane.Costa) deixa de contar como Logística: entra no **Relacionamento**, com **Ana Motta** como responsável (`RESP_CRIADA_LOG`) e a observação "criada por Dayane.Costa". Vale para Controle, SLA de Apontamento e exportações; as outras situações da Dayane (ex.: NF-e Emitida) continuam na Logística.
 - Controle de Situações ganhou o bloco **"Criadas pela Logística — para a Ana Motta atualizar"** (Andamento, Motivo e Status editáveis ali mesmo), com **📋 Copiar lista para encaminhar** (mensagem pronta com cliente, NF, data e andamento) e **Exportar CSV**. A seção Relacionamento do SLA tem o mesmo atalho de cópia.
 - A Ana precisa de login no painel (Administração → Novo usuário) para que o andamento fique registrado com o nome dela.
+
+## Histórico reúne todos os encerrados (22/10/2026)
+- **Perdas** ficam na aba Perdas e também no **Histórico como Finalizado** (perda é caso encerrado: a mercadoria foi perdida). Vale para perda pela situação (Perdas Cliente…) e pelo Andamento ("perdas…"), em tratativas e em linhas de coleta.
+- Histórico = Finalizados (inclui perdas, Prod Recolhido no Cliente, recebidos no CD, Andamento "Finalizada") + Cancelados + "Saiu da planilha", pesquisável por cliente, NF, CPF, situação e andamento.
+- Correção: linha de **coleta** com Andamento "Finalizada" agora também sai das listas abertas e vai ao Histórico (antes só tratativas faziam isso).
