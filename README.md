@@ -203,3 +203,8 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - **Perdas** ficam na aba Perdas e também no **Histórico como Finalizado** (perda é caso encerrado: a mercadoria foi perdida). Vale para perda pela situação (Perdas Cliente…) e pelo Andamento ("perdas…"), em tratativas e em linhas de coleta.
 - Histórico = Finalizados (inclui perdas, Prod Recolhido no Cliente, recebidos no CD, Andamento "Finalizada") + Cancelados + "Saiu da planilha", pesquisável por cliente, NF, CPF, situação e andamento.
 - Correção: linha de **coleta** com Andamento "Finalizada" agora também sai das listas abertas e vai ao Histórico (antes só tratativas faziam isso).
+
+## Setores separados pela situação; Logística por último (22/10/2026)
+- **Logística = situações que só a Dayane atualiza**: Cobrança Realizada (e 2), Recol P/ Acomp Cliente, Recol P/ Acomp Transportadora (e 2), Mercadoria Danificada (e 2) e Recol Acomp C/ Reenvio. Essas linhas vão sempre para a Logística, **com a Dayane como responsável** ("aberta por <usuário da planilha>" aparece embaixo), seja qual for o usuário da planilha.
+- **Todas as outras situações são do Relacionamento** (ou Marketplace, pela lista de usuários). Usuário da Logística em situação do Relacionamento (ex.: NF-e Emitida) conta como Relacionamento; "Criada" aberta pela Dayane vai para a **Ana Motta**.
+- **Ordem na tela:** no SLA de Apontamento: Relacionamento → Marketplace → Logística. No Controle de Situações: indicadores do Relacionamento/Marketplace, bloco "Criadas pela Dayane (Ana Motta)" e, por último, o bloco da Logística. O filtro/cartão Logística mostra os números dessas situações.
