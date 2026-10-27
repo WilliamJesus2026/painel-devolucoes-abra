@@ -228,3 +228,7 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - **Controle de Situações e Tratativas Transportadora** agora têm uma tabela de casos para cada setor, nesta ordem: **Relacionamento**, **Marketplace** e, por último, **Logística** (o SLA de Apontamento já era assim). Cada tabela tem as mesmas colunas, o filtro estilo Excel e o menu de colunas.
 - **Removido** o bloco/tópico "Criadas pela Dayane — Ana Motta atualizar" (e o botão de copiar lista). A "Criada" aberta pela Dayane fica **dentro da tabela do Relacionamento**, com o Responsável "Ana Motta" e a observação "criada por Dayane.Costa" embaixo.
 - Textos enxutos na aba Tratativas: o cartão "Em aberto" não tem mais a descrição "sem a Logística".
+
+## Barrar Entrega Seguir Rec volta ao Relacionamento (27/10/2026)
+- **"Barrar Entrega Seguir Rec" é atualizada pelo Relacionamento** (muda o apontamento para o próximo passo); só os passos seguintes (Recol P/ Acomp Transportadora, Recol Acomp C/ Reenvio…) são da Logística. Corrige a regra de 22/10, que a tinha colocado na Logística (a lista `LOG_SITS` não tem mais as situações Barrar).
+- **SLA de Apontamento:** na coluna "Próximos passos" cada passo que pertence à Logística aparece marcado com "(Logística)".

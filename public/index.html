@@ -1793,7 +1793,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261022-153808';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261027-165326';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -3639,7 +3639,7 @@ function renderSla(){
     let trs = regras.map(r => {
       const its = baseTab.filter(x => sitKey(x.sit)===r.key), a = its.filter(x=>x.estado==='ATRASO'), h = its.filter(x=>x.estado==='HOJE').length, mx = a.reduce((m,x)=>Math.max(m,x.atraso),0), un = r.util?'d.u.':'d';
       return `<tr class="clickable${SLA_ST.sit===r.key?' sel':''}${r.n?'':' sla-zero'}" data-k="${r.key}" onclick="slaSet('sit',this.dataset.k)"${r.n?'':' style="opacity:.6"'}><td class="td-nome">${esc(r.sit)}</td><td>${r.n?`<b>${slaPrazoTxt(r)}</b>`:'<span class="bdg b-dk">Sem SLA (0)</span>'}</td>
-        <td style="font-size:11px;color:var(--tx3)">${r.prox.length?esc(r.prox.join(' · ')):'—'}</td><td>${its.length}</td><td>${a.length?`<span class="bdg b-red" data-k="${r.key}" onclick="event.stopPropagation();slaSet('sitAtraso',this.dataset.k)" title="Ver só os atrasados desta situação">${a.length}</span>`:(r.n?0:'—')}</td><td>${h||(r.n?0:'—')}</td><td>${mx?mx+' '+un:'—'}</td></tr>`; }).join('');
+        <td style="font-size:11px;color:var(--tx3)">${r.prox.length?r.prox.map(p => esc(p) + (LOG_SITS.has(sitKey(p)) ? ' <b style="color:var(--tx2)">(Logística)</b>' : '')).join(' · '):'—'}</td><td>${its.length}</td><td>${a.length?`<span class="bdg b-red" data-k="${r.key}" onclick="event.stopPropagation();slaSet('sitAtraso',this.dataset.k)" title="Ver só os atrasados desta situação">${a.length}</span>`:(r.n?0:'—')}</td><td>${h||(r.n?0:'—')}</td><td>${mx?mx+' '+un:'—'}</td></tr>`; }).join('');
     const fora = baseTab.filter(x => !conhecidas.has(sitKey(x.sit)));
     if (fora.length) trs += `<tr style="opacity:.6"><td class="td-nome">Outras situações sem regra</td><td><span class="bdg b-dk">Sem SLA</span></td><td style="font-size:11px;color:var(--tx3)">${[...new Set(fora.map(x=>x.sit))].slice(0,6).map(esc).join(' · ')}</td><td>${fora.length}</td><td>—</td><td>—</td><td>—</td></tr>`;
     const lista = SLA_ITENS.filter(x => fc(x)).sort((a,b) => b.atraso-a.atraso || (a.venceu||0)-(b.venceu||0)); SLA_LISTAS[c] = lista;
@@ -4177,7 +4177,7 @@ let MKT_USERS = (() => { try { const a = JSON.parse(localStorage.getItem('mkt_us
 let LOG_USERS = (() => { try { const a = JSON.parse(localStorage.getItem('log_users')||'null'); if (Array.isArray(a)) return a; } catch(e){} return ['dayane.costa']; })();   // usuarios da Logistica
 function canalOf(u){ const n = norm(u||'').trim(); return LOG_USERS.some(k => n.startsWith(k)) ? 'Logística' : MKT_USERS.some(k => n.startsWith(k)) ? 'Marketplace' : 'Relacionamento'; }
 // roteamento automatico por situacao: estas situacoes sao da Logistica (quem acompanha: Dayane.Costa), qualquer que seja o usuario que aparece na planilha
-const LOG_SITS = new Set(['recol_p_acomp_cliente','recol_p_acomp_transportad','recol_p_acomp_transp_2','recol_acomp_c_reenvio_tra','cobranca_realizada','cobranca_realizada_2','mercadoria_danificada','mercadoria_danificada_2','barrar_entrega_seguir_rec','barrar_entrega_e_seguir_recolhimento']);
+const LOG_SITS = new Set(['recol_p_acomp_cliente','recol_p_acomp_transportad','recol_p_acomp_transp_2','recol_acomp_c_reenvio_tra','cobranca_realizada','cobranca_realizada_2','mercadoria_danificada','mercadoria_danificada_2']);
 const LOG_RESP = 'Dayane.Costa';
 const ehLogSit = x => LOG_SITS.has(sitKey(x.sit || x.tipo_devolucao || ''));
 // situacao "Criada" aberta pela Logistica (ex.: Dayane.Costa) e para a Ana Motta seguir: entra no Relacionamento, nao na Logistica
