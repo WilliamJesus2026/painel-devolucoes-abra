@@ -1793,7 +1793,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261027-165326';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261028-083716';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2102,7 +2102,7 @@ function gravaCaso(id, campos){
   return true;
 }
 // ---- motivo da pendencia: preenchido sozinho (por andamento e situacao), editavel; igual em todas as abas ----
-const MOTIVOS_PEND = ['No prazo','Relacionamento','Transporte','Cliente','Fiscal','Logística','Esquecimento de apontamento','Problema no Innovaro','Outro'];
+const MOTIVOS_PEND = ['No prazo','Relacionamento','Marketplace','Transporte','Cliente','Fiscal','Logística','Esquecimento de apontamento','Problema no Innovaro','Outro'];
 const MOT_LEGADO = { 'Aguardando cliente':'Cliente', 'Aguardando transportadora':'Transporte', 'Aguardando logística':'Logística', 'Aguardando fiscal / financeiro':'Fiscal', 'Esquecimento / falta de apontamento':'Esquecimento de apontamento', 'Problema no Innovaro':'Problema no Innovaro', 'Outro':'Outro' };
 function motivoAuto(x){
   const an = norm(x.andamento||''), sit = sitKey(x.sit || x.tipo_devolucao || '');
@@ -2111,6 +2111,7 @@ function motivoAuto(x){
     if (!/\b(nao|fora)\b.*\bprazo\b/.test(an) && /\bno prazo\b/.test(an)) return 'No prazo';
     if (/esquec/.test(an)) return 'Esquecimento de apontamento';
     if (/innovaro|sistema/.test(an)) return 'Problema no Innovaro';
+    if (/(^|[^a-z])mp([^a-z]|$)|market ?place|(^|[^a-z])mkt([^a-z]|$)/.test(an)) return 'Marketplace';   // andamento "MP"/marketplace: o motivo automatico acompanha (e o SLA do Marketplace)
     if (/relacionamento|laureano/.test(an)) return 'Relacionamento';
     if (/fiscal|nf-?e|financeiro/.test(an)) return 'Fiscal';
     if (/cliente/.test(an)) return 'Cliente';
@@ -3051,7 +3052,7 @@ const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente','Fiscal'
 const MOT_CANON = new Map();   // mesma frase com maiusculas/espacos diferentes conta como um motivo so
 const MOT_PAL = ['#06B6D4','#7C3AED','#F59E0B','#F43F5E','#10B981','#3B82F6','#EC4899','#84CC16','#F97316','#8B5CF6'];
 const escA = t => esc(t).replace(/"/g,'&quot;');
-const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'Fiscal':'#10B981', 'A classificar':'#64748B', 'Sem andamento':'#64748B', 'Logística':'#EAB308', 'Esquecimento de apontamento':'#EF4444', 'Problema no Innovaro':'#94A3B8', 'Outro':'#64748B' };
+const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Marketplace':'#A855F7', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'Fiscal':'#10B981', 'A classificar':'#64748B', 'Sem andamento':'#64748B', 'Logística':'#EAB308', 'Esquecimento de apontamento':'#EF4444', 'Problema no Innovaro':'#94A3B8', 'Outro':'#64748B' };
 const motCor = m => IND_COR[m] || MOT_PAL[[...String(m)].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0, 7) % MOT_PAL.length];
 const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', sit:'', usuario:'', and:'', alerta:'' };
 const IND_INICIO = new Date(2026, 6, 1);   // pendencias criadas antes de 01/07/2026 contam como finalizadas; dai em diante a equipe vai sanando

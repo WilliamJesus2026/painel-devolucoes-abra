@@ -232,3 +232,6 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 ## Barrar Entrega Seguir Rec volta ao Relacionamento (27/10/2026)
 - **"Barrar Entrega Seguir Rec" é atualizada pelo Relacionamento** (muda o apontamento para o próximo passo); só os passos seguintes (Recol P/ Acomp Transportadora, Recol Acomp C/ Reenvio…) são da Logística. Corrige a regra de 22/10, que a tinha colocado na Logística (a lista `LOG_SITS` não tem mais as situações Barrar).
 - **SLA de Apontamento:** na coluna "Próximos passos" cada passo que pertence à Logística aparece marcado com "(Logística)".
+
+## Motivo da pendência "Marketplace" no automático (28/10/2026)
+- Novo motivo **Marketplace** (lista de motivos, filtros do Controle/SLA/Tratativas e seletor de cada caso). O motivo automático acompanha o que está no **Andamento**: "MP", "aguardando MP", "marketplace", "market place" ou "mkt" → Marketplace; "logística" → Logística; "relacionamento" → Relacionamento (e os demais de antes: fiscal, cliente, transportadora…). Assim o Andamento e o Motivo não se contradizem, e o SLA/pendências do Marketplace aparecem pelo motivo. Escolher o motivo manualmente continua valendo sobre o automático.
