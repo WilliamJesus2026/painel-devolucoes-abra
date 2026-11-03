@@ -832,9 +832,9 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Relacionamento — casos em aberto</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button><span class="col-menu" id="col-menu"><button class="btn-exp" type="button" onclick="colsMenu(event)">Colunas ▾</button><div class="col-pop" id="col-pop"></div></span></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-main"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th><th title="Data prevista de chegada no CD: informada ou estimada pela mediana da transportadora">Previsão no CD</th><th>Além da previsão</th><th title="Dias além do prazo em cada etapa: criação → protocolo e protocolo → CD">Atraso SLA coleta</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-main"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th><th title="Data de previsão informada pela transportadora (campo Previsão de coleta)">Previsão da transportadora</th><th>Além da previsão</th><th title="Dias além do prazo em cada etapa: criação → protocolo e protocolo → CD">Atraso SLA coleta</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
       <div class="filters" style="margin:22px 0 8px"><b style="font-size:13px" id="ind-lista-t-mp">Marketplace — casos em aberto</b><span class="fcnt" id="cnt-ind-mp"></span></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-mp"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th><th title="Data prevista de chegada no CD: informada ou estimada pela mediana da transportadora">Previsão no CD</th><th>Além da previsão</th><th title="Dias além do prazo em cada etapa: criação → protocolo e protocolo → CD">Atraso SLA coleta</th></tr></thead><tbody id="tb-ind-mp"></tbody></table></div></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-mp"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th><th title="Data de previsão informada pela transportadora (campo Previsão de coleta)">Previsão da transportadora</th><th>Além da previsão</th><th title="Dias além do prazo em cada etapa: criação → protocolo e protocolo → CD">Atraso SLA coleta</th></tr></thead><tbody id="tb-ind-mp"></tbody></table></div></div>
       <div class="ind-h" style="margin-top:22px">Logística — situações acompanhadas pela Logística</div>
       <div class="ind-f" style="margin:6px 0"><div class="ind-fr" style="border-top:none"><b>Situação</b><div id="ind-log-chips"></div></div></div>
       <div class="ind-sub" id="ind-log-sub"></div>
@@ -1083,8 +1083,10 @@ function deriveColetaLive(c){
   const col_manual = aCD || aCanc || aReal || aFin;
   const sm = c.status_manual;   // status escolhido na mao: Finalizado / Cancelado / Em aberto (reabre)
   const cancelada = sm==='ab' ? false : (sm==='canc' || bucket==='cancelada' || aCanc);
-  const coletaRealizada = sm==='ab' ? false : (sm==='fin' || bucket==='realizada' || !!c.recebido_cd || aReal || aCD || aFin);
-  const recebidoCD = sm==='ab' ? false : (sm==='fin' || !!c.recebido_cd || aCD || aFin);
+  const temAnd = !!an;   // com andamento escrito, ele decide a aba (No prazo, Coleta realizada...); o romaneio so decide quando nao ha andamento
+  const romaneio = !!c.recebido_cd && (!temAnd || aCD || aFin);
+  const coletaRealizada = sm==='ab' ? false : (sm==='fin' || (bucket==='realizada' && !temAnd) || romaneio || aReal || aCD || aFin);
+  const recebidoCD = sm==='ab' ? false : (sm==='fin' || romaneio || aCD || aFin);
   const concluidoAuto = sm==='ab' ? false : !!c.concluido_auto; // sumiu do arquivo mais recente => nao esta mais em aberto no Innovaro
   const realizada = recebidoCD || concluidoAuto; // concluido = recebido no CD ou saiu do arquivo
 
@@ -1131,6 +1133,8 @@ function andClasse(x){
   if (/^finalizad/.test(a)) return 'finalizada';
   return '';
 }
+// Andamento "No prazo": a equipe confirma que o caso esta dentro do prazo, entao nao conta como atraso de apontamento
+const andNoPrazo = x => { const a = norm(String(x.andamento||'')); return /\bno prazo\b/.test(a) && !/\b(nao|fora)\b.*\bprazo\b/.test(a); };
 function rebuildData(){
   DATA_VER++;
   const coletaMap = {};
@@ -1793,7 +1797,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261028-083716';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261103-135329';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2157,7 +2161,7 @@ const prevCdTds2 = x => {
 };
 const deltaH = d => d==null ? '—' : Math.abs(d)<0.05 ? '=' : `<b style="color:${d>0?'var(--st-bad)':'var(--st-ok)'}" title="${d>0?'piorou':'melhorou'} contra o mês anterior">${d>0?'▲':'▼'} ${fmt1(Math.abs(d))} d</b>`;
 // colunas da lista do Controle (preferencia pessoal, guardada no navegador) e visoes de filtros
-const IND_COLS = ['Mês','Transportadora','Situação','Classe','Tipo de saída','Cliente','NF','Dias','Média (dias)','Responsável','Andamento','Andamento atualizado em','Motivo da pendência','Status do caso','Previsão no CD','Além da previsão','Atraso SLA coleta'];
+const IND_COLS = ['Mês','Transportadora','Situação','Classe','Tipo de saída','Cliente','NF','Dias','Média (dias)','Responsável','Andamento','Andamento atualizado em','Motivo da pendência','Status do caso','Previsão da transportadora','Além da previsão','Atraso SLA coleta'];
 function lsGet(k, vazio){ try { const v = JSON.parse(localStorage.getItem(k)||'null'); return v==null ? vazio : v; } catch(e){ return vazio; } }
 function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
 function colsAplica(){
@@ -2171,7 +2175,7 @@ function colsMenu(e){ e.stopPropagation(); document.getElementById('col-menu').c
 function colsToggle(i, on){ const o = new Set(lsGet('ind_cols', [])); on ? o.delete(i) : o.add(i); lsSet('ind_cols', [...o]); colsAplica(); }
 function colsReset(){ lsSet('ind_cols', []); colsAplica(); }
 document.addEventListener('click', e => { const m = document.getElementById('col-menu'); if (m && !e.target.closest('#col-menu')) m.classList.remove('open'); });
-const IND_PRESETS = { 'p:limpar':'Em aberto (padrão)', 'p:60':'Abertos há 60+ dias', 'p:30':'Abertos há 30 a 59 dias', 'p:sem':'Sem andamento', 'p:prev':'Coleta além da previsão no CD', 'p:atrp':'Protocolo fora do prazo', 'p:atrcd':'Além de 20 dias até o CD' };
+const IND_PRESETS = { 'p:limpar':'Em aberto (padrão)', 'p:60':'Abertos há 60+ dias', 'p:30':'Abertos há 30 a 59 dias', 'p:sem':'Sem andamento', 'p:prev':'Coleta além da previsão da transportadora', 'p:atrp':'Protocolo fora do prazo', 'p:atrcd':'Além de 20 dias até o CD' };
 function indViewsRender(){
   const el = document.getElementById('ind-views'); if (!el) return;
   const u = Object.keys(lsGet('ind_views', {}));
@@ -2432,6 +2436,7 @@ function isoNow(){ return new Date().toISOString(); }
 function hojeBR(){ const n = new Date(); return String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
 
 let IMPORTING = false;
+const ANDAMENTO_REVALIDA = true;   // cada importacao reconfirma o andamento (data de registro = hoje); mude para false para so datar quando o texto mudar
 
 // ---- planilha "Tarefas em aberto - recol cliente": enriquece os casos que ja existem (nao cria caso novo) ----
 const normH = rows => (rows[0]||[]).map(c => norm(String(c||'')).trim());
@@ -2553,18 +2558,10 @@ async function importFile(file){
     }
 
     if (result.andCol === -1) toast('Atenção: não encontrei a coluna "Andamento" neste arquivo, então o Andamento dos casos NÃO será atualizado. Confira o nome da coluna (Andamento / Em andamento).', {type:'warn', ms:14000});
-    let forcarAnd = false;
-    { const conf = result.rows.filter(r => { const arq = r.andamento_arq; if (!arq) return false; const pv = DB_CASES[r.id] || {}, ant = pv.andamento_arq_ult; return pv.andamento !== arq && (arq === ant || (pv.andamento_origem === 'painel' && ant === undefined)); });
-      if (conf.length){
-        forcarAnd = await askConfirm('Andamento: planilha × painel',
-          `<p><b>${conf.length}</b> casos têm na planilha um Andamento diferente do que está no painel, mas o painel guarda o texto que a equipe digitou (a planilha não mudou desde a última importação, ou é a primeira vez que a coluna chega).</p>
-           <p style="margin-top:8px">Quer <b>atualizar esses casos com o Andamento da planilha</b>, com a data de hoje?</p>
-           <p style="margin-top:8px;color:var(--tx3)">“Cancelar” mantém o texto do painel. Nos dois casos a importação continua.</p>`, 'Atualizar com a planilha');
-      } }
     say(`Salvando ${result.rows.length} linhas...`);
     const importId = 'imp_' + Date.now();
     const now = isoNow();
-    const ops = [], AND = { upd:0, prot:0, vazio:0 };
+    const ops = [], AND = { upd:0, conf:0, vazio:0 };
     result.rows.forEach(r => {
       const prev = DB_CASES[r.id];
       // data em que o caso entrou na situacao atual (so sabemos quando a situacao MUDA entre duas importacoes)
@@ -2578,18 +2575,18 @@ async function importFile(file){
           if (sib.recolhido_em) r.recolhido_em = sib.recolhido_em;
           else if (/recolhido no cliente/.test(norm(r.tipo_devolucao||'')) && sib.tipo_devolucao && norm(sib.tipo_devolucao)!==norm(r.tipo_devolucao)) r.recolhido_em = hojeBR();   // virou "Recolhido no Cliente" agora
         } }
-      // coluna "em andamento" da planilha: entra como andamento do caso, mas o que foi digitado no painel tem prioridade
+      // coluna "Andamento" da planilha: e a base de trabalho da equipe, entao entra sozinha a cada importacao
+      //  - texto novo/diferente: vira o andamento do caso, com a data de hoje (o texto anterior fica no historico do caso)
+      //  - texto igual: o andamento foi reconfirmado na planilha, entao a data de registro tambem passa a ser a de hoje
       { const arq = r.andamento_arq; delete r.andamento_arq;
         if (arq){
-          const pv = prev || {}, ant = pv.andamento_arq_ult;
-          r.andamento_arq_ult = arq;   // ultimo valor que veio da planilha: so atualiza o painel quando a PLANILHA muda
-          const painelProtegido = pv.andamento_origem === 'painel' && ant === undefined;   // primeira vez que a coluna chega: nao apaga o que a equipe ja digitou
-          if (pv.andamento !== arq && ((arq !== ant && !painelProtegido) || forcarAnd)){
+          const pv = prev || {};
+          r.andamento_arq_ult = arq;
+          if (pv.andamento !== arq){
             r.andamento = arq; r.andamento_origem = 'planilha'; r.andamento_em = now; r.andamento_por = CUR_EMAIL || null;
             r.andamento_hist = [...(pv.andamento_hist||[]), { t:arq, em:now, por:CUR_EMAIL||null, o:'planilha' }].slice(-10);
             AND.upd++;
-          } else if (pv.andamento === arq){ if (!pv.andamento_por && CUR_EMAIL) r.andamento_por = CUR_EMAIL; }
-          else AND.prot++;
+          } else if (ANDAMENTO_REVALIDA){ r.andamento_em = now; r.andamento_por = CUR_EMAIL || pv.andamento_por || null; AND.conf++; }
         } else AND.vazio++; }
       const ehFin = o => o.origem==='coleta' ? !!o.recebido_cd : sitClasseDe(o.tipo_devolucao||'')==='Finalizada';
       if (prev && !prev.finalizado_em && !ehFin(prev) && ehFin(r)){ const n = new Date(); r.finalizado_em = String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
@@ -2598,7 +2595,7 @@ async function importFile(file){
       ops.push({ type:'set', merge:true, path:'cases/'+r.id, data:{ ...r, history, concluido_auto:false, concluidoEm:null, updatedAt: now, lastImportId: importId } });
     });
     toClose.forEach(id => ops.push({ type:'update', path:'cases/'+id, data:{ concluido_auto:true, concluidoEm: now, concluidoPorImport: importId } }));
-    const andTxt = ` · Andamento: ${AND.upd} atualizados pela planilha` + (AND.prot ? `, ${AND.prot} mantidos como no painel` : '') + (AND.vazio ? `, ${AND.vazio} sem texto na planilha` : '');
+    const andTxt = ` · Andamento: ${AND.upd} atualizados pela planilha` + (AND.conf ? `, ${AND.conf} reconfirmados com a data de hoje` : '') + (AND.vazio ? `, ${AND.vazio} sem texto na planilha` : '');
     await DB.batchCommit(ops);
 
     await DB.collection('imports').doc(importId).set({
@@ -3165,7 +3162,7 @@ function colslaCalcula(){
   });
   COLSLA = itens; COLSLA_MAP = new Map(itens.map(i => [i.chave, i]));
   COLSLA_CARR = new Map(); [...new Set(itens.map(i=>i.carr))].forEach(c => COLSLA_CARR.set(c, colslaAgg(itens.filter(i=>i.carr===c))));
-  IND_ALL.forEach(x => { const it = COLSLA_MAP.get(x.chave); if (!it) return; x.atrasoProt = it.atrasoProt; x.atrasoCd = it.atrasoCd; if (!it.chegou){ x.prevCd = it.prevData; x.prevTipo = it.prevTipo; x.atrasoPrev = it.atrasoPrev; } });
+  IND_ALL.forEach(x => { const it = COLSLA_MAP.get(x.chave); if (!it) return; x.atrasoProt = it.atrasoProt; x.atrasoCd = it.atrasoCd; if (!it.chegou && it.prevTipo==='informada'){ x.prevCd = it.prevData; x.prevTipo = it.prevTipo; x.atrasoPrev = it.atrasoPrev; } });   // Controle mostra so a previsao informada pela transportadora
 }
 function colslaLinha(c){
   const a = COLSLA_CARR.get(c); if (!a || !a.n) return '';
@@ -3297,7 +3294,7 @@ function renderInd(){
   }).join('') || '<tr><td colspan="9" style="color:var(--tx3);padding:12px">Sem dados.</td></tr>';
   { // faixa de alertas: o que precisa de acao + mes atual contra o anterior
     const b = doAno.filter(x => f(x,['status','motivo','alerta']) && !x.fin);
-    const al = [['60','Abertos há 60+ dias','r'],['30','Abertos há 30 a 59 dias','w'],['sem','Sem andamento informado','w'],['prev','Coleta além da previsão no CD','r']].map(([k,t,cl]) => { const n = b.filter(x=>alertaOk(x,k)).length; return `<button type="button" class="alerta ${n?cl:''}${IND.alerta===k?' on':''}${n?'':' z'}" onclick="indSet('alerta','${k}')" title="Clique para filtrar a lista"><b>${n}</b><span>${t}</span></button>`; });
+    const al = [['60','Abertos há 60+ dias','r'],['30','Abertos há 30 a 59 dias','w'],['sem','Sem andamento informado','w'],['prev','Coleta além da previsão da transportadora','r']].map(([k,t,cl]) => { const n = b.filter(x=>alertaOk(x,k)).length; return `<button type="button" class="alerta ${n?cl:''}${IND.alerta===k?' on':''}${n?'':' z'}" onclick="indSet('alerta','${k}')" title="Clique para filtrar a lista"><b>${n}</b><span>${t}</span></button>`; });
     const ult = meses.filter(m=>m>0).slice(-2);
     if (ult.length===2){ const m1 = mediaDe(doCar.filter(noGrupo(ult[1]))), m0 = mediaDe(doCar.filter(noGrupo(ult[0]))), d = (m1!=null && m0!=null) ? m1-m0 : null;
       al.push(`<div class="alerta${d!=null&&d>0.05?' r':''}" style="cursor:default"><b>${fd(m1)}</b><span>Média de dias em ${MESES[ult[1]-1]} · ${deltaH(d)} vs ${MESES[ult[0]-1]}</span></div>`); }
@@ -3545,7 +3542,7 @@ function slaFonte(){
   const out = [];
   COL.concat(REA).forEach(c => out.push({ ...c, __tipo:'coleta', sit:'Protocolo de Coleta' }));
   TRAT_ALL.filter(t => !t.concluido_auto).forEach(t => out.push({ ...t, __tipo:'tratativa', sit:t.tipo_devolucao || '(sem situação)' }));
-  return out.filter(x => !/^perdas/.test(sitKey(x.sit)) && !NR_TIPOS[sitKey(x.sit)] && !andClasse(x) && x.status_manual!=='fin' && x.status_manual!=='canc' && !['Finalizada','Desconsiderar'].includes(sitClasseDe(x.sit)));   // finalizados, cancelados e perdas nao contam atraso de apontamento
+  return out.filter(x => !/^perdas/.test(sitKey(x.sit)) && !NR_TIPOS[sitKey(x.sit)] && !andClasse(x) && !andNoPrazo(x) && x.status_manual!=='fin' && x.status_manual!=='canc' && !['Finalizada','Desconsiderar'].includes(sitClasseDe(x.sit)));   // finalizados, cancelados e perdas nao contam atraso de apontamento
 }
 function slaCalcula(){
   if (_slaVer === DATA_VER) return; _slaVer = DATA_VER;
