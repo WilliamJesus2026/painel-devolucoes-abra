@@ -241,3 +241,8 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - **Importação automática do Andamento, sem perguntas:** a planilha é a base de trabalho. Texto diferente do painel → vira o andamento (o anterior fica no histórico do caso); texto igual → reconfirmado. Nos dois casos a **data de registro do andamento passa a ser a da importação** (`ANDAMENTO_REVALIDA`, mude para `false` para datar só quando o texto mudar). Atenção: atualizar o andamento reinicia o prazo do SLA de Apontamento.
 - **SLA de Apontamento:** casos com Andamento "No prazo" não entram (não são atraso).
 - **Controle de Situações:** a coluna passou a se chamar "Previsão da transportadora" e mostra só a data **informada pela transportadora** (campo Previsão de coleta); a estimativa pela mediana fica apenas na aba SLA Transportadora. O alerta "Coleta além da previsão" usa só a data informada.
+
+## Desfazer passo a passo (04/11/2026)
+- Botão **↶ Desfazer (N)** no topo (e **Ctrl+Z** fora de campos de texto): cada alteração feita no painel — status do caso, andamento (inclusive "✓ hoje"), motivo da pendência, previsão de coleta, protocolo Hello, datas de coleta/chegada — guarda o estado anterior e pode ser desfeita em sequência, da mais recente para a mais antiga (até 50 passos). Vale também para as cópias do caso nas outras abas (mesma chave).
+- Os avisos de sucesso de uma edição ganham o botão **Desfazer**. O botão mostra o que será desfeito (ex.: "Status do caso — Fulano").
+- Cada pessoa desfaz só as próprias alterações; a pilha fica guardada no navegador por 24 h (sobrevive a recarregar a página). Importações de planilha não entram nessa pilha (a importação tem o próprio "Desfazer" para casos que saíram do controle).

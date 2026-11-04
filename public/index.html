@@ -706,6 +706,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
           <button class="hchip hc-pur" type="button" onclick="ir('rea')" title="Coleta feita, aguardando o CD"><b id="hc-rea">0</b> aguardando CD</button>
           <span class="tb-ref hc-ref" id="tb-ref">—</span>
         </div>
+        <button class="hero-search" type="button" id="btn-desfazer" onclick="desfazer()" title="Nada para desfazer" disabled style="opacity:.5"><span id="btn-desfazer-n">↶ Desfazer</span></button>
         <button class="hero-search" type="button" onclick="openPalette()" aria-label="Buscar"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke-width="2" stroke-linecap="round"/></svg><span>Buscar cliente, NF ou CPF</span><kbd>Ctrl K</kbd></button>
         <button class="hero-search" type="button" id="hero-user" onclick="menuConta()" style="display:none" title="Conta e troca de usuário"><span id="hero-user-n"></span></button>
       </div>
@@ -1797,7 +1798,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261103-135329';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261104-111916';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2096,10 +2097,47 @@ function andCell(c, lista){
 }
 // ---- gravacao unica: o que a equipe escreve vale para o caso em TODAS as abas e para as copias dele (mesma chave) ----
 function irmaosDe(id){ const ch = (DB_CASES[id]||{}).chave; return ch ? Object.keys(DB_CASES).filter(k => DB_CASES[k].chave===ch) : [id]; }
+// ---- desfazer: cada alteracao feita no painel (status, andamento, motivo, previsao, datas...) guarda o estado anterior; o botao do topo e o Ctrl+Z voltam passo a passo ----
+const UNDO = [], UNDO_MAX = 50; let UNDO_T = 0;
+const UNDO_ROTULOS = { andamento:'Andamento', status_manual:'Status do caso', motivo_pend:'Motivo da pendência', previsao_coleta:'Previsão de coleta', protocolo_hello:'Protocolo Hello', recebido_cd_em:'Chegada no CD', recolhido_em:'Coleta no cliente' };
+try { JSON.parse(localStorage.getItem('undo_stack')||'[]').filter(u => u && u.ids && Date.now()-u.em < 864e5).forEach(u => UNDO.push(u)); } catch(e){}
+function undoSalva(){ try { localStorage.setItem('undo_stack', JSON.stringify(UNDO.slice(-UNDO_MAX))); } catch(e){} }
+const undoMeus = () => UNDO.filter(u => !u.por || u.por===CUR_EMAIL);
+function undoAtualiza(){
+  const b = document.getElementById('btn-desfazer'); if (!b) return;
+  const m = undoMeus(), u = m[m.length-1];
+  b.disabled = !u; b.style.opacity = u ? '1' : '.5';
+  document.getElementById('btn-desfazer-n').textContent = '↶ Desfazer' + (m.length ? ' (' + m.length + ')' : '');
+  b.title = u ? 'Desfazer: ' + u.rotulo + ' (Ctrl+Z)' : 'Nada para desfazer';
+}
+function desfazer(){
+  if (!podeEditar()){ toast('Seu acesso é somente de consulta: não é possível editar.', {type:'warn'}); return; }
+  let i = UNDO.length - 1; while (i >= 0 && UNDO[i].por && UNDO[i].por!==CUR_EMAIL) i--;
+  if (i < 0 || !DB){ toast('Não há nada para desfazer.', {type:'warn', ms:2500}); undoAtualiza(); return; }
+  const u = UNDO.splice(i, 1)[0]; UNDO_T = 0;
+  u.ids.forEach(k => { const antes = u.antes[k]; if (!antes || !DB_CASES[k]) return;
+    DB.doc('cases/'+k).set(antes, true).catch(err => toast('Falha ao desfazer: '+(err.code||err.message), {type:'err'}));
+    DB_CASES[k] = { ...DB_CASES[k], ...antes }; });
+  undoSalva(); undoAtualiza();
+  toast('Desfeito: ' + u.rotulo, {type:'ok', ms:3500}); scheduleRender();
+}
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && String(e.key).toLowerCase()==='z'){
+    const a = document.activeElement; if (a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable)) return;   // dentro de um campo, Ctrl+Z continua desfazendo o texto
+    if (undoMeus().length){ e.preventDefault(); desfazer(); }
+  }
+});
+setTimeout(undoAtualiza, 1500);
 function gravaCaso(id, campos){
   if (!podeEditar()){ toast('Seu acesso é somente de consulta: não é possível editar.', {type:'warn'}); return false; }
   if (!DB){ toast('Entre com sua conta para gravar.', {type:'warn'}); return false; }
-  [...new Set([id, ...irmaosDe(id)])].forEach(k => {
+  const ids = [...new Set([id, ...irmaosDe(id)])], antes = {};
+  ids.forEach(k => { const c = DB_CASES[k] || {}; antes[k] = {}; Object.keys(campos).forEach(f => { antes[k][f] = c[f] === undefined ? null : c[f]; }); });
+  const kRot = Object.keys(campos).find(c => UNDO_ROTULOS[c]);
+  UNDO.push({ ids, antes, rotulo: (kRot ? UNDO_ROTULOS[kRot] : 'Alteração') + ' — ' + ((DB_CASES[id]||{}).cliente || id), em: Date.now(), por: CUR_EMAIL || '' });
+  if (UNDO.length > UNDO_MAX) UNDO.shift();
+  UNDO_T = Date.now(); undoSalva(); undoAtualiza();
+  ids.forEach(k => {
     DB.doc('cases/'+k).set(campos, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
     DB_CASES[k] = { ...(DB_CASES[k]||{}), ...campos };
   });
@@ -2651,6 +2689,7 @@ document.getElementById('file-input').addEventListener('change', e => { const f=
 // ================= TOAST / CONFIRMACAO =================
 function toast(text, opt){
   opt = opt || {};
+  if (opt.type==='ok' && !opt.actionLabel && UNDO_T && Date.now()-UNDO_T < 800){ opt = { ...opt, actionLabel:'Desfazer', onAction:desfazer, ms:Math.max(opt.ms||0, 7000) }; UNDO_T = 0; }   // logo apos uma edicao
   const box = document.getElementById('toasts');
   const el = document.createElement('div');
   el.className = 'toast t-' + (opt.type||'info');
