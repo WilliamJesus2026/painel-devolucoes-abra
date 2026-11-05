@@ -1435,7 +1435,7 @@ function renderCol(tipo){
 }
 
 const OUTROS_TAGS=['TOTAL EXPRESS','TRANSLOVATO','FEDEX OR','SHOPEE','ROTEIRO','OUTROS'];
-// ---- Tratativas Transportadora: mesmo layout do Controle de Situacoes (filtros, canais, lista, bloco da Ana e, por ultimo, a Logistica) ----
+// ---- Tratativas Transportadora: mesmo layout do Controle de Situacoes (filtros, canais, lista, bloco das Criadas e, por ultimo, a Logistica) ----
 const TF = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', grupo:'', sit:'', usuario:'', and:'' };
 const TF_GRUPOS = [['recolhimento','Recolhimento'], ['barrar','Barrar'], ['financeiro','Financeiro'], ['nova','Novo / a triar'], ['outros','Outros']];
 const tfGrupoNome = g => (TF_GRUPOS.find(a => a[0]===(g||'outros'))||[])[1] || g || 'Outros';
@@ -1798,14 +1798,14 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261104-111916';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261105-154409';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
 const souAdmin = () => SUPER_ADMINS.includes(String(CUR_EMAIL).toLowerCase()) || !!(PERFIL && PERFIL.papel==='admin' && PERFIL.ativo!==false);
 const podeAba = id => { if (id==='adm') return souAdmin(); if (!PERFIL || souAdmin()) return true; const a = PERFIL.abas || ['*']; if (a.includes('*') || a.includes(id)) return true; return id==='sla' && a.some(x => /^sla-(log|rel|mp)$/.test(x)); };
 const SLA_CANAIS = [['Relacionamento','rel'], ['Marketplace','mp'], ['Logística','log']];   // a Logistica fica por ultimo
-const SLA_SUB = { 'Relacionamento':'Situações atualizadas pelo Relacionamento, inclusive as “Criadas” abertas pela Dayane (a Ana Motta atualiza).', 'Marketplace':'Casos dos usuários do Marketplace.', 'Logística':'Situações que só a Logística (Dayane) atualiza: Cobrança Realizada, Recol P/ Acomp Cliente, Recol P/ Acomp Transportadora, Mercadoria Danificada e Recol Acomp C/ Reenvio.' };
+const SLA_SUB = { 'Relacionamento':'Situações atualizadas pelo Relacionamento, inclusive as “Criadas” abertas pela Dayane (a Patrícia Maia atualiza).', 'Marketplace':'Casos dos usuários do Marketplace.', 'Logística':'Situações que só a Logística (Dayane) atualiza: Cobrança Realizada, Recol P/ Acomp Cliente, Recol P/ Acomp Transportadora, Mercadoria Danificada e Recol Acomp C/ Reenvio.' };
 const podeSecaoSla = c => { if (!PERFIL || souAdmin()) return true; const a = PERFIL.abas || ['*'], k = (SLA_CANAIS.find(x => x[0]===c)||[])[1]; return a.includes('*') || a.includes('sla') || (!!k && a.includes('sla-'+k)); };
 const podeEditar = () => souAdmin() || !PERFIL || PERFIL.editar!==false;
 const podeImportar = () => souAdmin() || !PERFIL || PERFIL.importar!==false;
@@ -4217,11 +4217,11 @@ function canalOf(u){ const n = norm(u||'').trim(); return LOG_USERS.some(k => n.
 const LOG_SITS = new Set(['recol_p_acomp_cliente','recol_p_acomp_transportad','recol_p_acomp_transp_2','recol_acomp_c_reenvio_tra','cobranca_realizada','cobranca_realizada_2','mercadoria_danificada','mercadoria_danificada_2']);
 const LOG_RESP = 'Dayane.Costa';
 const ehLogSit = x => LOG_SITS.has(sitKey(x.sit || x.tipo_devolucao || ''));
-// situacao "Criada" aberta pela Logistica (ex.: Dayane.Costa) e para a Ana Motta seguir: entra no Relacionamento, nao na Logistica
-const RESP_CRIADA_LOG = 'Ana Motta';
+// situacao "Criada" aberta pela Logistica (ex.: Dayane.Costa) e para a Patrícia Maia seguir: entra no Relacionamento, nao na Logistica
+const RESP_CRIADA_LOG = 'Patrícia Maia';
 const criadaPorLog = x => sitKey(x.sit || x.tipo_devolucao || '') === 'criada' && canalOf(x.usuario) === 'Logística';
 const canalCaso = x => { if (ehLogSit(x)) return 'Logística'; const c = canalOf(x.usuario); return c === 'Logística' ? 'Relacionamento' : c; };   // Logistica = situacoes de acompanhamento; usuario da Logistica em outra situacao = Relacionamento
-const respCaso = x => criadaPorLog(x) ? RESP_CRIADA_LOG : (ehLogSit(x) ? LOG_RESP : (x.usuario || ''));   // Criada da Day -> Ana Motta; situacoes da Logistica -> Dayane
+const respCaso = x => criadaPorLog(x) ? RESP_CRIADA_LOG : (ehLogSit(x) ? LOG_RESP : (x.usuario || ''));   // Criada da Day -> Patricia Maia; situacoes da Logistica -> Dayane
 const respDe = x => x.resp || x.usuario || '—';
 const respCel = x => esc(respDe(x)) + ((x.resp && x.usuario && x.resp !== x.usuario) ? `<br><small style="color:var(--tx3)">${x.criadaLog ? 'criada' : 'aberta'} por ${esc(x.usuario)}</small>` : '');
 const CANAL_COR = { 'Marketplace':'#7C3AED', 'Relacionamento':'#06B6D4', 'Logística':'#F59E0B' };

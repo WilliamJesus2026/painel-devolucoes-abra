@@ -246,3 +246,6 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Botão **↶ Desfazer (N)** no topo (e **Ctrl+Z** fora de campos de texto): cada alteração feita no painel — status do caso, andamento (inclusive "✓ hoje"), motivo da pendência, previsão de coleta, protocolo Hello, datas de coleta/chegada — guarda o estado anterior e pode ser desfeita em sequência, da mais recente para a mais antiga (até 50 passos). Vale também para as cópias do caso nas outras abas (mesma chave).
 - Os avisos de sucesso de uma edição ganham o botão **Desfazer**. O botão mostra o que será desfeito (ex.: "Status do caso — Fulano").
 - Cada pessoa desfaz só as próprias alterações; a pilha fica guardada no navegador por 24 h (sobrevive a recarregar a página). Importações de planilha não entram nessa pilha (a importação tem o próprio "Desfazer" para casos que saíram do controle).
+
+## "Criada" pela Dayane segue com a Patrícia Maia (05/11/2026)
+- A situação **Criada** aberta pela Dayane (Logística) continua no Relacionamento, agora com **Patrícia Maia** como responsável (antes: Ana Motta), com a observação "criada por Dayane.Costa". Constante `RESP_CRIADA_LOG` no código.
