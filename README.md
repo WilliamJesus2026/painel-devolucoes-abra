@@ -264,3 +264,5 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Natal agora liga ja na primeira aba ao abrir o painel.
 
 - SLA da coleta: voltaram os 4 indices (2 cartoes de % fora do prazo + 2 de media criacao->protocolo e protocolo->CD).
+
+- Revisao: "A caminho / aguardando" e a ficha do caso na aba SLA Transportadora passaram a tratar os Encerrados sem chegada (novo contador). Natal: trenó com renas e duende em SVG.

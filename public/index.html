@@ -124,15 +124,21 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 body.natal #snow{display:block}
 #natal-deco{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;display:none;z-index:1}
 body.natal #natal-deco{display:block}
-.nd-trio{position:absolute;top:10px;left:-170px;font-size:24px;white-space:nowrap;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));animation:nd-voa 16s linear infinite}
-.nd-trio i{font-style:normal;display:inline-block;animation:nd-bal 1.1s ease-in-out infinite alternate}
-.nd-trio .tr{margin-left:-2px;font-size:20px;opacity:.7;letter-spacing:-3px}
-@keyframes nd-voa{0%{transform:translate(0,14px) rotate(-6deg)}20%{transform:translate(22vw,0) rotate(-3deg)}50%{transform:translate(52vw,10px) rotate(-6deg)}80%{transform:translate(82vw,-2px) rotate(-3deg)}100%{transform:translate(112vw,12px) rotate(-5deg)}}
-@keyframes nd-bal{from{transform:translateY(-2px)}to{transform:translateY(3px)}}
-.nd-corda{position:absolute;right:34%;top:0;width:2px;height:48px;background:repeating-linear-gradient(#fde68a 0 4px,#b45309 4px 6px);transform-origin:top center;animation:nd-desce 5s ease-in-out infinite}
-.nd-corda b{position:absolute;left:50%;bottom:-26px;font-size:26px;transform:translateX(-50%);filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
-@keyframes nd-desce{0%,100%{height:12px;transform:rotate(5deg)}50%{height:48px;transform:rotate(-5deg)}}
-@media (prefers-reduced-motion:reduce){.nd-trio,.nd-trio i,.nd-corda{animation:none}.nd-trio{left:40%}.nd-corda{height:34px}}
+.nd-trio{position:absolute;top:6px;left:-270px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4));animation:nd-voa 17s linear infinite}
+.nd-svg{display:block;animation:nd-bal 1s ease-in-out infinite alternate}
+.nd-leg{transform-box:fill-box;transform-origin:top center;animation:nd-perna .5s ease-in-out infinite alternate}
+.nd-nariz{animation:nd-pisca .9s ease-in-out infinite alternate;filter:drop-shadow(0 0 4px #ef4444)}
+@keyframes nd-perna{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+@keyframes nd-pisca{from{opacity:.55}to{opacity:1}}
+@keyframes nd-voa{0%{transform:translate(0,16px) rotate(-5deg)}25%{transform:translate(28vw,2px) rotate(-2deg)}55%{transform:translate(58vw,12px) rotate(-5deg)}85%{transform:translate(90vw,0) rotate(-2deg)}100%{transform:translate(116vw,14px) rotate(-5deg)}}
+@keyframes nd-bal{from{transform:translateY(-3px)}to{transform:translateY(3px)}}
+.nd-corda{position:absolute;right:30%;top:0;width:2px;height:20px;background:repeating-linear-gradient(#fde68a 0 4px,#b45309 4px 6px);transform-origin:top center;animation:nd-desce 6s ease-in-out infinite}
+.nd-elf{position:absolute;left:50%;top:100%;margin-left:-23px;margin-top:-8px;width:38px;height:61px;filter:drop-shadow(0 3px 3px rgba(0,0,0,.4));transform-origin:50% 0;animation:nd-gira 2.2s ease-in-out infinite alternate}
+.nd-elf-g{transform-box:fill-box}
+.nd-sino{animation:nd-pisca .6s ease-in-out infinite alternate}
+@keyframes nd-gira{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+@keyframes nd-desce{0%,100%{height:6px}50%{height:22px}}
+@media (prefers-reduced-motion:reduce){.nd-trio,.nd-svg,.nd-leg,.nd-corda,.nd-elf,.nd-sino,.nd-nariz{animation:none}.nd-trio{left:40%}.nd-corda{height:30px}}
 @media (max-width:640px){.nd-corda{right:14%}}
 body.natal .hero-card,body.natal.in-perdas .hero-card{background:linear-gradient(125deg,#450a0a 0%,#991b1b 48%,#14532d 100%);box-shadow:0 22px 44px -18px rgba(127,29,29,.75),0 2px 0 rgba(255,255,255,.18) inset,0 -3px 0 rgba(0,0,0,.28) inset}
 body.natal .tb-title{text-shadow:0 1px 0 #7f1d1d,0 2px 0 #651616,0 3px 0 #4c1010,0 7px 14px rgba(0,0,0,.4)}
@@ -1869,7 +1875,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261110-175000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261110-183000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2119,7 +2125,7 @@ function natalAplica(id){
   const b = document.getElementById('btn-natal'); if (b){ b.style.display = naAba ? '' : 'none'; b.style.opacity = on ? '1' : '.6'; b.title = on ? 'Desligar o tema de Natal (volta ao visual normal)' : 'Ligar o tema de Natal'; }
   const hc = document.querySelector('.hero-card');
   if (hc && on && !document.getElementById('natal-deco')){ const d = document.createElement('div'); d.id = 'natal-deco'; d.setAttribute('aria-hidden','true');
-    d.innerHTML = '<div class="nd-trio"><i>🎅🛷</i><i class="tr">🦌🦌</i></div><div class="nd-corda"><b>🧝</b></div>'; hc.appendChild(d); }
+    d.innerHTML = '<div class="nd-trio"><svg class="nd-svg" viewBox="0 0 250 64" width="250" height="64" xmlns="http://www.w3.org/2000/svg"><path d="M0 54c30 6 60-8 96-2" stroke="#fde68a" stroke-width="2" fill="none" stroke-dasharray="2 5" opacity=".7"/><g transform="translate(8 0)"><path class="nd-leg" d="M8 38l-5 14M14 38l-2 15M26 38l3 14M32 38l6 12" stroke="#7c4a21" stroke-width="3" stroke-linecap="round" fill="none"/><ellipse cx="22" cy="32" rx="17" ry="9" fill="#a8672d"/><ellipse cx="22" cy="35" rx="11" ry="4.5" fill="#d9a066"/><path d="M33 28l9-12" stroke="#a8672d" stroke-width="6" stroke-linecap="round"/><ellipse cx="45" cy="13" rx="7" ry="5.5" fill="#a8672d"/><circle cx="47" cy="11.5" r="1.3" fill="#1c1917"/><circle cx="51.5" cy="14" r="1.6" fill="#1c1917"/><path d="M42 8l-3-8m3 8l5-7M39 3l-4-1M45 7l6-5" stroke="#f5deb3" stroke-width="1.8" stroke-linecap="round" fill="none"/></g><g transform="translate(52 0)"><path class="nd-leg" d="M8 38l-5 14M14 38l-2 15M26 38l3 14M32 38l6 12" stroke="#7c4a21" stroke-width="3" stroke-linecap="round" fill="none"/><ellipse cx="22" cy="32" rx="17" ry="9" fill="#a8672d"/><ellipse cx="22" cy="35" rx="11" ry="4.5" fill="#d9a066"/><path d="M33 28l9-12" stroke="#a8672d" stroke-width="6" stroke-linecap="round"/><ellipse cx="45" cy="13" rx="7" ry="5.5" fill="#a8672d"/><circle cx="47" cy="11.5" r="1.3" fill="#1c1917"/><circle cx="51.5" cy="14" r="3" fill="#ef4444" class="nd-nariz"/><path d="M42 8l-3-8m3 8l5-7M39 3l-4-1M45 7l6-5" stroke="#f5deb3" stroke-width="1.8" stroke-linecap="round" fill="none"/></g><path d="M92 34l22 8" stroke="#fde047" stroke-width="1.6"/><path d="M112 20h42l8-8 2 22c0 10-10 16-26 16h-22c-4 0-6-4-4-8z" fill="#dc2626" stroke="#7f1d1d" stroke-width="1.5"/><path d="M112 42h46" stroke="#fde047" stroke-width="2.4"/><path d="M104 58c0 4 6 5 24 5h42c10 0 14-6 12-12" stroke="#fbbf24" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M122 58v-8m30 8v-8" stroke="#fbbf24" stroke-width="2.4"/><circle cx="138" cy="12" r="8.5" fill="#fcd9b6"/><path d="M129 14c1 9 15 9 18 0c-3 4-15 4-18 0z" fill="#fff"/><circle cx="136" cy="11" r="1.1" fill="#1c1917"/><circle cx="141" cy="11" r="1.1" fill="#1c1917"/><circle cx="138.5" cy="13.5" r="1.8" fill="#f87171"/><path d="M127 8c1-9 11-13 20-5l6-4-1 9z" fill="#dc2626"/><path d="M127 8h21" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><circle cx="153" cy="3" r="2.6" fill="#fff"/><path d="M130 20c-2 6-2 10 0 14h17c2-4 2-8 0-14z" fill="#dc2626"/><path d="M130 27h17" stroke="#1c1917" stroke-width="2.2"/><path d="M147 23l7 6" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/><path d="M156 30c10-12 28-12 30 0c1 8-6 14-18 12z" fill="#b45309" stroke="#78350f" stroke-width="1.5"/><path d="M162 22l6-5 3 6" fill="none" stroke="#fde047" stroke-width="2"/><rect x="176" y="34" width="12" height="9" rx="1.5" fill="#22c55e"/><path d="M176 38h12M182 34v9" stroke="#fde047" stroke-width="1.6"/></svg></div><div class="nd-corda"><svg class="nd-elf" viewBox="0 0 46 74" width="46" height="74" xmlns="http://www.w3.org/2000/svg"><g class="nd-elf-g"><path d="M17 32l-5-27M29 32l5-27" stroke="#16a34a" stroke-width="5" stroke-linecap="round"/><circle cx="12" cy="4" r="3.6" fill="#fcd9b6"/><circle cx="34" cy="4" r="3.6" fill="#fcd9b6"/><path d="M13 52l-3 16h8m11-16l3 16h-8" fill="none" stroke="#dc2626" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 69h13m8 0h13" stroke="#fde047" stroke-width="4.5" stroke-linecap="round"/><path d="M12 31h22l3 22H9z" fill="#16a34a"/><path d="M10 40h26M9.5 47h27" stroke="#dc2626" stroke-width="3.2"/><path d="M12 31h22" stroke="#fde047" stroke-width="2.4"/><path d="M13 22l-8-4 3 9zM33 22l8-4-3 9z" fill="#fcd9b6"/><circle cx="23" cy="23" r="10.5" fill="#fcd9b6"/><path d="M12.5 19c3-13 16-14 21 0z" fill="#dc2626"/><path d="M12 19h22" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><path d="M26 7l12-3" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/><circle cx="39" cy="4" r="2.8" fill="#fbbf24" class="nd-sino"/><circle cx="19" cy="23" r="1.3" fill="#1c1917"/><circle cx="27" cy="23" r="1.3" fill="#1c1917"/><circle cx="16" cy="27" r="2" fill="#fca5a5" opacity=".7"/><circle cx="30" cy="27" r="2" fill="#fca5a5" opacity=".7"/><path d="M19 28c2 3 6 3 8 0" stroke="#7f1d1d" stroke-width="1.4" fill="none" stroke-linecap="round"/></g></svg></div>'; hc.appendChild(d); }
   on ? neveLiga() : neveDesliga();
 }
 setTimeout(() => { try { natalAplica(); } catch(e){} }, 0); window.addEventListener('load', () => { try { natalAplica(); } catch(e){} });   // liga o tema ja na primeira aba, sem precisar trocar de aba
@@ -3315,7 +3321,7 @@ function colslaLinha(c){
 }
 function colslaDetalhe(it){
   const c = COLSLA_MAP.get(it.chave); if (!c) return '';
-  const t = c.chegou ? `Chegou no CD${c.fim ? ' em '+fmtDt(c.fim)+(c.fimTipo==='exata' ? '' : ' (aprox.)') : ''} · ${c.diasTotal==null ? '—' : c.diasTotal+' dias do protocolo'} (prazo ${SLA})` : `${c.estagio} · ${c.diasAberto} dias desde o protocolo (prazo ${SLA}) · previsão no CD ${fmtDt(c.prevData)} (${c.prevTipo})`;
+  const t = c.chegou ? `Chegou no CD${c.fim ? ' em '+fmtDt(c.fim)+(c.fimTipo==='exata' ? '' : ' (aprox.)') : ''} · ${c.diasTotal==null ? '—' : c.diasTotal+' dias do protocolo'} (prazo ${SLA})` : c.encerrado ? 'Encerrado no Controle, sem data de chegada no CD (não entra na conta do SLA)' : `${c.estagio} · ${c.diasAberto} dias desde o protocolo (prazo ${SLA}) · previsão no CD ${fmtDt(c.prevData)} (${c.prevTipo})`;
   const e1 = c.diasCriProg==null ? '—' : c.diasCriProg + ' dias' + (c.atrasoProt>0 ? ' (+' + c.atrasoProt + ' além do prazo de ' + CONFIG.PRAZO_PROTOCOLO_DIAS + ')' : ' (no prazo)');
   return `<dt>SLA da transportadora</dt><dd>${t}<br>Criação → protocolo: ${e1}</dd>`;
 }
@@ -4221,7 +4227,7 @@ function renderColSla(){
   document.getElementById('ph-cs').innerHTML = pwHero('Coleta Reversa', 'SLA da transportadora', todos.length ? `Prazo de ${SLA} dias corridos, contados da programação do protocolo até a chegada no CD (romaneio de entrada). Sem previsão informada, o painel estima pela mediana da transportadora.` : 'Ainda não há casos de Protocolo de Coleta / Recolhido no Cliente. Importe o Controle de Situações.',
     [['Média protocolo → CD', A.media==null ? '—' : fmt1(A.media)+' dias', `${A.chegaram} que já chegaram · mediana ${A.mediana==null?'—':fmt1(A.mediana)}`], [`No prazo (${SLA} d)`, pc(A.dentro, A.chegaram), `${A.dentro} de ${A.chegaram} que chegaram`],
      ['A caminho / aguardando', A.transito, `${A.atrasados} além dos ${SLA} dias`], ['Com previsão informada', A.comPrevInf, `de ${A.transito} · o restante é estimado`], ['Além da previsão', A.atrasoPrev, 'passaram da data prevista no CD']], '');
-  ligaStats('ph-cs', [['Casos do SLA', () => vis.map(i=>i.x)], ['Chegaram no CD', () => vis.filter(i=>i.chegou).map(i=>i.x)], ['A caminho / aguardando', () => vis.filter(i=>!i.chegou).map(i=>i.x)], ['Atrasados', () => vis.filter(i=>i.farol==='Atrasado').map(i=>i.x)], ['Além da previsão', () => vis.filter(i=>i.atrasoPrev>0).map(i=>i.x)]]);
+  ligaStats('ph-cs', [['Casos do SLA', () => vis.map(i=>i.x)], ['Chegaram no CD', () => vis.filter(i=>i.chegou).map(i=>i.x)], ['A caminho / aguardando', () => vis.filter(i=>!i.chegou && !i.encerrado).map(i=>i.x)], ['Encerrados sem chegada', () => vis.filter(i=>i.encerrado).map(i=>i.x)], ['Atrasados', () => vis.filter(i=>i.farol==='Atrasado').map(i=>i.x)], ['Além da previsão', () => vis.filter(i=>i.atrasoPrev>0).map(i=>i.x)]]);
   const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
   const carrs = [...new Set(todos.map(i=>i.carr))].map(c => ({ c, n:todos.filter(i=>i.carr===c && f(i,['carr'])).length })).filter(o=>o.n).sort((a,b)=>b.n-a.n);
   document.getElementById('cs-fbody').innerHTML =
