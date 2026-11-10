@@ -442,6 +442,10 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .pw-top{position:relative;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;z-index:1}
 .pw-kick{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.65)}
 .pw-hero h2{font-size:28px;font-weight:800;letter-spacing:-.5px;margin:4px 0 2px;text-shadow:0 2px 0 rgba(0,0,0,.18),0 10px 24px rgba(0,0,0,.35)}
+.pw-minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:6px}
+.pw-mini{display:flex;flex-direction:column;gap:1px;padding:5px 8px;border-radius:9px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);font-size:9.5px;line-height:1.2;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pw-mini b{font-size:15px;color:#fff;font-variant-numeric:tabular-nums}
+.pw-sub:empty{display:none}
 .pw-sub{font-size:12px;color:rgba(255,255,255,.72);max-width:520px}
 .pw-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .pw-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;font-size:11.5px;font-weight:700;cursor:pointer;color:#fff;
@@ -1875,7 +1879,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261110-185000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261110-191500';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -3412,8 +3416,8 @@ function renderInd(){
 
   // ---- KPIs ----
   const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
-  document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', 'Base: planilha Controle de Situações' + (LAST_IMPORT && LAST_IMPORT.importedAt ? ' · última importação: ' + (LAST_IMPORT.filename||'') + ' em ' + new Date(LAST_IMPORT.importedAt).toLocaleDateString('pt-BR') + ' ' + new Date(LAST_IMPORT.importedAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) + ' (' + (LAST_IMPORT.rowCount||0) + ' linhas)' : '') + '. Para atualizar, importe o CSV novo com o botão ao lado.',
-    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'importe a planilha “Tarefas em aberto” (xlsx) para calcular'], ['Em aberto hoje', A.aberto, (() => { const ab = doAnoAll.filter(x=>!x.fin && x.canal!=='Logística'), c = m => ab.filter(x=>x.motivo===m).length, nLog = doAnoAll.filter(x=>!x.fin && x.canal==='Logística').length; return `Marketplace ${c('Marketplace')} · Transporte ${c('Transporte')} · Relacionamento ${c('Relacionamento')} · No prazo ${c('No prazo')} · Logística ${nLog}`; })()]]);
+  document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', '',
+    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'importe a planilha “Tarefas em aberto” (xlsx) para calcular'], ['Em aberto hoje', A.aberto, (() => { const ab = doAnoAll.filter(x=>!x.fin && x.canal!=='Logística'), c = m => ab.filter(x=>x.motivo===m).length, nLog = doAnoAll.filter(x=>!x.fin && x.canal==='Logística').length; const t = (n, l) => `<span class="pw-mini"><b>${n}</b>${l}</span>`; return `<span class="pw-minis">${t(c('Marketplace'),'Marketplace')}${t(c('Transporte'),'Transporte')}${t(c('Relacionamento'),'Relacionamento')}${t(c('No prazo'),'No prazo')}${t(nLog,'Logística')}</span>`; })()]]);
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);

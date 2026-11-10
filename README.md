@@ -268,3 +268,5 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Revisao: "A caminho / aguardando" e a ficha do caso na aba SLA Transportadora passaram a tratar os Encerrados sem chegada (novo contador). Natal: trenó com renas e duende em SVG.
 
 - Natal: renas agora vao na frente do trenó (sentido do voo).
+
+- Controle de Situacoes: removido o texto "Base: planilha... ultima importacao" do topo; "Em aberto hoje" mostra Marketplace/Transporte/Relacionamento/No prazo/Logistica em quadradinhos dentro do cartao.
