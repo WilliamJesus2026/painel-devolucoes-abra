@@ -400,6 +400,8 @@ body.loading .kpi-v,body.loading .kpi-s{color:transparent!important;background:l
 .slc-card.r .slc-bar i{background:var(--st-bad)} .slc-card.w .slc-bar i{background:var(--st-warn)}
 .slc-l{list-style:none;margin:0;padding:0;font-size:12px;color:var(--tx2);display:grid;gap:4px}
 .slc-l b{color:var(--tx)}
+.slc-med{cursor:default}.slc-med:hover{transform:none}
+.slc-med .slc-big b{font-size:30px}
 .slc-det{margin-top:10px;font-size:12px;color:var(--tx2)}
 .slc-det summary{cursor:pointer;font-weight:700;color:var(--acc)}
 .slc-det p{margin:6px 0 0;line-height:1.6;max-width:980px}
@@ -1867,7 +1869,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261110-172500';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261110-175000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -3453,10 +3455,14 @@ function renderInd(){
       const p1 = pf(A2.protFora, A2.protN), p2 = pf(A2.cdFora, A2.cdN), encerrados = its.filter(i=>i.encerrado).length;
       const card = (n, titulo, prazo, p, fora, tot, linhas, k) => `<button type="button" class="slc-card ${cor(p)}${IND.alerta===k ? ' on' : ''}" onclick="indSet('alerta','${k}')" title="Clique para listar só os casos em aberto que passaram do prazo"><div class="slc-h"><span class="slc-n">${n}</span>${titulo}<em>${prazo}</em></div>
         <div class="slc-big"><b>${p==null ? '—' : p+'%'}</b><span>${p==null ? 'sem casos medidos' : 'dos casos passaram do prazo'}</span></div><div class="slc-bar"><i style="width:${p==null ? 0 : p}%"></i></div><ul class="slc-l">${linhas.map(l => `<li>${l}</li>`).join('')}</ul></button>`;
+      const med = (n, titulo, v, prazo, qtd, expl) => { const p = v==null ? null : Math.min(100, Math.round(v/prazo*100)); return `<div class="slc-card slc-med ${v==null ? '' : v>prazo ? 'r' : v>prazo*0.7 ? 'w' : ''}"><div class="slc-h"><span class="slc-n">${n}</span>${titulo}<em>prazo ${prazo} d</em></div>
+        <div class="slc-big"><b>${fm(v)}</b><span>${v==null ? 'sem casos medidos' : v>prazo ? 'acima do prazo' : 'dentro do prazo'}</span></div><div class="slc-bar"><i style="width:${p==null ? 0 : p}%"></i></div><ul class="slc-l"><li>${expl}</li><li><b>${qtd}</b></li></ul></div>`; };
       box.innerHTML = `<div class="ind-h" style="display:flex;align-items:center;gap:10px">SLA da coleta — transportadora <button class="btn-exp" type="button" onclick="ir('colsla')">Ver detalhes ↗</button></div>
         <div class="slc-sub">Quanto tempo a coleta leva, em duas etapas: <b>1)</b> da criação da tarefa até incluirmos o protocolo de coleta e <b>2)</b> do protocolo até o produto chegar no CD. A barra mostra a parte dos casos que estourou o prazo.</div>
         <div class="slc-grid">${card(1, 'Criação → Protocolo', `prazo máx. ${PP} dias`, p1, A2.protFora, A2.protN, [`<b>${A2.protFora}</b> de <b>${A2.protN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.protAtrasoMed)}</b>`, `Tempo médio até o protocolo: <b>${fm(A2.protMedia)}</b>`, `<b>${nP}</b> ainda em aberto agora`], 'atrp')}
-        ${card(2, 'Protocolo → Chegada no CD', `prazo ${SLA} dias corridos`, p2, A2.cdFora, A2.cdN, [`<b>${A2.cdFora}</b> de <b>${A2.cdN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.cdAtrasoMed)}</b>`, `Tempo médio até chegar: <b>${fm(A2.media)}</b> (<b>${A2.chegaram}</b> já chegaram)`, `<b>${nC}</b> a caminho e já atrasados agora`], 'atrcd')}</div>
+        ${card(2, 'Protocolo → Chegada no CD', `prazo ${SLA} dias corridos`, p2, A2.cdFora, A2.cdN, [`<b>${A2.cdFora}</b> de <b>${A2.cdN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.cdAtrasoMed)}</b>`, `Tempo médio até chegar: <b>${fm(A2.media)}</b> (<b>${A2.chegaram}</b> já chegaram)`, `<b>${nC}</b> a caminho e já atrasados agora`], 'atrcd')}
+        ${med('⌀', 'Média criação → protocolo', A2.protMedia, PP, `${A2.protN} casos medidos`, 'Tempo médio para incluirmos o protocolo de coleta')}
+        ${med('⌀', 'Média protocolo → CD', A2.media, SLA, `${A2.chegaram} já chegaram no CD`, 'Tempo médio para o produto chegar no CD')}</div>
         <details class="slc-det"><summary>Como ler estes números</summary><p><b>Etapa 1</b> conta os dias entre criar a tarefa e a data em que o protocolo de coleta entra no sistema (máximo de ${PP} dias). <b>Etapa 2</b> conta os dias entre o protocolo e a chegada no CD (romaneio de entrada), com prazo de ${SLA} dias corridos; casos ainda a caminho contam os dias já passados. <b>Atraso médio</b> é quantos dias, em média, passaram do prazo só os casos que estouraram. ${encerrados ? `<b>${encerrados}</b> casos já finalizados no Controle e sem data de chegada ficam fora da etapa 2, porque não dá para medir. ` : ''}Clique num cartão para listar os casos em aberto que passaram do prazo.</p></details>`;
     }
   }

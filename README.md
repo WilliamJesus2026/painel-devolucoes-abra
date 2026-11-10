@@ -262,3 +262,5 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Tema de Natal em todas as abas (até 07/01/2027), com duende na cordinha e Papai Noel no trenó no cabeçalho. Botão "🎄 Natal" liga/desliga.
 
 - Natal agora liga ja na primeira aba ao abrir o painel.
+
+- SLA da coleta: voltaram os 4 indices (2 cartoes de % fora do prazo + 2 de media criacao->protocolo e protocolo->CD).
