@@ -122,7 +122,19 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 @keyframes cubeSpin{from{transform:rotateX(-18deg) rotateY(0)}to{transform:rotateX(-18deg) rotateY(360deg)}}
 #snow{position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;pointer-events:none;display:none}
 body.natal #snow{display:block}
-body.natal .hero-card{background:linear-gradient(125deg,#450a0a 0%,#991b1b 48%,#14532d 100%);box-shadow:0 22px 44px -18px rgba(127,29,29,.75),0 2px 0 rgba(255,255,255,.18) inset,0 -3px 0 rgba(0,0,0,.28) inset}
+#natal-deco{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;display:none;z-index:1}
+body.natal #natal-deco{display:block}
+.nd-trio{position:absolute;top:10px;left:-170px;font-size:24px;white-space:nowrap;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));animation:nd-voa 16s linear infinite}
+.nd-trio i{font-style:normal;display:inline-block;animation:nd-bal 1.1s ease-in-out infinite alternate}
+.nd-trio .tr{margin-left:-2px;font-size:20px;opacity:.7;letter-spacing:-3px}
+@keyframes nd-voa{0%{transform:translate(0,14px) rotate(-6deg)}20%{transform:translate(22vw,0) rotate(-3deg)}50%{transform:translate(52vw,10px) rotate(-6deg)}80%{transform:translate(82vw,-2px) rotate(-3deg)}100%{transform:translate(112vw,12px) rotate(-5deg)}}
+@keyframes nd-bal{from{transform:translateY(-2px)}to{transform:translateY(3px)}}
+.nd-corda{position:absolute;right:34%;top:0;width:2px;height:48px;background:repeating-linear-gradient(#fde68a 0 4px,#b45309 4px 6px);transform-origin:top center;animation:nd-desce 5s ease-in-out infinite}
+.nd-corda b{position:absolute;left:50%;bottom:-26px;font-size:26px;transform:translateX(-50%);filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+@keyframes nd-desce{0%,100%{height:12px;transform:rotate(5deg)}50%{height:48px;transform:rotate(-5deg)}}
+@media (prefers-reduced-motion:reduce){.nd-trio,.nd-trio i,.nd-corda{animation:none}.nd-trio{left:40%}.nd-corda{height:34px}}
+@media (max-width:640px){.nd-corda{right:14%}}
+body.natal .hero-card,body.natal.in-perdas .hero-card{background:linear-gradient(125deg,#450a0a 0%,#991b1b 48%,#14532d 100%);box-shadow:0 22px 44px -18px rgba(127,29,29,.75),0 2px 0 rgba(255,255,255,.18) inset,0 -3px 0 rgba(0,0,0,.28) inset}
 body.natal .tb-title{text-shadow:0 1px 0 #7f1d1d,0 2px 0 #651616,0 3px 0 #4c1010,0 7px 14px rgba(0,0,0,.4)}
 body.natal .tb-title::after{content:" 🎄";font-size:.85em}
 body.natal .hero-kick::after{content:" · Boas Festas";color:#fde68a}
@@ -130,10 +142,10 @@ body.natal .hero-card::after{content:"";position:absolute;left:18px;right:18px;t
   background:radial-gradient(circle at 10px 5px,#fde047 0 3px,transparent 4px) 0 0/44px 9px repeat-x,radial-gradient(circle at 32px 5px,#34d399 0 3px,transparent 4px) 0 0/44px 9px repeat-x;
   filter:drop-shadow(0 0 5px rgba(253,224,71,.85));animation:luzes 1.8s ease-in-out infinite alternate}
 @keyframes luzes{from{opacity:.5}to{opacity:1}}
-body.natal #panel-ind .pw-hero,body.natal #panel-sla .pw-hero{background:linear-gradient(120deg,#3f0a0a 0%,#991b1b 48%,#14532d 100%);box-shadow:0 24px 50px -22px rgba(153,27,27,.7),0 1px 0 rgba(255,255,255,.16) inset}
-body.natal #panel-ind .pw-hero::before,body.natal #panel-sla .pw-hero::before{background:#FACC15;opacity:.32}
-body.natal #panel-ind .pw-hero::after,body.natal #panel-sla .pw-hero::after{background:#22c55e;opacity:.3}
-body.natal .nav.on{background:#b91c1c}
+body.natal .pw-hero{background:linear-gradient(120deg,#3f0a0a 0%,#991b1b 48%,#14532d 100%);box-shadow:0 24px 50px -22px rgba(153,27,27,.7),0 1px 0 rgba(255,255,255,.16) inset}
+body.natal .pw-hero::before{background:#FACC15;opacity:.32}
+body.natal .pw-hero::after{background:#22c55e;opacity:.3}
+body.natal .nav.on,body.natal.in-perdas .nav.on{background:#b91c1c}
 .hero-kick{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.62);transition:.2s}
 .tb-title{font-size:21px;font-weight:800;letter-spacing:-.3px;line-height:1.15;color:#fff;
   text-shadow:0 1px 0 #1d4f8a,0 2px 0 #174077,0 3px 0 #123565,0 7px 14px rgba(0,0,0,.4)}
@@ -370,6 +382,27 @@ body.loading .kpi-v,body.loading .kpi-s{color:transparent!important;background:l
 #cf-pop .cf-bt{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
 .cf-info{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:12px;font-weight:700;color:var(--acc)}
 .cf-info[hidden]{display:none}
+.slc{margin-bottom:16px}
+.slc-sub{font-size:12px;color:var(--tx2);margin:2px 0 12px;line-height:1.55;max-width:980px}
+.slc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.slc-card{position:relative;text-align:left;background:var(--srf);border:1px solid var(--bd);border-radius:16px;padding:16px 18px 14px 22px;box-shadow:var(--sh);color:var(--tx);font:inherit;cursor:pointer;transition:.15s;overflow:hidden}
+.slc-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--st-ok)}
+.slc-card.r::before{background:var(--st-bad)} .slc-card.w::before{background:var(--st-warn)}
+.slc-card:hover{transform:translateY(-2px)} .slc-card.on{outline:2px solid var(--acc)}
+.slc-h{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700}
+.slc-n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--acc);color:#fff;font-size:11.5px;flex-shrink:0}
+.slc-h em{margin-left:auto;font-style:normal;font-size:10.5px;font-weight:700;color:var(--tx2);background:var(--srf1);padding:3px 9px;border-radius:999px;white-space:nowrap}
+.slc-big{display:flex;align-items:baseline;gap:8px;margin:10px 0 8px}
+.slc-big b{font-size:34px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.slc-big span{font-size:12.5px;color:var(--tx2);font-weight:600}
+.slc-bar{height:8px;border-radius:99px;background:var(--srf1);overflow:hidden;margin-bottom:10px}
+.slc-bar i{display:block;height:100%;border-radius:99px;background:var(--st-ok);transition:width .4s}
+.slc-card.r .slc-bar i{background:var(--st-bad)} .slc-card.w .slc-bar i{background:var(--st-warn)}
+.slc-l{list-style:none;margin:0;padding:0;font-size:12px;color:var(--tx2);display:grid;gap:4px}
+.slc-l b{color:var(--tx)}
+.slc-det{margin-top:10px;font-size:12px;color:var(--tx2)}
+.slc-det summary{cursor:pointer;font-weight:700;color:var(--acc)}
+.slc-det p{margin:6px 0 0;line-height:1.6;max-width:980px}
 .alerta-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px}
 .alerta{border:1px solid var(--bd);border-left:4px solid var(--st-ok);background:var(--srf);border-radius:12px;padding:10px 14px;cursor:pointer;text-align:left;color:var(--tx);box-shadow:var(--sh);font:inherit;transition:.15s}
 .alerta:hover{transform:translateY(-2px)}
@@ -729,7 +762,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
           <button class="hchip hc-pur" type="button" onclick="ir('rea')" title="Coleta feita, aguardando o CD"><b id="hc-rea">0</b> aguardando CD</button>
           <span class="tb-ref hc-ref" id="tb-ref">—</span>
         </div>
-        <button class="hero-search" type="button" id="btn-natal" onclick="natalToggle()" title="Ligar/desligar o tema de Natal" style="display:none">🎄</button>
+        <button class="hero-search" type="button" id="btn-natal" onclick="natalToggle()" title="Ligar/desligar o tema de Natal" style="display:none">🎄 Natal</button>
         <button class="hero-search" type="button" id="btn-desfazer" onclick="desfazer()" title="Nada para desfazer" disabled style="opacity:.5"><span id="btn-desfazer-n">↶ Desfazer</span></button>
         <button class="hero-search" type="button" onclick="openPalette()" aria-label="Buscar"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke-width="2" stroke-linecap="round"/></svg><span>Buscar cliente, NF ou CPF</span><kbd>Ctrl K</kbd></button>
         <button class="hero-search" type="button" id="hero-user" onclick="menuConta()" style="display:none" title="Conta e troca de usuário"><span id="hero-user-n"></span></button>
@@ -1834,7 +1867,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261110-162438';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261110-170500';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2074,14 +2107,17 @@ document.addEventListener('keydown', e => {
 });
 
 // ================= TEMA DE NATAL (temporario): Controle de Situacoes e SLA de Apontamento, ate 06/01/2027 =================
-const NATAL_ATE = new Date(2027, 0, 7), NATAL_ABAS = ['ind','sla'];
+const NATAL_ATE = new Date(2027, 0, 7);
 let _neve = null;
 const natalLigado = () => { try { return new Date() < NATAL_ATE && localStorage.getItem('natal_off')!=='1'; } catch(e){ return new Date() < NATAL_ATE; } };
 function natalAplica(id){
   id = id || ((document.querySelector('.panel.on')||{id:''}).id.replace(/^panel-/,''));
-  const naAba = NATAL_ABAS.includes(id) && new Date() < NATAL_ATE, on = naAba && natalLigado();
+  const naAba = new Date() < NATAL_ATE, on = naAba && natalLigado();   // todas as abas; o botao 🎄 reverte
   document.body.classList.toggle('natal', on);
-  const b = document.getElementById('btn-natal'); if (b){ b.style.display = naAba ? '' : 'none'; b.style.opacity = on ? '1' : '.55'; }
+  const b = document.getElementById('btn-natal'); if (b){ b.style.display = naAba ? '' : 'none'; b.style.opacity = on ? '1' : '.6'; b.title = on ? 'Desligar o tema de Natal (volta ao visual normal)' : 'Ligar o tema de Natal'; }
+  const hc = document.querySelector('.hero-card');
+  if (hc && on && !document.getElementById('natal-deco')){ const d = document.createElement('div'); d.id = 'natal-deco'; d.setAttribute('aria-hidden','true');
+    d.innerHTML = '<div class="nd-trio"><i>🎅🛷</i><i class="tr">🦌🦌</i></div><div class="nd-corda"><b>🧝</b></div>'; hc.appendChild(d); }
   on ? neveLiga() : neveDesliga();
 }
 function natalToggle(){ try { localStorage.setItem('natal_off', localStorage.getItem('natal_off')==='1' ? '0' : '1'); } catch(e){} natalAplica(); }
@@ -3223,7 +3259,7 @@ const fmtDt = d => d ? d.toLocaleDateString('pt-BR') : '—';
 const medianaDe = a => { if (!a.length) return null; const t = [...a].sort((p,q)=>p-q), m = t.length>>1; return t.length%2 ? t[m] : (t[m-1]+t[m])/2; };
 const mediaArr = a => a.length ? a.reduce((p,q)=>p+q,0)/a.length : null;
 function colslaAgg(arr){
-  const ch = arr.filter(i => i.diasTotal!=null), tr = arr.filter(i => !i.chegou);
+  const ch = arr.filter(i => i.diasTotal!=null), tr = arr.filter(i => !i.chegou && !i.encerrado);
   return { n:arr.length, chegaram:ch.length, media:mediaArr(ch.map(i=>i.diasTotal)), mediana:medianaDe(ch.map(i=>i.diasTotal)), dentro:ch.filter(i=>i.diasTotal<=SLA).length,
     transito:tr.length, atrasados:tr.filter(i=>i.farol==='Atrasado').length, comPrevInf:tr.filter(i=>i.prevTipo==='informada').length, atrasoPrev:tr.filter(i=>i.atrasoPrev>0).length,
     ...(() => { const cp = arr.filter(i=>i.atrasoProt!=null), fp = cp.filter(i=>i.atrasoProt>0), cc = arr.filter(i=>i.atrasoCd!=null), fc = cc.filter(i=>i.atrasoCd>0);
@@ -3246,12 +3282,13 @@ function colslaCalcula(){
     const cri = parseBR(x.criada_em) || x.d, rcl = parseBR(x.recolhido_em), exata = parseBR(x.recebido_cd_em);
     const cand = chegou && !exata ? (parseBR(x.finalizado_em) || parseBR(x.ultimo_apontamento)) : null, aprox = (cand && (!rcl || cand > rcl)) ? cand : null, fim = chegou ? (exata || aprox) : null;   // so aceita a data aproximada se for depois da coleta (senao seria a propria coleta)
     const diasAberto = Math.max(0, daysBetween(prog, h0)), diasTotal = fim ? Math.max(0, daysBetween(prog, fim)) : null;
-    const it = { x, id:x.id, chave:x.chave, carr:x.carr, cri, prog, rcl, fim, fimTipo: exata ? 'exata' : (aprox ? 'aprox.' : null), chegou, estagio: chegou ? 'No CD' : ((rec || x.coletaRealizada || rcl) ? 'A caminho do CD' : 'Aguardando coleta'),
+    const enc = !chegou && !!x.fin;   // ja encerrado no Controle, sem data de chegada: nao da para medir o tempo ate o CD (antes contava como 'a caminho' e atrasado)
+    const it = { x, encerrado:enc, id:x.id, chave:x.chave, carr:x.carr, cri, prog, rcl, fim, fimTipo: exata ? 'exata' : (aprox ? 'aprox.' : null), chegou, estagio: chegou ? 'No CD' : enc ? 'Encerrado' : ((rec || x.coletaRealizada || rcl) ? 'A caminho do CD' : 'Aguardando coleta'),
       diasAberto, diasTotal, diasCriProg: cri ? Math.max(0, daysBetween(cri, prog)) : null, diasProtColeta: rcl ? Math.max(0, daysBetween(prog, rcl)) : null, diasColetaCd: (rcl && fim) ? Math.max(0, daysBetween(rcl, fim)) : null,
       diasCriFim: (cri && fim) ? Math.max(0, daysBetween(cri, fim)) : null };
     it.atrasoProt = it.diasCriProg!=null ? Math.max(0, it.diasCriProg - CONFIG.PRAZO_PROTOCOLO_DIAS) : null;   // etapa 1
-    it.atrasoCd = chegou ? (diasTotal!=null ? Math.max(0, diasTotal - SLA) : null) : Math.max(0, diasAberto - SLA);   // etapa 2 (a caminho: dias ja passados alem do prazo)
-    it.farol = chegou ? (diasTotal<=SLA ? 'Dentro do prazo' : 'Fora do prazo') : (diasAberto>SLA ? 'Atrasado' : diasAberto>=SLA-CONFIG.RISCO_JANELA_DIAS ? 'Em risco' : 'No prazo');
+    it.atrasoCd = chegou ? (diasTotal!=null ? Math.max(0, diasTotal - SLA) : null) : (enc ? null : Math.max(0, diasAberto - SLA));   // etapa 2 (a caminho: dias ja passados alem do prazo)
+    it.farol = chegou ? (diasTotal<=SLA ? 'Dentro do prazo' : 'Fora do prazo') : enc ? 'Encerrado' : (diasAberto>SLA ? 'Atrasado' : diasAberto>=SLA-CONFIG.RISCO_JANELA_DIAS ? 'Em risco' : 'No prazo');
     itens.push(it);
   });
   // previsao: a informada vale; sem ela, estimamos = programacao + mediana recente da transportadora (cai para a geral e, sem historico, para o prazo)
@@ -3259,7 +3296,7 @@ function colslaCalcula(){
   const medC = new Map(); recentes.forEach(i => { if (!medC.has(i.carr)) medC.set(i.carr, []); medC.get(i.carr).push(i.diasTotal); });
   const medG = recentes.length >= 3 ? medianaDe(recentes.map(i=>i.diasTotal)) : null;
   itens.forEach(it => {
-    if (it.chegou) return;
+    if (it.chegou || it.encerrado) return;
     const inf = iso2d(it.x.previsao_coleta), mc = (medC.get(it.carr)||[]).length >= 3 ? medianaDe(medC.get(it.carr)) : null;
     if (inf){ it.prevData = inf; it.prevTipo = 'informada'; }
     else { const base = mc!=null ? mc : (medG!=null ? medG : SLA); it.prevData = new Date(it.prog.getTime() + Math.round(base)*86400000); it.prevTipo = 'estimada'; it.prevBase = mc!=null ? 'transportadora' : (medG!=null ? 'geral' : 'prazo'); }
@@ -3411,12 +3448,15 @@ function renderInd(){
     else {
       const A2 = colslaAgg(its), PP = CONFIG.PRAZO_PROTOCOLO_DIAS, pc = (a,b) => b ? Math.round(a/b*100)+'%' : '—', fm = v => v==null ? '—' : fmt1(v)+' d';
       const nP = its.filter(i=>!i.x.fin && i.atrasoProt>0).length, nC = its.filter(i=>!i.x.fin && i.atrasoCd>0).length;
-      const cx = (t, big, sub, cl, k) => `<button type="button" class="alerta ${cl}${k && IND.alerta===k ? ' on' : ''}" ${k ? `onclick="indSet('alerta','${k}')" title="Clique para filtrar a lista pelos casos em aberto"` : 'style="cursor:default"'}><b>${big}</b><span>${t}<br><small style="color:var(--tx3)">${sub}</small></span></button>`;
+      const pf = (a,b) => b ? Math.round(a/b*100) : null, cor = p => p==null ? '' : p>30 ? 'r' : p>10 ? 'w' : '';
+      const p1 = pf(A2.protFora, A2.protN), p2 = pf(A2.cdFora, A2.cdN), encerrados = its.filter(i=>i.encerrado).length;
+      const card = (n, titulo, prazo, p, fora, tot, linhas, k) => `<button type="button" class="slc-card ${cor(p)}${IND.alerta===k ? ' on' : ''}" onclick="indSet('alerta','${k}')" title="Clique para listar só os casos em aberto que passaram do prazo"><div class="slc-h"><span class="slc-n">${n}</span>${titulo}<em>${prazo}</em></div>
+        <div class="slc-big"><b>${p==null ? '—' : p+'%'}</b><span>${p==null ? 'sem casos medidos' : 'dos casos passaram do prazo'}</span></div><div class="slc-bar"><i style="width:${p==null ? 0 : p}%"></i></div><ul class="slc-l">${linhas.map(l => `<li>${l}</li>`).join('')}</ul></button>`;
       box.innerHTML = `<div class="ind-h" style="display:flex;align-items:center;gap:10px">SLA da coleta — transportadora <button class="btn-exp" type="button" onclick="ir('colsla')">Ver detalhes ↗</button></div>
-        <div class="alerta-bar">${cx(`Etapa 1 · criação → protocolo fora do prazo (máx. ${PP} d)`, pc(A2.protFora, A2.protN), `${A2.protFora} de ${A2.protN} casos · atraso médio ${fm(A2.protAtrasoMed)} · ${nP} em aberto`, A2.protN && A2.protFora/A2.protN>0.3 ? 'r' : 'w', 'atrp')}
-        ${cx(`Etapa 2 · protocolo → CD fora do prazo (${SLA} d corridos)`, pc(A2.cdFora, A2.cdN), `${A2.cdFora} de ${A2.cdN} casos · atraso médio ${fm(A2.cdAtrasoMed)} · ${nC} em aberto`, A2.cdN && A2.cdFora/A2.cdN>0.3 ? 'r' : 'w', 'atrcd')}
-        ${cx('Média criação → protocolo', fm(A2.protMedia), `prazo máx. ${PP} d · ${A2.protN} casos`, A2.protMedia!=null && A2.protMedia>PP ? 'r' : '', '')}
-        ${cx('Média protocolo → CD', fm(A2.media), `${A2.chegaram} chegaram · prazo ${SLA} d`, A2.media!=null && A2.media>SLA ? 'r' : '', '')}</div>`;
+        <div class="slc-sub">Quanto tempo a coleta leva, em duas etapas: <b>1)</b> da criação da tarefa até incluirmos o protocolo de coleta e <b>2)</b> do protocolo até o produto chegar no CD. A barra mostra a parte dos casos que estourou o prazo.</div>
+        <div class="slc-grid">${card(1, 'Criação → Protocolo', `prazo máx. ${PP} dias`, p1, A2.protFora, A2.protN, [`<b>${A2.protFora}</b> de <b>${A2.protN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.protAtrasoMed)}</b>`, `Tempo médio até o protocolo: <b>${fm(A2.protMedia)}</b>`, `<b>${nP}</b> ainda em aberto agora`], 'atrp')}
+        ${card(2, 'Protocolo → Chegada no CD', `prazo ${SLA} dias corridos`, p2, A2.cdFora, A2.cdN, [`<b>${A2.cdFora}</b> de <b>${A2.cdN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.cdAtrasoMed)}</b>`, `Tempo médio até chegar: <b>${fm(A2.media)}</b> (<b>${A2.chegaram}</b> já chegaram)`, `<b>${nC}</b> a caminho e já atrasados agora`], 'atrcd')}</div>
+        <details class="slc-det"><summary>Como ler estes números</summary><p><b>Etapa 1</b> conta os dias entre criar a tarefa e a data em que o protocolo de coleta entra no sistema (máximo de ${PP} dias). <b>Etapa 2</b> conta os dias entre o protocolo e a chegada no CD (romaneio de entrada), com prazo de ${SLA} dias corridos; casos ainda a caminho contam os dias já passados. <b>Atraso médio</b> é quantos dias, em média, passaram do prazo só os casos que estouraram. ${encerrados ? `<b>${encerrados}</b> casos já finalizados no Controle e sem data de chegada ficam fora da etapa 2, porque não dá para medir. ` : ''}Clique num cartão para listar os casos em aberto que passaram do prazo.</p></details>`;
     }
   }
   colsAplica(); indViewsRender();
@@ -4137,7 +4177,7 @@ function csSet(k, v){
   renderColSla();
 }
 let CS_LISTA = [], _csOk = false;
-const FAROL_COR = { 'Atrasado':'var(--st-bad)', 'Em risco':'var(--st-warn)', 'No prazo':'var(--st-ok)', 'Fora do prazo':'var(--st-bad)', 'Dentro do prazo':'var(--st-ok)' };
+const FAROL_COR = { 'Atrasado':'var(--st-bad)', 'Em risco':'var(--st-warn)', 'No prazo':'var(--st-ok)', 'Fora do prazo':'var(--st-bad)', 'Dentro do prazo':'var(--st-ok)', 'Encerrado':'var(--tx3)' };
 const etapaTd = (d, a) => d==null ? '—' : (a>0 ? '<b style="color:var(--st-bad)">'+d+' d</b> <small style="color:var(--st-bad)">+'+a+'</small>' : '<span style="color:var(--st-ok)">'+d+' d</span>');
 function csPrevCell(it){
   if (it.chegou) return '<td style="color:var(--tx3)">—</td>';
@@ -4179,8 +4219,8 @@ function renderColSla(){
   const carrs = [...new Set(todos.map(i=>i.carr))].map(c => ({ c, n:todos.filter(i=>i.carr===c && f(i,['carr'])).length })).filter(o=>o.n).sort((a,b)=>b.n-a.n);
   document.getElementById('cs-fbody').innerHTML =
     `<div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o => chip(CS.carrs.has(o.c), `csSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>
-     <div class="ind-fr"><b>Estágio</b><div>${['Aguardando coleta','A caminho do CD','No CD'].map(e => chip(CS.est===e, `csSet('est','${e}')`, e, todos.filter(i=>i.estagio===e && f(i,['est'])).length)).join('')}</div></div>
-     <div class="ind-fr"><b>Farol</b><div>${['Atrasado','Em risco','No prazo','Fora do prazo','Dentro do prazo'].map(e => chip(CS.farol===e, `csSet('farol','${e}')`, e, todos.filter(i=>i.farol===e && f(i,['farol'])).length)).join('')}</div></div>
+     <div class="ind-fr"><b>Estágio</b><div>${['Aguardando coleta','A caminho do CD','No CD','Encerrado'].map(e => chip(CS.est===e, `csSet('est','${e}')`, e, todos.filter(i=>i.estagio===e && f(i,['est'])).length)).join('')}</div></div>
+     <div class="ind-fr"><b>Farol</b><div>${['Atrasado','Em risco','No prazo','Fora do prazo','Dentro do prazo','Encerrado'].map(e => chip(CS.farol===e, `csSet('farol','${e}')`, e, todos.filter(i=>i.farol===e && f(i,['farol'])).length)).join('')}</div></div>
      <div class="ind-fr"><b>Atraso por etapa</b><div>${chip(CS.atr==='prot', "csSet('atr','prot')", 'Protocolo fora do prazo (+' + CONFIG.PRAZO_PROTOCOLO_DIAS + ' d)', todos.filter(i=>i.atrasoProt>0 && f(i,['atr'])).length)}${chip(CS.atr==='cd', "csSet('atr','cd')", 'Além do prazo até o CD (+' + SLA + ' d)', todos.filter(i=>i.atrasoCd>0 && f(i,['atr'])).length)}</div></div>`;
   document.getElementById('cs-limpar').style.visibility = (CS.carrs.size || CS.est || CS.farol || CS.atr || CS.q) ? 'visible' : 'hidden';
   // funil: onde o tempo e gasto

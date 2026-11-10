@@ -255,3 +255,8 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - **Tema de Natal (temporário)** só nas abas **Controle de Situações** e **SLA de Apontamento**: cabeçalho vermelho/verde com luzes piscando, neve no cabeçalho e cartões de indicadores natalinos. Liga/desliga pelo botão 🎄 do topo e se desativa sozinho em 07/01/2027 (`NATAL_ATE`). Respeita "reduzir movimento" do sistema (sem neve).
 - **Filtros do Controle e das Tratativas mais limpos:** com "Em aberto" os chips mostram só o número de casos abertos, os chips sem casos ficam escondidos atrás de "+ N sem casos", visual de pílulas com contagem e menos texto. **Motivo da pendência** sempre mostra Marketplace, Transporte, Relacionamento, No prazo e Logística (Logística = casos do setor Logística).
 - **Cartão "Em aberto hoje"** do Controle mostra a divisão por Marketplace, Transporte, Relacionamento, No prazo e Logística.
+
+## SLA da coleta, Natal em todas as abas (10/11/2026)
+- SLA da coleta: caso já finalizado no Controle sem data de chegada no CD agora aparece como "Encerrado" e fica fora da etapa 2 (antes contava como a caminho e atrasado, inflando % e atraso médio).
+- Cartões novos no topo de Controle de Situações: etapa 1 (Criação → Protocolo, 3 dias) e etapa 2 (Protocolo → CD, 20 dias corridos), com barra, médias e "Como ler estes números".
+- Tema de Natal em todas as abas (até 07/01/2027), com duende na cordinha e Papai Noel no trenó no cabeçalho. Botão "🎄 Natal" liga/desliga.
