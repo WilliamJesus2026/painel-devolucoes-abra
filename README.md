@@ -272,3 +272,5 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Controle de Situacoes: removido o texto "Base: planilha... ultima importacao" do topo; "Em aberto hoje" mostra Marketplace/Transporte/Relacionamento/No prazo/Logistica em quadradinhos dentro do cartao.
 
 - Controle de Situacoes: cartoes principais compactos; motivos (Marketplace/Transporte/Relacionamento/No prazo/Logistica) em pilulas pequenas numa faixa abaixo deles.
+
+- Controle de Situacoes: pilulas de motivo clicaveis (filtram os casos em aberto, varias ao mesmo tempo; Logistica filtra o canal; botao limpar).

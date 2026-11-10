@@ -444,7 +444,8 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .pw-hero h2{font-size:28px;font-weight:800;letter-spacing:-.5px;margin:4px 0 2px;text-shadow:0 2px 0 rgba(0,0,0,.18),0 10px 24px rgba(0,0,0,.35)}
 .pw-minis{position:relative;z-index:1;display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:8px}
 .pw-minis-l{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-right:4px}
-.pw-mini{padding:2px 9px;border-radius:99px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);font-size:10px;color:rgba(255,255,255,.82);white-space:nowrap}
+.pw-mini{font:inherit;cursor:pointer;transition:.15s;padding:2px 9px;border-radius:99px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);font-size:10px;color:rgba(255,255,255,.82);white-space:nowrap}
+.pw-mini:hover{background:rgba(255,255,255,.28);transform:translateY(-1px)}.pw-mini.on{background:#fff;color:#7f1d1d;border-color:#fff}.pw-mini.on b{color:#7f1d1d}.pw-mini.lim{background:transparent;border-style:dashed}
 .pw-mini b{font-size:11px;color:#fff;font-variant-numeric:tabular-nums}
 #ph-ind .pw-hero{padding:16px 20px 14px}
 #ph-ind .pw-stats{margin-top:12px;gap:8px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
@@ -1885,7 +1886,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261110-193500';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261110-195500';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -3425,7 +3426,8 @@ function renderInd(){
   document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', '',
     [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'importe a planilha “Tarefas em aberto” (xlsx) para calcular'], ['Em aberto hoje', A.aberto, 'por motivo, logo abaixo']],
     undefined, (() => { const ab = doAnoAll.filter(x=>!x.fin && x.canal!=='Logística'), c = m => ab.filter(x=>x.motivo===m).length, nLog = doAnoAll.filter(x=>!x.fin && x.canal==='Logística').length;
-      const t = (n, l) => `<span class="pw-mini"><b>${n}</b> ${l}</span>`; return `<div class="pw-minis"><span class="pw-minis-l">Em aberto por motivo</span>${t(c('Marketplace'),'Marketplace')}${t(c('Transporte'),'Transporte')}${t(c('Relacionamento'),'Relacionamento')}${t(c('No prazo'),'No prazo')}${t(nLog,'Logística')}</div>`; })());
+      const t = (n, l, k, v, on) => `<button type="button" class="pw-mini${on ? ' on' : ''}" onclick="indSet('${k}','${v}')" title="${on ? 'Clique para tirar o filtro' : 'Clique para filtrar os casos em aberto: '+l}"><b>${n}</b> ${l}</button>`, mt = m => t(c(m), m, 'motivo', m, IND.motivos.has(m));
+      return `<div class="pw-minis"><span class="pw-minis-l">Em aberto por motivo</span>${mt('Marketplace')}${mt('Transporte')}${mt('Relacionamento')}${mt('No prazo')}${t(nLog, 'Logística', 'canal', 'Logística', IND.canal==='Logística')}${(IND.motivos.size || IND.canal==='Logística') ? `<button type="button" class="pw-mini lim" onclick="IND.motivos.clear();IND.canal='';renderInd()">✕ limpar</button>` : ''}</div>`; })());
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
