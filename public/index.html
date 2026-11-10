@@ -442,9 +442,15 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .pw-top{position:relative;display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;z-index:1}
 .pw-kick{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.65)}
 .pw-hero h2{font-size:28px;font-weight:800;letter-spacing:-.5px;margin:4px 0 2px;text-shadow:0 2px 0 rgba(0,0,0,.18),0 10px 24px rgba(0,0,0,.35)}
-.pw-minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:6px}
-.pw-mini{display:flex;flex-direction:column;gap:1px;padding:5px 8px;border-radius:9px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);font-size:9.5px;line-height:1.2;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.pw-mini b{font-size:15px;color:#fff;font-variant-numeric:tabular-nums}
+.pw-minis{position:relative;z-index:1;display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:8px}
+.pw-minis-l{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-right:4px}
+.pw-mini{padding:2px 9px;border-radius:99px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);font-size:10px;color:rgba(255,255,255,.82);white-space:nowrap}
+.pw-mini b{font-size:11px;color:#fff;font-variant-numeric:tabular-nums}
+#ph-ind .pw-hero{padding:16px 20px 14px}
+#ph-ind .pw-stats{margin-top:12px;gap:8px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+#ph-ind .pw-stat{padding:8px 12px}
+#ph-ind .pw-stat .v{font-size:22px;margin:1px 0 2px}
+#ph-ind .pw-stat .l{font-size:9.5px}#ph-ind .pw-stat .n{font-size:9.5px}
 .pw-sub:empty{display:none}
 .pw-sub{font-size:12px;color:rgba(255,255,255,.72);max-width:520px}
 .pw-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
@@ -1879,7 +1885,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261110-191500';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261110-193500';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -3072,10 +3078,10 @@ function ligaStats(id, lista){
     st.title = 'Clique para ver os casos'; st.onkeydown = e => { if (e.key==='Enter') st.click(); };
   });
 }
-function pwHero(kick, title, sub, stats, acao){
+function pwHero(kick, title, sub, stats, acao, extra){
   return `<div class="pw-hero"><div class="pw-top"><div><div class="pw-kick">${kick}</div><h2>${title}</h2><div class="pw-sub">${sub}</div></div>
     <div class="pw-actions no-print">${acao!==undefined ? acao : `<button class="pw-btn btn-import" type="button" onclick="document.getElementById('file-input').click()">⭱ Importar planilha</button>`}</div></div>
-    <div class="pw-stats">${stats.map(([l,v,n,go,sm]) => `<div class="pw-stat"${go?` onclick="${go}" style="cursor:pointer"`:''}><div class="l">${l}</div><div class="v${sm?' sm':''}">${v}</div><div class="n">${n||''}</div></div>`).join('')}</div></div>`;
+    <div class="pw-stats">${stats.map(([l,v,n,go,sm]) => `<div class="pw-stat"${go?` onclick="${go}" style="cursor:pointer"`:''}><div class="l">${l}</div><div class="v${sm?' sm':''}">${v}</div><div class="n">${n||''}</div></div>`).join('')}</div>${extra||''}</div>`;
 }
 const PH_TITLES = { at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD', 'col-all':'Todos os protocolos' };
 const K_ALL = () => COLETAS_ARQ.length;
@@ -3417,7 +3423,9 @@ function renderInd(){
   // ---- KPIs ----
   const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
   document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', '',
-    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'importe a planilha “Tarefas em aberto” (xlsx) para calcular'], ['Em aberto hoje', A.aberto, (() => { const ab = doAnoAll.filter(x=>!x.fin && x.canal!=='Logística'), c = m => ab.filter(x=>x.motivo===m).length, nLog = doAnoAll.filter(x=>!x.fin && x.canal==='Logística').length; const t = (n, l) => `<span class="pw-mini"><b>${n}</b>${l}</span>`; return `<span class="pw-minis">${t(c('Marketplace'),'Marketplace')}${t(c('Transporte'),'Transporte')}${t(c('Relacionamento'),'Relacionamento')}${t(c('No prazo'),'No prazo')}${t(nLog,'Logística')}</span>`; })()]]);
+    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'importe a planilha “Tarefas em aberto” (xlsx) para calcular'], ['Em aberto hoje', A.aberto, 'por motivo, logo abaixo']],
+    undefined, (() => { const ab = doAnoAll.filter(x=>!x.fin && x.canal!=='Logística'), c = m => ab.filter(x=>x.motivo===m).length, nLog = doAnoAll.filter(x=>!x.fin && x.canal==='Logística').length;
+      const t = (n, l) => `<span class="pw-mini"><b>${n}</b> ${l}</span>`; return `<div class="pw-minis"><span class="pw-minis-l">Em aberto por motivo</span>${t(c('Marketplace'),'Marketplace')}${t(c('Transporte'),'Transporte')}${t(c('Relacionamento'),'Relacionamento')}${t(c('No prazo'),'No prazo')}${t(nLog,'Logística')}</div>`; })());
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
