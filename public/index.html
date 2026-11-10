@@ -1867,7 +1867,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261110-170500';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261110-172500';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2120,6 +2120,7 @@ function natalAplica(id){
     d.innerHTML = '<div class="nd-trio"><i>🎅🛷</i><i class="tr">🦌🦌</i></div><div class="nd-corda"><b>🧝</b></div>'; hc.appendChild(d); }
   on ? neveLiga() : neveDesliga();
 }
+setTimeout(() => { try { natalAplica(); } catch(e){} }, 0); window.addEventListener('load', () => { try { natalAplica(); } catch(e){} });   // liga o tema ja na primeira aba, sem precisar trocar de aba
 function natalToggle(){ try { localStorage.setItem('natal_off', localStorage.getItem('natal_off')==='1' ? '0' : '1'); } catch(e){} natalAplica(); }
 function neveLiga(){
   const card = document.querySelector('.hero-card'); if (!card || _neve || (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches)) return;

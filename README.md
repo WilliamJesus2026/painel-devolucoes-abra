@@ -260,3 +260,5 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - SLA da coleta: caso já finalizado no Controle sem data de chegada no CD agora aparece como "Encerrado" e fica fora da etapa 2 (antes contava como a caminho e atrasado, inflando % e atraso médio).
 - Cartões novos no topo de Controle de Situações: etapa 1 (Criação → Protocolo, 3 dias) e etapa 2 (Protocolo → CD, 20 dias corridos), com barra, médias e "Como ler estes números".
 - Tema de Natal em todas as abas (até 07/01/2027), com duende na cordinha e Papai Noel no trenó no cabeçalho. Botão "🎄 Natal" liga/desliga.
+
+- Natal agora liga ja na primeira aba ao abrir o painel.
