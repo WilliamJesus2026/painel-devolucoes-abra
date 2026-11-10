@@ -249,3 +249,9 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 
 ## "Criada" pela Dayane segue com a Patrícia Maia (05/11/2026)
 - A situação **Criada** aberta pela Dayane (Logística) continua no Relacionamento, agora com **Patrícia Maia** como responsável (antes: Ana Motta), com a observação "criada por Dayane.Costa". Constante `RESP_CRIADA_LOG` no código.
+
+## Visual: cubo da Abra, Natal temporário e filtros mais limpos (10/11/2026)
+- **Cubo do cabeçalho** agora usa os logos da marca (Abra Cadabra e Abra Casa, arquivos `logo_abracadabra.png` / `logo_abracasa.png` em `public/`) e gira.
+- **Tema de Natal (temporário)** só nas abas **Controle de Situações** e **SLA de Apontamento**: cabeçalho vermelho/verde com luzes piscando, neve no cabeçalho e cartões de indicadores natalinos. Liga/desliga pelo botão 🎄 do topo e se desativa sozinho em 07/01/2027 (`NATAL_ATE`). Respeita "reduzir movimento" do sistema (sem neve).
+- **Filtros do Controle e das Tratativas mais limpos:** com "Em aberto" os chips mostram só o número de casos abertos, os chips sem casos ficam escondidos atrás de "+ N sem casos", visual de pílulas com contagem e menos texto. **Motivo da pendência** sempre mostra Marketplace, Transporte, Relacionamento, No prazo e Logística (Logística = casos do setor Logística).
+- **Cartão "Em aberto hoje"** do Controle mostra a divisão por Marketplace, Transporte, Relacionamento, No prazo e Logística.

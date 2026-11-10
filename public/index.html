@@ -112,13 +112,28 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 .hero-card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:radial-gradient(520px 160px at var(--mx,25%) -20%,rgba(255,255,255,.28),transparent 60%)}
 .hero-brand{display:flex;align-items:center;gap:14px;transform:translateZ(38px);min-width:0}
-.cube-wrap{perspective:240px;width:38px;height:38px;flex-shrink:0}
-.cube{position:relative;width:38px;height:38px;transform-style:preserve-3d;animation:cubeSpin 16s linear infinite}
-.cube i{position:absolute;inset:0;display:grid;place-items:center;font:800 17px/1 -apple-system,'Segoe UI',sans-serif;font-style:normal;color:#fff;
-  border:1px solid rgba(255,255,255,.55);background:linear-gradient(135deg,rgba(255,255,255,.28),rgba(46,134,222,.7));backface-visibility:visible}
-.cube .f1{transform:translateZ(19px)} .cube .f2{transform:rotateY(90deg) translateZ(19px)} .cube .f3{transform:rotateY(180deg) translateZ(19px)}
-.cube .f4{transform:rotateY(-90deg) translateZ(19px)} .cube .f5{transform:rotateX(90deg) translateZ(19px)} .cube .f6{transform:rotateX(-90deg) translateZ(19px)}
+.cube-wrap{perspective:300px;width:46px;height:46px;flex-shrink:0;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.cube{position:relative;width:46px;height:46px;transform-style:preserve-3d;animation:cubeSpin 12s linear infinite}
+.cube i{position:absolute;inset:0;font-size:0;border:0;border-radius:3px;background:#ab0033 center/cover no-repeat;backface-visibility:visible;box-shadow:0 0 0 1px rgba(255,255,255,.25) inset}
+.cube .f1,.cube .f3{background-image:url(logo_abracadabra.png)} .cube .f2,.cube .f4{background-image:url(logo_abracasa.png)}
+.cube .f5,.cube .f6{background:linear-gradient(135deg,#fbbf24,#ab0033)}
+.cube .f1{transform:translateZ(23px)} .cube .f2{transform:rotateY(90deg) translateZ(23px)} .cube .f3{transform:rotateY(180deg) translateZ(23px)}
+.cube .f4{transform:rotateY(-90deg) translateZ(23px)} .cube .f5{transform:rotateX(90deg) translateZ(23px)} .cube .f6{transform:rotateX(-90deg) translateZ(23px)}
 @keyframes cubeSpin{from{transform:rotateX(-18deg) rotateY(0)}to{transform:rotateX(-18deg) rotateY(360deg)}}
+#snow{position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;pointer-events:none;display:none}
+body.natal #snow{display:block}
+body.natal .hero-card{background:linear-gradient(125deg,#450a0a 0%,#991b1b 48%,#14532d 100%);box-shadow:0 22px 44px -18px rgba(127,29,29,.75),0 2px 0 rgba(255,255,255,.18) inset,0 -3px 0 rgba(0,0,0,.28) inset}
+body.natal .tb-title{text-shadow:0 1px 0 #7f1d1d,0 2px 0 #651616,0 3px 0 #4c1010,0 7px 14px rgba(0,0,0,.4)}
+body.natal .tb-title::after{content:" 🎄";font-size:.85em}
+body.natal .hero-kick::after{content:" · Boas Festas";color:#fde68a}
+body.natal .hero-card::after{content:"";position:absolute;left:18px;right:18px;top:-4px;height:9px;pointer-events:none;
+  background:radial-gradient(circle at 10px 5px,#fde047 0 3px,transparent 4px) 0 0/44px 9px repeat-x,radial-gradient(circle at 32px 5px,#34d399 0 3px,transparent 4px) 0 0/44px 9px repeat-x;
+  filter:drop-shadow(0 0 5px rgba(253,224,71,.85));animation:luzes 1.8s ease-in-out infinite alternate}
+@keyframes luzes{from{opacity:.5}to{opacity:1}}
+body.natal #panel-ind .pw-hero,body.natal #panel-sla .pw-hero{background:linear-gradient(120deg,#3f0a0a 0%,#991b1b 48%,#14532d 100%);box-shadow:0 24px 50px -22px rgba(153,27,27,.7),0 1px 0 rgba(255,255,255,.16) inset}
+body.natal #panel-ind .pw-hero::before,body.natal #panel-sla .pw-hero::before{background:#FACC15;opacity:.32}
+body.natal #panel-ind .pw-hero::after,body.natal #panel-sla .pw-hero::after{background:#22c55e;opacity:.3}
+body.natal .nav.on{background:#b91c1c}
 .hero-kick{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.62);transition:.2s}
 .tb-title{font-size:21px;font-weight:800;letter-spacing:-.3px;line-height:1.15;color:#fff;
   text-shadow:0 1px 0 #1d4f8a,0 2px 0 #174077,0 3px 0 #123565,0 7px 14px rgba(0,0,0,.4)}
@@ -470,15 +485,23 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .ind-k b{font-size:34px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .ind-k b i{font-style:normal;font-size:15px;font-weight:600;color:var(--tx3);margin-left:4px}
 .ind-k.g{border-top-color:#16A34A}.ind-k.b{border-top-color:#2563EB}.ind-k.a{border-top-color:#D97706}.ind-k.r{border-top-color:#DC2626}
-.ind-f{background:var(--srf);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;margin-bottom:16px;box-shadow:var(--sh)}
-.ind-f-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
-.ind-f-top input{flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--srf1,var(--srf));color:var(--tx);font-size:13px}
-.ind-fr{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-top:1px dashed var(--bd)}
-.ind-fr>b{flex:0 0 112px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3);padding-top:7px}
-.ind-fr>div{display:flex;flex-wrap:wrap;gap:6px}
-.ind-ch{border:1px solid var(--bd);background:none;color:var(--tx2);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.12s}
-.ind-ch:hover{border-color:var(--acc)}.ind-ch.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.ind-ch small{opacity:.65;margin-left:5px;font-weight:700}.ind-ch.zero{opacity:.4}
+.ind-f{background:var(--srf);border:1px solid var(--bd);border-radius:16px;padding:16px 18px;margin-bottom:16px;box-shadow:var(--sh)}
+.ind-f-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.ind-f-top input{flex:1;min-width:200px;padding:9px 14px;border:1px solid var(--bd);border-radius:10px;background:var(--srf1,var(--srf));color:var(--tx);font-size:13px}
+.ind-fr{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid color-mix(in srgb,var(--bd) 55%,transparent)}
+.ind-fr>b{flex:0 0 118px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);padding-top:6px}
+.ind-fr>div{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ind-chs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ind-ch{display:inline-flex;align-items:center;gap:7px;border:1px solid transparent;background:var(--srf1,rgba(127,127,127,.1));color:var(--tx2);border-radius:999px;padding:4px 6px 4px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:.12s}
+.ind-ch:not(:has(small)){padding-right:12px}
+.ind-ch:hover{border-color:var(--acc);color:var(--tx)}
+.ind-ch.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.ind-ch small{margin:0;min-width:20px;text-align:center;padding:1px 7px;border-radius:999px;background:rgba(124,58,237,.14);color:var(--tx);font-size:10.5px;font-weight:700;opacity:1}
+.ind-ch.on small{background:rgba(255,255,255,.28);color:#fff}
+.ind-ch.zero{opacity:.4}
+.ind-chs .ind-ch.zero{display:none}
+.ind-chs .ind-ch.zero.fixo,.ind-chs.open .ind-ch.zero{display:inline-flex}
+.ind-mais{border:0;background:none;color:var(--acc);font-size:11.5px;font-weight:700;cursor:pointer;padding:4px 8px}
 .ind-f-res{font-size:12px;color:var(--tx3);margin-top:8px}.ind-f-res b{color:var(--tx)}
 @media(max-width:700px){.ind-fr{flex-direction:column}.ind-fr>b{padding-top:0}}
 .hero-chips .hchip{display:none!important}
@@ -706,6 +729,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
           <button class="hchip hc-pur" type="button" onclick="ir('rea')" title="Coleta feita, aguardando o CD"><b id="hc-rea">0</b> aguardando CD</button>
           <span class="tb-ref hc-ref" id="tb-ref">—</span>
         </div>
+        <button class="hero-search" type="button" id="btn-natal" onclick="natalToggle()" title="Ligar/desligar o tema de Natal" style="display:none">🎄</button>
         <button class="hero-search" type="button" id="btn-desfazer" onclick="desfazer()" title="Nada para desfazer" disabled style="opacity:.5"><span id="btn-desfazer-n">↶ Desfazer</span></button>
         <button class="hero-search" type="button" onclick="openPalette()" aria-label="Buscar"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke-width="2" stroke-linecap="round"/></svg><span>Buscar cliente, NF ou CPF</span><kbd>Ctrl K</kbd></button>
         <button class="hero-search" type="button" id="hero-user" onclick="menuConta()" style="display:none" title="Conta e troca de usuário"><span id="hero-user-n"></span></button>
@@ -1245,6 +1269,7 @@ function ir(id){
   document.getElementById('tb-title').textContent = TITLES[id]||id;
   renderPanel(id);
   setTimeout(cfScan, 60);
+  try { natalAplica(id); } catch(e){}
   window.scrollTo({top:0});
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1457,6 +1482,17 @@ function tfSet(k, v){
   renderTrat();
 }
 function setGrupoTab(g){ TF.grupo = g || ''; renderTrat(); }   // atalho usado pelo Dashboard
+// chips dos filtros: com "Em aberto" selecionado mostram so o numero de abertos; chips sem casos ficam escondidos atras de "+ N sem casos"
+function chipHtml(on, onclick, label, n, ab, fixo, foco){
+  const v = (foco && ab!=null) ? ab : n, zero = v===0 && !on;
+  return `<button type="button" class="ind-ch${on?' on':''}${zero?' zero':''}${fixo?' fixo':''}" onclick="${onclick}"${ab!=null ? ` title="${n} no total · ${ab} em aberto"` : ''}>${label}${v==null?'':`<small>${v}</small>`}</button>`;
+}
+function indGrupo(html){
+  const nz = (html.match(/class="ind-ch[^"]*\bzero\b(?![^"]*\bfixo\b)/g)||[]).length;
+  return `<div class="ind-chs">${html}${nz ? `<button type="button" class="ind-mais" data-n="${nz}" onclick="indMais(this)">+ ${nz} sem casos</button>` : ''}</div>`;
+}
+function indMais(b){ const p = b.parentElement; p.classList.toggle('open'); b.textContent = p.classList.contains('open') ? 'ocultar sem casos' : '+ ' + b.dataset.n + ' sem casos'; }
+const MOT_FIXOS = ['No prazo','Relacionamento','Marketplace','Transporte','Logística'];
 function renderTrat(){
   if (!document.getElementById('panel-trat')) return;
   indCalcula();
@@ -1480,7 +1516,7 @@ function renderTrat(){
   document.getElementById('bdg-trat').textContent = todos.filter(x => !x.fin && x.canal!=='Logística').length;
 
   // ---- barra de filtros (igual a do Controle) ----
-  const chip = (on, onclick, label, n, ab) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${onclick}">${label}${n==null?'':`<small>${n}${ab!=null?` · ${ab} em aberto`:''}</small>`}</button>`;
+  const chip = (on, onclick, label, n, ab, fixo) => chipHtml(on, onclick, label, n, ab, fixo, TF.status==='aberto');
   const cnt = (arr, ign) => [arr.filter(x=>f(x,ign.concat(['status','motivo']))).length, arr.filter(x=>!x.fin && f(x,ign.concat(['status','motivo']))).length];
   const mesCont = m => cnt(doAno.filter(x=>x.mes===m),['mes']);
   const meses12 = Array.from({length:12},(_,i)=>i+1).filter(m => doAno.some(x=>x.mes===m));
@@ -1496,14 +1532,14 @@ function renderTrat(){
   const usrs = [...new Set(doAno.filter(x=>!x.fin).map(respDe))].sort(), usrSel = `<select class="fsel" onchange="tfSet('usuario',this.value)"><option value="">Todos</option>${usrs.map(u=>`<option${TF.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select>`;
   const temFiltro = TF.meses.size || TF.carrs.size || TF.motivos.size || TF.status!=='aberto' || TF.q || TF.canal || TF.grupo || TF.sit || TF.usuario || TF.and;
   document.getElementById('trat-fbody').innerHTML =
-    `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="tfSet('ano',this.value)">${anos.map(a=>`<option${a===TF.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${meses12.map(m=>chip(TF.meses.has(m), `tfSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join('')}</div></div>
-     <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(TF.carrs.has(o.c), `tfSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join('')}</div></div>
+    `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="tfSet('ano',this.value)">${anos.map(a=>`<option${a===TF.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${indGrupo(meses12.map(m=>chip(TF.meses.has(m), `tfSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join(''))}</div></div>
+     <div class="ind-fr"><b>Transportadora</b><div>${indGrupo(carrs.map(o=>chip(TF.carrs.has(o.c), `tfSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join(''))}</div></div>
      <div class="ind-fr"><b>Canal</b><div>${chip(!TF.canal, "tfSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Relacionamento','Marketplace','Logística'].map(c => { const k = cnt((c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c),['canal']); return chip(TF.canal===c, `tfSet('canal','${c}')`, c, k[0], k[1]); }).join('')}</div></div>
      <div class="ind-fr"><b>Grupo</b><div>${grupoChips}</div></div>
-     <div class="ind-fr"><b>Situação do caso</b><div>${sitChips}</div></div>
+     <div class="ind-fr"><b>Situação do caso</b><div>${indGrupo(sitChips)}</div></div>
      <div class="ind-fr"><b>Responsável</b><div>${usrSel}</div></div>
      <div class="ind-fr"><b>Estado</b><div>${chip(!TF.status, "tfSet('status','')", 'Todas', nFin+nAb)}${chip(TF.status==='fin', "tfSet('status','fin')", 'Atendidas', nFin)}${chip(TF.status==='aberto', "tfSet('status','aberto')", 'Em aberto', nAb)}</div></div>
-     ${TF.status==='fin' ? '' : `<div class="ind-fr"><b>Andamento</b><div>${andChips}</div></div><div class="ind-fr"><b>Motivo da pendência</b><div>${motList.map(m=>chip(TF.motivos.has(m), `tfSet('motivo',this.dataset.m)" data-m="${escA(m)}`, esc(m), motCont(m))).join('')}</div></div>`}`;
+     ${TF.status==='fin' ? '' : `<div class="ind-fr"><b>Andamento</b><div>${indGrupo(andChips)}</div></div><div class="ind-fr"><b>Motivo da pendência</b><div>${indGrupo([...MOT_FIXOS, ...motList.filter(m => !MOT_FIXOS.includes(m))].map(m => m==='Logística' ? chip(TF.canal==='Logística', "tfSet('canal','Logística')", 'Logística', doAnoAll.filter(x=>!x.fin && x.canal==='Logística').length, null, true) : chip(TF.motivos.has(m), `tfSet('motivo',this.dataset.m)" data-m="${escA(m)}`, esc(m), motCont(m), null, MOT_FIXOS.includes(m))).join(''))}</div></div>`}`;
   document.getElementById('trat-fres').innerHTML = `${TF.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${TF.ano} no período` + (temFiltro ? ' · filtros ativos' : '');
   document.getElementById('trat-limpar').style.visibility = temFiltro ? 'visible' : 'hidden';
 
@@ -1798,7 +1834,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261105-154409';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261110-162438';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2036,6 +2072,36 @@ document.addEventListener('keydown', e => {
   else if (e.key==='ArrowUp'){ e.preventDefault(); palMove(-1); }
   else if (e.key==='Enter'){ e.preventDefault(); palRun(palSel); }
 });
+
+// ================= TEMA DE NATAL (temporario): Controle de Situacoes e SLA de Apontamento, ate 06/01/2027 =================
+const NATAL_ATE = new Date(2027, 0, 7), NATAL_ABAS = ['ind','sla'];
+let _neve = null;
+const natalLigado = () => { try { return new Date() < NATAL_ATE && localStorage.getItem('natal_off')!=='1'; } catch(e){ return new Date() < NATAL_ATE; } };
+function natalAplica(id){
+  id = id || ((document.querySelector('.panel.on')||{id:''}).id.replace(/^panel-/,''));
+  const naAba = NATAL_ABAS.includes(id) && new Date() < NATAL_ATE, on = naAba && natalLigado();
+  document.body.classList.toggle('natal', on);
+  const b = document.getElementById('btn-natal'); if (b){ b.style.display = naAba ? '' : 'none'; b.style.opacity = on ? '1' : '.55'; }
+  on ? neveLiga() : neveDesliga();
+}
+function natalToggle(){ try { localStorage.setItem('natal_off', localStorage.getItem('natal_off')==='1' ? '0' : '1'); } catch(e){} natalAplica(); }
+function neveLiga(){
+  const card = document.querySelector('.hero-card'); if (!card || _neve || (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches)) return;
+  let cv = document.getElementById('snow'); if (!cv){ cv = document.createElement('canvas'); cv.id = 'snow'; card.appendChild(cv); }
+  const ctx = cv.getContext('2d'), fl = []; let w = 0, h = 0, ult = 0;
+  const ajusta = () => { w = cv.width = Math.max(1, card.clientWidth); h = cv.height = Math.max(1, card.clientHeight); };
+  ajusta(); for (let i = 0; i < 80; i++) fl.push({ x:Math.random()*w, y:Math.random()*h, r:1+Math.random()*2.6, v:.3+Math.random()*.9, d:Math.random()*6.28, a:.4+Math.random()*.55 });
+  const quadro = t => {
+    _neve = requestAnimationFrame(quadro); if (document.hidden || t - ult < 33) return; ult = t;
+    if (w !== card.clientWidth || h !== card.clientHeight) ajusta();
+    ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#fff';
+    fl.forEach(f => { f.y += f.v; f.d += .02; f.x += Math.sin(f.d)*.5; if (f.y > h+4){ f.y = -4; f.x = Math.random()*w; } if (f.x > w+4) f.x = -4; else if (f.x < -4) f.x = w+4;
+      ctx.globalAlpha = f.a; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.283); ctx.fill(); });
+    ctx.globalAlpha = 1;
+  };
+  _neve = requestAnimationFrame(quadro);
+}
+function neveDesliga(){ if (_neve){ cancelAnimationFrame(_neve); _neve = null; } const cv = document.getElementById('snow'); if (cv) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); }
 
 // ================= CABECALHO 3D: inclinacao pelo mouse + compactar ao rolar =================
 (function(){
@@ -3270,7 +3336,7 @@ function renderInd(){
   document.getElementById('bdg-ind').textContent = IND_ALL.filter(x=>!x.fin).length;
 
   // ---- barra de filtros ----
-  const chip = (on, onclick, label, n, ab) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${onclick}">${label}${n==null?'':`<small>${n}${ab!=null?` · ${ab} em aberto`:''}</small>`}</button>`;
+  const chip = (on, onclick, label, n, ab, fixo) => chipHtml(on, onclick, label, n, ab, fixo, IND.status==='aberto');
   const cnt = (arr, ign) => [arr.filter(x=>f(x,ign.concat(['status','motivo']))).length, arr.filter(x=>!x.fin && f(x,ign.concat(['status','motivo']))).length];
   const mesCont = m => cnt(doAno.filter(x=>x.mes===m),['mes']);
   const meses12 = Array.from({length:12},(_,i)=>i+1).filter(m => m>=IND_CORTE && doAno.some(x=>x.mes===m));
@@ -3287,13 +3353,13 @@ function renderInd(){
   const usrs = [...new Set(doAno.filter(x=>!x.fin).map(respDe))].sort(), usrSel = `<select class="fsel" onchange="indSet('usuario',this.value)"><option value="">Todos</option>${usrs.map(u=>`<option${IND.usuario===u?' selected':''}>${esc(u)}</option>`).join('')}</select>`;
   const temFiltro = IND.meses.size || IND.carrs.size || IND.motivos.size || IND.status!=='aberto' || IND.q || IND.canal || IND.sit || IND.usuario || IND.and || IND.alerta;
   document.getElementById('ind-fbody').innerHTML =
-    `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${antChip}${meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join('')}</div></div>
-     <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join('')}</div></div>
+    `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${indGrupo(antChip + meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join(''))}</div></div>
+     <div class="ind-fr"><b>Transportadora</b><div>${indGrupo(carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join(''))}</div></div>
      <div class="ind-fr"><b>Canal</b><div>${chip(!IND.canal, "indSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Marketplace','Relacionamento','Logística'].map(c => { const k = cnt((c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c),['canal']); return chip(IND.canal===c, `indSet('canal','${c}')`, c, k[0], k[1]); }).join('')}<button type="button" class="ind-ch" onclick="indUsuarios()" title="Marketplace, Logística ou Relacionamento (padrão)">⚙ Definir usuários por canal</button></div></div>
-     <div class="ind-fr"><b>Situação do caso</b><div>${sitChips}</div></div>
+     <div class="ind-fr"><b>Situação do caso</b><div>${indGrupo(sitChips)}</div></div>
      <div class="ind-fr"><b>Responsável</b><div>${usrSel}</div></div>
      <div class="ind-fr"><b>Estado</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
-     ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Andamento</b><div>${andChips}</div></div><div class="ind-fr"><b>Motivo da pendência</b><div>${motList.map(m=>chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${escA(m)}`, esc(m), motCont(m))).join('')}</div></div>`}`;
+     ${IND.status==='fin' ? '' : `<div class="ind-fr"><b>Andamento</b><div>${indGrupo(andChips)}</div></div><div class="ind-fr"><b>Motivo da pendência</b><div>${indGrupo([...MOT_FIXOS, ...motList.filter(m => !MOT_FIXOS.includes(m))].map(m => m==='Logística' ? chip(IND.canal==='Logística', "indSet('canal','Logística')", 'Logística', doAnoAll.filter(x=>!x.fin && x.canal==='Logística').length, null, true) : chip(IND.motivos.has(m), `indSet('motivo',this.dataset.m)" data-m="${escA(m)}`, esc(m), motCont(m), null, MOT_FIXOS.includes(m))).join(''))}</div></div>`}`;
   document.getElementById('ind-fres').innerHTML = `${IND.status==='aberto'?'Foco em <b>casos em aberto</b>':'Todas as situações'} · <b>${base.length}</b> tarefas de ${IND.ano} no período` + (temFiltro ? ' · filtros ativos' : '') + (A.nsla ? '' : ' · <i>SLA médio: importe a planilha “Tarefas em aberto” (xlsx) uma vez — ela traz a data de finalização</i>');
   document.getElementById('ind-limpar').style.visibility = temFiltro ? 'visible' : 'hidden';
   if (IND_FORA) document.getElementById('ind-fres').innerHTML += ` · <span title="Acerto de estoque, sem saída ou transportadora sem de/para">${IND_FORA} casos fora da análise (sem transportadora)</span>`;
@@ -3301,7 +3367,7 @@ function renderInd(){
   // ---- KPIs ----
   const tc = A.taxa==null ? '' : A.taxa>=90 ? 'g' : A.taxa>=75 ? 'a' : 'r';
   document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', 'Base: planilha Controle de Situações' + (LAST_IMPORT && LAST_IMPORT.importedAt ? ' · última importação: ' + (LAST_IMPORT.filename||'') + ' em ' + new Date(LAST_IMPORT.importedAt).toLocaleDateString('pt-BR') + ' ' + new Date(LAST_IMPORT.importedAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) + ' (' + (LAST_IMPORT.rowCount||0) + ' linhas)' : '') + '. Para atualizar, importe o CSV novo com o botão ao lado.',
-    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'importe a planilha “Tarefas em aberto” (xlsx) para calcular'], ['Em aberto hoje', A.aberto, `Marketplace ${base.filter(x=>!x.fin&&x.canal==='Marketplace').length} · Relacionamento ${base.filter(x=>!x.fin&&x.canal==='Relacionamento').length} · Logística ${base.filter(x=>!x.fin&&x.canal==='Logística').length}` + (() => { const n = doAnoAll.filter(x=>x.logistica && !x.fin).length; return n ? ` · +${n} com a Logística (abaixo)` : ''; })()]]);
+    [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'importe a planilha “Tarefas em aberto” (xlsx) para calcular'], ['Em aberto hoje', A.aberto, (() => { const ab = doAnoAll.filter(x=>!x.fin && x.canal!=='Logística'), c = m => ab.filter(x=>x.motivo===m).length, nLog = doAnoAll.filter(x=>!x.fin && x.canal==='Logística').length; return `Marketplace ${c('Marketplace')} · Transporte ${c('Transporte')} · Relacionamento ${c('Relacionamento')} · No prazo ${c('No prazo')} · Logística ${nLog}`; })()]]);
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
@@ -3312,7 +3378,7 @@ function renderInd(){
     return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}<button class="ind-drill" type="button" title="Ver os casos desta transportadora" onclick="event.stopPropagation();abreDrill(${regDrill('Casos — '+c, () => arr)})">ver casos ↗</button></h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div>${colslaLinha(c)}</div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
 
   // ---- por canal (Marketplace x Relacionamento) ----
-  document.getElementById('ind-canais-sub').textContent = 'Marketplace e Relacionamento atendem o cliente separadamente · identificados pelo usuário responsável (Marketplace: ' + MKT_USERS.join(', ') + '). A Logística é definida pela situação (Cobrança Realizada, Recol P/ Acomp…, Mercadoria Danificada, Recol Acomp C/ Reenvio), atualizada pela Dayane, e não pelo usuário. Clique para filtrar.';
+  document.getElementById('ind-canais-sub').textContent = 'Relacionamento e Marketplace pelo usuário responsável; Logística pela situação (atualizada pela Dayane). Clique para filtrar.';
   document.getElementById('ind-canais').innerHTML = ['Marketplace','Relacionamento','Logística'].map(c => {
     const arr = (c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c && f(x,['canal','status','motivo'])), a = indAgg(arr), tcl = a.taxa==null ? '' : a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
     const us = [...arr.reduce((m,x)=>m.set(respDe(x),(m.get(respDe(x))||0)+1), new Map()).entries()].sort((p,q)=>q[1]-p[1]).slice(0,4).map(([u,n])=>esc(u)+' ('+n+')').join(' · ');
