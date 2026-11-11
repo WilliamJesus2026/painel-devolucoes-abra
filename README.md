@@ -276,3 +276,10 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Controle de Situacoes: pilulas de motivo clicaveis (filtram os casos em aberto, varias ao mesmo tempo; Logistica filtra o canal; botao limpar).
 
 - SLA da coleta: os 2 cartoes de media abrem a aba SLA Transportadora; filtro ativo dos cartoes 1/2 mostra aviso com botao limpar (antes os indicadores pareciam vazios sem explicacao).
+
+## Ajustes de 11/11/2026
+- Dashboard: "Painel de devoluções" (visão geral) agora fica acima dos filtros; filtros viraram 4 seletores (ano, mês, transportadora, canal) com o resumo embaixo; duende sentado no canto da visão geral (só no tema Natal).
+- Controle de Situações: o gráfico "SLA médio por mês de criação" passou para depois dos demais gráficos; clicar nos motivos, canais, transportadoras, alertas e na rosca de motivos rola direto até a lista de casos.
+- SLA de Apontamento: clicar no número vermelho de atraso (na linha da situação ou no título do setor) filtra e desce até a lista de casos.
+- Temas: o botão do cabeçalho virou "Tema" (menu Padrão / Natal). Natal deixa a lateral verde/vermelha e troca o azul de destaque por vermelho; Padrão volta ao azul original. Para uma nova festividade: incluir uma linha em `TEMAS` e o CSS `body.<id>` em index.html. Preferência fica no navegador de cada pessoa.
+- Cubo da Abra: translúcido, com brilho e núcleo dourado.

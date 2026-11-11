@@ -112,9 +112,14 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 .hero-card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:radial-gradient(520px 160px at var(--mx,25%) -20%,rgba(255,255,255,.28),transparent 60%)}
 .hero-brand{display:flex;align-items:center;gap:14px;transform:translateZ(38px);min-width:0}
-.cube-wrap{perspective:300px;width:46px;height:46px;flex-shrink:0;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.cube-wrap{perspective:300px;width:46px;height:46px;flex-shrink:0;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35)) drop-shadow(0 0 8px rgba(251,191,36,.35))}
 .cube{position:relative;width:46px;height:46px;transform-style:preserve-3d;animation:cubeSpin 12s linear infinite}
-.cube i{position:absolute;inset:0;font-size:0;border:0;border-radius:3px;background:#ab0033 center/cover no-repeat;backface-visibility:visible;box-shadow:0 0 0 1px rgba(255,255,255,.25) inset}
+.cube i{position:absolute;inset:0;font-size:0;border:1.5px solid rgba(255,255,255,.6);border-radius:5px;background:#ab0033 center/cover no-repeat;opacity:.78;backface-visibility:visible;box-shadow:0 0 10px rgba(255,255,255,.28) inset,0 0 8px rgba(171,0,51,.5)}
+.cube i::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.55) 0,rgba(255,255,255,0) 40%,rgba(255,255,255,.18) 100%)}
+.cube .core{position:absolute;left:12px;top:12px;width:22px;height:22px;transform-style:preserve-3d}
+.cube .core i{border:0;border-radius:2px;opacity:.95;background:linear-gradient(135deg,#fde68a,#f59e0b 55%,#ab0033);box-shadow:0 0 8px rgba(251,191,36,.9)}
+.cube .core i::after{display:none}
+.cube .core .c1{transform:translateZ(11px)}.cube .core .c2{transform:rotateY(90deg) translateZ(11px)}.cube .core .c3{transform:rotateY(180deg) translateZ(11px)}.cube .core .c4{transform:rotateY(-90deg) translateZ(11px)}.cube .core .c5{transform:rotateX(90deg) translateZ(11px)}.cube .core .c6{transform:rotateX(-90deg) translateZ(11px)}
 .cube .f1,.cube .f3{background-image:url(logo_abracadabra.png)} .cube .f2,.cube .f4{background-image:url(logo_abracasa.png)}
 .cube .f5,.cube .f6{background:linear-gradient(135deg,#fbbf24,#ab0033)}
 .cube .f1{transform:translateZ(23px)} .cube .f2{transform:rotateY(90deg) translateZ(23px)} .cube .f3{transform:rotateY(180deg) translateZ(23px)}
@@ -152,6 +157,16 @@ body.natal .pw-hero{background:linear-gradient(120deg,#3f0a0a 0%,#991b1b 48%,#14
 body.natal .pw-hero::before{background:#FACC15;opacity:.32}
 body.natal .pw-hero::after{background:#22c55e;opacity:.3}
 body.natal .nav.on,body.natal.in-perdas .nav.on{background:#b91c1c}
+body.natal .sb{background:linear-gradient(180deg,#0b3d2b 0%,#14532d 52%,#5b1118 100%)}
+body.natal .sb-top,body.natal .sb-up{border-color:rgba(253,224,71,.28)}
+body.natal .sb-brand::after{content:" 🎄"}
+body.natal .nav:hover{background:rgba(253,224,71,.12)}
+body.natal{--acc:#b91c1c;--acc-lt:#fef2f2;--acc-bd:#fca5a5;--mid:#15803d}
+:root[data-theme="dark"] body.natal{--acc-lt:#3b0d0d;--acc-bd:#7f1d1d}
+#tema-menu{position:fixed;z-index:9999;background:var(--srf);color:var(--tx);border:1px solid var(--bd);border-radius:12px;box-shadow:0 14px 34px -10px rgba(0,0,0,.5);padding:6px;min-width:190px}
+#tema-menu b{display:block;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--tx3);padding:6px 10px 4px}
+#tema-menu button{display:flex;width:100%;align-items:center;gap:8px;text-align:left;font:inherit;font-size:12.5px;padding:7px 10px;border:0;border-radius:8px;background:none;color:inherit;cursor:pointer}
+#tema-menu button:hover{background:var(--srf1)}#tema-menu button.on{font-weight:700;background:var(--srf1)}
 .hero-kick{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.62);transition:.2s}
 .tb-title{font-size:21px;font-weight:800;letter-spacing:-.3px;line-height:1.15;color:#fff;
   text-shadow:0 1px 0 #1d4f8a,0 2px 0 #174077,0 3px 0 #123565,0 7px 14px rgba(0,0,0,.4)}
@@ -454,6 +469,18 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 #ph-ind .pw-stat .v{font-size:22px;margin:1px 0 2px}
 #ph-ind .pw-stat .l{font-size:9.5px}#ph-ind .pw-stat .n{font-size:9.5px}
 .pw-sub:empty{display:none}
+.filters,.ind-f,.ind-h{scroll-margin-top:160px}
+.dash-fr{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.dash-fr label{display:flex;flex-direction:column;gap:3px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3)}
+.dash-fr .fsel{min-width:150px}
+.dash-f .ind-f-res{margin-top:10px}
+#dash-hero{position:relative}
+.nd-sentado{display:none;position:absolute;right:38px;top:-44px;z-index:6;pointer-events:none;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35))}
+body.natal .nd-sentado{display:block}
+body.natal #dash-hero{margin-top:46px}
+.nd-pernas{transform-box:fill-box;transform-origin:50% 0;animation:nd-balanca 1.4s ease-in-out infinite alternate}
+@keyframes nd-balanca{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+@media (prefers-reduced-motion:reduce){.nd-pernas{animation:none}}
 .pw-sub{font-size:12px;color:rgba(255,255,255,.72);max-width:520px}
 .pw-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .pw-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;font-size:11.5px;font-weight:700;cursor:pointer;color:#fff;
@@ -773,7 +800,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
     <div class="hero-scene">
       <div class="hero-card" id="hero-card">
         <div class="hero-brand">
-          <div class="cube-wrap" aria-hidden="true"><div class="cube"><i class="f1">A</i><i class="f2">A</i><i class="f3">A</i><i class="f4">A</i><i class="f5"></i><i class="f6"></i></div></div>
+          <div class="cube-wrap" aria-hidden="true"><div class="cube"><i class="f1">A</i><i class="f2">A</i><i class="f3">A</i><i class="f4">A</i><i class="f5"></i><i class="f6"></i><b class="core"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><i class="c5"></i><i class="c6"></i></b></div></div>
           <div><div class="hero-kick">Abracadabra · Devoluções &amp; Recolhimentos</div><h1 class="tb-title" id="tb-title">Dashboard</h1></div>
         </div>
         <div class="hero-chips">
@@ -782,7 +809,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
           <button class="hchip hc-pur" type="button" onclick="ir('rea')" title="Coleta feita, aguardando o CD"><b id="hc-rea">0</b> aguardando CD</button>
           <span class="tb-ref hc-ref" id="tb-ref">—</span>
         </div>
-        <button class="hero-search" type="button" id="btn-natal" onclick="natalToggle()" title="Ligar/desligar o tema de Natal" style="display:none">🎄 Natal</button>
+        <button class="hero-search" type="button" id="btn-natal" onclick="temaMenu(event)" title="Escolher o tema do painel" style="display:none">🎄 Tema</button>
         <button class="hero-search" type="button" id="btn-desfazer" onclick="desfazer()" title="Nada para desfazer" disabled style="opacity:.5"><span id="btn-desfazer-n">↶ Desfazer</span></button>
         <button class="hero-search" type="button" onclick="openPalette()" aria-label="Buscar"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke-width="2" stroke-linecap="round"/></svg><span>Buscar cliente, NF ou CPF</span><kbd>Ctrl K</kbd></button>
         <button class="hero-search" type="button" id="hero-user" onclick="menuConta()" style="display:none" title="Conta e troca de usuário"><span id="hero-user-n"></span></button>
@@ -903,12 +930,12 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
       <div class="ind-h">Indicadores por transportadora</div><div class="ind-sub" id="ind-sub"></div>
       <div class="ind-cars" id="ind-cars"></div>
       <div class="card" style="margin-bottom:14px"><div class="card-title">Volume de tarefas e % de atendimento por mês de criação</div><div class="card-sub">Barras = tarefas criadas · linha = % já atendidas · clique numa barra para filtrar o mês</div><div style="height:320px"><canvas id="ch-ind"></canvas></div></div>
-      <div class="card" style="margin-bottom:14px"><div class="card-title">SLA médio por mês de criação</div><div class="card-sub">SLA = dias até finalizar (só finalizadas). Meses recentes têm poucas finalizadas, então mostramos também a média de dias de todas as tarefas do mês (a mesma coluna “Média (dias)” do Controle). Clique numa linha para filtrar o mês.</div><div style="overflow:auto"><table class="tbl"><thead><tr><th>Mês</th><th>Criadas</th><th>Finalizadas</th><th>% atend.</th><th>SLA médio (finalizadas)</th><th>Média de dias (todas)</th><th title="Variação da média de dias contra o mês anterior (subir é pior)">Δ vs mês anterior</th><th>Em aberto</th><th>Média de dias (em aberto)</th></tr></thead><tbody id="tb-sla-mes"></tbody></table></div></div>
       <div class="g2">
         <div class="card"><div class="card-title">Pendências por mês, transportadora e motivo</div><div class="card-sub">Gerado dos casos em aberto · clique numa linha para ver os casos</div>
           <div class="tbl-scroll" style="max-height:380px"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Motivo</th><th>Qtd.</th></tr></thead><tbody id="tb-ind-pend"></tbody></table></div></div>
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
+      <div class="card" style="margin-bottom:14px"><div class="card-title">SLA médio por mês de criação</div><div class="card-sub">SLA = dias até finalizar (só finalizadas). Meses recentes têm poucas finalizadas, então mostramos também a média de dias de todas as tarefas do mês (a mesma coluna “Média (dias)” do Controle). Clique numa linha para filtrar o mês.</div><div style="overflow:auto"><table class="tbl"><thead><tr><th>Mês</th><th>Criadas</th><th>Finalizadas</th><th>% atend.</th><th>SLA médio (finalizadas)</th><th>Média de dias (todas)</th><th title="Variação da média de dias contra o mês anterior (subir é pior)">Δ vs mês anterior</th><th>Em aberto</th><th>Média de dias (em aberto)</th></tr></thead><tbody id="tb-sla-mes"></tbody></table></div></div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Relacionamento — casos em aberto</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button><span class="col-menu" id="col-menu"><button class="btn-exp" type="button" onclick="colsMenu(event)">Colunas ▾</button><div class="col-pop" id="col-pop"></div></span></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-main"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th><th title="Data de previsão informada pela transportadora (campo Previsão de coleta)">Previsão da transportadora</th><th>Além da previsão</th><th title="Dias além do prazo em cada etapa: criação → protocolo e protocolo → CD">Atraso SLA coleta</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
       <div class="filters" style="margin:22px 0 8px"><b style="font-size:13px" id="ind-lista-t-mp">Marketplace — casos em aberto</b><span class="fcnt" id="cnt-ind-mp"></span></div>
@@ -1887,7 +1914,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261111-100000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261111-110000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2128,20 +2155,34 @@ document.addEventListener('keydown', e => {
 
 // ================= TEMA DE NATAL (temporario): Controle de Situacoes e SLA de Apontamento, ate 06/01/2027 =================
 const NATAL_ATE = new Date(2027, 0, 7);
+// ---- temas: para uma nova festividade basta incluir uma linha aqui (e o CSS 'body.<id>' correspondente) ----
+const TEMAS = { padrao:{ nome:'Padrão (azul)', ico:'🏢' }, natal:{ nome:'Natal', ico:'🎄', ate:NATAL_ATE } };
 let _neve = null;
-const natalLigado = () => { try { return new Date() < NATAL_ATE && localStorage.getItem('natal_off')!=='1'; } catch(e){ return new Date() < NATAL_ATE; } };
+function temaAtual(){
+  try { const t = localStorage.getItem('tema'); if (t && TEMAS[t] && (!TEMAS[t].ate || new Date() < TEMAS[t].ate)) return t; if (localStorage.getItem('natal_off')==='1') return 'padrao'; } catch(e){}
+  return new Date() < NATAL_ATE ? 'natal' : 'padrao';
+}
+const natalLigado = () => temaAtual()==='natal';
 function natalAplica(id){
-  id = id || ((document.querySelector('.panel.on')||{id:''}).id.replace(/^panel-/,''));
-  const naAba = new Date() < NATAL_ATE, on = naAba && natalLigado();   // todas as abas; o botao 🎄 reverte
+  const t = temaAtual(), on = t==='natal';
   document.body.classList.toggle('natal', on);
-  const b = document.getElementById('btn-natal'); if (b){ b.style.display = naAba ? '' : 'none'; b.style.opacity = on ? '1' : '.6'; b.title = on ? 'Desligar o tema de Natal (volta ao visual normal)' : 'Ligar o tema de Natal'; }
+  const b = document.getElementById('btn-natal'); if (b){ b.style.display = ''; b.textContent = TEMAS[t].ico + ' Tema'; b.title = 'Escolher o tema do painel (atual: ' + TEMAS[t].nome + ')'; }
   const hc = document.querySelector('.hero-card');
   if (hc && on && !document.getElementById('natal-deco')){ const d = document.createElement('div'); d.id = 'natal-deco'; d.setAttribute('aria-hidden','true');
-    d.innerHTML = '<div class="nd-trio"><svg class="nd-svg" viewBox="0 0 250 64" width="250" height="64" xmlns="http://www.w3.org/2000/svg"><path d="M0 54c30 6 60-8 96-2" stroke="#fde68a" stroke-width="2" fill="none" stroke-dasharray="2 5" opacity=".7"/><g transform="translate(150 0)"><path class="nd-leg" d="M8 38l-5 14M14 38l-2 15M26 38l3 14M32 38l6 12" stroke="#7c4a21" stroke-width="3" stroke-linecap="round" fill="none"/><ellipse cx="22" cy="32" rx="17" ry="9" fill="#a8672d"/><ellipse cx="22" cy="35" rx="11" ry="4.5" fill="#d9a066"/><path d="M33 28l9-12" stroke="#a8672d" stroke-width="6" stroke-linecap="round"/><ellipse cx="45" cy="13" rx="7" ry="5.5" fill="#a8672d"/><circle cx="47" cy="11.5" r="1.3" fill="#1c1917"/><circle cx="51.5" cy="14" r="1.6" fill="#1c1917"/><path d="M42 8l-3-8m3 8l5-7M39 3l-4-1M45 7l6-5" stroke="#f5deb3" stroke-width="1.8" stroke-linecap="round" fill="none"/></g><g transform="translate(194 0)"><path class="nd-leg" d="M8 38l-5 14M14 38l-2 15M26 38l3 14M32 38l6 12" stroke="#7c4a21" stroke-width="3" stroke-linecap="round" fill="none"/><ellipse cx="22" cy="32" rx="17" ry="9" fill="#a8672d"/><ellipse cx="22" cy="35" rx="11" ry="4.5" fill="#d9a066"/><path d="M33 28l9-12" stroke="#a8672d" stroke-width="6" stroke-linecap="round"/><ellipse cx="45" cy="13" rx="7" ry="5.5" fill="#a8672d"/><circle cx="47" cy="11.5" r="1.3" fill="#1c1917"/><circle cx="51.5" cy="14" r="3" fill="#ef4444" class="nd-nariz"/><path d="M42 8l-3-8m3 8l5-7M39 3l-4-1M45 7l6-5" stroke="#f5deb3" stroke-width="1.8" stroke-linecap="round" fill="none"/></g><g transform="translate(-92 0)"><path d="M112 20h42l8-8 2 22c0 10-10 16-26 16h-22c-4 0-6-4-4-8z" fill="#dc2626" stroke="#7f1d1d" stroke-width="1.5"/><path d="M112 42h46" stroke="#fde047" stroke-width="2.4"/><path d="M104 58c0 4 6 5 24 5h42c10 0 14-6 12-12" stroke="#fbbf24" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M122 58v-8m30 8v-8" stroke="#fbbf24" stroke-width="2.4"/><circle cx="138" cy="12" r="8.5" fill="#fcd9b6"/><path d="M129 14c1 9 15 9 18 0c-3 4-15 4-18 0z" fill="#fff"/><circle cx="136" cy="11" r="1.1" fill="#1c1917"/><circle cx="141" cy="11" r="1.1" fill="#1c1917"/><circle cx="138.5" cy="13.5" r="1.8" fill="#f87171"/><path d="M127 8c1-9 11-13 20-5l6-4-1 9z" fill="#dc2626"/><path d="M127 8h21" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><circle cx="153" cy="3" r="2.6" fill="#fff"/><path d="M130 20c-2 6-2 10 0 14h17c2-4 2-8 0-14z" fill="#dc2626"/><path d="M130 27h17" stroke="#1c1917" stroke-width="2.2"/><path d="M147 23l7 6" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/><path d="M156 30c10-12 28-12 30 0c1 8-6 14-18 12z" fill="#b45309" stroke="#78350f" stroke-width="1.5"/><path d="M162 22l6-5 3 6" fill="none" stroke="#fde047" stroke-width="2"/><rect x="176" y="34" width="12" height="9" rx="1.5" fill="#22c55e"/><path d="M176 38h12M182 34v9" stroke="#fde047" stroke-width="1.6"/></g><path d="M94 38Q122 30 154 36" stroke="#fde047" stroke-width="1.6" fill="none"/></svg></div><div class="nd-corda"><svg class="nd-elf" viewBox="0 0 46 74" width="46" height="74" xmlns="http://www.w3.org/2000/svg"><g class="nd-elf-g"><path d="M17 32l-5-27M29 32l5-27" stroke="#16a34a" stroke-width="5" stroke-linecap="round"/><circle cx="12" cy="4" r="3.6" fill="#fcd9b6"/><circle cx="34" cy="4" r="3.6" fill="#fcd9b6"/><path d="M13 52l-3 16h8m11-16l3 16h-8" fill="none" stroke="#dc2626" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 69h13m8 0h13" stroke="#fde047" stroke-width="4.5" stroke-linecap="round"/><path d="M12 31h22l3 22H9z" fill="#16a34a"/><path d="M10 40h26M9.5 47h27" stroke="#dc2626" stroke-width="3.2"/><path d="M12 31h22" stroke="#fde047" stroke-width="2.4"/><path d="M13 22l-8-4 3 9zM33 22l8-4-3 9z" fill="#fcd9b6"/><circle cx="23" cy="23" r="10.5" fill="#fcd9b6"/><path d="M12.5 19c3-13 16-14 21 0z" fill="#dc2626"/><path d="M12 19h22" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><path d="M26 7l12-3" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/><circle cx="39" cy="4" r="2.8" fill="#fbbf24" class="nd-sino"/><circle cx="19" cy="23" r="1.3" fill="#1c1917"/><circle cx="27" cy="23" r="1.3" fill="#1c1917"/><circle cx="16" cy="27" r="2" fill="#fca5a5" opacity=".7"/><circle cx="30" cy="27" r="2" fill="#fca5a5" opacity=".7"/><path d="M19 28c2 3 6 3 8 0" stroke="#7f1d1d" stroke-width="1.4" fill="none" stroke-linecap="round"/></g></svg></div>'; hc.appendChild(d); }
+    d.innerHTML = '<div class="nd-trio"><svg class="nd-svg" viewBox="0 0 250 64" width="250" height="64" xmlns="http://www.w3.org/2000/svg"><path d="M0 54c30 6 60-8 96-2" stroke="#fde68a" stroke-width="2" fill="none" stroke-dasharray="2 5" opacity=".7"/><g transform="translate(150 0)"><path class="nd-leg" d="M8 38l-5 14M14 38l-2 15M26 38l3 14M32 38l6 12" stroke="#7c4a21" stroke-width="3" stroke-linecap="round" fill="none"/><ellipse cx="22" cy="32" rx="17" ry="9" fill="#a8672d"/><ellipse cx="22" cy="35" rx="11" ry="4.5" fill="#d9a066"/><path d="M33 28l9-12" stroke="#a8672d" stroke-width="6" stroke-linecap="round"/><ellipse cx="45" cy="13" rx="7" ry="5.5" fill="#a8672d"/><circle cx="47" cy="11.5" r="1.3" fill="#1c1917"/><circle cx="51.5" cy="14" r="1.6" fill="#1c1917"/><path d="M42 8l-3-8m3 8l5-7M39 3l-4-1M45 7l6-5" stroke="#f5deb3" stroke-width="1.8" stroke-linecap="round" fill="none"/></g><g transform="translate(194 0)"><path class="nd-leg" d="M8 38l-5 14M14 38l-2 15M26 38l3 14M32 38l6 12" stroke="#7c4a21" stroke-width="3" stroke-linecap="round" fill="none"/><ellipse cx="22" cy="32" rx="17" ry="9" fill="#a8672d"/><ellipse cx="22" cy="35" rx="11" ry="4.5" fill="#d9a066"/><path d="M33 28l9-12" stroke="#a8672d" stroke-width="6" stroke-linecap="round"/><ellipse cx="45" cy="13" rx="7" ry="5.5" fill="#a8672d"/><circle cx="47" cy="11.5" r="1.3" fill="#1c1917"/><circle cx="51.5" cy="14" r="3" fill="#ef4444" class="nd-nariz"/><path d="M42 8l-3-8m3 8l5-7M39 3l-4-1M45 7l6-5" stroke="#f5deb3" stroke-width="1.8" stroke-linecap="round" fill="none"/></g><g transform="translate(-92 0)"><path d="M112 20h42l8-8 2 22c0 10-10 16-26 16h-22c-4 0-6-4-4-8z" fill="#dc2626" stroke="#7f1d1d" stroke-width="1.5"/><path d="M112 42h46" stroke="#fde047" stroke-width="2.4"/><path d="M104 58c0 4 6 5 24 5h42c10 0 14-6 12-12" stroke="#fbbf24" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M122 58v-8m30 8v-8" stroke="#fbbf24" stroke-width="2.4"/><circle cx="138" cy="12" r="8.5" fill="#fcd9b6"/><path d="M129 14c1 9 15 9 18 0c-3 4-15 4-18 0z" fill="#fff"/><circle cx="136" cy="11" r="1.1" fill="#1c1917"/><circle cx="141" cy="11" r="1.1" fill="#1c1917"/><circle cx="138.5" cy="13.5" r="1.8" fill="#f87171"/><path d="M127 8c1-9 11-13 20-5l6-4-1 9z" fill="#dc2626"/><path d="M127 8h21" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><circle cx="153" cy="3" r="2.6" fill="#fff"/><path d="M130 20c-2 6-2 10 0 14h17c2-4 2-8 0-14z" fill="#dc2626"/><path d="M130 27h17" stroke="#1c1917" stroke-width="2.2"/><path d="M147 23l7 6" stroke="#dc2626" stroke-width="5" stroke-linecap="round"/><path d="M156 30c10-12 28-12 30 0c1 8-6 14-18 12z" fill="#b45309" stroke="#78350f" stroke-width="1.5"/><path d="M162 22l6-5 3 6" fill="none" stroke="#fde047" stroke-width="2"/><rect x="176" y="34" width="12" height="9" rx="1.5" fill="#22c55e"/><path d="M176 38h12M182 34v9" stroke="#fde047" stroke-width="1.6"/></g><path d="M94 38Q122 30 154 36" stroke="#fde047" stroke-width="1.6" fill="none"/></svg></div>'; hc.appendChild(d); }
   on ? neveLiga() : neveDesliga();
 }
-setTimeout(() => { try { natalAplica(); } catch(e){} }, 0); window.addEventListener('load', () => { try { natalAplica(); } catch(e){} });   // liga o tema ja na primeira aba, sem precisar trocar de aba
-function natalToggle(){ try { localStorage.setItem('natal_off', localStorage.getItem('natal_off')==='1' ? '0' : '1'); } catch(e){} natalAplica(); }
+function temaSet(t){ try { localStorage.setItem('tema', t); localStorage.removeItem('natal_off'); } catch(e){} temaFecha(); natalAplica(); }
+function temaFecha(){ const m = document.getElementById('tema-menu'); if (m) m.remove(); document.removeEventListener('click', temaFora, true); }
+function temaFora(e){ const m = document.getElementById('tema-menu'); if (m && !m.contains(e.target) && e.target.id!=='btn-natal') temaFecha(); }
+function temaMenu(ev){
+  if (document.getElementById('tema-menu')){ temaFecha(); return; }
+  const b = ev.currentTarget, r = b.getBoundingClientRect(), at = temaAtual(), m = document.createElement('div'); m.id = 'tema-menu';
+  m.innerHTML = '<b>Tema do painel</b>' + Object.entries(TEMAS).filter(([k,t]) => !t.ate || new Date() < t.ate).map(([k,t]) => `<button type="button" class="${k===at ? 'on' : ''}" onclick="temaSet('${k}')">${t.ico} ${t.nome}${k===at ? ' ✓' : ''}</button>`).join('');
+  document.body.appendChild(m); m.style.top = (r.bottom + 6) + 'px'; m.style.left = Math.max(8, Math.min(r.left, innerWidth - 210)) + 'px';
+  setTimeout(() => document.addEventListener('click', temaFora, true), 0);
+}
+setTimeout(() => { try { natalAplica(); } catch(e){} }, 0); window.addEventListener('load', () => { try { natalAplica(); } catch(e){} });   // aplica o tema ja na primeira aba
 function neveLiga(){
   const card = document.querySelector('.hero-card'); if (!card || _neve || (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches)) return;
   let cv = document.getElementById('snow'); if (!cv){ cv = document.createElement('canvas'); cv.id = 'snow'; card.appendChild(cv); }
@@ -3107,6 +3148,9 @@ function dfSet(k, v){
   else if (k==='mes') DF.mes = (DF.mes===+v ? 0 : +v);
   else if (k==='carr'){ DF.carrs.has(v) ? DF.carrs.delete(v) : DF.carrs.add(v); }
   else if (k==='canal') DF.canal = (DF.canal===v ? '' : v);
+  else if (k==='mesSel') DF.mes = +v || 0;
+  else if (k==='carrSel'){ DF.carrs.clear(); if (v) DF.carrs.add(v); }
+  else if (k==='canalSel') DF.canal = v || '';
   else if (k==='limpar'){ DF.mes = 0; DF.carrs.clear(); DF.canal = ''; DF.ano = null; }
   renderDashBlocks();
 }
@@ -3132,14 +3176,19 @@ function renderDashBlocks(){
   const mesesDisp = [...new Set(IND_ALL.filter(x=>DF.ano==='all' || x.ano===DF.ano).map(x=>x.mes))].sort((a,b)=>a-b);
   const carrList = [...new Set(IND_ALL.map(x=>x.carr))].map(c => ({ c, n:IND_ALL.filter(x=>!x.logistica && x.carr===c && dfPass(x,['carr'])).length })).sort((a,b)=>b.n-a.n);
   const temF = DF.mes || DF.carrs.size || DF.canal;
-  const filtros = `<div class="ind-f" style="margin-bottom:14px">
-      <div class="ind-fr" style="border-top:none"><b>Período</b><div><select class="fsel" onchange="dfSet('ano',this.value)"><option value="all"${DF.ano==='all'?' selected':''}>Todos os anos</option>${anosAll.map(a=>`<option${a===DF.ano?' selected':''}>${a}</option>`).join('')}</select>${DF.ano==='all' ? '' : mesesDisp.map(m => chip(DF.mes===m, `dfSet('mes',${m})`, MESES[m-1], IND_ALL.filter(x=>!x.logistica && x.mes===m && x.ano===DF.ano && dfPass(x,['mes'])).length)).join('')}</div></div>
-      <div class="ind-fr"><b>Transportadora</b><div>${carrList.map(o => chip(DF.carrs.has(o.c), `dfSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>
-      <div class="ind-fr"><b>Canal</b><div>${['Marketplace','Relacionamento','Logística'].map(c => chip(DF.canal===c, `dfSet('canal','${c}')`, c, IND_ALL.filter(x=>x.canal===c && dfPass(x,['canal'])).length)).join('')}${temF ? '<button type="button" class="ind-ch" onclick="dfSet(\'limpar\')">Limpar filtros ✕</button>' : ''}</div></div>
+  const opt = (v, t, on) => `<option value="${esc(String(v))}"${on ? ' selected' : ''}>${t}</option>`;
+  const filtros = `<div class="ind-f dash-f" style="margin:14px 0">
+      <div class="dash-fr">
+        <label><span>Ano</span><select class="fsel" onchange="dfSet('ano',this.value)">${opt('all','Todos os anos',DF.ano==='all')}${anosAll.map(a => opt(a, a, a===DF.ano)).join('')}</select></label>
+        <label><span>Mês</span><select class="fsel" onchange="dfSet('mesSel',this.value)"${DF.ano==='all' ? ' disabled' : ''}>${opt(0,'Todos os meses',!DF.mes)}${mesesDisp.map(m => opt(m, MESES[m-1]+' ('+IND_ALL.filter(x=>!x.logistica && x.mes===m && x.ano===DF.ano && dfPass(x,['mes'])).length+')', DF.mes===m)).join('')}</select></label>
+        <label><span>Transportadora</span><select class="fsel" onchange="dfSet('carrSel',this.value)">${opt('','Todas',!DF.carrs.size)}${carrList.map(o => opt(o.c, esc(o.c)+' ('+o.n+')', DF.carrs.size===1 && DF.carrs.has(o.c))).join('')}</select></label>
+        <label><span>Canal</span><select class="fsel" onchange="dfSet('canalSel',this.value)">${opt('','Todos',!DF.canal)}${['Marketplace','Relacionamento','Logística'].map(c => opt(c, c+' ('+IND_ALL.filter(x=>x.canal===c && dfPass(x,['canal'])).length+')', DF.canal===c)).join('')}</select></label>
+        ${temF ? '<button type="button" class="btn-exp" onclick="dfSet(\'limpar\')">Limpar filtros ✕</button>' : ''}
+      </div>
       <div class="ind-f-res">Todos os números e gráficos abaixo seguem estes filtros · <b>${indB.length}</b> tarefas e <b>${colTodas.length}</b> coletas no recorte${temF ? ' · filtros ativos' : ''}</div></div>`;
 
   const nav = (id, t) => `<button class="pw-btn" type="button" onclick="ir('${id}')">${t}</button>`;
-  const hero = pwHero('Visão geral', 'Painel de devoluções', 'Clique em qualquer número para ver os casos por trás dele; use os filtros acima para recortar.', [
+  const hero = pwHero('Visão geral', 'Painel de devoluções', 'Clique em qualquer número para ver os casos por trás dele; use os filtros logo abaixo para recortar.', [
     ['Coletas reversas', colTodas.length, `${AT_.length} atrasadas · ${RI_.length} em risco · ${REA_.length} aguardando CD`],
     ['Apontamentos em atraso', slaAt.length, `${slaHj} vencem hoje`],
     ['Tarefas em aberto', A.aberto, `atendimento de ${rotuloPer}: ${fmt1(A.taxa)}%`],
@@ -3156,7 +3205,7 @@ function renderDashBlocks(){
     : '<div class="pw-empty">Nada atrasado neste recorte.</div>';
   const gloss = `<details class="ind-f" style="margin-top:6px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da Dayane.</div></details>`;
 
-  el.innerHTML = `${filtros}<div class="pworld" id="dash-hero">${hero}
+  el.innerHTML = `<div class="pworld" id="dash-hero"><div class="nd-sentado" aria-hidden="true"><svg viewBox="0 0 64 74" width="64" height="74" xmlns="http://www.w3.org/2000/svg"><g class="nd-pernas"><path d="M22 44v17M36 44v17" stroke="#dc2626" stroke-width="8" stroke-linecap="round"/><path d="M22 50v4M22 57v4M36 50v4M36 57v4" stroke="#fff" stroke-width="8" stroke-linecap="butt" opacity=".9"/><path d="M16 64q6 5 13 0M30 64q6 5 13 0" stroke="#fbbf24" stroke-width="5" stroke-linecap="round" fill="none"/></g><path d="M14 44V32q0-6 6-6h24q6 0 6 6v12z" fill="#16a34a"/><path d="M14 36h36M14 41h36" stroke="#dc2626" stroke-width="3"/><path d="M14 30h36" stroke="#fde047" stroke-width="2.4"/><path d="M17 31q-7 6-3 13M47 31q7 6 3 13" stroke="#16a34a" stroke-width="5.5" stroke-linecap="round" fill="none"/><circle cx="14" cy="45" r="3.6" fill="#fcd9b6"/><circle cx="50" cy="45" r="3.6" fill="#fcd9b6"/><path d="M19 15l-9-5 4 10zM45 15l9-5-4 10z" fill="#fcd9b6"/><circle cx="32" cy="17" r="11.5" fill="#fcd9b6"/><path d="M19.5 13c4-16 21-16 25 0z" fill="#dc2626"/><path d="M19 13h26" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><path d="M38 3q14-4 16 10" stroke="#dc2626" stroke-width="5.5" stroke-linecap="round" fill="none"/><circle cx="54" cy="14" r="3.2" fill="#fbbf24" class="nd-sino"/><circle cx="27.5" cy="17" r="1.4" fill="#1c1917"/><circle cx="36.5" cy="17" r="1.4" fill="#1c1917"/><circle cx="23.5" cy="21" r="2.2" fill="#fca5a5" opacity=".7"/><circle cx="40.5" cy="21" r="2.2" fill="#fca5a5" opacity=".7"/><path d="M27 22q5 5 10 0" stroke="#7f1d1d" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>${hero}${filtros}
     <div class="pw-grid even">${card('Coleta reversa', `Prazo de ${SLA} dias · clique numa fatia para abrir a aba`, 'dc-col')}${card('Atendimento por mês', 'Tarefas criadas e % atendido · clique numa barra para filtrar o mês', 'dc-ate')}</div>
     <div class="pw-grid even">${card('Perdas por mês', 'Valor estimado e acumulado · clique para abrir as Perdas', 'dc-per')}${card('SLA de apontamento', 'Casos por tópico · clique numa barra para abrir o tópico', 'dc-sla')}</div>
     <div class="pw-grid even">${card('Tratativas por grupo', 'Casos pendentes por tipo · clique para abrir o grupo', 'dc-trat')}${card('Atenção agora', 'O que mais pede cobrança neste recorte', '', `<div class="pw-ins">${lista}</div>`)}</div>${gloss}</div>`;
@@ -3349,7 +3398,10 @@ function indAgg(arr){
   return { total:arr.length, fin:fin.length, aberto:arr.length-fin.length, taxa:arr.length ? fin.length/arr.length*100 : null, sla: sl.length ? sl.reduce((s,x)=>s+x.slaDias,0)/sl.length : null, nsla:sl.length };
 }
 const fmt1 = n => n==null ? '—' : n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
-function indSet(k,v){
+function indIr(){   // rola ate a lista de casos do canal em foco (depois de renderizar)
+  setTimeout(() => { const id = IND.canal==='Marketplace' ? 'ind-lista-t-mp' : IND.canal==='Logística' ? 'ind-log-chips' : 'ind-lista-t', el = document.getElementById(id), alvo = el && (el.closest('.filters,.ind-f') || el); if (alvo) alvo.scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
+}
+function indSet(k,v,go){
   const tg = (set,x) => set.has(x) ? set.delete(x) : set.add(x);
   if (k==='ano'){ IND.ano = +v; IND.meses.clear(); }
   else if (k==='mes'){ if (+v===0){ const a = indAntigos(), todos = a.every(m=>IND.meses.has(m)); a.forEach(m => todos ? IND.meses.delete(m) : IND.meses.add(m)); } else tg(IND.meses, +v); }
@@ -3363,7 +3415,7 @@ function indSet(k,v){
   else if (k==='alerta'){ IND.alerta = (IND.alerta===v ? '' : v); if (IND.alerta) IND.status = 'aberto'; }
   else if (k==='q'){ IND.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderInd, 180); return; }
   else if (k==='limpar'){ IND.meses.clear(); IND.carrs.clear(); IND.motivos.clear(); IND.status='aberto'; IND.q=''; IND.canal=''; IND.sit=''; IND.usuario=''; IND.and=''; IND.alerta=''; const i=document.getElementById('ind-q'); if(i) i.value=''; }
-  renderInd();
+  renderInd(); if (go) indIr();
 }
 function indSetMotivo(id, v){
   const x = IND_ALL.find(y=>y.id===id); if (!x || !DB){ toast('Entre com sua conta para gravar o motivo.', {type:'warn'}); return; }
@@ -3427,7 +3479,7 @@ function renderInd(){
   document.getElementById('ph-ind').innerHTML = pwHero('Controle de Situações', 'Indicadores por transportadora', '',
     [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'importe a planilha “Tarefas em aberto” (xlsx) para calcular'], ['Em aberto hoje', A.aberto, 'por motivo, logo abaixo']],
     undefined, (() => { const ab = doAnoAll.filter(x=>!x.fin && x.canal!=='Logística'), c = m => ab.filter(x=>x.motivo===m).length, nLog = doAnoAll.filter(x=>!x.fin && x.canal==='Logística').length;
-      const t = (n, l, k, v, on) => `<button type="button" class="pw-mini${on ? ' on' : ''}" onclick="indSet('${k}','${v}')" title="${on ? 'Clique para tirar o filtro' : 'Clique para filtrar os casos em aberto: '+l}"><b>${n}</b> ${l}</button>`, mt = m => t(c(m), m, 'motivo', m, IND.motivos.has(m));
+      const t = (n, l, k, v, on) => `<button type="button" class="pw-mini${on ? ' on' : ''}" onclick="indSet('${k}','${v}',1)" title="${on ? 'Clique para tirar o filtro' : 'Clique para filtrar os casos em aberto: '+l}"><b>${n}</b> ${l}</button>`, mt = m => t(c(m), m, 'motivo', m, IND.motivos.has(m));
       return `<div class="pw-minis"><span class="pw-minis-l">Em aberto por motivo</span>${mt('Marketplace')}${mt('Transporte')}${mt('Relacionamento')}${mt('No prazo')}${t(nLog, 'Logística', 'canal', 'Logística', IND.canal==='Logística')}${(IND.motivos.size || IND.canal==='Logística') ? `<button type="button" class="pw-mini lim" onclick="IND.motivos.clear();IND.canal='';renderInd()">✕ limpar</button>` : ''}</div>`; })());
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
@@ -3436,14 +3488,14 @@ function renderInd(){
   const por = new Map(); doAno.filter(x=>f(x,['carr','status','motivo'])).forEach(x => { if(!por.has(x.carr)) por.set(x.carr,[]); por.get(x.carr).push(x); });
   document.getElementById('ind-cars').innerHTML = [...por.entries()].map(([c,arr])=>({c, arr, a:indAgg(arr)})).sort((x,y)=>y.a.total-x.a.total).map(({c,a,arr}) => {
     const cl = a.taxa>=90 ? '' : a.taxa>=75 ? ' am' : ' rd', tcl = a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
-    return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c)" data-c="${esc(c)}"><h4>${esc(c)}<button class="ind-drill" type="button" title="Ver os casos desta transportadora" onclick="event.stopPropagation();abreDrill(${regDrill('Casos — '+c, () => arr)})">ver casos ↗</button></h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div>${colslaLinha(c)}</div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
+    return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c,1)" data-c="${esc(c)}"><h4>${esc(c)}<button class="ind-drill" type="button" title="Ver os casos desta transportadora" onclick="event.stopPropagation();abreDrill(${regDrill('Casos — '+c, () => arr)})">ver casos ↗</button></h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div>${colslaLinha(c)}</div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
 
   // ---- por canal (Marketplace x Relacionamento) ----
   document.getElementById('ind-canais-sub').textContent = 'Relacionamento e Marketplace pelo usuário responsável; Logística pela situação (atualizada pela Dayane). Clique para filtrar.';
   document.getElementById('ind-canais').innerHTML = ['Marketplace','Relacionamento','Logística'].map(c => {
     const arr = (c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c && f(x,['canal','status','motivo'])), a = indAgg(arr), tcl = a.taxa==null ? '' : a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
     const us = [...arr.reduce((m,x)=>m.set(respDe(x),(m.get(respDe(x))||0)+1), new Map()).entries()].sort((p,q)=>q[1]-p[1]).slice(0,4).map(([u,n])=>esc(u)+' ('+n+')').join(' · ');
-    return `<div class="ind-c${IND.canal===c?' on':''}" onclick="indSet('canal','${c}')"><h4>${c}<button class="ind-drill" type="button" title="Ver os casos deste canal" onclick="event.stopPropagation();abreDrill(${regDrill('Casos — '+c, () => arr)})">ver casos ↗</button></h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div><div style="font-size:10.5px;color:var(--tx3);margin-top:8px">${us||'sem casos'}</div></div>`; }).join('');
+    return `<div class="ind-c${IND.canal===c?' on':''}" onclick="indSet('canal','${c}',1)"><h4>${c}<button class="ind-drill" type="button" title="Ver os casos deste canal" onclick="event.stopPropagation();abreDrill(${regDrill('Casos — '+c, () => arr)})">ver casos ↗</button></h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div><div style="font-size:10.5px;color:var(--tx3);margin-top:8px">${us||'sem casos'}</div></div>`; }).join('');
 
   // ---- grafico mensal (ignora mes/situacao/motivo para mostrar a serie inteira; meses filtrados ficam destacados) ----
   const doCar = doAno.filter(x=>f(x,['mes','status','motivo']));
@@ -3460,7 +3512,7 @@ function renderInd(){
   }).join('') || '<tr><td colspan="9" style="color:var(--tx3);padding:12px">Sem dados.</td></tr>';
   { // faixa de alertas: o que precisa de acao + mes atual contra o anterior
     const b = doAno.filter(x => f(x,['status','motivo','alerta']) && !x.fin);
-    const al = [['60','Abertos há 60+ dias','r'],['30','Abertos há 30 a 59 dias','w'],['sem','Sem andamento informado','w'],['prev','Coleta além da previsão da transportadora','r']].map(([k,t,cl]) => { const n = b.filter(x=>alertaOk(x,k)).length; return `<button type="button" class="alerta ${n?cl:''}${IND.alerta===k?' on':''}${n?'':' z'}" onclick="indSet('alerta','${k}')" title="Clique para filtrar a lista"><b>${n}</b><span>${t}</span></button>`; });
+    const al = [['60','Abertos há 60+ dias','r'],['30','Abertos há 30 a 59 dias','w'],['sem','Sem andamento informado','w'],['prev','Coleta além da previsão da transportadora','r']].map(([k,t,cl]) => { const n = b.filter(x=>alertaOk(x,k)).length; return `<button type="button" class="alerta ${n?cl:''}${IND.alerta===k?' on':''}${n?'':' z'}" onclick="indSet('alerta','${k}',1)" title="Clique para filtrar a lista"><b>${n}</b><span>${t}</span></button>`; });
     const ult = meses.filter(m=>m>0).slice(-2);
     if (ult.length===2){ const m1 = mediaDe(doCar.filter(noGrupo(ult[1]))), m0 = mediaDe(doCar.filter(noGrupo(ult[0]))), d = (m1!=null && m0!=null) ? m1-m0 : null;
       al.push(`<div class="alerta${d!=null&&d>0.05?' r':''}" style="cursor:default"><b>${fd(m1)}</b><span>Média de dias em ${MESES[ult[1]-1]} · ${deltaH(d)} vs ${MESES[ult[0]-1]}</span></div>`); }
@@ -3474,7 +3526,7 @@ function renderInd(){
       const nP = its.filter(i=>!i.x.fin && i.atrasoProt>0).length, nC = its.filter(i=>!i.x.fin && i.atrasoCd>0).length;
       const pf = (a,b) => b ? Math.round(a/b*100) : null, cor = p => p==null ? '' : p>30 ? 'r' : p>10 ? 'w' : '';
       const p1 = pf(A2.protFora, A2.protN), p2 = pf(A2.cdFora, A2.cdN), encerrados = its.filter(i=>i.encerrado).length;
-      const card = (n, titulo, prazo, p, fora, tot, linhas, k) => `<button type="button" class="slc-card ${cor(p)}${IND.alerta===k ? ' on' : ''}" onclick="indSet('alerta','${k}')" title="Clique para listar só os casos em aberto que passaram do prazo"><div class="slc-h"><span class="slc-n">${n}</span>${titulo}<em>${prazo}</em></div>
+      const card = (n, titulo, prazo, p, fora, tot, linhas, k) => `<button type="button" class="slc-card ${cor(p)}${IND.alerta===k ? ' on' : ''}" onclick="indSet('alerta','${k}',1)" title="Clique para listar só os casos em aberto que passaram do prazo"><div class="slc-h"><span class="slc-n">${n}</span>${titulo}<em>${prazo}</em></div>
         <div class="slc-big"><b>${p==null ? '—' : p+'%'}</b><span>${p==null ? 'sem casos medidos' : 'dos casos passaram do prazo'}</span></div><div class="slc-bar"><i style="width:${p==null ? 0 : p}%"></i></div><ul class="slc-l">${linhas.map(l => `<li>${l}</li>`).join('')}</ul></button>`;
       const med = (n, titulo, v, prazo, qtd, expl) => { const p = v==null ? null : Math.min(100, Math.round(v/prazo*100)); return `<button type="button" class="slc-card slc-med ${v==null ? '' : v>prazo ? 'r' : v>prazo*0.7 ? 'w' : ''}" onclick="ir('colsla')" title="Clique para ver os casos na aba SLA Transportadora"><div class="slc-h"><span class="slc-n">${n}</span>${titulo}<em>prazo ${prazo} d</em></div>
         <div class="slc-big"><b>${fm(v)}</b><span>${v==null ? 'sem casos medidos' : v>prazo ? 'acima do prazo' : 'dentro do prazo'}</span></div><div class="slc-bar"><i style="width:${p==null ? 0 : p}%"></i></div><ul class="slc-l"><li>${expl}</li><li><b>${qtd}</b></li></ul></button>`; };
@@ -3513,7 +3565,7 @@ function renderInd(){
     const mo = [...new Set(ab.map(x=>x.motivo))].map(m=>[m, ab.filter(x=>x.motivo===m).length]).sort((a,b)=>b[1]-a[1]);
     if (charts.indMot) charts.indMot.destroy();
     charts.indMot = new Chart(document.getElementById('ch-ind-mot'), { type:'doughnut', data:{ labels:mo.map(a=>a[0]), datasets:[{ data:mo.map(a=>a[1]), backgroundColor:mo.map(a=>motCor(a[0]) + (!IND.motivos.size||IND.motivos.has(a[0])?'':'55')), borderWidth:0 }] },
-      options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', onClick:(e,els)=>{ if (els.length) indSet('motivo', mo[els[0].index][0]); }, plugins:{ legend:{ position:'right', labels:{ color:tick, boxWidth:10 } } } } });
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', onClick:(e,els)=>{ if (els.length) indSet('motivo', mo[els[0].index][0], 1); }, plugins:{ legend:{ position:'right', labels:{ color:tick, boxWidth:10 } } } } });
   }
 
   // ---- lista de casos: uma tabela por setor; a Logistica fica no ultimo quadro ----
@@ -3748,6 +3800,7 @@ function slaSetMotivo(id, v){
   DB.doc('cases/'+id).set({ motivo_apont:v||null, motivo_apont_em:isoNow() }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
   DB_CASES[id] = { ...(DB_CASES[id]||{}), motivo_apont:v||null }; scheduleRender();
 }
+function slaIr(key){ setTimeout(() => { const el = document.getElementById('sla-lista-'+key); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }, 120); }
 function slaSet(k, v){
   if (k==='fluxo'){ SLA_ST.fluxo = v; SLA_ST.sit = ''; SLA_ST.usuario = ''; }
   else if (k==='estado') SLA_ST.estado = v;
@@ -3810,13 +3863,13 @@ function renderSla(){
     let trs = regras.map(r => {
       const its = baseTab.filter(x => sitKey(x.sit)===r.key), a = its.filter(x=>x.estado==='ATRASO'), h = its.filter(x=>x.estado==='HOJE').length, mx = a.reduce((m,x)=>Math.max(m,x.atraso),0), un = r.util?'d.u.':'d';
       return `<tr class="clickable${SLA_ST.sit===r.key?' sel':''}${r.n?'':' sla-zero'}" data-k="${r.key}" onclick="slaSet('sit',this.dataset.k)"${r.n?'':' style="opacity:.6"'}><td class="td-nome">${esc(r.sit)}</td><td>${r.n?`<b>${slaPrazoTxt(r)}</b>`:'<span class="bdg b-dk">Sem SLA (0)</span>'}</td>
-        <td style="font-size:11px;color:var(--tx3)">${r.prox.length?r.prox.map(p => esc(p) + (LOG_SITS.has(sitKey(p)) ? ' <b style="color:var(--tx2)">(Logística)</b>' : '')).join(' · '):'—'}</td><td>${its.length}</td><td>${a.length?`<span class="bdg b-red" data-k="${r.key}" onclick="event.stopPropagation();slaSet('sitAtraso',this.dataset.k)" title="Ver só os atrasados desta situação">${a.length}</span>`:(r.n?0:'—')}</td><td>${h||(r.n?0:'—')}</td><td>${mx?mx+' '+un:'—'}</td></tr>`; }).join('');
+        <td style="font-size:11px;color:var(--tx3)">${r.prox.length?r.prox.map(p => esc(p) + (LOG_SITS.has(sitKey(p)) ? ' <b style="color:var(--tx2)">(Logística)</b>' : '')).join(' · '):'—'}</td><td>${its.length}</td><td>${a.length?`<span class="bdg b-red" data-k="${r.key}" onclick="event.stopPropagation();slaSet('sitAtraso',this.dataset.k);slaIr('${key}')" title="Ver só os atrasados desta situação e descer até os casos">${a.length}</span>`:(r.n?0:'—')}</td><td>${h||(r.n?0:'—')}</td><td>${mx?mx+' '+un:'—'}</td></tr>`; }).join('');
     const fora = baseTab.filter(x => !conhecidas.has(sitKey(x.sit)));
     if (fora.length) trs += `<tr style="opacity:.6"><td class="td-nome">Outras situações sem regra</td><td><span class="bdg b-dk">Sem SLA</span></td><td style="font-size:11px;color:var(--tx3)">${[...new Set(fora.map(x=>x.sit))].slice(0,6).map(esc).join(' · ')}</td><td>${fora.length}</td><td>—</td><td>—</td><td>—</td></tr>`;
     const lista = SLA_ITENS.filter(x => fc(x)).sort((a,b) => b.atraso-a.atraso || (a.venceu||0)-(b.venceu||0)); SLA_LISTAS[c] = lista;
-    return `<div class="ind-h" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:22px">${canalBdg(c)} <span>${c}</span> <span class="bdg b-red">${a1} em atraso</span> <span class="bdg b-amb">${h1} vencem hoje</span> <span class="bdg b-grn">${o1} no prazo</span></div><div class="ind-sub" style="margin-bottom:6px">${SLA_SUB[c]||''}</div>
+    return `<div class="ind-h" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:22px">${canalBdg(c)} <span>${c}</span> <span class="bdg b-red" style="cursor:pointer" onclick="slaSet('estado','atraso');slaIr('${key}')" title="Ver os casos em atraso deste setor">${a1} em atraso</span> <span class="bdg b-amb">${h1} vencem hoje</span> <span class="bdg b-grn">${o1} no prazo</span></div><div class="ind-sub" style="margin-bottom:6px">${SLA_SUB[c]||''}</div>
       <div class="tbl-wrap" style="margin-bottom:12px"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Prazo</th><th>Próximos passos</th><th>Casos</th><th>Em atraso</th><th>Vence hoje</th><th>Maior atraso</th></tr></thead><tbody>${trs}</tbody></table></div></div>
-      <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">${tituloLista} — ${c}</b><span class="fcnt">${lista.length} caso${lista.length!==1?'s':''}</span><button class="btn-exp" onclick="slaExport('${c}')">Exportar CSV</button></div>
+      <div class="filters" id="sla-lista-${key}" style="margin:6px 0 8px;scroll-margin-top:160px"><b style="font-size:13px">${tituloLista} — ${c}</b><span class="fcnt">${lista.length} caso${lista.length!==1?'s':''}</span><button class="btn-exp" onclick="slaExport('${c}')">Exportar CSV</button></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Venceu em</th><th>Atraso</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th title="Número de protocolo / coleta da Hello (só clientes Hello)">Protocolo Hello<br><small style="font-weight:400">nº de coleta</small></th><th>Motivo da pendência</th></tr></thead><tbody id="tb-sla-${key}">${lista.slice(0,CAP(300)).map(linha).join('') + (lista.length>CAP(300) ? `<tr><td colspan="12" style="color:var(--tx3);padding:10px">Mostrando 300 de ${lista.length}. Refine pelos filtros ou exporte o CSV.</td></tr>` : '') || '<tr><td colspan="12" style="color:var(--tx3);padding:14px">Nenhum caso neste filtro.</td></tr>'}</tbody></table></div></div>`;
   };
   const ativoSla = document.activeElement && document.activeElement.closest && document.activeElement.closest('#sla-secoes') && !document.activeElement.classList.contains('cf-btn');
