@@ -1178,6 +1178,7 @@ let COLETAS_ARQ = [];   // todas as coletas da planilha atual
 let HIST = [];       // coletas historico (canceladas ou realizadas)
 let TRAT = [];       // tratativas em aberto
 let ALL_TRAT = [];   // todas as tratativas (inclui perdas, a pagar/nao retornou e as que sairam da planilha): base do Historico
+let EXTR_ALL = [];   // casos de extravio (aba propria), de qualquer canal
 let NR = [];       // transportadora a pagar + produto nao retornou (aba propria)
 let TRAT_ALL = [];   // todas as tratativas (pendentes + finalizadas), base dos indicadores
 let TRAT_HIST = [];  // tratativas que sairam do arquivo (concluidas automaticamente)
@@ -1249,6 +1250,9 @@ function andClasse(x){
   if (/^finalizad/.test(a)) return 'finalizada';
   return '';
 }
+// Extravio: qualquer caso cujo andamento/situacao cita extravio (ou que ja tem data de acatamento) vive so na aba Extravios, seja qual for o responsavel/canal
+const ehExtravio = x => { if (!x || x.status_manual==='fin' || x.status_manual==='canc' || andClasse(x)) return false; if (x.extravio_acatado_em) return true;
+  const t = norm((x.andamento||'')+' '+(x.tipo_devolucao||x.sit||'')); return /extravi/.test(t) && !/\b(nao|sem)\b.{0,25}extravi/.test(t); };
 // Andamento "No prazo": a equipe confirma que o caso esta dentro do prazo, entao nao conta como atraso de apontamento
 const andNoPrazo = x => { const a = norm(String(x.andamento||'')); return /\bno prazo\b/.test(a) && !/\b(nao|fora)\b.*\bprazo\b/.test(a); };
 function rebuildData(){
@@ -1275,6 +1279,8 @@ function rebuildData(){
   let allColetas = Object.values(coletaMap).map(deriveColetaLive);   // coleta nao e escondida por status: todas as linhas da planilha entram
   const colPerdas = allColetas.filter(c => andClasse(c)==='perdas');   // Andamento 'perdas': sai da Coleta Reversa e vai so para a aba Perdas
   if (colPerdas.length){ const sp = new Set(colPerdas); allColetas = allColetas.filter(c => !sp.has(c)); }
+  const colExtr = allColetas.filter(c => !c.concluidoAuto && !c.cancelada && !c.realizada && ehExtravio(c));   // extravio: sai da Coleta Reversa e vai para a aba Extravios
+  if (colExtr.length){ const se = new Set(colExtr); allColetas = allColetas.filter(c => !se.has(c)); }
   COL = allColetas.filter(c => !c.cancelada && !c.realizada && !c.coletaRealizada);
   REA = allColetas.filter(c => !c.cancelada && !c.realizada && c.coletaRealizada);
   HIST = allColetas.filter(c => c.cancelada || c.realizada);
@@ -1282,8 +1288,10 @@ function rebuildData(){
   const allTrat = Object.values(tratMap).filter(visivel).map(deriveTratativaLive).map(t => andClasse(t)==='perdas' ? { ...t, grupo:'perdas' } : t).concat(colPerdas.map(c => ({ ...c, grupo:'perdas' })));
   // Perdas sao fato historico (indice mensal) e vivem na propria aba: nao saem do controle por sumirem do arquivo.
   PERDAS = allTrat.filter(t => t.grupo==='perdas').map(derivePerda);
-  NR = allTrat.filter(t => t.grupo!=='perdas' && isNR(t) && !t.concluido_auto).map(deriveNR);
-  const outrasTrat = allTrat.filter(t => t.grupo!=='perdas' && !isNR(t));
+  const tratExtr = allTrat.filter(t => t.grupo!=='perdas' && !t.concluido_auto && ehExtravio(t)), vistos = new Set();
+  EXTR_ALL = tratExtr.map(t => ({ ...t, __tipo:'tratativa' })).concat(colExtr.map(c => ({ ...c, __tipo:'coleta', tipo_devolucao:c.tipo_devolucao || 'Protocolo de Coleta' }))).filter(x => { const k = x.chave || (x.nf+'|'+x.cliente); if (vistos.has(k)) return false; vistos.add(k); return true; });
+  NR = allTrat.filter(t => t.grupo!=='perdas' && isNR(t) && !t.concluido_auto && !ehExtravio(t)).map(deriveNR);
+  const outrasTrat = allTrat.filter(t => t.grupo!=='perdas' && !isNR(t) && !(ehExtravio(t) && !t.concluido_auto));
   TRAT_ALL = outrasTrat; ALL_TRAT = allTrat;
   // painel de tratativas: so o que esta pendente (Finalizada / Desconsiderar saem; seguem nos indicadores)
   TRAT = outrasTrat.filter(t => !t.concluido_auto && sitClasseDe(t.tipo_devolucao||'')==='Pendente' && !andClasse(t));
@@ -1927,7 +1935,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261111-170000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261111-190000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2122,23 +2130,25 @@ function renderPalette(q){
     PAL_CMDS.forEach(([t,fn])=>out.push({h:'Comandos', t, s:'', fn}));
   } else {
     PAL_CMDS.filter(([t])=>norm(t).includes(nq)).forEach(([t,fn])=>out.push({h:'Comandos', t, s:'', fn}));
-    const src = [...AT,...RI,...EM,...REA,...COL.filter(c=>!c.prazo_status)].map(c=>({...c,__tipo:'coleta'}))
-      .concat(histItens().filter(h=>h.__tipo!=='perda'), TRAT.map(t=>({...t,__tipo:'tratativa'})), (typeof IND_ALL!=='undefined' ? IND_ALL : []).map(x=>({...x,__tipo:x.__tipo||'tratativa'})), PERDAS);
+    const dq = nq.replace(/\D/g,'');   // CPF/NF digitados com ou sem pontos e tracos
+    const src = [].concat(EXTR_ALL.map(x=>({...x,__tipo:x.__tipo||'tratativa',__extr:true})), [...AT,...RI,...EM,...REA,...COL].map(c=>({...c,__tipo:'coleta'})), NR.map(x=>({...x,__nr:true})),
+      histItens().filter(h=>h.__tipo!=='perda'), TRAT_ALL.map(t=>({...t,__tipo:'tratativa'})), (typeof IND_ALL!=='undefined' ? IND_ALL : []).map(x=>({...x,__tipo:x.__tipo||'tratativa'})), PERDAS);
     const seen = new Set(); let n = 0;
     for (const c of src){
-      const key = c.__tipo+(c.chave||c.nf||c.cliente);
+      const key = String(c.chave || ((c.nf||'')+'|'+(c.cliente||'')));
       if (seen.has(key)) continue;
-      const hay = norm([c.cliente,c.nf,c.cpf,c.chave,c.transportadora,c.carrier,c.motivo,c.cidade].join(' '));
-      if (!hay.includes(nq)) continue;
+      const hayRaw = [c.cliente,c.nf,c.cpf,c.chave,c.transportadora,c.carrier,c.motivo,c.cidade,c.pedido,c.nfe].join(' '), hay = norm(hayRaw);
+      if (!(hay.includes(nq) || (dq.length>=4 && hayRaw.replace(/\D/g,'').includes(dq)))) continue;
       seen.add(key);
-      const tag = c.__tipo==='perda' ? 'Perda · '+c.motivo : c.__tipo==='tratativa' ? 'Tratativa' : (c.cancelada||c.realizada ? 'Histórico' : (c.prazo_status==='ATRASADO'?'Atrasado':c.prazo_status==='RISCO'?'Em risco':c.prazo_status==='REALIZADA'?'Coleta realizada':'No prazo'));
+      const tag = c.__extr ? 'Extravio' : c.__nr ? 'Transportadora a pagar / não retornou' : c.__tipo==='perda' ? 'Perda · '+c.motivo : c.__tipo==='tratativa' ? 'Tratativa' : (c.cancelada||c.realizada ? 'Histórico' : (c.prazo_status==='ATRASADO'?'Atrasado':c.prazo_status==='RISCO'?'Em risco':c.prazo_status==='REALIZADA'?'Coleta realizada':'No prazo'));
       out.push({h:'Casos', t:(c.cliente||'—')+(c.nf?'  ·  NF '+c.nf:''), s:tag+' · '+(c.transportadora||'')+' '+(c.uf||''), fn:()=>openDetail(c)});
       if (++n>=40) break;
     }
   }
   palItems = out; palSel = 0;
   const so = out.filter(o => o.h==='Casos');
-  if (so.length===1 && /^\d{5,}$/.test(nq.replace(/[.\-\/\s]/g,''))){ clearTimeout(window._palAuto); window._palAuto = setTimeout(() => { if (document.getElementById('palette').classList.contains('on') && palItems.length===1 + out.filter(o=>o.h==='Comandos').length) palRun(palItems.indexOf(so[0])); }, 350); }   // CPF/NF com um unico caso: abre direto
+  clearTimeout(window._palAuto);
+  if (so.length===1 && nq.length>=4){ const alvo = so[0], q0 = nq; window._palAuto = setTimeout(() => { const inp = document.getElementById('pal-in'); if (document.getElementById('palette').classList.contains('on') && norm(inp.value).trim()===q0 && palItems.includes(alvo)) palRun(palItems.indexOf(alvo)); }, 650); }   // um unico caso: abre direto
   const list = document.getElementById('pal-list');
   let last = '';
   list.innerHTML = out.length ? out.map((o,i)=>{ const hd = o.h!==last ? `<div class="pal-h">${o.h}</div>` : ''; last=o.h;
@@ -3954,23 +3964,20 @@ function nrSkeleton(sc){
 // ================= EXTRAVIO: prazo da transportadora para liquidar o valor (lembrete de cobranca) =================
 // Total: 45 dias uteis; demais: 60 dias uteis. O prazo conta da data em que o extravio foi acatado (campo "Extravio acatado em", informado por voces).
 // Chegou o prazo: cobrar a transportadora. Ao cobrar ("Cobrei hoje"), o prazo recomeca a contar da data da cobranca, e assim por diante.
-const EXTR_SITS = /^(reenvio_s_recol_transp_pg|transportadora_a_pagar|produto_nao_retornou)/;
+const EXTR_AVISO = 5;   // o lembrete comeca X dias uteis antes de chegar o prazo de cobranca
 const EXTR_ST = { f:'', q:'' };
 const extrPrazo = carr => { const n = /\btotal\b/.test(norm(carr||'')) ? 45 : 60; return { n, util:true, txt:n+' dias úteis' }; };
 const extrData = v => { const m = v && /^(\d{4})-(\d{2})-(\d{2})/.exec(v); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; };
 function extrItens(){
   const hj = new Date(), hoje = new Date(hj.getFullYear(), hj.getMonth(), hj.getDate()), out = [];
-  (typeof TRAT_ALL==='undefined' ? [] : TRAT_ALL).forEach(t => {
-    if (t.concluido_auto || t.status_manual==='fin' || t.status_manual==='canc') return;
-    if (!EXTR_SITS.test(sitKey(t.tipo_devolucao||''))) return;
+  (typeof EXTR_ALL==='undefined' ? [] : EXTR_ALL).forEach(t => {
     const dc = (typeof DB_CASES!=='undefined' && DB_CASES[t.id]) || {}, man = dc.extravio_acatado_em || t.extravio_acatado_em || null, cob = dc.extravio_cobrado_em || t.extravio_cobrado_em || null;
-    if (!man && !/extravi/.test(norm([t.andamento, t.tipo_devolucao, t.classe].filter(Boolean).join(' ')))) return;
-    const carr = indNome(t.transportadora), pz = extrPrazo(carr), ini = extrData(man), mc = extrData(cob), dCob = (mc && ini && mc >= ini) ? mc : null;
+    const carr = indCarr(t), pz = extrPrazo(carr), ini = extrData(man), mc = extrData(cob), dCob = (mc && ini && mc >= ini) ? mc : null;
     const base = dCob || ini, venc = base ? slaSomaDias(base, pz.n, true) : null;   // so conta quando a data do acatamento foi informada (sem estimativa)
     let estado = 'SEMDATA', dias = null;
     if (venc){
       if (hoje >= venc){ estado = 'COBRAR'; dias = slaDifDias(venc, hoje, true); }
-      else { dias = slaDifDias(hoje, venc, true); estado = dias <= 5 ? 'RISCO' : 'PRAZO'; }
+      else { dias = slaDifDias(hoje, venc, true); estado = dias <= EXTR_AVISO ? 'RISCO' : 'PRAZO'; }
     }
     out.push({ t, id:t.id, carr, pz, ini, venc, estado, dias, dCob, man:man||'', cobIso:dCob ? cob : '' });
   });
@@ -3978,15 +3985,15 @@ function extrItens(){
   return out.sort((a,b) => ord[a.estado]-ord[b.estado] || (a.estado==='COBRAR' ? (b.dias||0)-(a.dias||0) : (a.dias||0)-(b.dias||0)));
 }
 function extrBadge(){
-  const its = extrItens(), n = its.filter(i => i.estado==='COBRAR').length, b = document.getElementById('bdg-extr');
+  const its = extrItens(), nc = its.filter(i => i.estado==='COBRAR').length, nr = its.filter(i => i.estado==='RISCO').length, n = nc + nr, b = document.getElementById('bdg-extr');
   if (b){ b.textContent = n; b.classList.toggle('red', n>0); }
   window._tit0 = window._tit0 || document.title.replace(/^🔔 \(\d+\) /, ''); document.title = (n ? '🔔 ('+n+') ' : '') + window._tit0;
   const bn = document.getElementById('extr-banner');
-  if (bn){ if (n && podeAba('extr')){ bn.style.display = ''; bn.innerHTML = `🔔 <b>${n} extravio${n>1?'s':''}</b> com o prazo da transportadora chegando ao fim: hora de cobrar. <button type="button" class="btn-exp" onclick="ir('extr')">Abrir Extravios ↗</button>`; } else bn.style.display = 'none'; }
+  if (bn){ if (n && podeAba('extr')){ bn.style.display = ''; bn.innerHTML = `🔔 ${nc ? `<b>${nc} extravio${nc>1?'s':''}</b> para cobrar agora` : ''}${nc && nr ? ' · ' : ''}${nr ? `<b>${nr}</b> com o prazo de cobrança chegando (até ${EXTR_AVISO} dias úteis)` : ''}. <button type="button" class="btn-exp" onclick="ir('extr')">Abrir Extravios ↗</button>`; } else bn.style.display = 'none'; }
   if (n && typeof DB!=='undefined' && DB && podeAba('extr')){
     const k = isoD(new Date()); let ja = false;
     try { ja = localStorage.getItem('extr_lembrete')===k; if (!ja) localStorage.setItem('extr_lembrete', k); } catch(e){ ja = !!window._extrLemb; window._extrLemb = true; }
-    if (!ja) toast(`Lembrete: ${n} extravio${n>1?'s':''} com o prazo da transportadora vencido. Hora de cobrar.`, { type:'warn', ms:10000, actionLabel:'Ver', onAction:() => ir('extr') });
+    if (!ja) toast(`Lembrete de extravios: ${nc ? nc+' para cobrar agora' : ''}${nc && nr ? ' e ' : ''}${nr ? nr+' com o prazo de cobrança chegando' : ''}.`, { type:'warn', ms:10000, actionLabel:'Ver', onAction:() => ir('extr') });
   }
 }
 function extrSet(k, v){ if (k==='f') EXTR_ST.f = (EXTR_ST.f===v ? '' : v); else if (k==='q'){ EXTR_ST.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderExtr, 180); return; } renderExtr(); }
@@ -3999,7 +4006,7 @@ function renderExtr(){
   const todos = extrItens(), c = e => todos.filter(i => i.estado===e).length;
   const q = EXTR_ST.q, vis = todos.filter(i => (!EXTR_ST.f || i.estado===EXTR_ST.f) && (!q || norm((i.t.cliente||'')+' '+(i.t.nf||'')+' '+(i.t.cpf||'')+' '+i.carr).includes(q)));
   const hero = pwHero('Transportadora', 'Extravios — prazo de liquidação', 'Depois que a transportadora acata o extravio, o caso fica parado: Total tem 45 dias úteis e as demais 60 dias úteis para liquidar. Quando o prazo chega, é hora de cobrar; ao cobrar, o prazo recomeça da data da cobrança.',
-    [['Cobrar agora', c('COBRAR'), 'prazo chegou ou passou', "extrSet('f','COBRAR')"], ['Cobrar em até 5 dias úteis', c('RISCO'), 'prazo chegando', "extrSet('f','RISCO')"], ['Aguardando prazo', c('PRAZO'), 'caso parado, dentro do prazo', "extrSet('f','PRAZO')"], ['Sem data de acatamento', c('SEMDATA'), 'informe a data para começar a contar', "extrSet('f','SEMDATA')"], ['Já cobrados', todos.filter(i=>i.dCob).length, 'pelo menos uma vez']], '');
+    [['Cobrar agora', c('COBRAR'), 'prazo chegou ou passou', "extrSet('f','COBRAR')"], [`Cobrar em até ${EXTR_AVISO} dias úteis`, c('RISCO'), 'lembrete: prazo chegando', "extrSet('f','RISCO')"], ['Aguardando prazo', c('PRAZO'), 'caso parado, dentro do prazo', "extrSet('f','PRAZO')"], ['Sem data de acatamento', c('SEMDATA'), 'informe a data para começar a contar', "extrSet('f','SEMDATA')"], ['Já cobrados', todos.filter(i=>i.dCob).length, 'pelo menos uma vez']], '');
   const NOM = { COBRAR:'Cobrar', RISCO:'Cobrar em breve', PRAZO:'Aguardando prazo', SEMDATA:'Sem data' };
   const chip = (e) => `<button type="button" class="ind-ch${EXTR_ST.f===e?' on':''}${c(e)===0?' zero':''}" onclick="extrSet('f','${e}')">${NOM[e]}<small>${c(e)}</small></button>`;
   const st = i => ({ COBRAR: i.dias ? `<span class="bdg b-red">Cobrar · prazo passou há ${i.dias} d.u.</span>` : '<span class="bdg b-red">Cobrar hoje</span>', RISCO:`<span class="bdg b-amb">Cobrar em ${i.dias} d.u.</span>`, PRAZO:`<span class="bdg b-grn">Aguardando · ${i.dias} d.u.</span>`, SEMDATA:'<span class="bdg b-dk">Informe a data</span>' })[i.estado];
@@ -4012,10 +4019,10 @@ function renderExtr(){
   el.innerHTML = `<div class="pworld" id="ph-extr">${hero}</div>
     <div class="ind-f"><div class="ind-f-top"><input id="extr-q" placeholder="Buscar cliente, NF ou transportadora..." value="${esc(EXTR_ST.q)}" oninput="extrSet('q',this.value)"><button class="btn-exp" type="button" onclick="EXTR_ST.f='';EXTR_ST.q='';renderExtr()" style="visibility:${(EXTR_ST.f||EXTR_ST.q)?'visible':'hidden'}">Limpar filtros</button></div>
       <div class="ind-fr"><b>Situação do prazo</b><div>${['COBRAR','RISCO','PRAZO','SEMDATA'].map(chip).join('')}</div></div></div>
-    <div class="ind-sub" style="margin:8px 0">Entram aqui os casos em Reenvio S Recol Transp Pg, Transportadora a pagar e Produto não retornou cujo andamento cita extravio. O prazo só começa a contar quando você preenche <b>Extravio acatado em</b>. Quando chegar a data de <b>cobrança</b>, o painel avisa (faixa vermelha no topo, número no menu e lembrete ao abrir). Depois de cobrar, clique em <b>✓ Cobrei hoje</b> (ou informe a data da cobrança): o prazo recomeça e o aviso volta quando ele chegar de novo.</div>
+    <div class="ind-sub" style="margin:8px 0">Entra aqui <b>qualquer caso</b> cujo andamento ou situação cita extravio (ou que tenha a data de acatamento preenchida), seja do Relacionamento, Marketplace ou Logística: ele sai das outras abas e passa a ser acompanhado só aqui. O prazo só começa a contar quando você preenche <b>Extravio acatado em</b>. O painel avisa <b>${EXTR_AVISO} dias úteis antes</b> da data de cobrança e de novo quando ela chegar (faixa vermelha no topo, número no menu, 🔔 no título da aba e lembrete ao abrir). Depois de cobrar, clique em <b>✓ Cobrei hoje</b> (ou informe a data da cobrança): o prazo recomeça e o aviso volta quando ele chegar de novo.</div>
     <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos</b><span class="fcnt">${vis.length} caso${vis.length!==1?'s':''}</span><button class="btn-exp" onclick="extrExport()">Exportar CSV</button></div>
     <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Status</th><th>Cliente</th><th>NF</th><th>Situação</th><th>Transportadora</th><th>Prazo</th><th>Extravio acatado em</th><th>Última cobrança</th><th>Próxima cobrança</th><th></th><th>Andamento</th></tr></thead><tbody>${vis.length ? vis.map(linha).join('') : '<tr><td colspan="11" style="padding:18px;color:var(--tx3)">Nenhum caso de extravio neste filtro.</td></tr>'}</tbody></table></div></div>`;
-  ligaStats('ph-extr', [['Cobrar agora', () => todos.filter(i=>i.estado==='COBRAR').map(i=>i.t)], ['Cobrar em até 5 dias úteis', () => todos.filter(i=>i.estado==='RISCO').map(i=>i.t)], ['Aguardando prazo', () => todos.filter(i=>i.estado==='PRAZO').map(i=>i.t)], ['Sem data de acatamento', () => todos.filter(i=>i.estado==='SEMDATA').map(i=>i.t)], ['Já cobrados', () => todos.filter(i=>i.dCob).map(i=>i.t)]]);
+  ligaStats('ph-extr', [['Cobrar agora', () => todos.filter(i=>i.estado==='COBRAR').map(i=>i.t)], [`Cobrar em até ${EXTR_AVISO} dias úteis`, () => todos.filter(i=>i.estado==='RISCO').map(i=>i.t)], ['Aguardando prazo', () => todos.filter(i=>i.estado==='PRAZO').map(i=>i.t)], ['Sem data de acatamento', () => todos.filter(i=>i.estado==='SEMDATA').map(i=>i.t)], ['Já cobrados', () => todos.filter(i=>i.dCob).map(i=>i.t)]]);
 }
 function extrExport(){
   const l = extrItens(); if (!l.length){ toast('Nada para exportar.', {type:'warn'}); return; }
