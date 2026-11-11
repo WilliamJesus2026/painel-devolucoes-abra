@@ -290,3 +290,8 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Prazo da transportadora para liquidar, a partir do campo **Extravio acatado em** (preenchido na própria aba): Total = 45 dias corridos; demais = 60 dias úteis (feriados de `SLA_FERIADOS`). Sem a data, usa a 1ª menção a extravio no histórico do andamento (marcada com ~).
 - Status: Cobrar (vencido), Vence hoje/em breve (até 5 dias), No prazo, Sem data, Cobrado. **✓ Cobrei hoje** silencia o caso por 7 dias.
 - Lembrete (toast) uma vez por dia ao abrir o painel, se houver casos vencidos. Campos gravados no caso: `extravio_acatado_em`, `extravio_cobrado_em` (desfazer funciona).
+
+## Dashboard clicável, cubo e Marketplace (11/11/2026)
+- Dashboard: clicar em qualquer ponto da coluna/linha dos gráficos abre a aba certa (Atendimento por mês abre o Controle já no mês clicado; Perdas, SLA e Tratativas idem); cada cartão ganhou o botão "Abrir ↗" e o cursor vira mão.
+- Cubo da Abra: o nome "ABRA" nas faces ficou mais nítido (sem o véu translúcido sobre o logo).
+- Marketplace neutro: textos e exemplos não citam mais pessoas que saíram. Quem saiu continua na lista de usuários do canal só para os casos antigos seguirem no Marketplace com o responsável original; novas pessoas entram em "Usuários por canal".

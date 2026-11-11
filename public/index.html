@@ -116,6 +116,8 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 .cube{position:relative;width:46px;height:46px;transform-style:preserve-3d;animation:cubeSpin 12s linear infinite}
 .cube i{position:absolute;inset:0;font-size:0;border:1.5px solid rgba(255,255,255,.6);border-radius:5px;background:#ab0033 center/cover no-repeat;opacity:.78;backface-visibility:visible;box-shadow:0 0 10px rgba(255,255,255,.28) inset,0 0 8px rgba(171,0,51,.5)}
 .cube i::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.55) 0,rgba(255,255,255,0) 40%,rgba(255,255,255,.18) 100%)}
+.cube .f1,.cube .f2,.cube .f3,.cube .f4{opacity:.97;filter:contrast(1.25) brightness(1.1) saturate(1.1)}
+.cube .f1::after,.cube .f2::after,.cube .f3::after,.cube .f4::after{background:linear-gradient(135deg,rgba(255,255,255,.22) 0,rgba(255,255,255,0) 30%)}
 .cube .core{position:absolute;left:12px;top:12px;width:22px;height:22px;transform-style:preserve-3d}
 .cube .core i{border:0;border-radius:2px;opacity:.95;background:linear-gradient(135deg,#fde68a,#f59e0b 55%,#ab0033);box-shadow:0 0 8px rgba(251,191,36,.9)}
 .cube .core i::after{display:none}
@@ -1922,14 +1924,14 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261111-140000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261111-153000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
 const souAdmin = () => SUPER_ADMINS.includes(String(CUR_EMAIL).toLowerCase()) || !!(PERFIL && PERFIL.papel==='admin' && PERFIL.ativo!==false);
 const podeAba = id => { if (id==='adm') return souAdmin(); if (!PERFIL || souAdmin()) return true; const a = PERFIL.abas || ['*']; if (a.includes('*') || a.includes(id)) return true; return id==='sla' && a.some(x => /^sla-(log|rel|mp)$/.test(x)); };
 const SLA_CANAIS = [['Relacionamento','rel'], ['Marketplace','mp'], ['Logística','log']];   // a Logistica fica por ultimo
-const SLA_SUB = { 'Relacionamento':'Situações atualizadas pelo Relacionamento, inclusive as “Criadas” abertas pela Dayane (a Patrícia Maia atualiza).', 'Marketplace':'Casos dos usuários do Marketplace.', 'Logística':'Situações que só a Logística (Dayane) atualiza: Cobrança Realizada, Recol P/ Acomp Cliente, Recol P/ Acomp Transportadora, Mercadoria Danificada e Recol Acomp C/ Reenvio.' };
+const SLA_SUB = { 'Relacionamento':'Situações atualizadas pelo Relacionamento, inclusive as “Criadas” abertas pela Dayane (a Patrícia Maia atualiza).', 'Marketplace':'Casos do canal Marketplace. O responsável é quem está no caso; quem assumir o Marketplace passa a atualizar aqui.', 'Logística':'Situações que só a Logística (Dayane) atualiza: Cobrança Realizada, Recol P/ Acomp Cliente, Recol P/ Acomp Transportadora, Mercadoria Danificada e Recol Acomp C/ Reenvio.' };
 const podeSecaoSla = c => { if (!PERFIL || souAdmin()) return true; const a = PERFIL.abas || ['*'], k = (SLA_CANAIS.find(x => x[0]===c)||[])[1]; return a.includes('*') || a.includes('sla') || (!!k && a.includes('sla-'+k)); };
 const podeEditar = () => souAdmin() || !PERFIL || PERFIL.editar!==false;
 const podeImportar = () => souAdmin() || !PERFIL || PERFIL.importar!==false;
@@ -3204,7 +3206,7 @@ function renderDashBlocks(){
     [`Perdas ${rotuloPer}`, brl(vSum(pf)), `${pf.length} casos`, null, true],
     ['Tratativas pendentes', trat_.length, 'sem prazo fixo']],
     `${nav('col-all','Coleta Reversa')}${nav('ind','Controle')}${nav('sla','SLA')}${nav('perdas','Perdas')}${nav('trat','Tratativas')}`);
-  const card = (t, sub, id, extra) => `<div class="pw-card"><h3>${t}</h3><div class="s">${sub}</div>${extra||`<div class="pw-chart"><canvas id="${id}"></canvas></div>`}</div>`;
+  const card = (t, sub, id, extra, go) => `<div class="pw-card"><h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${t}${go ? `<button type="button" class="btn-exp no-print" style="margin-left:auto" onclick="${go}">Abrir ↗</button>` : ''}</h3><div class="s">${sub}</div>${extra||`<div class="pw-chart"><canvas id="${id}"></canvas></div>`}</div>`;
   const crit = [
     ...[...AT_].sort((a,b)=>(b.dias||0)-(a.dias||0)).slice(0,3).map(c => ({ tag:'Coleta reversa', cor:PAL.rose, nome:c.cliente, det:`${c.transportadora||'—'} · NF ${c.nf||'—'}`, val:`${c.dias} d`, item:{...c,__tipo:'coleta'} })),
     ...[...slaAt].sort((a,b)=>b.atraso-a.atraso).slice(0,3).map(x => ({ tag:'SLA de apontamento', cor:PAL.amb, nome:x.cliente, det:`${x.sit} · ${x.usuario||'—'}`, val:`${x.estimado?'~':''}+${x.atraso} ${x.regra.util?'d.u.':'d'}`, item:x })),
@@ -3214,9 +3216,9 @@ function renderDashBlocks(){
   const gloss = `<details class="ind-f" style="margin-top:6px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da Dayane.</div></details>`;
 
   el.innerHTML = `<div class="pworld" id="dash-hero"><div class="nd-sentado" aria-hidden="true"><svg viewBox="0 0 64 74" width="64" height="74" xmlns="http://www.w3.org/2000/svg"><g class="nd-pernas"><path d="M22 44v17M36 44v17" stroke="#dc2626" stroke-width="8" stroke-linecap="round"/><path d="M22 50v4M22 57v4M36 50v4M36 57v4" stroke="#fff" stroke-width="8" stroke-linecap="butt" opacity=".9"/><path d="M16 64q6 5 13 0M30 64q6 5 13 0" stroke="#fbbf24" stroke-width="5" stroke-linecap="round" fill="none"/></g><path d="M14 44V32q0-6 6-6h24q6 0 6 6v12z" fill="#16a34a"/><path d="M14 36h36M14 41h36" stroke="#dc2626" stroke-width="3"/><path d="M14 30h36" stroke="#fde047" stroke-width="2.4"/><path d="M17 31q-7 6-3 13M47 31q7 6 3 13" stroke="#16a34a" stroke-width="5.5" stroke-linecap="round" fill="none"/><circle cx="14" cy="45" r="3.6" fill="#fcd9b6"/><circle cx="50" cy="45" r="3.6" fill="#fcd9b6"/><path d="M19 15l-9-5 4 10zM45 15l9-5-4 10z" fill="#fcd9b6"/><circle cx="32" cy="17" r="11.5" fill="#fcd9b6"/><path d="M19.5 13c4-16 21-16 25 0z" fill="#dc2626"/><path d="M19 13h26" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><path d="M38 3q14-4 16 10" stroke="#dc2626" stroke-width="5.5" stroke-linecap="round" fill="none"/><circle cx="54" cy="14" r="3.2" fill="#fbbf24" class="nd-sino"/><circle cx="27.5" cy="17" r="1.4" fill="#1c1917"/><circle cx="36.5" cy="17" r="1.4" fill="#1c1917"/><circle cx="23.5" cy="21" r="2.2" fill="#fca5a5" opacity=".7"/><circle cx="40.5" cy="21" r="2.2" fill="#fca5a5" opacity=".7"/><path d="M27 22q5 5 10 0" stroke="#7f1d1d" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>${hero}${filtros}
-    <div class="pw-grid even">${card('Coleta reversa', `Prazo de ${SLA} dias · clique numa fatia para abrir a aba`, 'dc-col')}${card('Atendimento por mês', 'Tarefas criadas e % atendido · clique numa barra para filtrar o mês', 'dc-ate')}</div>
-    <div class="pw-grid even">${card('Perdas por mês', 'Valor estimado e acumulado · clique para abrir as Perdas', 'dc-per')}${card('SLA de apontamento', 'Casos por tópico · clique numa barra para abrir o tópico', 'dc-sla')}</div>
-    <div class="pw-grid even">${card('Tratativas por grupo', 'Casos pendentes por tipo · clique para abrir o grupo', 'dc-trat')}${card('Atenção agora', 'O que mais pede cobrança neste recorte', '', `<div class="pw-ins">${lista}</div>`)}</div>${gloss}</div>`;
+    <div class="pw-grid even">${card('Coleta reversa', `Prazo de ${SLA} dias · clique numa fatia para abrir a lista`, 'dc-col', '', "ir('col-all')")}${card('Atendimento por mês', 'Tarefas criadas e % atendido · clique numa barra para abrir esse mês no Controle', 'dc-ate', '', "ir('ind')")}</div>
+    <div class="pw-grid even">${card('Perdas por mês', 'Valor estimado e acumulado · clique numa barra para abrir as Perdas', 'dc-per', '', "ir('perdas')")}${card('SLA de apontamento', 'Casos por tópico · clique numa barra para abrir o tópico', 'dc-sla', '', "ir('sla')")}</div>
+    <div class="pw-grid even">${card('Tratativas por grupo', 'Casos pendentes por tipo · clique numa barra para abrir o grupo', 'dc-trat', '', "ir('trat')")}${card('Atenção agora', 'O que mais pede cobrança neste recorte', '', `<div class="pw-ins">${lista}</div>`)}</div>${gloss}</div>`;
 
   ligaStats('dash-hero', [
     ['Coletas reversas (filtros atuais)', () => colTodas],
@@ -3228,7 +3230,8 @@ function renderDashBlocks(){
 
   if (!window.Chart || !document.getElementById('panel-dash').classList.contains('on')) return;
   const mk = (id, cfg) => { if (charts[id]) charts[id].destroy(); const cv = document.getElementById(id); if (cv) charts[id] = new Chart(cv, cfg); };
-  const base = { responsive:true, maintainAspectRatio:false, animation:{duration:400} };
+  const base = { responsive:true, maintainAspectRatio:false, animation:{duration:400}, onHover:(e,els) => { const c = e.native && e.native.target; if (c) c.style.cursor = els.length ? 'pointer' : 'default'; } };
+  const colI = h => ({ interaction:{ mode:'index', axis:h ? 'y' : 'x', intersect:false } });   // clicar em qualquer ponto da coluna/linha vale
   const eixos = (y1) => ({ x:{ ticks:{color:tick}, grid:{display:false} }, y:{ beginAtZero:true, ticks:{color:tick}, grid:{color:grid} }, ...(y1||{}) });
   const chavesMes = arr => [...new Set(arr.map(x => { const d = dfDate(x); return d ? d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0') : null; }).filter(Boolean))].sort().slice(-12);
   const rotMes = k => MESES[+k.split('-')[1]-1] + (DF.ano==='all' ? '/' + k.slice(2,4) : '');
@@ -3242,23 +3245,23 @@ function renderDashBlocks(){
   mk('dc-ate', { data:{ labels:kA.map(rotMes), datasets:[
       { type:'bar', label:'Tarefas', data:kA.map(k=>itAte.filter(x=>ehMes(x,k)).length), backgroundColor:kA.map(k=>`rgba(124,58,237,${corMes(k)})`), borderRadius:6, yAxisID:'y', order:2 },
       { type:'line', label:'% atendido', data:kA.map(k=>{ const a=itAte.filter(x=>ehMes(x,k)); return a.length?Math.round(a.filter(x=>x.fin).length/a.length*100):null; }), borderColor:PAL.rose, backgroundColor:PAL.rose, tension:.25, pointRadius:3, yAxisID:'y1', order:1 } ] },
-    options:{ ...base, onClick:(e,els)=>{ if (els.length && DF.ano!=='all') dfSet('mes', +kA[els[0].index].split('-')[1]); else ir('ind'); }, plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } }, scales:eixos({ y1:{ position:'right', min:0, max:100, ticks:{color:PAL.rose, callback:v=>v+'%'}, grid:{display:false} } }) } });
+    options:{ ...base, ...colI(false), onClick:(e,els)=>{ if (els.length){ const [a,m] = kA[els[0].index].split('-').map(Number); IND.ano = a; IND.meses.clear(); IND.meses.add(m); } ir('ind'); }, plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } }, scales:eixos({ y1:{ position:'right', min:0, max:100, ticks:{color:PAL.rose, callback:v=>v+'%'}, grid:{display:false} } }) } });
 
   const itPer = PERDAS.filter(p => dfPass(p,['mes'])), kP = chavesMes(itPer), porMes = kP.map(k => vSum(itPer.filter(p=>ehMes(p,k)))); let ac = 0; const acum = porMes.map(v => (ac += v));
   mk('dc-per', { data:{ labels:kP.map(rotMes), datasets:[
       { type:'bar', label:'Valor no mês', data:porMes, backgroundColor:kP.map(k=>`rgba(244,63,94,${corMes(k)})`), borderRadius:6, yAxisID:'y', order:2 },
       { type:'line', label:'Acumulado', data:acum, borderColor:PAL.pur, backgroundColor:PAL.pur, tension:.25, pointRadius:3, yAxisID:'y1', order:1 } ] },
-    options:{ ...base, onClick:(e,els)=>{ if (els.length && DF.ano!=='all') dfSet('mes', +kP[els[0].index].split('-')[1]); else ir('perdas'); }, plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } }, tooltip:{ callbacks:{ label:c => ' '+c.dataset.label+': '+brl(c.parsed.y) } } },
+    options:{ ...base, ...colI(false), onClick:() => ir('perdas'), plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } }, tooltip:{ callbacks:{ label:c => ' '+c.dataset.label+': '+brl(c.parsed.y) } } },
       scales:eixos({ y:{ beginAtZero:true, ticks:{color:tick, callback:v=>'R$ '+v.toLocaleString('pt-BR')}, grid:{color:grid} }, y1:{ position:'right', beginAtZero:true, ticks:{color:PAL.pur, callback:v=>'R$ '+v.toLocaleString('pt-BR')}, grid:{display:false} } }) } });
 
   const cont = (f, e) => SLA_ITENS.filter(x => x.fluxo===f && x.estado===e && P(x)).length;
   mk('dc-sla', { type:'bar', data:{ labels:SLA_FLUXOS.map(a=>a[1].replace(' (rota emergencial)','')), datasets:[
       { label:'Em atraso', data:SLA_FLUXOS.map(a=>cont(a[0],'ATRASO')), backgroundColor:PAL.rose }, { label:'Vence hoje', data:SLA_FLUXOS.map(a=>cont(a[0],'HOJE')), backgroundColor:PAL.amb }, { label:'No prazo', data:SLA_FLUXOS.map(a=>cont(a[0],'PRAZO')), backgroundColor:PAL.cyan } ] },
-    options:{ ...base, indexAxis:'y', onClick:(e,els)=>{ if (els.length){ SLA_ST.fluxo = SLA_FLUXOS[els[0].index][0]; SLA_ST.sit=''; SLA_ST.usuario=''; ir('sla'); } },
+    options:{ ...base, ...colI(true), indexAxis:'y', onClick:(e,els)=>{ if (els.length){ SLA_ST.fluxo = SLA_FLUXOS[els[0].index][0]; SLA_ST.sit=''; SLA_ST.usuario=''; ir('sla'); } },
       plugins:{ legend:{ labels:{ color:tick, boxWidth:10 } } }, scales:{ x:{ stacked:true, beginAtZero:true, ticks:{color:tick}, grid:{color:grid} }, y:{ stacked:true, ticks:{color:tick}, grid:{display:false} } } } });
 
   mk('dc-trat', { type:'bar', data:{ labels:grupos.map(g=>gNomes[g[0]]), datasets:[{ data:grupos.map(g=>g[1]), backgroundColor:PAL.cyan, borderRadius:6 }] },
-    options:{ ...base, indexAxis:'y', onClick:(e,els)=>{ if (els.length){ ir('trat'); setGrupoTab(grupos[els[0].index][0]); } }, plugins:{ legend:{ display:false } },
+    options:{ ...base, ...colI(true), indexAxis:'y', onClick:(e,els)=>{ if (els.length){ ir('trat'); setGrupoTab(grupos[els[0].index][0]); } }, plugins:{ legend:{ display:false } },
       scales:{ x:{ beginAtZero:true, ticks:{color:tick, precision:0}, grid:{color:grid} }, y:{ ticks:{color:tick}, grid:{display:false} } } } });
 }
 function renderTratHero(){}   // a aba Tratativas pinta o proprio hero em renderTrat()
@@ -3622,9 +3625,10 @@ async function indUsuarios(){
   const us = [...cont.entries()].sort((a,b)=>b[1]-a[1]);
   const opts = u => ['Relacionamento','Marketplace','Logística'].map(n => `<option${canalOf(u)===n?' selected':''}>${n}</option>`).join('');
   const html = `<p style="margin-bottom:8px">Escolha o canal de cada usuário. Quem não for marcado fica no <b>Relacionamento</b>. Vale para Controle de Situações, SLA de Apontamento e Perdas.</p>
+    <p style="margin-bottom:8px;font-size:11.5px;color:var(--tx3)">Quem deixou o Marketplace continua na lista só para os casos antigos seguirem no Marketplace com o responsável original. Para as próximas pessoas, marque o canal delas aqui ou digite abaixo.</p>
     <div style="max-height:300px;overflow:auto;border:1px solid var(--bd);border-radius:10px;padding:8px">${us.map(([u,n]) => `<div style="display:flex;gap:8px;align-items:center;padding:3px 2px"><span style="flex:1">${esc(u)} <small style="color:var(--tx3)">${n} caso${n>1?'s':''}</small></span><select data-u="${esc(u)}" class="fsel">${opts(u)}</select></div>`).join('') || '<i>Importe um arquivo para listar os usuários.</i>'}</div>
     <p style="margin-top:8px;font-size:11.5px;color:var(--tx3)">Usuário que ainda não apareceu? Digite o nome (ou o começo dele), separados por vírgula:</p>
-    <input id="mkt-extra" style="width:100%;padding:7px 10px;margin-bottom:6px;border:1px solid var(--bd);border-radius:8px;background:var(--srf);color:var(--tx)" placeholder="Marketplace — ex.: thairiny, joao">
+    <input id="mkt-extra" style="width:100%;padding:7px 10px;margin-bottom:6px;border:1px solid var(--bd);border-radius:8px;background:var(--srf);color:var(--tx)" placeholder="Marketplace — nome de quem passar a atualizar, ex.: nome.sobrenome">
     <input id="log-extra" style="width:100%;padding:7px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--srf);color:var(--tx)" placeholder="Logística — ex.: dayane.costa">`;
   const ok = await askConfirm('Usuários por canal', html, 'Salvar');
   if (!ok) return;
