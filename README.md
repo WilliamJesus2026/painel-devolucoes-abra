@@ -283,3 +283,10 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - SLA de Apontamento: clicar no número vermelho de atraso (na linha da situação ou no título do setor) filtra e desce até a lista de casos.
 - Temas: o botão do cabeçalho virou "Tema" (menu Padrão / Natal). Natal deixa a lateral verde/vermelha e troca o azul de destaque por vermelho; Padrão volta ao azul original. Para uma nova festividade: incluir uma linha em `TEMAS` e o CSS `body.<id>` em index.html. Preferência fica no navegador de cada pessoa.
 - Cubo da Abra: translúcido, com brilho e núcleo dourado.
+
+## Extravios — lembrete de cobrança (11/11/2026)
+- Nova aba **Extravios (cobrança)** (menu Transportadora) com badge vermelho dos casos a cobrar.
+- Entram casos em Reenvio S Recol Transp Pg, Transportadora a pagar e Produto não retornou (com 2) cujo andamento/situação/classe cita "extravio".
+- Prazo da transportadora para liquidar, a partir do campo **Extravio acatado em** (preenchido na própria aba): Total = 45 dias corridos; demais = 60 dias úteis (feriados de `SLA_FERIADOS`). Sem a data, usa a 1ª menção a extravio no histórico do andamento (marcada com ~).
+- Status: Cobrar (vencido), Vence hoje/em breve (até 5 dias), No prazo, Sem data, Cobrado. **✓ Cobrei hoje** silencia o caso por 7 dias.
+- Lembrete (toast) uma vez por dia ao abrir o painel, se houver casos vencidos. Campos gravados no caso: `extravio_acatado_em`, `extravio_cobrado_em` (desfazer funciona).
