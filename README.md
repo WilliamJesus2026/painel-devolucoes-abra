@@ -295,3 +295,8 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Dashboard: clicar em qualquer ponto da coluna/linha dos gráficos abre a aba certa (Atendimento por mês abre o Controle já no mês clicado; Perdas, SLA e Tratativas idem); cada cartão ganhou o botão "Abrir ↗" e o cursor vira mão.
 - Cubo da Abra: o nome "ABRA" nas faces ficou mais nítido (sem o véu translúcido sobre o logo).
 - Marketplace neutro: textos e exemplos não citam mais pessoas que saíram. Quem saiu continua na lista de usuários do canal só para os casos antigos seguirem no Marketplace com o responsável original; novas pessoas entram em "Usuários por canal".
+
+## Extravios, busca direta e SLA da coleta (11/11/2026, tarde)
+- Extravios: Total 45 dias úteis e demais 60 dias úteis, contados só da data informada em "Extravio acatado em" (sem estimativa: caso sem data fica em "Sem data"). Quando o prazo chega: faixa vermelha no topo, número no menu, título da aba com 🔔 e lembrete ao abrir. "Cobrei hoje" (ou a data da cobrança) recomeça o prazo a partir da cobrança. Feriados de 2027 incluídos em `SLA_FERIADOS`.
+- Busca: Ctrl+K e as buscas dentro das abas abrem o caso direto (Enter vai ao 1º caso; CPF/NF/nome com um único resultado abre sozinho); a busca rápida agora inclui os casos do Controle.
+- SLA da coleta: cada caso mostra de onde vem a data do protocolo (real = planilha de apontamentos; "~ programação" = aproximação). Novos filtros "Data do protocolo" e "Ano" na aba SLA Transportadora, cartões da etapa 1 separados por origem da data e botões "Ver os N casos…" no Controle que abrem a lista completa já filtrada (`csVer`).

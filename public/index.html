@@ -426,6 +426,7 @@ body.loading .kpi-v,body.loading .kpi-s{color:transparent!important;background:l
 .slc-med .slc-h{width:100%}
 .slc-med .slc-big b{font-size:30px}
 .slc-filtro{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.5);border-radius:10px;padding:8px 12px;font-size:12px;margin-bottom:10px}.slc-filtro button{margin-left:8px;font:inherit;font-weight:700;cursor:pointer;border:1px solid var(--bd);background:var(--srf);color:var(--tx);border-radius:8px;padding:2px 10px}
+.slc-links{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}.slc-obs{font-size:11.5px;color:var(--tx2)}
 .slc-det{margin-top:10px;font-size:12px;color:var(--tx2)}
 .slc-det summary{cursor:pointer;font-weight:700;color:var(--acc)}
 .slc-det p{margin:6px 0 0;line-height:1.6;max-width:980px}
@@ -472,6 +473,7 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 #ph-ind .pw-stat .l{font-size:9.5px}#ph-ind .pw-stat .n{font-size:9.5px}
 .pw-sub:empty{display:none}
 .filters,.ind-f,.ind-h{scroll-margin-top:160px}
+.flash-caso{outline:2px solid #f59e0b;outline-offset:-2px;animation:flashc 1s ease-in-out 2}@keyframes flashc{50%{background:rgba(245,158,11,.25)}}
 .dash-fr{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
 .dash-fr label{display:flex;flex-direction:column;gap:3px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3)}
 .dash-fr .fsel{min-width:150px}
@@ -828,6 +830,7 @@ body.natal #dash-hero{margin-top:46px}
     <div id="stateBanner"></div>
 
     <!-- DASHBOARD -->
+    <div id="extr-banner" style="display:none;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.55);font-size:13px"></div>
     <div class="panel on" id="panel-dash">
       <div id="dash-blocks"></div>
     </div>
@@ -1924,7 +1927,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261111-153000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261111-170000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2120,7 +2123,7 @@ function renderPalette(q){
   } else {
     PAL_CMDS.filter(([t])=>norm(t).includes(nq)).forEach(([t,fn])=>out.push({h:'Comandos', t, s:'', fn}));
     const src = [...AT,...RI,...EM,...REA,...COL.filter(c=>!c.prazo_status)].map(c=>({...c,__tipo:'coleta'}))
-      .concat(histItens().filter(h=>h.__tipo!=='perda'), TRAT.map(t=>({...t,__tipo:'tratativa'})), PERDAS);
+      .concat(histItens().filter(h=>h.__tipo!=='perda'), TRAT.map(t=>({...t,__tipo:'tratativa'})), (typeof IND_ALL!=='undefined' ? IND_ALL : []).map(x=>({...x,__tipo:x.__tipo||'tratativa'})), PERDAS);
     const seen = new Set(); let n = 0;
     for (const c of src){
       const key = c.__tipo+(c.chave||c.nf||c.cliente);
@@ -2134,6 +2137,8 @@ function renderPalette(q){
     }
   }
   palItems = out; palSel = 0;
+  const so = out.filter(o => o.h==='Casos');
+  if (so.length===1 && /^\d{5,}$/.test(nq.replace(/[.\-\/\s]/g,''))){ clearTimeout(window._palAuto); window._palAuto = setTimeout(() => { if (document.getElementById('palette').classList.contains('on') && palItems.length===1 + out.filter(o=>o.h==='Comandos').length) palRun(palItems.indexOf(so[0])); }, 350); }   // CPF/NF com um unico caso: abre direto
   const list = document.getElementById('pal-list');
   let last = '';
   list.innerHTML = out.length ? out.map((o,i)=>{ const hd = o.h!==last ? `<div class="pal-h">${o.h}</div>` : ''; last=o.h;
@@ -2148,6 +2153,18 @@ function palMove(d){
 }
 function palRun(i){ const it = palItems[i]; if (!it) return; closePalette(); it.fn(); }
 document.getElementById('pal-in').addEventListener('input', e=>renderPalette(e.target.value));
+// ---- buscas dentro das abas: Enter vai ao primeiro caso; CPF/NF/nome com um unico resultado abre o caso sozinho ----
+(function(){
+  const linhas = () => [...document.querySelectorAll('.panel.on tbody tr[onclick*="openDetailIdx"]')].filter(r => r.offsetParent !== null);
+  function vaiAoCaso(inp, auto){
+    const rs = linhas(); if (!rs.length) return;
+    if (rs.length===1){ rs[0].scrollIntoView({ block:'center', behavior:'smooth' }); setTimeout(() => rs[0].click(), 250); return; }
+    if (!auto){ rs[0].scrollIntoView({ block:'center', behavior:'smooth' }); rs[0].classList.add('flash-caso'); setTimeout(() => rs[0].classList.remove('flash-caso'), 2200); }
+  }
+  const ehBusca = e => e.target && e.target.tagName==='INPUT' && /^buscar/i.test(e.target.placeholder||'') && e.target.closest('.panel');
+  document.addEventListener('keydown', e => { if (e.key==='Enter' && ehBusca(e)){ clearTimeout(window._buscaT); setTimeout(() => vaiAoCaso(e.target, false), 450); } });
+  document.addEventListener('input', e => { if (!ehBusca(e) || (e.target.value||'').trim().length < 4) return; clearTimeout(window._buscaT); window._buscaT = setTimeout(() => { if (document.activeElement===e.target) vaiAoCaso(e.target, true); }, 900); });
+})();
 document.getElementById('pal-list').addEventListener('click', e=>{ const el=e.target.closest('.pal-it'); if (el) palRun(+el.dataset.i); });
 document.getElementById('palette').addEventListener('mousedown', e=>{ if (e.target.id==='palette') closePalette(); });
 document.addEventListener('keydown', e => {
@@ -3359,12 +3376,13 @@ function colslaCalcula(){
   });
   const itens = [];
   porChave.forEach(({ x, rec, chegou }) => {
-    const prog = parseBR(x.protocolo_em) || parseBR(x.data_programacao) || x.d; if (!prog) return;   // protocolo_em = data da movimentacao 'Protocolo de Coleta' (planilha de apontamentos)
+    const prog = parseBR(x.protocolo_em) || parseBR(x.data_programacao) || x.d; if (!prog) return;
+    const protFonte = parseBR(x.protocolo_em) ? 'real' : (parseBR(x.data_programacao) ? 'programação' : 'solicitação');   // 'real' = data do protocolo na planilha de apontamentos; as outras sao aproximacoes   // protocolo_em = data da movimentacao 'Protocolo de Coleta' (planilha de apontamentos)
     const cri = parseBR(x.criada_em) || x.d, rcl = parseBR(x.recolhido_em), exata = parseBR(x.recebido_cd_em);
     const cand = chegou && !exata ? (parseBR(x.finalizado_em) || parseBR(x.ultimo_apontamento)) : null, aprox = (cand && (!rcl || cand > rcl)) ? cand : null, fim = chegou ? (exata || aprox) : null;   // so aceita a data aproximada se for depois da coleta (senao seria a propria coleta)
     const diasAberto = Math.max(0, daysBetween(prog, h0)), diasTotal = fim ? Math.max(0, daysBetween(prog, fim)) : null;
     const enc = !chegou && !!x.fin;   // ja encerrado no Controle, sem data de chegada: nao da para medir o tempo ate o CD (antes contava como 'a caminho' e atrasado)
-    const it = { x, encerrado:enc, id:x.id, chave:x.chave, carr:x.carr, cri, prog, rcl, fim, fimTipo: exata ? 'exata' : (aprox ? 'aprox.' : null), chegou, estagio: chegou ? 'No CD' : enc ? 'Encerrado' : ((rec || x.coletaRealizada || rcl) ? 'A caminho do CD' : 'Aguardando coleta'),
+    const it = { x, encerrado:enc, protFonte, id:x.id, chave:x.chave, carr:x.carr, cri, prog, rcl, fim, fimTipo: exata ? 'exata' : (aprox ? 'aprox.' : null), chegou, estagio: chegou ? 'No CD' : enc ? 'Encerrado' : ((rec || x.coletaRealizada || rcl) ? 'A caminho do CD' : 'Aguardando coleta'),
       diasAberto, diasTotal, diasCriProg: cri ? Math.max(0, daysBetween(cri, prog)) : null, diasProtColeta: rcl ? Math.max(0, daysBetween(prog, rcl)) : null, diasColetaCd: (rcl && fim) ? Math.max(0, daysBetween(rcl, fim)) : null,
       diasCriFim: (cri && fim) ? Math.max(0, daysBetween(cri, fim)) : null };
     it.atrasoProt = it.diasCriProg!=null ? Math.max(0, it.diasCriProg - CONFIG.PRAZO_PROTOCOLO_DIAS) : null;   // etapa 1
@@ -3541,12 +3559,15 @@ function renderInd(){
         <div class="slc-big"><b>${p==null ? '—' : p+'%'}</b><span>${p==null ? 'sem casos medidos' : 'dos casos passaram do prazo'}</span></div><div class="slc-bar"><i style="width:${p==null ? 0 : p}%"></i></div><ul class="slc-l">${linhas.map(l => `<li>${l}</li>`).join('')}</ul></button>`;
       const med = (n, titulo, v, prazo, qtd, expl) => { const p = v==null ? null : Math.min(100, Math.round(v/prazo*100)); return `<button type="button" class="slc-card slc-med ${v==null ? '' : v>prazo ? 'r' : v>prazo*0.7 ? 'w' : ''}" onclick="ir('colsla')" title="Clique para ver os casos na aba SLA Transportadora"><div class="slc-h"><span class="slc-n">${n}</span>${titulo}<em>prazo ${prazo} d</em></div>
         <div class="slc-big"><b>${fm(v)}</b><span>${v==null ? 'sem casos medidos' : v>prazo ? 'acima do prazo' : 'dentro do prazo'}</span></div><div class="slc-bar"><i style="width:${p==null ? 0 : p}%"></i></div><ul class="slc-l"><li>${expl}</li><li><b>${qtd}</b></li></ul></button>`; };
+      const pReal = its.filter(i=>i.diasCriProg!=null && i.protFonte==='real'), pAp = its.filter(i=>i.diasCriProg!=null && i.protFonte!=='real');
       box.innerHTML = `<div class="ind-h" style="display:flex;align-items:center;gap:10px">SLA da coleta — transportadora <button class="btn-exp" type="button" onclick="ir('colsla')">Ver detalhes ↗</button></div>
         ${IND.alerta ? `<div class="slc-filtro">Filtro ativo: <b>${IND.alerta==='atrp' ? 'etapa 1 atrasada' : 'etapa 2 atrasada'}</b>, a aba inteira mostra só os casos em aberto que passaram do prazo (${IND.alerta==='atrp' ? nP : nC}). <button type="button" onclick="indSet('alerta','${IND.alerta}')">✕ limpar filtro</button></div>` : ''}<div class="slc-sub">Quanto tempo a coleta leva, em duas etapas: <b>1)</b> da criação da tarefa até incluirmos o protocolo de coleta e <b>2)</b> do protocolo até o produto chegar no CD. A barra mostra a parte dos casos que estourou o prazo.</div>
         <div class="slc-grid">${card(1, 'Criação → Protocolo', `prazo máx. ${PP} dias`, p1, A2.protFora, A2.protN, [`<b>${A2.protFora}</b> de <b>${A2.protN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.protAtrasoMed)}</b>`, `Tempo médio até o protocolo: <b>${fm(A2.protMedia)}</b>`, `<b>${nP}</b> ainda em aberto agora`], 'atrp')}
         ${card(2, 'Protocolo → Chegada no CD', `prazo ${SLA} dias corridos`, p2, A2.cdFora, A2.cdN, [`<b>${A2.cdFora}</b> de <b>${A2.cdN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.cdAtrasoMed)}</b>`, `Tempo médio até chegar: <b>${fm(A2.media)}</b> (<b>${A2.chegaram}</b> já chegaram)`, `<b>${nC}</b> a caminho e já atrasados agora`], 'atrcd')}
         ${med('⌀', 'Média criação → protocolo', A2.protMedia, PP, `${A2.protN} casos medidos`, 'Tempo médio para incluirmos o protocolo de coleta')}
         ${med('⌀', 'Média protocolo → CD', A2.media, SLA, `${A2.chegaram} já chegaram no CD`, 'Tempo médio para o produto chegar no CD')}</div>
+        <div class="slc-links"><button type="button" class="btn-exp" onclick="csVer('prot','',IND.ano)">Ver os ${A2.protFora} casos da etapa 1 fora do prazo ↗</button><button type="button" class="btn-exp" onclick="csVer('cd','',IND.ano)">Ver os ${A2.cdFora} casos da etapa 2 fora do prazo ↗</button>
+          <span class="slc-obs">Na etapa 1, <b>${pReal.length}</b> casos têm a data real do protocolo (planilha de apontamentos) e <b>${pAp.length}</b> usam a data de programação como aproximação.</span></div>
         <details class="slc-det"><summary>Como ler estes números</summary><p><b>Etapa 1</b> conta os dias entre criar a tarefa e a data em que o protocolo de coleta entra no sistema (máximo de ${PP} dias). <b>Etapa 2</b> conta os dias entre o protocolo e a chegada no CD (romaneio de entrada), com prazo de ${SLA} dias corridos; casos ainda a caminho contam os dias já passados. <b>Atraso médio</b> é quantos dias, em média, passaram do prazo só os casos que estouraram. ${encerrados ? `<b>${encerrados}</b> casos já finalizados no Controle e sem data de chegada ficam fora da etapa 2, porque não dá para medir. ` : ''}Clique num cartão para listar os casos em aberto que passaram do prazo.</p></details>`;
     }
   }
@@ -3754,7 +3775,7 @@ const SLA_ST = { fluxo:'rec', estado:'atraso', sit:'', usuario:'', motivo:'', q:
 let SLA_CLASSES = {}, SLA_LISTA = [], SLA_ITENS = [];
 try { const c = JSON.parse(localStorage.getItem('sla_classes')||'null'); if (c) SLA_CLASSES = c; } catch(e){}
 
-const SLA_FERIADOS = new Set(['2026-01-01','2026-02-16','2026-02-17','2026-04-03','2026-04-21','2026-05-01','2026-06-04','2026-09-07','2026-10-12','2026-11-02','2026-11-15','2026-11-20','2026-12-25']);
+const SLA_FERIADOS = new Set(['2026-01-01','2026-02-16','2026-02-17','2026-04-03','2026-04-21','2026-05-01','2026-06-04','2026-09-07','2026-10-12','2026-11-02','2026-11-15','2026-11-20','2026-12-25','2027-01-01','2027-02-08','2027-02-09','2027-03-26','2027-04-21','2027-05-01','2027-05-27','2027-09-07','2027-10-12','2027-11-02','2027-11-15','2027-11-20','2027-12-25']);
 const isoD = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const ehUtil = d => d.getDay()!==0 && d.getDay()!==6 && !SLA_FERIADOS.has(isoD(d));
 function slaSomaDias(d, n, util){ const r = new Date(d.getFullYear(), d.getMonth(), d.getDate()); if (!util){ r.setDate(r.getDate()+n); return r; } let k=0; while (k<n){ r.setDate(r.getDate()+1); if (ehUtil(r)) k++; } return r; }
@@ -3931,10 +3952,12 @@ function nrSkeleton(sc){
     <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Aberto em</th><th>Dias parado</th><th>Valor</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th></tr></thead><tbody id="tb-nr-${sc}"></tbody></table></div></div>`;
 }
 // ================= EXTRAVIO: prazo da transportadora para liquidar o valor (lembrete de cobranca) =================
-// Total: 45 dias corridos; demais transportadoras: 60 dias uteis, contados da data em que o extravio foi acatado (campo "Extravio acatado em").
+// Total: 45 dias uteis; demais: 60 dias uteis. O prazo conta da data em que o extravio foi acatado (campo "Extravio acatado em", informado por voces).
+// Chegou o prazo: cobrar a transportadora. Ao cobrar ("Cobrei hoje"), o prazo recomeca a contar da data da cobranca, e assim por diante.
 const EXTR_SITS = /^(reenvio_s_recol_transp_pg|transportadora_a_pagar|produto_nao_retornou)/;
 const EXTR_ST = { f:'', q:'' };
-const extrPrazo = carr => /\btotal\b/.test(norm(carr||'')) ? { n:45, util:false, txt:'45 dias corridos' } : { n:60, util:true, txt:'60 dias úteis' };
+const extrPrazo = carr => { const n = /\btotal\b/.test(norm(carr||'')) ? 45 : 60; return { n, util:true, txt:n+' dias úteis' }; };
+const extrData = v => { const m = v && /^(\d{4})-(\d{2})-(\d{2})/.exec(v); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; };
 function extrItens(){
   const hj = new Date(), hoje = new Date(hj.getFullYear(), hj.getMonth(), hj.getDate()), out = [];
   (typeof TRAT_ALL==='undefined' ? [] : TRAT_ALL).forEach(t => {
@@ -3942,28 +3965,24 @@ function extrItens(){
     if (!EXTR_SITS.test(sitKey(t.tipo_devolucao||''))) return;
     const dc = (typeof DB_CASES!=='undefined' && DB_CASES[t.id]) || {}, man = dc.extravio_acatado_em || t.extravio_acatado_em || null, cob = dc.extravio_cobrado_em || t.extravio_cobrado_em || null;
     if (!man && !/extravi/.test(norm([t.andamento, t.tipo_devolucao, t.classe].filter(Boolean).join(' ')))) return;
-    const carr = indNome(t.transportadora), pz = extrPrazo(carr);
-    let ini = null, estimado = false; const m = man && /^(\d{4})-(\d{2})-(\d{2})/.exec(man);
-    if (m) ini = new Date(+m[1], +m[2]-1, +m[3]);
-    else { const d = (t.andamento_hist||[]).filter(e => /extravi/.test(norm(e.t||''))).map(e => new Date(e.em)).filter(d => !isNaN(d)).sort((a,b)=>a-b)[0];
-      if (d){ ini = new Date(d.getFullYear(), d.getMonth(), d.getDate()); estimado = true; } }   // sem a data informada: usa a 1a vez que o andamento citou extravio (estimativa)
-    const venc = ini ? slaSomaDias(ini, pz.n, pz.util) : null;
+    const carr = indNome(t.transportadora), pz = extrPrazo(carr), ini = extrData(man), mc = extrData(cob), dCob = (mc && ini && mc >= ini) ? mc : null;
+    const base = dCob || ini, venc = base ? slaSomaDias(base, pz.n, true) : null;   // so conta quando a data do acatamento foi informada (sem estimativa)
     let estado = 'SEMDATA', dias = null;
     if (venc){
-      if (hoje > venc){ estado = 'COBRAR'; dias = slaDifDias(venc, hoje, pz.util); }
-      else if (+hoje === +venc) estado = 'HOJE';
-      else { dias = slaDifDias(hoje, venc, pz.util); estado = dias <= 5 ? 'RISCO' : 'PRAZO'; }
+      if (hoje >= venc){ estado = 'COBRAR'; dias = slaDifDias(venc, hoje, true); }
+      else { dias = slaDifDias(hoje, venc, true); estado = dias <= 5 ? 'RISCO' : 'PRAZO'; }
     }
-    const mc = cob && /^(\d{4})-(\d{2})-(\d{2})/.exec(cob), dCob = mc ? new Date(+mc[1], +mc[2]-1, +mc[3]) : null;
-    if (estado==='COBRAR' && dCob && daysBetween(dCob, hoje) < 7) estado = 'COBRADO';   // cobrou: o lembrete volta em 7 dias
-    out.push({ t, id:t.id, carr, pz, ini, estimado, venc, estado, dias, dCob, man:man||'' });
+    out.push({ t, id:t.id, carr, pz, ini, venc, estado, dias, dCob, man:man||'', cobIso:dCob ? cob : '' });
   });
-  const ord = { COBRAR:0, HOJE:1, RISCO:2, SEMDATA:3, COBRADO:4, PRAZO:5 };
-  return out.sort((a,b) => ord[a.estado]-ord[b.estado] || (b.dias||0)*(a.estado==='COBRAR'?1:-1) - (a.dias||0)*(a.estado==='COBRAR'?1:-1));
+  const ord = { COBRAR:0, RISCO:1, PRAZO:2, SEMDATA:3 };
+  return out.sort((a,b) => ord[a.estado]-ord[b.estado] || (a.estado==='COBRAR' ? (b.dias||0)-(a.dias||0) : (a.dias||0)-(b.dias||0)));
 }
 function extrBadge(){
   const its = extrItens(), n = its.filter(i => i.estado==='COBRAR').length, b = document.getElementById('bdg-extr');
   if (b){ b.textContent = n; b.classList.toggle('red', n>0); }
+  window._tit0 = window._tit0 || document.title.replace(/^🔔 \(\d+\) /, ''); document.title = (n ? '🔔 ('+n+') ' : '') + window._tit0;
+  const bn = document.getElementById('extr-banner');
+  if (bn){ if (n && podeAba('extr')){ bn.style.display = ''; bn.innerHTML = `🔔 <b>${n} extravio${n>1?'s':''}</b> com o prazo da transportadora chegando ao fim: hora de cobrar. <button type="button" class="btn-exp" onclick="ir('extr')">Abrir Extravios ↗</button>`; } else bn.style.display = 'none'; }
   if (n && typeof DB!=='undefined' && DB && podeAba('extr')){
     const k = isoD(new Date()); let ja = false;
     try { ja = localStorage.getItem('extr_lembrete')===k; if (!ja) localStorage.setItem('extr_lembrete', k); } catch(e){ ja = !!window._extrLemb; window._extrLemb = true; }
@@ -3971,34 +3990,36 @@ function extrBadge(){
   }
 }
 function extrSet(k, v){ if (k==='f') EXTR_ST.f = (EXTR_ST.f===v ? '' : v); else if (k==='q'){ EXTR_ST.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderExtr, 180); return; } renderExtr(); }
-function extrSetData(id, v){ if (gravaCaso(id, { extravio_acatado_em: v || null })){ toast(v ? 'Data do acatamento salva.' : 'Data removida.', {type:'ok'}); scheduleRender(); } }
-function extrCobrei(id){ if (gravaCaso(id, { extravio_cobrado_em: isoD(new Date()) })){ toast('Cobrança registrada. O lembrete volta em 7 dias se continuar pendente.', {type:'ok'}); scheduleRender(); } }
+function extrSetData(id, v){ if (gravaCaso(id, { extravio_acatado_em: v || null })){ toast(v ? 'Data do acatamento salva. O prazo já está contando.' : 'Data removida.', {type:'ok'}); scheduleRender(); } }
+function extrSetCob(id, v){ if (gravaCaso(id, { extravio_cobrado_em: v || null })){ toast(v ? 'Cobrança registrada. O prazo recomeça a contar dessa data.' : 'Cobrança removida.', {type:'ok'}); scheduleRender(); } }
+function extrCobrei(id){ extrSetCob(id, isoD(new Date())); }
 function renderExtr(){
   const el = document.getElementById('panel-extr'); if (!el) return;
   const ae = document.activeElement; if (ae && el.contains(ae) && /^(INPUT|TEXTAREA)$/.test(ae.tagName) && ae.type!=='button') return;   // nao refaz a tela enquanto digita
   const todos = extrItens(), c = e => todos.filter(i => i.estado===e).length;
   const q = EXTR_ST.q, vis = todos.filter(i => (!EXTR_ST.f || i.estado===EXTR_ST.f) && (!q || norm((i.t.cliente||'')+' '+(i.t.nf||'')+' '+(i.t.cpf||'')+' '+i.carr).includes(q)));
-  const hero = pwHero('Transportadora', 'Extravios — prazo de liquidação', 'Total tem 45 dias corridos e as demais transportadoras 60 dias úteis, a partir do acatamento do extravio, para liquidar o valor. Passou do prazo: é hora de cobrar.',
-    [['Cobrar agora', c('COBRAR'), 'prazo vencido, sem cobrança recente', "extrSet('f','COBRAR')"], ['Vencem em até 5 dias', c('HOJE')+c('RISCO'), 'incluindo hoje', "extrSet('f','RISCO')"], ['No prazo', c('PRAZO'), 'ainda dentro do prazo', "extrSet('f','PRAZO')"], ['Sem data de acatamento', c('SEMDATA'), 'informe a data para contar o prazo', "extrSet('f','SEMDATA')"], ['Cobrados (últimos 7 dias)', c('COBRADO'), 'o lembrete volta depois', "extrSet('f','COBRADO')"]], '');
-  const NOM = { COBRAR:'Cobrar', HOJE:'Vence hoje', RISCO:'Vence em breve', PRAZO:'No prazo', SEMDATA:'Sem data', COBRADO:'Cobrado' };
+  const hero = pwHero('Transportadora', 'Extravios — prazo de liquidação', 'Depois que a transportadora acata o extravio, o caso fica parado: Total tem 45 dias úteis e as demais 60 dias úteis para liquidar. Quando o prazo chega, é hora de cobrar; ao cobrar, o prazo recomeça da data da cobrança.',
+    [['Cobrar agora', c('COBRAR'), 'prazo chegou ou passou', "extrSet('f','COBRAR')"], ['Cobrar em até 5 dias úteis', c('RISCO'), 'prazo chegando', "extrSet('f','RISCO')"], ['Aguardando prazo', c('PRAZO'), 'caso parado, dentro do prazo', "extrSet('f','PRAZO')"], ['Sem data de acatamento', c('SEMDATA'), 'informe a data para começar a contar', "extrSet('f','SEMDATA')"], ['Já cobrados', todos.filter(i=>i.dCob).length, 'pelo menos uma vez']], '');
+  const NOM = { COBRAR:'Cobrar', RISCO:'Cobrar em breve', PRAZO:'Aguardando prazo', SEMDATA:'Sem data' };
   const chip = (e) => `<button type="button" class="ind-ch${EXTR_ST.f===e?' on':''}${c(e)===0?' zero':''}" onclick="extrSet('f','${e}')">${NOM[e]}<small>${c(e)}</small></button>`;
-  const st = i => ({ COBRAR:`<span class="bdg b-red">Cobrar · vencido há ${i.dias} ${i.pz.util?'d.u.':'d'}</span>`, HOJE:'<span class="bdg b-amb">Vence hoje</span>', RISCO:`<span class="bdg b-amb">Vence em ${i.dias} ${i.pz.util?'d.u.':'d'}</span>`, PRAZO:`<span class="bdg b-grn">No prazo · ${i.dias} ${i.pz.util?'d.u.':'d'}</span>`, SEMDATA:'<span class="bdg b-dk">Informe a data</span>', COBRADO:`<span class="bdg b-dk">Cobrado em ${i.dCob ? fmtD2(i.dCob) : ''}</span>` })[i.estado];
+  const st = i => ({ COBRAR: i.dias ? `<span class="bdg b-red">Cobrar · prazo passou há ${i.dias} d.u.</span>` : '<span class="bdg b-red">Cobrar hoje</span>', RISCO:`<span class="bdg b-amb">Cobrar em ${i.dias} d.u.</span>`, PRAZO:`<span class="bdg b-grn">Aguardando · ${i.dias} d.u.</span>`, SEMDATA:'<span class="bdg b-dk">Informe a data</span>' })[i.estado];
   const linha = i => `<tr><td>${st(i)}</td><td class="td-nome clickable" onclick="openDetailIdx(${regDetail(i.t)})">${esc(i.t.cliente||'—')}</td><td class="td-nf">${esc(i.t.nf||'—')}</td><td style="font-size:11px">${esc(i.t.tipo_devolucao||'—')}</td><td style="font-size:11px">${esc(i.carr||'—')}</td><td style="font-size:11px">${i.pz.txt}</td>
-    <td><input type="date" class="fsel" value="${i.man}" onchange="extrSetData('${esc(String(i.id))}', this.value)" title="Data em que a transportadora acatou o extravio">${i.estimado && i.ini ? `<br><small style="color:var(--tx3)">~ estimada: ${fmtD2(i.ini)} (1ª menção no andamento)</small>` : ''}</td>
-    <td>${i.venc ? fmtD2(i.venc) : '—'}</td><td>${i.dCob ? fmtD2(i.dCob) : '—'}</td>
-    <td>${(i.estado==='COBRAR' || i.estado==='COBRADO') ? `<button class="btn-exp" type="button" onclick="extrCobrei('${esc(String(i.id))}')">✓ Cobrei hoje</button>` : ''}</td>
+    <td><input type="date" class="fsel" value="${i.man}" onchange="extrSetData('${esc(String(i.id))}', this.value)" title="Data em que a transportadora acatou o extravio"></td>
+    <td><input type="date" class="fsel" value="${i.cobIso}" onchange="extrSetCob('${esc(String(i.id))}', this.value)" title="Data da última cobrança à transportadora; o prazo recomeça daqui"></td>
+    <td>${i.venc ? '<b>'+fmtD2(i.venc)+'</b><br><small style="color:var(--tx3)">'+(i.dCob ? 'da cobrança' : 'do acatamento')+'</small>' : '—'}</td>
+    <td>${i.estado==='COBRAR' ? `<button class="btn-exp" type="button" onclick="extrCobrei('${esc(String(i.id))}')">✓ Cobrei hoje</button>` : ''}</td>
     <td style="font-size:11px;max-width:260px">${esc(String(i.t.andamento||'—').slice(0,140))}</td></tr>`;
   el.innerHTML = `<div class="pworld" id="ph-extr">${hero}</div>
     <div class="ind-f"><div class="ind-f-top"><input id="extr-q" placeholder="Buscar cliente, NF ou transportadora..." value="${esc(EXTR_ST.q)}" oninput="extrSet('q',this.value)"><button class="btn-exp" type="button" onclick="EXTR_ST.f='';EXTR_ST.q='';renderExtr()" style="visibility:${(EXTR_ST.f||EXTR_ST.q)?'visible':'hidden'}">Limpar filtros</button></div>
-      <div class="ind-fr"><b>Situação do prazo</b><div>${['COBRAR','HOJE','RISCO','PRAZO','SEMDATA','COBRADO'].map(chip).join('')}</div></div></div>
-    <div class="ind-sub" style="margin:8px 0">Entram aqui os casos em Reenvio S Recol Transp Pg, Transportadora a pagar e Produto não retornou cujo andamento cita extravio. Preencha <b>Extravio acatado em</b> para contar o prazo (sem a data, usamos a 1ª vez que o andamento citou extravio, marcada com ~). Depois de cobrar, clique em <b>✓ Cobrei hoje</b>: o lembrete some por 7 dias.</div>
+      <div class="ind-fr"><b>Situação do prazo</b><div>${['COBRAR','RISCO','PRAZO','SEMDATA'].map(chip).join('')}</div></div></div>
+    <div class="ind-sub" style="margin:8px 0">Entram aqui os casos em Reenvio S Recol Transp Pg, Transportadora a pagar e Produto não retornou cujo andamento cita extravio. O prazo só começa a contar quando você preenche <b>Extravio acatado em</b>. Quando chegar a data de <b>cobrança</b>, o painel avisa (faixa vermelha no topo, número no menu e lembrete ao abrir). Depois de cobrar, clique em <b>✓ Cobrei hoje</b> (ou informe a data da cobrança): o prazo recomeça e o aviso volta quando ele chegar de novo.</div>
     <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos</b><span class="fcnt">${vis.length} caso${vis.length!==1?'s':''}</span><button class="btn-exp" onclick="extrExport()">Exportar CSV</button></div>
-    <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Status</th><th>Cliente</th><th>NF</th><th>Situação</th><th>Transportadora</th><th>Prazo</th><th>Extravio acatado em</th><th>Vence em</th><th>Última cobrança</th><th></th><th>Andamento</th></tr></thead><tbody>${vis.length ? vis.map(linha).join('') : '<tr><td colspan="11" style="padding:18px;color:var(--tx3)">Nenhum caso de extravio neste filtro.</td></tr>'}</tbody></table></div></div>`;
-  ligaStats('ph-extr', [['Cobrar agora', () => todos.filter(i=>i.estado==='COBRAR').map(i=>i.t)], ['Vencem em até 5 dias', () => todos.filter(i=>i.estado==='HOJE'||i.estado==='RISCO').map(i=>i.t)], ['No prazo', () => todos.filter(i=>i.estado==='PRAZO').map(i=>i.t)], ['Sem data de acatamento', () => todos.filter(i=>i.estado==='SEMDATA').map(i=>i.t)], ['Cobrados nos últimos 7 dias', () => todos.filter(i=>i.estado==='COBRADO').map(i=>i.t)]]);
+    <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Status</th><th>Cliente</th><th>NF</th><th>Situação</th><th>Transportadora</th><th>Prazo</th><th>Extravio acatado em</th><th>Última cobrança</th><th>Próxima cobrança</th><th></th><th>Andamento</th></tr></thead><tbody>${vis.length ? vis.map(linha).join('') : '<tr><td colspan="11" style="padding:18px;color:var(--tx3)">Nenhum caso de extravio neste filtro.</td></tr>'}</tbody></table></div></div>`;
+  ligaStats('ph-extr', [['Cobrar agora', () => todos.filter(i=>i.estado==='COBRAR').map(i=>i.t)], ['Cobrar em até 5 dias úteis', () => todos.filter(i=>i.estado==='RISCO').map(i=>i.t)], ['Aguardando prazo', () => todos.filter(i=>i.estado==='PRAZO').map(i=>i.t)], ['Sem data de acatamento', () => todos.filter(i=>i.estado==='SEMDATA').map(i=>i.t)], ['Já cobrados', () => todos.filter(i=>i.dCob).map(i=>i.t)]]);
 }
 function extrExport(){
   const l = extrItens(); if (!l.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(l.map(i => ({ 'Status':i.estado, 'Cliente':i.t.cliente||'', 'NF':i.t.nf||'', 'Situação':i.t.tipo_devolucao||'', 'Transportadora':i.carr, 'Prazo':i.pz.txt, 'Extravio acatado em':i.man||(i.ini ? fmtD2(i.ini)+' (estimada)' : ''), 'Vence em':i.venc ? fmtD2(i.venc) : '', 'Dias':i.dias==null ? '' : i.dias, 'Última cobrança':i.dCob ? fmtD2(i.dCob) : '', 'Andamento':i.t.andamento||'' })), 'extravios_prazo');
+  exportCSV(l.map(i => ({ 'Status':i.estado, 'Cliente':i.t.cliente||'', 'NF':i.t.nf||'', 'Situação':i.t.tipo_devolucao||'', 'Transportadora':i.carr, 'Prazo':i.pz.txt, 'Extravio acatado em':i.ini ? fmtD2(i.ini) : '', 'Última cobrança':i.dCob ? fmtD2(i.dCob) : '', 'Próxima cobrança':i.venc ? fmtD2(i.venc) : '', 'Dias úteis':i.dias==null ? '' : i.dias, 'Andamento':i.t.andamento||'' })), 'extravios_prazo');
 }
 function renderNR(){ ['ap','nr'].forEach(renderNRp); }
 function renderNRp(sc){
@@ -4329,14 +4350,20 @@ function mdCsv(){
 }
 
 // ---- SLA Transportadora (Coleta Reversa): protocolo -> coleta na casa do cliente -> chegada no CD ----
-const CS = { carrs:new Set(), est:'', farol:'', atr:'', q:'' };
+const CS = { carrs:new Set(), est:'', farol:'', atr:'', fonte:'', ano:0, q:'' };
+function csVer(atr, fonte, ano){   // abre a lista de casos do SLA ja filtrada (ex.: todos os casos da etapa 1 fora do prazo)
+  CS.carrs.clear(); CS.est = ''; CS.farol = ''; CS.q = ''; CS.atr = atr || ''; CS.fonte = fonte || ''; CS.ano = ano || 0;
+  ir('colsla'); setTimeout(() => { const e = document.getElementById('cnt-cs'), a = e && e.closest('.filters'); if (a) a.scrollIntoView({ behavior:'smooth', block:'start' }); }, 250);
+}
 function csSet(k, v){
   if (k==='carr'){ CS.carrs.has(v) ? CS.carrs.delete(v) : CS.carrs.add(v); }
   else if (k==='est') CS.est = (CS.est===v ? '' : v);
   else if (k==='farol') CS.farol = (CS.farol===v ? '' : v);
   else if (k==='atr') CS.atr = (CS.atr===v ? '' : v);
+  else if (k==='fonte') CS.fonte = (CS.fonte===v ? '' : v);
+  else if (k==='ano') CS.ano = (CS.ano===+v ? 0 : +v);
   else if (k==='q'){ CS.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderColSla, 180); return; }
-  else if (k==='limpar'){ CS.carrs.clear(); CS.est=''; CS.farol=''; CS.atr=''; CS.q=''; const i = document.getElementById('cs-q'); if (i) i.value=''; }
+  else if (k==='limpar'){ CS.carrs.clear(); CS.est=''; CS.farol=''; CS.atr=''; CS.fonte=''; CS.ano=0; CS.q=''; const i = document.getElementById('cs-q'); if (i) i.value=''; }
   renderColSla();
 }
 let CS_LISTA = [], _csOk = false;
@@ -4370,7 +4397,7 @@ function renderColSla(){
       <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos do SLA</b><span class="fcnt" id="cnt-cs"></span><button class="btn-exp" onclick="csCsv()">Exportar CSV</button></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Transportadora</th><th>Cliente</th><th>NF</th><th>Criação</th><th>Protocolo</th><th title="Dias entre a criação da tarefa e o protocolo">Criação → Protocolo</th><th>Dias</th><th>Farol</th><th title="Dias além do prazo até a chegada no CD">Atraso até o CD</th><th>Estágio</th><th>Previsão no CD</th><th>Coleta no cliente</th><th>Chegada no CD</th><th>Total (dias)</th><th>Andamento</th></tr></thead><tbody id="tb-cs"></tbody></table></div></div>`; }
   const todos = COLSLA;
-  const f = (it, ign) => { ign = ign||[]; return (ign.includes('carr') || !CS.carrs.size || CS.carrs.has(it.carr)) && (ign.includes('est') || !CS.est || it.estagio===CS.est) && (ign.includes('farol') || !CS.farol || it.farol===CS.farol) && (ign.includes('atr') || !CS.atr || (CS.atr==='prot' ? it.atrasoProt>0 : it.atrasoCd>0)) &&
+  const f = (it, ign) => { ign = ign||[]; return (ign.includes('carr') || !CS.carrs.size || CS.carrs.has(it.carr)) && (ign.includes('est') || !CS.est || it.estagio===CS.est) && (ign.includes('farol') || !CS.farol || it.farol===CS.farol) && (ign.includes('atr') || !CS.atr || (CS.atr==='prot' ? it.atrasoProt>0 : it.atrasoCd>0)) && (ign.includes('fonte') || !CS.fonte || (CS.fonte==='real' ? it.protFonte==='real' : it.protFonte!=='real')) && (ign.includes('ano') || !CS.ano || it.x.ano===CS.ano) &&
     (!CS.q || norm((it.x.cliente||'')+' '+(it.x.nf||'')+' '+(it.x.cpf||'')).includes(CS.q)); };
   const vis = todos.filter(i=>f(i)), A = colslaAgg(vis), pc = (a,b) => b ? Math.round(a/b*100)+'%' : '—';
   document.getElementById('bdg-colsla').textContent = todos.filter(i => !i.chegou && i.farol==='Atrasado').length;
@@ -4384,8 +4411,10 @@ function renderColSla(){
     `<div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o => chip(CS.carrs.has(o.c), `csSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>
      <div class="ind-fr"><b>Estágio</b><div>${['Aguardando coleta','A caminho do CD','No CD','Encerrado'].map(e => chip(CS.est===e, `csSet('est','${e}')`, e, todos.filter(i=>i.estagio===e && f(i,['est'])).length)).join('')}</div></div>
      <div class="ind-fr"><b>Farol</b><div>${['Atrasado','Em risco','No prazo','Fora do prazo','Dentro do prazo','Encerrado'].map(e => chip(CS.farol===e, `csSet('farol','${e}')`, e, todos.filter(i=>i.farol===e && f(i,['farol'])).length)).join('')}</div></div>
-     <div class="ind-fr"><b>Atraso por etapa</b><div>${chip(CS.atr==='prot', "csSet('atr','prot')", 'Protocolo fora do prazo (+' + CONFIG.PRAZO_PROTOCOLO_DIAS + ' d)', todos.filter(i=>i.atrasoProt>0 && f(i,['atr'])).length)}${chip(CS.atr==='cd', "csSet('atr','cd')", 'Além do prazo até o CD (+' + SLA + ' d)', todos.filter(i=>i.atrasoCd>0 && f(i,['atr'])).length)}</div></div>`;
-  document.getElementById('cs-limpar').style.visibility = (CS.carrs.size || CS.est || CS.farol || CS.atr || CS.q) ? 'visible' : 'hidden';
+     <div class="ind-fr"><b>Atraso por etapa</b><div>${chip(CS.atr==='prot', "csSet('atr','prot')", 'Protocolo fora do prazo (+' + CONFIG.PRAZO_PROTOCOLO_DIAS + ' d)', todos.filter(i=>i.atrasoProt>0 && f(i,['atr'])).length)}${chip(CS.atr==='cd', "csSet('atr','cd')", 'Além do prazo até o CD (+' + SLA + ' d)', todos.filter(i=>i.atrasoCd>0 && f(i,['atr'])).length)}</div></div>
+     <div class="ind-fr"><b>Data do protocolo</b><div>${chip(CS.fonte==='real', "csSet('fonte','real')", 'Real (planilha de apontamentos)', todos.filter(i=>i.protFonte==='real' && f(i,['fonte'])).length)}${chip(CS.fonte==='aprox', "csSet('fonte','aprox')", 'Aproximada (usa a programação)', todos.filter(i=>i.protFonte!=='real' && f(i,['fonte'])).length)}</div></div>
+     <div class="ind-fr"><b>Ano</b><div>${[...new Set(todos.map(i=>i.x.ano))].sort((a,b)=>b-a).map(a => chip(CS.ano===a, `csSet('ano',${a})`, a, todos.filter(i=>i.x.ano===a && f(i,['ano'])).length)).join('')}</div></div>`;
+  document.getElementById('cs-limpar').style.visibility = (CS.carrs.size || CS.est || CS.farol || CS.atr || CS.fonte || CS.ano || CS.q) ? 'visible' : 'hidden';
   // funil: onde o tempo e gasto
   const cp = vis.filter(i=>i.diasCriProg!=null), tot = vis.filter(i=>i.diasCriFim!=null), pcol = vis.filter(i=>i.diasProtColeta!=null), cd = vis.filter(i=>i.diasColetaCd!=null);
   const caixa = (t, v, n, sub, cl) => `<div class="alerta ${cl||''}" style="cursor:default"><b>${v==null ? '—' : fmt1(v)+' d'}</b><span>${t}<br><small style="color:var(--tx3)">${n} caso${n===1?'':'s'}${sub ? ' · '+sub : ''}</small></span></div>`;
@@ -4398,6 +4427,9 @@ function renderColSla(){
     document.getElementById('cs-etapas').innerHTML =
       cx('Etapa 1 · fora do prazo', pc(A.protFora, A.protN), `${A.protFora} de ${A.protN} casos · atraso médio ${fm(A.protAtrasoMed)}`, A.protN && A.protFora/A.protN>0.3 ? 'r' : 'w', 'prot') +
       cx('Etapa 1 · tempo médio até o protocolo', fm(A.protMedia), `prazo ${PP} d · ${A.protN} casos`, A.protMedia!=null && A.protMedia>PP ? 'r' : '', '') +
+      (() => { const rl = vis.filter(i=>i.diasCriProg!=null && i.protFonte==='real'), ap = vis.filter(i=>i.diasCriProg!=null && i.protFonte!=='real'), rlF = rl.filter(i=>i.atrasoProt>0).length, apF = ap.filter(i=>i.atrasoProt>0).length;
+        return `<button type="button" class="alerta ${rl.length && rlF/rl.length>0.3 ? 'r' : 'w'}${CS.atr==='prot' && CS.fonte==='real' ? ' on' : ''}" onclick="csVer('prot','real',CS.ano)"><b>${pc(rlF, rl.length)}</b><span>Etapa 1 · só com a data real do protocolo<br><small style="color:var(--tx3)">${rlF} de ${rl.length} casos (planilha de apontamentos)</small></span></button>
+        <button type="button" class="alerta ${ap.length && apF/ap.length>0.3 ? 'r' : 'w'}${CS.atr==='prot' && CS.fonte==='aprox' ? ' on' : ''}" onclick="csVer('prot','aprox',CS.ano)"><b>${pc(apF, ap.length)}</b><span>Etapa 1 · data aproximada pela programação<br><small style="color:var(--tx3)">${apF} de ${ap.length} casos · a data do protocolo é estimada</small></span></button>`; })() +
       cx('Etapa 2 · fora do prazo', pc(A.cdFora, A.cdN), `${A.cdFora} de ${A.cdN} casos · atraso médio ${fm(A.cdAtrasoMed)}`, A.cdN && A.cdFora/A.cdN>0.3 ? 'r' : 'w', 'cd') +
       cx('Etapa 2 · a caminho e já atrasados', A.cdForaTransito, `passaram dos ${SLA} dias sem chegar ao CD`, A.cdForaTransito ? 'r' : '', 'cd'); }
   // ranking
@@ -4417,7 +4449,7 @@ function renderColSla(){
   }
   const lista = vis.slice().sort((a,b) => (a.chegou - b.chegou) || (a.chegou ? (+(b.fim||0)) - (+(a.fim||0)) : b.diasAberto - a.diasAberto)); CS_LISTA = lista;
   document.getElementById('cnt-cs').textContent = lista.length + ' caso' + (lista.length!==1 ? 's' : '');
-  document.getElementById('tb-cs').innerHTML = lista.slice(0,CAP(400)).map(it => { const x = it.x; return `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td style="font-size:11px">${esc(it.carr)}</td><td class="td-nome">${esc(x.cliente||'—')}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${fmtDt(it.cri)}</td><td>${fmtDt(it.prog)}</td><td>${etapaTd(it.diasCriProg, it.atrasoProt)}</td>
+  document.getElementById('tb-cs').innerHTML = lista.slice(0,CAP(400)).map(it => { const x = it.x; return `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td style="font-size:11px">${esc(it.carr)}</td><td class="td-nome">${esc(x.cliente||'—')}</td><td class="td-nf">${esc(x.nf||'—')}</td><td>${fmtDt(it.cri)}</td><td>${fmtDt(it.prog)}${it.protFonte!=='real' ? `<br><small style="color:var(--tx3)" title="Sem a data real do protocolo na planilha de apontamentos: usa a ${it.protFonte}">~ ${it.protFonte}</small>` : ''}</td><td>${etapaTd(it.diasCriProg, it.atrasoProt)}</td>
     <td><b>${it.diasAberto} d</b></td><td><b style="color:${FAROL_COR[it.farol]}">${it.farol}</b></td><td>${it.atrasoCd==null ? '—' : it.atrasoCd>0 ? '<b style="color:var(--st-bad)">+'+it.atrasoCd+' d</b>' : '<span style="color:var(--st-ok)">no prazo</span>'}</td><td style="font-size:11px">${it.estagio}</td>${csPrevCell(it)}${csDataCell(it,'recolhido_em')}${csDataCell(it,'recebido_cd_em')}<td>${it.diasTotal==null ? '—' : '<b>'+it.diasTotal+' d</b>'}</td><td style="font-size:11px">${esc(x.andamento||'—')}</td></tr>`; }).join('') + capNota(lista.length)
     || '<tr><td colspan="15" style="color:var(--tx3);padding:16px">Nenhum caso com esses filtros.</td></tr>';
 }
