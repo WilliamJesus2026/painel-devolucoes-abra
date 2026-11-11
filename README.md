@@ -305,3 +305,9 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - Qualquer caso cujo andamento/situação cita extravio (`ehExtravio`), ou que já tem "Extravio acatado em", vai direto para a aba Extravios (`EXTR_ALL`), seja de que canal for. Ele sai da Coleta Reversa, Controle, SLA de Apontamento, Tratativas e das abas Transportadora a pagar / Produto não retornou.
 - Prazo: Total 45 d.u., demais 60 d.u., a partir da data do acatamento; 1ª cobrança na data de vencimento (ex.: Total acatado em 04/11/2026 -> 11/01/2027). Lembrete `EXTR_AVISO` = 5 dias úteis antes (e de novo no dia): faixa no topo, badge no menu, 🔔 no título e toast. "Cobrei hoje" recomeça o prazo.
 - Busca rápida (Ctrl+K / "Buscar"): procura em todas as bases do painel (inclui Extravios, Controle, a pagar/não retornou, histórico, perdas), aceita CPF/NF com ou sem pontuação e abre o caso sozinha quando só há um resultado (4+ caracteres).
+
+## Extravios: correção da contagem (11/11/2026, noite)
+- Causa dos "cobrar agora" falsos: a data foi digitada com ano de 2 dígitos e ficou 0026 (prazo vencido há ~6000 dias). Agora o ano de 2 dígitos vira 2026, datas impossíveis são recusadas e o campo só aceita 2024–2035.
+- A transportadora do extravio pode ser escolhida por caso (Automática / Total 45 d.u. / Outra 60 d.u.), porque o "tipo de saída" (ex.: Hello - I9) nem sempre é quem acata o extravio.
+- Fluxo simplificado: acatamento -> data de cobrança (+45/+60 d.u.) -> aviso 5 d.u. antes e no dia. Removidos "Última cobrança" e "Cobrei hoje"; novo botão "✓ Liquidado" tira o caso dos avisos.
+- Casos duplicados (mesmo cliente como coleta e tratativa) agora aparecem uma vez só.

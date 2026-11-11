@@ -1289,7 +1289,9 @@ function rebuildData(){
   // Perdas sao fato historico (indice mensal) e vivem na propria aba: nao saem do controle por sumirem do arquivo.
   PERDAS = allTrat.filter(t => t.grupo==='perdas').map(derivePerda);
   const tratExtr = allTrat.filter(t => t.grupo!=='perdas' && !t.concluido_auto && ehExtravio(t)), vistos = new Set();
-  EXTR_ALL = tratExtr.map(t => ({ ...t, __tipo:'tratativa' })).concat(colExtr.map(c => ({ ...c, __tipo:'coleta', tipo_devolucao:c.tipo_devolucao || 'Protocolo de Coleta' }))).filter(x => { const k = x.chave || (x.nf+'|'+x.cliente); if (vistos.has(k)) return false; vistos.add(k); return true; });
+  EXTR_ALL = tratExtr.map(t => ({ ...t, __tipo:'tratativa' })).concat(colExtr.map(c => ({ ...c, __tipo:'coleta', tipo_devolucao:c.tipo_devolucao || 'Protocolo de Coleta' })))
+    .sort((a,b) => (b.extravio_acatado_em ? 1 : 0) - (a.extravio_acatado_em ? 1 : 0))
+    .filter(x => { const k = norm(x.cliente||'').trim() + '|' + String(x.nf || x.cpf || '').replace(/\D/g,''); if (vistos.has(k)) return false; vistos.add(k); return true; });
   NR = allTrat.filter(t => t.grupo!=='perdas' && isNR(t) && !t.concluido_auto && !ehExtravio(t)).map(deriveNR);
   const outrasTrat = allTrat.filter(t => t.grupo!=='perdas' && !isNR(t) && !(ehExtravio(t) && !t.concluido_auto));
   TRAT_ALL = outrasTrat; ALL_TRAT = allTrat;
@@ -1935,7 +1937,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261111-190000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261111-203000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2300,7 +2302,7 @@ function andCell(c, lista){
 function irmaosDe(id){ const ch = (DB_CASES[id]||{}).chave; return ch ? Object.keys(DB_CASES).filter(k => DB_CASES[k].chave===ch) : [id]; }
 // ---- desfazer: cada alteracao feita no painel (status, andamento, motivo, previsao, datas...) guarda o estado anterior; o botao do topo e o Ctrl+Z voltam passo a passo ----
 const UNDO = [], UNDO_MAX = 50; let UNDO_T = 0;
-const UNDO_ROTULOS = { andamento:'Andamento', status_manual:'Status do caso', motivo_pend:'Motivo da pendência', previsao_coleta:'Previsão de coleta', protocolo_hello:'Protocolo Hello', recebido_cd_em:'Chegada no CD', recolhido_em:'Coleta no cliente', extravio_acatado_em:'Extravio acatado em', extravio_cobrado_em:'Cobrança ao extravio' };
+const UNDO_ROTULOS = { andamento:'Andamento', status_manual:'Status do caso', motivo_pend:'Motivo da pendência', previsao_coleta:'Previsão de coleta', protocolo_hello:'Protocolo Hello', recebido_cd_em:'Chegada no CD', recolhido_em:'Coleta no cliente', extravio_acatado_em:'Extravio acatado em', extravio_cobrado_em:'Cobrança ao extravio', extravio_liquidado_em:'Extravio liquidado', extravio_transportadora:'Transportadora do extravio' };
 try { JSON.parse(localStorage.getItem('undo_stack')||'[]').filter(u => u && u.ids && Date.now()-u.em < 864e5).forEach(u => UNDO.push(u)); } catch(e){}
 function undoSalva(){ try { localStorage.setItem('undo_stack', JSON.stringify(UNDO.slice(-UNDO_MAX))); } catch(e){} }
 const undoMeus = () => UNDO.filter(u => !u.por || u.por===CUR_EMAIL);
@@ -3962,26 +3964,27 @@ function nrSkeleton(sc){
     <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Aberto em</th><th>Dias parado</th><th>Valor</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th></tr></thead><tbody id="tb-nr-${sc}"></tbody></table></div></div>`;
 }
 // ================= EXTRAVIO: prazo da transportadora para liquidar o valor (lembrete de cobranca) =================
-// Total: 45 dias uteis; demais: 60 dias uteis. O prazo conta da data em que o extravio foi acatado (campo "Extravio acatado em", informado por voces).
-// Chegou o prazo: cobrar a transportadora. Ao cobrar ("Cobrei hoje"), o prazo recomeca a contar da data da cobranca, e assim por diante.
+// A transportadora acata o extravio (data informada aqui) e tem 45 dias uteis (Total) ou 60 dias uteis (demais) para liquidar o valor.
+// No fim do prazo, se nao liquidou, cobramos. O painel avisa EXTR_AVISO dias uteis antes dessa data e de novo no dia.
 const EXTR_AVISO = 5;   // o lembrete comeca X dias uteis antes de chegar o prazo de cobranca
 const EXTR_ST = { f:'', q:'' };
-const extrPrazo = carr => { const n = /\btotal\b/.test(norm(carr||'')) ? 45 : 60; return { n, util:true, txt:n+' dias úteis' }; };
-const extrData = v => { const m = v && /^(\d{4})-(\d{2})-(\d{2})/.exec(v); return m ? new Date(+m[1], +m[2]-1, +m[3]) : null; };
+const extrPrazo = (carr, ov) => { const n = ov==='total' ? 45 : ov==='outra' ? 60 : (/\btotal\b/.test(norm(carr||'')) ? 45 : 60); return { n, util:true, txt:n+' dias úteis' }; };
+// aceita ano com 2 digitos ("26" vira 2026) e ignora datas impossiveis (ex.: 0026 digitado sem querer)
+function extrData(v){ const m = v && /^(\d{4})-(\d{2})-(\d{2})/.exec(v); if (!m) return null; let y = +m[1]; if (y < 100) y += 2000; if (y < 2000 || y > 2100) return null; return new Date(y, +m[2]-1, +m[3]); }
 function extrItens(){
   const hj = new Date(), hoje = new Date(hj.getFullYear(), hj.getMonth(), hj.getDate()), out = [];
   (typeof EXTR_ALL==='undefined' ? [] : EXTR_ALL).forEach(t => {
-    const dc = (typeof DB_CASES!=='undefined' && DB_CASES[t.id]) || {}, man = dc.extravio_acatado_em || t.extravio_acatado_em || null, cob = dc.extravio_cobrado_em || t.extravio_cobrado_em || null;
-    const carr = indCarr(t), pz = extrPrazo(carr), ini = extrData(man), mc = extrData(cob), dCob = (mc && ini && mc >= ini) ? mc : null;
-    const base = dCob || ini, venc = base ? slaSomaDias(base, pz.n, true) : null;   // so conta quando a data do acatamento foi informada (sem estimativa)
+    const dc = (typeof DB_CASES!=='undefined' && DB_CASES[t.id]) || {}, man = dc.extravio_acatado_em || t.extravio_acatado_em || null, liq = dc.extravio_liquidado_em || t.extravio_liquidado_em || null, ov = dc.extravio_transportadora || t.extravio_transportadora || '';
+    const carr = indCarr(t), pz = extrPrazo(carr, ov), ini = extrData(man), venc = ini ? slaSomaDias(ini, pz.n, true) : null;   // so conta quando a data do acatamento foi informada
     let estado = 'SEMDATA', dias = null;
-    if (venc){
+    if (liq) estado = 'LIQUIDADO';
+    else if (venc){
       if (hoje >= venc){ estado = 'COBRAR'; dias = slaDifDias(venc, hoje, true); }
       else { dias = slaDifDias(hoje, venc, true); estado = dias <= EXTR_AVISO ? 'RISCO' : 'PRAZO'; }
     }
-    out.push({ t, id:t.id, carr, pz, ini, venc, estado, dias, dCob, man:man||'', cobIso:dCob ? cob : '' });
+    out.push({ t, id:t.id, carr, pz, ini, venc, estado, dias, man:man||'', ov });
   });
-  const ord = { COBRAR:0, RISCO:1, PRAZO:2, SEMDATA:3 };
+  const ord = { COBRAR:0, RISCO:1, PRAZO:2, SEMDATA:3, LIQUIDADO:4 };
   return out.sort((a,b) => ord[a.estado]-ord[b.estado] || (a.estado==='COBRAR' ? (b.dias||0)-(a.dias||0) : (a.dias||0)-(b.dias||0)));
 }
 function extrBadge(){
@@ -3989,44 +3992,51 @@ function extrBadge(){
   if (b){ b.textContent = n; b.classList.toggle('red', n>0); }
   window._tit0 = window._tit0 || document.title.replace(/^🔔 \(\d+\) /, ''); document.title = (n ? '🔔 ('+n+') ' : '') + window._tit0;
   const bn = document.getElementById('extr-banner');
-  if (bn){ if (n && podeAba('extr')){ bn.style.display = ''; bn.innerHTML = `🔔 ${nc ? `<b>${nc} extravio${nc>1?'s':''}</b> para cobrar agora` : ''}${nc && nr ? ' · ' : ''}${nr ? `<b>${nr}</b> com o prazo de cobrança chegando (até ${EXTR_AVISO} dias úteis)` : ''}. <button type="button" class="btn-exp" onclick="ir('extr')">Abrir Extravios ↗</button>`; } else bn.style.display = 'none'; }
+  if (bn){ if (n && podeAba('extr')){ bn.style.display = ''; bn.innerHTML = `🔔 ${nc ? `<b>${nc} extravio${nc>1?'s':''}</b> para cobrar a transportadora agora` : ''}${nc && nr ? ' · ' : ''}${nr ? `<b>${nr}</b> com a data de cobrança chegando (em até ${EXTR_AVISO} dias úteis)` : ''}. <button type="button" class="btn-exp" onclick="ir('extr')">Abrir Extravios ↗</button>`; } else bn.style.display = 'none'; }
   if (n && typeof DB!=='undefined' && DB && podeAba('extr')){
     const k = isoD(new Date()); let ja = false;
     try { ja = localStorage.getItem('extr_lembrete')===k; if (!ja) localStorage.setItem('extr_lembrete', k); } catch(e){ ja = !!window._extrLemb; window._extrLemb = true; }
-    if (!ja) toast(`Lembrete de extravios: ${nc ? nc+' para cobrar agora' : ''}${nc && nr ? ' e ' : ''}${nr ? nr+' com o prazo de cobrança chegando' : ''}.`, { type:'warn', ms:10000, actionLabel:'Ver', onAction:() => ir('extr') });
+    if (!ja) toast(`Lembrete de extravios: ${nc ? nc+' para cobrar agora' : ''}${nc && nr ? ' e ' : ''}${nr ? nr+' com a data de cobrança chegando' : ''}.`, { type:'warn', ms:10000, actionLabel:'Ver', onAction:() => ir('extr') });
   }
 }
 function extrSet(k, v){ if (k==='f') EXTR_ST.f = (EXTR_ST.f===v ? '' : v); else if (k==='q'){ EXTR_ST.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderExtr, 180); return; } renderExtr(); }
-function extrSetData(id, v){ if (gravaCaso(id, { extravio_acatado_em: v || null })){ toast(v ? 'Data do acatamento salva. O prazo já está contando.' : 'Data removida.', {type:'ok'}); scheduleRender(); } }
-function extrSetCob(id, v){ if (gravaCaso(id, { extravio_cobrado_em: v || null })){ toast(v ? 'Cobrança registrada. O prazo recomeça a contar dessa data.' : 'Cobrança removida.', {type:'ok'}); scheduleRender(); } }
-function extrCobrei(id){ extrSetCob(id, isoD(new Date())); }
+function extrSetData(id, v){
+  if (v){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v); let y = m ? +m[1] : 0; if (m && y < 100) y += 2000;
+    if (!m || y < 2024 || y > 2035){ toast('Data inválida. Digite o ano completo (ex.: 04/11/2026).', {type:'warn'}); renderExtr(); return; }
+    v = y + '-' + m[2] + '-' + m[3]; }
+  if (gravaCaso(id, { extravio_acatado_em: v || null })){ toast(v ? 'Data do acatamento salva. A data de cobrança já foi calculada.' : 'Data removida.', {type:'ok'}); scheduleRender(); }
+}
+function extrSetTransp(id, v){ if (gravaCaso(id, { extravio_transportadora: v || null })){ toast('Transportadora do extravio atualizada: o prazo foi recalculado.', {type:'ok'}); scheduleRender(); } }
+function extrLiquidar(id, on){ if (gravaCaso(id, { extravio_liquidado_em: on ? isoD(new Date()) : null })){ toast(on ? 'Extravio marcado como liquidado: não será mais cobrado.' : 'Extravio reaberto.', {type:'ok'}); scheduleRender(); } }
 function renderExtr(){
   const el = document.getElementById('panel-extr'); if (!el) return;
   const ae = document.activeElement; if (ae && el.contains(ae) && /^(INPUT|TEXTAREA)$/.test(ae.tagName) && ae.type!=='button') return;   // nao refaz a tela enquanto digita
   const todos = extrItens(), c = e => todos.filter(i => i.estado===e).length;
   const q = EXTR_ST.q, vis = todos.filter(i => (!EXTR_ST.f || i.estado===EXTR_ST.f) && (!q || norm((i.t.cliente||'')+' '+(i.t.nf||'')+' '+(i.t.cpf||'')+' '+i.carr).includes(q)));
-  const hero = pwHero('Transportadora', 'Extravios — prazo de liquidação', 'Depois que a transportadora acata o extravio, o caso fica parado: Total tem 45 dias úteis e as demais 60 dias úteis para liquidar. Quando o prazo chega, é hora de cobrar; ao cobrar, o prazo recomeça da data da cobrança.',
-    [['Cobrar agora', c('COBRAR'), 'prazo chegou ou passou', "extrSet('f','COBRAR')"], [`Cobrar em até ${EXTR_AVISO} dias úteis`, c('RISCO'), 'lembrete: prazo chegando', "extrSet('f','RISCO')"], ['Aguardando prazo', c('PRAZO'), 'caso parado, dentro do prazo', "extrSet('f','PRAZO')"], ['Sem data de acatamento', c('SEMDATA'), 'informe a data para começar a contar', "extrSet('f','SEMDATA')"], ['Já cobrados', todos.filter(i=>i.dCob).length, 'pelo menos uma vez']], '');
-  const NOM = { COBRAR:'Cobrar', RISCO:'Cobrar em breve', PRAZO:'Aguardando prazo', SEMDATA:'Sem data' };
+  const hero = pwHero('Transportadora', 'Extravios — prazo de liquidação', 'Quando a transportadora acata o extravio, ela tem 45 dias úteis (Total) ou 60 dias úteis (demais) para liquidar o valor. No fim do prazo, se ainda não liquidou, é hora de cobrar. O painel avisa antes.',
+    [['Cobrar agora', c('COBRAR'), 'a data de cobrança chegou ou passou', "extrSet('f','COBRAR')"], [`Cobrar em até ${EXTR_AVISO} dias úteis`, c('RISCO'), 'lembrete: data de cobrança chegando', "extrSet('f','RISCO')"], ['Aguardando prazo', c('PRAZO'), 'transportadora ainda dentro do prazo', "extrSet('f','PRAZO')"], ['Sem data de acatamento', c('SEMDATA'), 'informe a data quando a transportadora acatar', "extrSet('f','SEMDATA')"], ['Liquidados', c('LIQUIDADO'), 'valor já pago pela transportadora', "extrSet('f','LIQUIDADO')"]], '');
+  const NOM = { COBRAR:'Cobrar', RISCO:'Cobrar em breve', PRAZO:'Aguardando prazo', SEMDATA:'Sem data', LIQUIDADO:'Liquidado' };
   const chip = (e) => `<button type="button" class="ind-ch${EXTR_ST.f===e?' on':''}${c(e)===0?' zero':''}" onclick="extrSet('f','${e}')">${NOM[e]}<small>${c(e)}</small></button>`;
-  const st = i => ({ COBRAR: i.dias ? `<span class="bdg b-red">Cobrar · prazo passou há ${i.dias} d.u.</span>` : '<span class="bdg b-red">Cobrar hoje</span>', RISCO:`<span class="bdg b-amb">Cobrar em ${i.dias} d.u.</span>`, PRAZO:`<span class="bdg b-grn">Aguardando · ${i.dias} d.u.</span>`, SEMDATA:'<span class="bdg b-dk">Informe a data</span>' })[i.estado];
-  const linha = i => `<tr><td>${st(i)}</td><td class="td-nome clickable" onclick="openDetailIdx(${regDetail(i.t)})">${esc(i.t.cliente||'—')}</td><td class="td-nf">${esc(i.t.nf||'—')}</td><td style="font-size:11px">${esc(i.t.tipo_devolucao||'—')}</td><td style="font-size:11px">${esc(i.carr||'—')}</td><td style="font-size:11px">${i.pz.txt}</td>
-    <td><input type="date" class="fsel" value="${i.man}" onchange="extrSetData('${esc(String(i.id))}', this.value)" title="Data em que a transportadora acatou o extravio"></td>
-    <td><input type="date" class="fsel" value="${i.cobIso}" onchange="extrSetCob('${esc(String(i.id))}', this.value)" title="Data da última cobrança à transportadora; o prazo recomeça daqui"></td>
-    <td>${i.venc ? '<b>'+fmtD2(i.venc)+'</b><br><small style="color:var(--tx3)">'+(i.dCob ? 'da cobrança' : 'do acatamento')+'</small>' : '—'}</td>
-    <td>${i.estado==='COBRAR' ? `<button class="btn-exp" type="button" onclick="extrCobrei('${esc(String(i.id))}')">✓ Cobrei hoje</button>` : ''}</td>
+  const st = i => ({ COBRAR: i.dias ? `<span class="bdg b-red">Cobrar · passou há ${i.dias} d.u.</span>` : '<span class="bdg b-red">Cobrar hoje</span>', RISCO:`<span class="bdg b-amb">Cobrar em ${i.dias} d.u.</span>`, PRAZO:`<span class="bdg b-grn">Aguardando · ${i.dias} d.u.</span>`, SEMDATA:'<span class="bdg b-dk">Informe a data</span>', LIQUIDADO:'<span class="bdg b-dk">Liquidado</span>' })[i.estado];
+  const idq = i => esc(String(i.id));
+  const linha = i => `<tr><td>${st(i)}</td><td class="td-nome clickable" onclick="openDetailIdx(${regDetail(i.t)})">${esc(i.t.cliente||'—')}</td><td class="td-nf">${esc(i.t.nf||'—')}</td><td style="font-size:11px">${esc(i.t.tipo_devolucao||'—')}</td>
+    <td style="font-size:11px">${esc(i.carr||'—')}</td>
+    <td><select class="fsel" onchange="extrSetTransp('${idq(i)}', this.value)" title="Quem acatou o extravio: define o prazo (Total 45 d.u., demais 60 d.u.)"><option value=""${!i.ov?' selected':''}>Automática (${i.pz.n} d.u.)</option><option value="total"${i.ov==='total'?' selected':''}>Total (45 d.u.)</option><option value="outra"${i.ov==='outra'?' selected':''}>Outra (60 d.u.)</option></select></td>
+    <td><input type="date" class="fsel" min="2024-01-01" max="2035-12-31" value="${i.man}" onchange="extrSetData('${idq(i)}', this.value)" title="Data em que a transportadora acatou o extravio (digite o ano completo)"></td>
+    <td>${i.venc ? '<b>'+fmtD2(i.venc)+'</b><br><small style="color:var(--tx3)">acatamento + '+i.pz.n+' d.u.</small>' : '—'}</td>
+    <td>${i.estado==='LIQUIDADO' ? `<button class="btn-exp" type="button" onclick="extrLiquidar('${idq(i)}', false)">Reabrir</button>` : `<button class="btn-exp" type="button" onclick="extrLiquidar('${idq(i)}', true)" title="A transportadora já pagou o extravio">✓ Liquidado</button>`}</td>
     <td style="font-size:11px;max-width:260px">${esc(String(i.t.andamento||'—').slice(0,140))}</td></tr>`;
   el.innerHTML = `<div class="pworld" id="ph-extr">${hero}</div>
     <div class="ind-f"><div class="ind-f-top"><input id="extr-q" placeholder="Buscar cliente, NF ou transportadora..." value="${esc(EXTR_ST.q)}" oninput="extrSet('q',this.value)"><button class="btn-exp" type="button" onclick="EXTR_ST.f='';EXTR_ST.q='';renderExtr()" style="visibility:${(EXTR_ST.f||EXTR_ST.q)?'visible':'hidden'}">Limpar filtros</button></div>
-      <div class="ind-fr"><b>Situação do prazo</b><div>${['COBRAR','RISCO','PRAZO','SEMDATA'].map(chip).join('')}</div></div></div>
-    <div class="ind-sub" style="margin:8px 0">Entra aqui <b>qualquer caso</b> cujo andamento ou situação cita extravio (ou que tenha a data de acatamento preenchida), seja do Relacionamento, Marketplace ou Logística: ele sai das outras abas e passa a ser acompanhado só aqui. O prazo só começa a contar quando você preenche <b>Extravio acatado em</b>. O painel avisa <b>${EXTR_AVISO} dias úteis antes</b> da data de cobrança e de novo quando ela chegar (faixa vermelha no topo, número no menu, 🔔 no título da aba e lembrete ao abrir). Depois de cobrar, clique em <b>✓ Cobrei hoje</b> (ou informe a data da cobrança): o prazo recomeça e o aviso volta quando ele chegar de novo.</div>
+      <div class="ind-fr"><b>Situação do prazo</b><div>${['COBRAR','RISCO','PRAZO','SEMDATA','LIQUIDADO'].map(chip).join('')}</div></div></div>
+    <div class="ind-sub" style="margin:8px 0">Entra aqui <b>qualquer caso</b> cujo andamento ou situação cita extravio, seja do Relacionamento, Marketplace ou Logística: ele sai das outras abas e passa a ser acompanhado só aqui. Quando a transportadora acatar, preencha <b>Extravio acatado em</b>: o painel calcula a data de cobrança (+45 d.u. para a Total, +60 d.u. para as demais) e avisa <b>${EXTR_AVISO} dias úteis antes</b> e no dia (faixa vermelha no topo, número no menu, 🔔 no título da aba e lembrete ao abrir). Se a transportadora liquidar o valor, clique em <b>✓ Liquidado</b>. Se o caso for da Total e o painel mostrar outra transportadora, escolha "Total" na coluna do prazo.</div>
     <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos</b><span class="fcnt">${vis.length} caso${vis.length!==1?'s':''}</span><button class="btn-exp" onclick="extrExport()">Exportar CSV</button></div>
-    <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Status</th><th>Cliente</th><th>NF</th><th>Situação</th><th>Transportadora</th><th>Prazo</th><th>Extravio acatado em</th><th>Última cobrança</th><th>Próxima cobrança</th><th></th><th>Andamento</th></tr></thead><tbody>${vis.length ? vis.map(linha).join('') : '<tr><td colspan="11" style="padding:18px;color:var(--tx3)">Nenhum caso de extravio neste filtro.</td></tr>'}</tbody></table></div></div>`;
-  ligaStats('ph-extr', [['Cobrar agora', () => todos.filter(i=>i.estado==='COBRAR').map(i=>i.t)], [`Cobrar em até ${EXTR_AVISO} dias úteis`, () => todos.filter(i=>i.estado==='RISCO').map(i=>i.t)], ['Aguardando prazo', () => todos.filter(i=>i.estado==='PRAZO').map(i=>i.t)], ['Sem data de acatamento', () => todos.filter(i=>i.estado==='SEMDATA').map(i=>i.t)], ['Já cobrados', () => todos.filter(i=>i.dCob).map(i=>i.t)]]);
+    <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Status</th><th>Cliente</th><th>NF</th><th>Situação</th><th>Transportadora (tipo de saída)</th><th>Prazo da transportadora</th><th>Extravio acatado em</th><th>Cobrar a transportadora em</th><th></th><th>Andamento</th></tr></thead><tbody>${vis.length ? vis.map(linha).join('') : '<tr><td colspan="10" style="padding:18px;color:var(--tx3)">Nenhum caso de extravio neste filtro.</td></tr>'}</tbody></table></div></div>`;
+  ligaStats('ph-extr', [['Cobrar agora', () => todos.filter(i=>i.estado==='COBRAR').map(i=>i.t)], [`Cobrar em até ${EXTR_AVISO} dias úteis`, () => todos.filter(i=>i.estado==='RISCO').map(i=>i.t)], ['Aguardando prazo', () => todos.filter(i=>i.estado==='PRAZO').map(i=>i.t)], ['Sem data de acatamento', () => todos.filter(i=>i.estado==='SEMDATA').map(i=>i.t)], ['Liquidados', () => todos.filter(i=>i.estado==='LIQUIDADO').map(i=>i.t)]]);
 }
 function extrExport(){
   const l = extrItens(); if (!l.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(l.map(i => ({ 'Status':i.estado, 'Cliente':i.t.cliente||'', 'NF':i.t.nf||'', 'Situação':i.t.tipo_devolucao||'', 'Transportadora':i.carr, 'Prazo':i.pz.txt, 'Extravio acatado em':i.ini ? fmtD2(i.ini) : '', 'Última cobrança':i.dCob ? fmtD2(i.dCob) : '', 'Próxima cobrança':i.venc ? fmtD2(i.venc) : '', 'Dias úteis':i.dias==null ? '' : i.dias, 'Andamento':i.t.andamento||'' })), 'extravios_prazo');
+  exportCSV(l.map(i => ({ 'Status':i.estado, 'Cliente':i.t.cliente||'', 'NF':i.t.nf||'', 'Situação':i.t.tipo_devolucao||'', 'Transportadora':i.carr, 'Prazo':i.pz.txt, 'Extravio acatado em':i.ini ? fmtD2(i.ini) : '', 'Cobrar a transportadora em':i.venc ? fmtD2(i.venc) : '', 'Dias úteis':i.dias==null ? '' : i.dias, 'Andamento':i.t.andamento||'' })), 'extravios_prazo');
 }
 function renderNR(){ ['ap','nr'].forEach(renderNRp); }
 function renderNRp(sc){
