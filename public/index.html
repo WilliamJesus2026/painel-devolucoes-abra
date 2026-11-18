@@ -941,7 +941,7 @@ body.natal #dash-hero{margin-top:46px}
     <!-- TRATATIVAS -->
     <div class="panel" id="panel-ind">
       <div class="pworld" id="ph-ind"></div>
-      <div id="ind-sla-coleta" style="margin-bottom:14px"></div>
+      <div id="ind-sla-coleta" style="display:none"></div>   <!-- bloco do SLA da coleta removido do Controle (segue completo na aba SLA Transportadora) -->
       <details class="ind-f" style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da equipe de Logística.</div></details>
       <div class="alerta-bar" id="ind-alertas" style="display:none"></div>
       <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button><select class="fsel" id="ind-views" onchange="indView(this.value)" title="Visões prontas e as que você salvou"></select><button class="btn-exp" type="button" onclick="indSalvaView()" title="Guarda os filtros atuais com um nome (neste navegador)">💾 Salvar visão</button><button class="btn-exp" type="button" onclick="indApagaView()">Excluir visão</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
@@ -1947,7 +1947,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261118-120000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261118-140000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -3480,6 +3480,7 @@ function indSetMotivo(id, v){
 function renderInd(){
   if (!document.getElementById('panel-ind')) return;
   indCalcula();
+  if (IND.alerta) IND.alerta = '';   // os cartoes de SLA da coleta saíram do Controle: nao deixa filtro escondido
   const IND_ALL = IND_CTRL;   // a aba Controle mostra so os casos do arquivo 'depois de entregue' (e demais fluxos), sem as tratativas
   const anos = [...new Set(IND_ALL.map(x=>x.ano))].sort((a,b)=>b-a);
   if (!anos.includes(IND.ano)) IND.ano = anos[0] || new Date().getFullYear();

@@ -319,3 +319,5 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - "Por canal de atendimento" virou **Por equipe responsável** (e "Canal" -> "Equipe" nos filtros); "Dayane" saiu dos textos e o responsável da Logística é a equipe (`LOG_RESP`).
 - Menu: títulos dos grupos (Visão geral, Coleta reversa, Controle...) com destaque.
 - **SLA da coleta em dias úteis** (sem sábado, domingo e feriado; `slaDifDias`), e a etapa 2 conta da **programação** da planilha (`ini2`), com o protocolo só como alternativa.
+
+- Controle de Situacoes: removido o bloco "SLA da coleta" (cartoes, botoes "Ver os N casos" e "Como ler"); o SLA da coleta segue completo na aba SLA Transportadora.
