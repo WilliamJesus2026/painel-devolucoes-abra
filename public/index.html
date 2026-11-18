@@ -81,7 +81,8 @@ body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:
 .sb-brand span{display:block;font-size:10px;font-weight:400;color:rgba(255,255,255,.4);margin-top:2px;letter-spacing:.02em}
 .sb-ref{font-size:10px;color:rgba(255,255,255,.3);margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.07)}
 .sb-nav{padding:10px 8px;flex:1}
-.sb-grp{font-size:9.5px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase;padding:10px 6px 5px}
+.sb-grp{font-size:11px;font-weight:800;color:#fff;letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;margin:14px 0 5px;background:rgba(255,255,255,.10);border-left:3px solid #38bdf8;border-radius:6px}
+body.natal .sb-grp{border-left-color:#fde047;background:rgba(253,224,71,.14)}
 .nav{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--r);cursor:pointer;color:rgba(255,255,255,.6);font-size:12px;font-weight:500;transition:.12s;border:none;background:none;width:100%;text-align:left;margin-bottom:2px}
 .nav:hover{background:rgba(255,255,255,.07);color:#fff}
 .nav.on{background:var(--acc);color:#fff}
@@ -427,6 +428,15 @@ body.loading .kpi-v,body.loading .kpi-s{color:transparent!important;background:l
 .slc-med .slc-big b{font-size:30px}
 .slc-filtro{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.5);border-radius:10px;padding:8px 12px;font-size:12px;margin-bottom:10px}.slc-filtro button{margin-left:8px;font:inherit;font-weight:700;cursor:pointer;border:1px solid var(--bd);background:var(--srf);color:var(--tx);border-radius:8px;padding:2px 10px}
 .slc-links{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}.slc-obs{font-size:11.5px;color:var(--tx2)}
+.mcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:10px}
+.mcard{text-align:left;font:inherit;color:var(--tx);cursor:pointer;background:var(--srf1);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;transition:.15s;display:flex;flex-direction:column;gap:5px}
+.mcard:hover{transform:translateY(-2px);box-shadow:var(--sh)}.mcard.on{outline:2px solid var(--acc)}
+.mc-h{font-size:14px;font-weight:800;margin-bottom:2px}
+.mc-row{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;color:var(--tx2)}.mc-row b{font-size:16px;color:var(--tx);font-variant-numeric:tabular-nums}
+.mc-bar{height:6px;border-radius:99px;background:var(--bd);overflow:hidden}.mc-bar i{display:block;height:100%;border-radius:99px;background:var(--tx3)}
+.mc-bar.g i{background:var(--st-ok)}.mc-bar.a i{background:var(--st-warn)}.mc-bar.r i{background:var(--st-bad)}
+.mcard small{font-size:10.5px;color:var(--tx3)}
+.mc-leg{margin-top:12px;font-size:11.5px;color:var(--tx2);line-height:1.6}
 .slc-det{margin-top:10px;font-size:12px;color:var(--tx2)}
 .slc-det summary{cursor:pointer;font-weight:700;color:var(--acc)}
 .slc-det p{margin:6px 0 0;line-height:1.6;max-width:980px}
@@ -932,20 +942,21 @@ body.natal #dash-hero{margin-top:46px}
     <div class="panel" id="panel-ind">
       <div class="pworld" id="ph-ind"></div>
       <div id="ind-sla-coleta" style="margin-bottom:14px"></div>
-      <details class="ind-f" style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da Dayane.</div></details>
-      <div class="alerta-bar" id="ind-alertas"></div>
+      <details class="ind-f" style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da equipe de Logística.</div></details>
+      <div class="alerta-bar" id="ind-alertas" style="display:none"></div>
       <div class="ind-f"><div class="ind-f-top"><input id="ind-q" placeholder="Buscar cliente, NF ou CPF..." oninput="indSet('q',this.value)"><button class="btn-exp" type="button" id="ind-limpar" onclick="indSet('limpar')">Limpar filtros</button><select class="fsel" id="ind-views" onchange="indView(this.value)" title="Visões prontas e as que você salvou"></select><button class="btn-exp" type="button" onclick="indSalvaView()" title="Guarda os filtros atuais com um nome (neste navegador)">💾 Salvar visão</button><button class="btn-exp" type="button" onclick="indApagaView()">Excluir visão</button></div><div id="ind-fbody"></div><div class="ind-f-res" id="ind-fres"></div></div>
-      <div class="ind-h">Por canal de atendimento</div><div class="ind-sub" id="ind-canais-sub"></div>
+      <div class="ind-h">Por equipe responsável</div><div class="ind-sub" id="ind-canais-sub"></div>
       <div class="ind-cars" id="ind-canais" style="margin-bottom:6px"></div>
       <div class="ind-h">Indicadores por transportadora</div><div class="ind-sub" id="ind-sub"></div>
       <div class="ind-cars" id="ind-cars"></div>
       <div class="card" style="margin-bottom:14px"><div class="card-title">Volume de tarefas e % de atendimento por mês de criação</div><div class="card-sub">Barras = tarefas criadas · linha = % já atendidas · clique numa barra para filtrar o mês</div><div style="height:320px"><canvas id="ch-ind"></canvas></div></div>
+      <div class="card" style="margin-bottom:14px"><div class="card-title">Atendimento mês a mês</div><div class="card-sub">Para cada mês de criação: quantas tarefas foram criadas, qual a % de atendimento e quantas foram atendidas dentro do prazo. Clique num mês para ver os casos.</div><div class="mcards" id="ind-mcards"></div><div class="mc-leg"><b>Como ler:</b> <b>Atendimento</b> = tarefas finalizadas ÷ criadas no mês. <b>Atendidas no prazo</b> = finalizadas em até <span id="mc-prazo">20</span> dias; a barra mostra a parte das atendidas que fechou dentro do prazo. Verde: 90% ou mais · amarelo: 60% a 89% · vermelho: abaixo de 60%.</div></div>
       <div class="g2">
         <div class="card"><div class="card-title">Pendências por mês, transportadora e motivo</div><div class="card-sub">Gerado dos casos em aberto · clique numa linha para ver os casos</div>
           <div class="tbl-scroll" style="max-height:380px"><table><thead><tr><th>Mês</th><th>Transportadora</th><th>Motivo</th><th>Qtd.</th></tr></thead><tbody id="tb-ind-pend"></tbody></table></div></div>
         <div class="card"><div class="card-title">Motivos das pendências</div><div class="card-sub">Quem está segurando as tarefas em aberto</div><div style="height:300px"><canvas id="ch-ind-mot"></canvas></div></div>
       </div>
-      <div class="card" style="margin-bottom:14px"><div class="card-title">SLA médio por mês de criação</div><div class="card-sub">SLA = dias até finalizar (só finalizadas). Meses recentes têm poucas finalizadas, então mostramos também a média de dias de todas as tarefas do mês (a mesma coluna “Média (dias)” do Controle). Clique numa linha para filtrar o mês.</div><div style="overflow:auto"><table class="tbl"><thead><tr><th>Mês</th><th>Criadas</th><th>Finalizadas</th><th>% atend.</th><th>SLA médio (finalizadas)</th><th>Média de dias (todas)</th><th title="Variação da média de dias contra o mês anterior (subir é pior)">Δ vs mês anterior</th><th>Em aberto</th><th>Média de dias (em aberto)</th></tr></thead><tbody id="tb-sla-mes"></tbody></table></div></div>
+      <details class="card" style="margin-bottom:14px"><summary class="card-title" style="cursor:pointer">SLA médio por mês de criação <small style="font-weight:400;color:var(--tx3)">(clique para abrir)</small></summary><div class="card-sub">SLA = dias até finalizar (só finalizadas). Meses recentes têm poucas finalizadas, então mostramos também a média de dias de todas as tarefas do mês (a mesma coluna “Média (dias)” do Controle). Clique numa linha para filtrar o mês.</div><div style="overflow:auto"><table class="tbl"><thead><tr><th>Mês</th><th>Criadas</th><th>Finalizadas</th><th>% atend.</th><th>SLA médio (finalizadas)</th><th>Média de dias (todas)</th><th title="Variação da média de dias contra o mês anterior (subir é pior)">Δ vs mês anterior</th><th>Em aberto</th><th>Média de dias (em aberto)</th></tr></thead><tbody id="tb-sla-mes"></tbody></table></div></details>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="ind-lista-t">Relacionamento — casos em aberto</b><span class="fcnt" id="cnt-ind"></span><button class="btn-exp" onclick="indExport()">Exportar CSV</button><span class="col-menu" id="col-menu"><button class="btn-exp" type="button" onclick="colsMenu(event)">Colunas ▾</button><div class="col-pop" id="col-pop"></div></span></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-ind-main"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th><th title="Data de previsão informada pela transportadora (campo Previsão de coleta)">Previsão da transportadora</th><th>Além da previsão</th><th title="Dias além do prazo em cada etapa: criação → protocolo e protocolo → CD">Atraso SLA coleta</th></tr></thead><tbody id="tb-ind"></tbody></table></div></div>
       <div class="filters" style="margin:22px 0 8px"><b style="font-size:13px" id="ind-lista-t-mp">Marketplace — casos em aberto</b><span class="fcnt" id="cnt-ind-mp"></span></div>
@@ -960,13 +971,13 @@ body.natal #dash-hero{margin-top:46px}
     <div class="panel" id="panel-trat">
       <div class="pworld" id="ph-trat"></div>
       <div class="ind-f"><div class="ind-f-top"><input id="trat-q" placeholder="Buscar cliente, NF ou CPF..." oninput="tfSet('q',this.value)"><button class="btn-exp" type="button" id="trat-limpar" onclick="tfSet('limpar')">Limpar filtros</button></div><div id="trat-fbody"></div><div class="ind-f-res" id="trat-fres"></div></div>
-      <div class="ind-h">Por canal de atendimento</div><div class="ind-sub" id="trat-canais-sub"></div>
+      <div class="ind-h">Por equipe responsável</div><div class="ind-sub" id="trat-canais-sub"></div>
       <div class="ind-cars" id="trat-canais" style="margin-bottom:6px"></div>
       <div class="filters" style="margin:14px 0 8px"><b style="font-size:13px" id="trat-lista-t">Relacionamento — casos em aberto</b><span class="fcnt" id="cnt-trat"></span><button class="btn-exp" onclick="exportTratativas()">Exportar CSV</button></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-trat-main"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Grupo</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th></tr></thead><tbody id="tb-trat"></tbody></table></div></div>
       <div class="filters" style="margin:22px 0 8px"><b style="font-size:13px" id="trat-lista-t-mp">Marketplace — casos em aberto</b><span class="fcnt" id="cnt-trat-mp"></span></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table id="tbl-trat-mp"><thead><tr><th>Mês</th><th>Transportadora</th><th>Situação</th><th>Grupo</th><th>Classe</th><th>Tipo de saída</th><th>Cliente</th><th>NF</th><th>Dias</th><th title="Dias entre a criação e a última movimentação (cruzamento com a planilha de tarefas)">Média (dias)</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th></tr></thead><tbody id="tb-trat-mp"></tbody></table></div></div>
-      <div class="ind-h" style="margin-top:22px">Logística — situações que só a Dayane atualiza</div>
+      <div class="ind-h" style="margin-top:22px">Logística — situações que só a Logística atualiza</div>
       <div class="ind-sub" id="trat-log-sub"></div>
       <div class="filters" style="margin:6px 0 8px"><span class="fcnt" id="cnt-trat-log"></span><button class="btn-exp" onclick="tfLogExport()">Exportar CSV</button></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Tipo de saída</th><th>Aberto em</th><th title="Dias desde a última movimentação no Innovaro (ou da programação)">Dias parado</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th><th>Status do caso</th></tr></thead><tbody id="tb-trat-log"></tbody></table></div></div>
@@ -1597,7 +1608,7 @@ const MOT_FIXOS = ['No prazo','Relacionamento','Marketplace','Transporte','Logí
 function renderTrat(){
   if (!document.getElementById('panel-trat')) return;
   indCalcula();
-  const todos = IND_ALL.filter(x => x.__tipo==='tratativa');
+  const todos = IND_TRAT;   // a aba Tratativas mostra so os casos do arquivo 'Tratativas'
   const anos = [...new Set(todos.map(x=>x.ano))].sort((a,b)=>b-a);
   if (!anos.includes(TF.ano)) TF.ano = anos[0] || new Date().getFullYear();
   const doAnoAll = todos.filter(x => x.ano===TF.ano);
@@ -1635,8 +1646,7 @@ function renderTrat(){
   document.getElementById('trat-fbody').innerHTML =
     `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="tfSet('ano',this.value)">${anos.map(a=>`<option${a===TF.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${indGrupo(meses12.map(m=>chip(TF.meses.has(m), `tfSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join(''))}</div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${indGrupo(carrs.map(o=>chip(TF.carrs.has(o.c), `tfSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join(''))}</div></div>
-     <div class="ind-fr"><b>Canal</b><div>${chip(!TF.canal, "tfSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Relacionamento','Marketplace','Logística'].map(c => { const k = cnt((c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c),['canal']); return chip(TF.canal===c, `tfSet('canal','${c}')`, c, k[0], k[1]); }).join('')}</div></div>
-     <div class="ind-fr"><b>Grupo</b><div>${grupoChips}</div></div>
+     <div class="ind-fr"><b>Equipe</b><div>${chip(!TF.canal, "tfSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Relacionamento','Marketplace','Logística'].map(c => { const k = cnt((c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c),['canal']); return chip(TF.canal===c, `tfSet('canal','${c}')`, c, k[0], k[1]); }).join('')}</div></div>
      <div class="ind-fr"><b>Situação do caso</b><div>${indGrupo(sitChips)}</div></div>
      <div class="ind-fr"><b>Responsável</b><div>${usrSel}</div></div>
      <div class="ind-fr"><b>Estado</b><div>${chip(!TF.status, "tfSet('status','')", 'Todas', nFin+nAb)}${chip(TF.status==='fin', "tfSet('status','fin')", 'Atendidas', nFin)}${chip(TF.status==='aberto', "tfSet('status','aberto')", 'Em aberto', nAb)}</div></div>
@@ -1647,10 +1657,10 @@ function renderTrat(){
   // ---- indicadores ----
   const logAb = doAnoAll.filter(x => x.canal==='Logística' && !x.fin);
   document.getElementById('ph-trat').innerHTML = pwHero('Tratativas Transportadora', 'Tratativas por grupo', 'Casos acompanhados por tipo, no mesmo padrão do Controle de Situações.',
-    [['Em aberto', A.aberto, ''], ['Tarefas no período', A.total, `criadas em ${TF.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['Logística em aberto', logAb.length, 'acompanhado pela Dayane']]);
+    [['Em aberto', A.aberto, ''], ['Tarefas no período', A.total, `criadas em ${TF.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['Logística em aberto', logAb.length, 'acompanhado pela Logística']]);
   ligaStats('ph-trat', [['Em aberto', () => base.filter(x=>!x.fin)], ['Tarefas do período', () => base], ['Atendidas', () => base.filter(x=>x.fin)], ['Logística em aberto', () => logAb]]);
 
-  document.getElementById('trat-canais-sub').textContent = 'Relacionamento, Marketplace e Logística (situações que a Dayane atualiza). Clique para filtrar.';
+  document.getElementById('trat-canais-sub').textContent = 'Relacionamento, Marketplace e Logística (situações que a Logística atualiza). Clique para filtrar.';
   document.getElementById('trat-canais').innerHTML = ['Relacionamento','Marketplace','Logística'].map(c => {
     const arr = (c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c && f(x,['canal','status','motivo'])), a = indAgg(arr), tcl = a.taxa==null ? '' : a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
     const us = [...arr.reduce((m,x)=>m.set(respDe(x),(m.get(respDe(x))||0)+1), new Map()).entries()].sort((p,q)=>q[1]-p[1]).slice(0,4).map(([u,n])=>esc(u)+' ('+n+')').join(' · ');
@@ -1671,7 +1681,7 @@ function renderTrat(){
   const hoje = new Date(), log = logAb.filter(x => f(x,['status','motivo','canal','sit','resp','grupo']));
   log.forEach(x => { const b = parseBR(x.sit_desde) || parseBR(x.ultimo_apontamento) || parseBR(x.data_programacao) || x.d; x.parado = b ? Math.max(0, daysBetween(b, hoje)) : null; });
   log.sort((a,b) => (b.parado||0)-(a.parado||0)); TF_LOG_LISTA = log;
-  document.getElementById('trat-log-sub').textContent = `Responsável: ${LOG_RESP} (Logística). ` + (log.length ? `${log.length} em aberto · ${log.filter(x=>!x.andamento).length} sem andamento · maior tempo parado: ${log.reduce((m,x)=>Math.max(m,x.parado||0),0)} dias.` : 'Nenhum caso em aberto nessas situações.');
+  document.getElementById('trat-log-sub').textContent = `Responsável: equipe de Logística. ` + (log.length ? `${log.length} em aberto · ${log.filter(x=>!x.andamento).length} sem andamento · maior tempo parado: ${log.reduce((m,x)=>Math.max(m,x.parado||0),0)} dias.` : 'Nenhum caso em aberto nessas situações.');
   document.getElementById('cnt-trat-log').textContent = log.length + ' em aberto';
   if (!ativo('tb-trat-log')) document.getElementById('tb-trat-log').innerHTML = log.slice(0,CAP(300)).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td><td style="font-size:11px">${esc(x.transportadoraOriginal||x.transportadora||'—')}</td><td>${esc(x.data_solicitacao||'—')}</td><td>${x.parado==null?'—':x.parado+' d'}</td><td style="font-size:11px">${respCel(x)} ${canalBdg('Logística')}</td>${andCell(x,'and-list-log')}${motivoCell(x)}${statusCell(x)}</tr>`).join('')
     || '<tr><td colspan="11" style="color:var(--tx3);padding:14px">Nenhum caso em aberto nas situações da Logística.</td></tr>';
@@ -1718,7 +1728,7 @@ function openDetail(item){
       <dt>Data do protocolo</dt><dd class="mono">${esc(item.data_programacao)||'Não informado'}</dd>
       ${isColeta ? `<dt>Dias em aberto (hoje)</dt><dd class="mono">${item.temData ? item.dias+' dias' : '—'}</dd>` : ''}
       ${isColeta ? `<dt>Coleta na casa do cliente</dt><dd>${item.coletaRealizada ? 'Realizada (data exata não registrada na base)' : 'Ainda não realizada'}</dd><dt>Recebimento no CD</dt><dd>${item.recebidoCD ? 'Confirmado (romaneio de entrada)' : 'Não confirmado'}</dd>` : ''}
-      ${isColeta ? `<dt>Prazo</dt><dd>20 dias corridos (protocolo → recebimento no CD)</dd>` : `<dt>Prazo</dt><dd>Sem SLA definido para tratativas</dd>`}
+      ${isColeta ? `<dt>Prazo</dt><dd>20 dias úteis (programação → recebimento no CD)</dd>` : `<dt>Prazo</dt><dd>Sem SLA definido para tratativas</dd>`}
       <dt>Status atual (sistema)</dt><dd>${esc(item.status)||'Não informado'}</dd>
       ${colslaDetalhe(item)}
       ${isColeta ? `<dt>Andamento</dt><dd>${esc(item.andamento)||'—'}</dd><dt>Andamento atualizado em</dt><dd class="mono">${andData(item) ? andData(item).txt : '—'} <small>(registro da equipe)</small></dd>${ehHello(item) ? `<dt>Protocolo Hello</dt><dd class="mono">${esc(item.protocolo_hello)||'—'}</dd>` : ''}<dt>Previsão de coleta (transportadora)</dt><dd class=\"mono\">${item.previsao_coleta ? item.previsao_coleta.split('-').reverse().join('/') : '—'}</dd>` : ''}
@@ -1892,8 +1902,8 @@ function renderAll(){
   indCalcula(); slaCalcula();
   { const anos = [...new Set(IND_ALL.map(x=>x.ano))].sort((a,b)=>b-a); if (!anos.includes(IND.ano)) IND.ano = anos[0] || new Date().getFullYear(); }
   const set = (i, v) => { const e = document.getElementById(i); if (e) e.textContent = v; };
-  set('bdg-ind', IND_ALL.filter(x=>!x.fin).length);
-  set('bdg-trat', IND_ALL.filter(x => x.__tipo==='tratativa' && !x.fin && x.canal!=='Logística').length);
+  set('bdg-ind', IND_CTRL.filter(x=>!x.fin).length);
+  set('bdg-trat', IND_TRAT.filter(x => !x.fin && x.canal!=='Logística').length);
   set('bdg-sla', SLA_ITENS.filter(x => x.regra && x.regra.n && x.estado==='ATRASO' && podeSecaoSla(x.canal)).length);
   set('bdg-hist', histItens().length);
   set('bdg-media', IND_ALL.filter(x=>x.media!=null).length);
@@ -1937,14 +1947,14 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261111-203000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261118-120000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
 const souAdmin = () => SUPER_ADMINS.includes(String(CUR_EMAIL).toLowerCase()) || !!(PERFIL && PERFIL.papel==='admin' && PERFIL.ativo!==false);
 const podeAba = id => { if (id==='adm') return souAdmin(); if (!PERFIL || souAdmin()) return true; const a = PERFIL.abas || ['*']; if (a.includes('*') || a.includes(id)) return true; return id==='sla' && a.some(x => /^sla-(log|rel|mp)$/.test(x)); };
 const SLA_CANAIS = [['Relacionamento','rel'], ['Marketplace','mp'], ['Logística','log']];   // a Logistica fica por ultimo
-const SLA_SUB = { 'Relacionamento':'Situações atualizadas pelo Relacionamento, inclusive as “Criadas” abertas pela Dayane (a Patrícia Maia atualiza).', 'Marketplace':'Casos do canal Marketplace. O responsável é quem está no caso; quem assumir o Marketplace passa a atualizar aqui.', 'Logística':'Situações que só a Logística (Dayane) atualiza: Cobrança Realizada, Recol P/ Acomp Cliente, Recol P/ Acomp Transportadora, Mercadoria Danificada e Recol Acomp C/ Reenvio.' };
+const SLA_SUB = { 'Relacionamento':'Situações atualizadas pelo Relacionamento, inclusive as “Criadas” abertas pela Logística (a Patrícia Maia atualiza).', 'Marketplace':'Casos do canal Marketplace. O responsável é quem está no caso; quem assumir o Marketplace passa a atualizar aqui.', 'Logística':'Situações que só a Logística atualiza: Cobrança Realizada, Recol P/ Acomp Cliente, Recol P/ Acomp Transportadora, Mercadoria Danificada e Recol Acomp C/ Reenvio.' };
 const podeSecaoSla = c => { if (!PERFIL || souAdmin()) return true; const a = PERFIL.abas || ['*'], k = (SLA_CANAIS.find(x => x[0]===c)||[])[1]; return a.includes('*') || a.includes('sla') || (!!k && a.includes('sla-'+k)); };
 const podeEditar = () => souAdmin() || !PERFIL || PERFIL.editar!==false;
 const podeImportar = () => souAdmin() || !PERFIL || PERFIL.importar!==false;
@@ -3221,7 +3231,7 @@ function renderDashBlocks(){
         <label><span>Ano</span><select class="fsel" onchange="dfSet('ano',this.value)">${opt('all','Todos os anos',DF.ano==='all')}${anosAll.map(a => opt(a, a, a===DF.ano)).join('')}</select></label>
         <label><span>Mês</span><select class="fsel" onchange="dfSet('mesSel',this.value)"${DF.ano==='all' ? ' disabled' : ''}>${opt(0,'Todos os meses',!DF.mes)}${mesesDisp.map(m => opt(m, MESES[m-1]+' ('+IND_ALL.filter(x=>!x.logistica && x.mes===m && x.ano===DF.ano && dfPass(x,['mes'])).length+')', DF.mes===m)).join('')}</select></label>
         <label><span>Transportadora</span><select class="fsel" onchange="dfSet('carrSel',this.value)">${opt('','Todas',!DF.carrs.size)}${carrList.map(o => opt(o.c, esc(o.c)+' ('+o.n+')', DF.carrs.size===1 && DF.carrs.has(o.c))).join('')}</select></label>
-        <label><span>Canal</span><select class="fsel" onchange="dfSet('canalSel',this.value)">${opt('','Todos',!DF.canal)}${['Marketplace','Relacionamento','Logística'].map(c => opt(c, c+' ('+IND_ALL.filter(x=>x.canal===c && dfPass(x,['canal'])).length+')', DF.canal===c)).join('')}</select></label>
+        <label><span>Equipe</span><select class="fsel" onchange="dfSet('canalSel',this.value)">${opt('','Todos',!DF.canal)}${['Marketplace','Relacionamento','Logística'].map(c => opt(c, c+' ('+IND_ALL.filter(x=>x.canal===c && dfPass(x,['canal'])).length+')', DF.canal===c)).join('')}</select></label>
         ${temF ? '<button type="button" class="btn-exp" onclick="dfSet(\'limpar\')">Limpar filtros ✕</button>' : ''}
       </div>
       <div class="ind-f-res">Todos os números e gráficos abaixo seguem estes filtros · <b>${indB.length}</b> tarefas e <b>${colTodas.length}</b> coletas no recorte${temF ? ' · filtros ativos' : ''}</div></div>`;
@@ -3242,7 +3252,7 @@ function renderDashBlocks(){
   ];
   const lista = crit.length ? crit.map(c => `<div class="pw-in" style="cursor:pointer" onclick="openDetailIdx(${regDetail(c.item)})"><i style="background:${c.cor}">!</i><div style="flex:1;min-width:0"><b>${esc((c.nome||'—').slice(0,34))}</b><br><span style="font-size:11px;color:var(--tx3)">${esc(c.tag)} · ${esc(c.det)}</span></div><b style="color:${c.cor}">${esc(c.val)}</b></div>`).join('')
     : '<div class="pw-empty">Nada atrasado neste recorte.</div>';
-  const gloss = `<details class="ind-f" style="margin-top:6px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da Dayane.</div></details>`;
+  const gloss = `<details class="ind-f" style="margin-top:6px"><summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--tx2)">Como ler os indicadores</summary><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-top:8px"><b>Tarefa</b>: caso criado no Innovaro (conta pela data da solicitação). <b>Atendida</b>: situação Finalizada, andamento “Finalizada” ou criada antes de julho. <b>Taxa de atendimento</b>: atendidas ÷ total. <b>SLA médio</b>: dias entre a criação e a última movimentação das atendidas (precisa da planilha “Tarefas em aberto”). <b>Em aberto</b>: casos ainda pendentes. <b>Andamento</b>: o texto da equipe (coluna F). <b>Motivo da pendência</b>: categoria preenchida sozinha a partir do andamento e da situação; você pode fixar outra. <b>SLA de apontamento</b>: prazo para lançar o próximo passo; atualizar o andamento reinicia o prazo. <b>Logística</b>: casos de Recol P/ Acomp e Cobrança Realizada ficam em bloco próprio, sob responsabilidade da equipe de Logística.</div></details>`;
 
   el.innerHTML = `<div class="pworld" id="dash-hero"><div class="nd-sentado" aria-hidden="true"><svg viewBox="0 0 64 74" width="64" height="74" xmlns="http://www.w3.org/2000/svg"><g class="nd-pernas"><path d="M22 44v17M36 44v17" stroke="#dc2626" stroke-width="8" stroke-linecap="round"/><path d="M22 50v4M22 57v4M36 50v4M36 57v4" stroke="#fff" stroke-width="8" stroke-linecap="butt" opacity=".9"/><path d="M16 64q6 5 13 0M30 64q6 5 13 0" stroke="#fbbf24" stroke-width="5" stroke-linecap="round" fill="none"/></g><path d="M14 44V32q0-6 6-6h24q6 0 6 6v12z" fill="#16a34a"/><path d="M14 36h36M14 41h36" stroke="#dc2626" stroke-width="3"/><path d="M14 30h36" stroke="#fde047" stroke-width="2.4"/><path d="M17 31q-7 6-3 13M47 31q7 6 3 13" stroke="#16a34a" stroke-width="5.5" stroke-linecap="round" fill="none"/><circle cx="14" cy="45" r="3.6" fill="#fcd9b6"/><circle cx="50" cy="45" r="3.6" fill="#fcd9b6"/><path d="M19 15l-9-5 4 10zM45 15l9-5-4 10z" fill="#fcd9b6"/><circle cx="32" cy="17" r="11.5" fill="#fcd9b6"/><path d="M19.5 13c4-16 21-16 25 0z" fill="#dc2626"/><path d="M19 13h26" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><path d="M38 3q14-4 16 10" stroke="#dc2626" stroke-width="5.5" stroke-linecap="round" fill="none"/><circle cx="54" cy="14" r="3.2" fill="#fbbf24" class="nd-sino"/><circle cx="27.5" cy="17" r="1.4" fill="#1c1917"/><circle cx="36.5" cy="17" r="1.4" fill="#1c1917"/><circle cx="23.5" cy="21" r="2.2" fill="#fca5a5" opacity=".7"/><circle cx="40.5" cy="21" r="2.2" fill="#fca5a5" opacity=".7"/><path d="M27 22q5 5 10 0" stroke="#7f1d1d" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div>${hero}${filtros}
     <div class="pw-grid even">${card('Coleta reversa', `Prazo de ${SLA} dias · clique numa fatia para abrir a lista`, 'dc-col', '', "ir('col-all')")}${card('Atendimento por mês', 'Tarefas criadas e % atendido · clique numa barra para abrir esse mês no Controle', 'dc-ate', '', "ir('ind')")}</div>
@@ -3307,6 +3317,7 @@ const IND_INICIO = new Date(2026, 6, 1);   // pendencias criadas antes de 01/07/
 const IND_CORTE = 1;   // todos os meses aparecem separados (jan–jun continuam contados como finalizados por IND_INICIO)
 const indAntigos = () => Array.from({length:IND_CORTE-1},(_,i)=>i+1);
 let IND_ALL = [], IND_ABERTOS = [], IND_FORA = 0;
+let IND_CTRL = [], IND_TRAT = [];   // Controle (arquivo 'depois de entregue' e demais) x Tratativas (arquivo 'Tratativas'): nao se misturam
 let _qT = null, _cT = null;
 let DATA_VER = 0, _indVer = -1, _slaVer = -1;   // versao dos dados: o calculo so refaz quando os dados mudam
 // de/para do tipo de saida -> transportadora (tabela "Resumo" da planilha de tarefas)
@@ -3356,10 +3367,11 @@ function indCalcula(){
     if (kMot && !MOT_CANON.has(kMot)) MOT_CANON.set(kMot, txtMot);
     const andRaw = kMot ? MOT_CANON.get(kMot) : 'Sem andamento';
     const motivo = fin ? null : motivoEf(x);
-    return { ...x, fin, finAuto, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, andRaw, slaDias:(finReal && mDias!=null) ? mDias : ((x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null), media:mDias, carr:indCarr(x), canal:canalCaso(x), resp:respCaso(x), criadaLog:criadaPorLog(x), logistica:ehLogSit(x) };
+    return { ...x, fluxo:slaFluxoDe(x), fin, finAuto, d, ano:d?d.getFullYear():hoje.getFullYear(), mes:d?d.getMonth()+1:hoje.getMonth()+1, semData:!d, dias, motivo, andRaw, slaDias:(finReal && mDias!=null) ? mDias : ((x.fin && d && fe) ? Math.max(0, daysBetween(d, fe)) : null), media:mDias, carr:indCarr(x), canal:canalCaso(x), resp:respCaso(x), criadaLog:criadaPorLog(x), logistica:ehLogSit(x) };
   });
   IND_FORA = IND_ALL.filter(x => SEM_ANALISE.has(x.carr)).length;
   IND_ALL = IND_ALL.filter(x => !SEM_ANALISE.has(x.carr));
+  IND_CTRL = IND_ALL.filter(x => x.fluxo!=='trat'); IND_TRAT = IND_ALL.filter(x => x.fluxo==='trat');   // separa pela CLASSE do arquivo (Tratativas x Recolhimento depois de entregue)
   colslaCalcula();
 }
 // ---- SLA da transportadora: do protocolo (programacao) ate o produto chegar no CD (romaneio de entrada) ----
@@ -3377,6 +3389,7 @@ function colslaAgg(arr){
 }
 function colslaCalcula(){
   const hoje = new Date(), h0 = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const dU = (a, b) => slaDifDias(a, b, true);   // dias uteis: sem sabados, domingos e feriados
   const iso2d = v => v ? parseBR(String(v).slice(8,10)+'/'+String(v).slice(5,7)+'/'+String(v).slice(0,4)) : null;
   const porChave = new Map();
   IND_ALL.forEach(x => {
@@ -3390,13 +3403,14 @@ function colslaCalcula(){
   porChave.forEach(({ x, rec, chegou }) => {
     const prog = parseBR(x.protocolo_em) || parseBR(x.data_programacao) || x.d; if (!prog) return;
     const protFonte = parseBR(x.protocolo_em) ? 'real' : (parseBR(x.data_programacao) ? 'programação' : 'solicitação');   // 'real' = data do protocolo na planilha de apontamentos; as outras sao aproximacoes   // protocolo_em = data da movimentacao 'Protocolo de Coleta' (planilha de apontamentos)
+    const ini2 = parseBR(x.data_programacao) || prog;   // o prazo da etapa 2 conta da PROGRAMACAO da planilha (coluna do arquivo 'depois'); sem ela, do protocolo
     const cri = parseBR(x.criada_em) || x.d, rcl = parseBR(x.recolhido_em), exata = parseBR(x.recebido_cd_em);
     const cand = chegou && !exata ? (parseBR(x.finalizado_em) || parseBR(x.ultimo_apontamento)) : null, aprox = (cand && (!rcl || cand > rcl)) ? cand : null, fim = chegou ? (exata || aprox) : null;   // so aceita a data aproximada se for depois da coleta (senao seria a propria coleta)
-    const diasAberto = Math.max(0, daysBetween(prog, h0)), diasTotal = fim ? Math.max(0, daysBetween(prog, fim)) : null;
+    const diasAberto = Math.max(0, dU(ini2, h0)), diasTotal = fim ? Math.max(0, dU(ini2, fim)) : null;
     const enc = !chegou && !!x.fin;   // ja encerrado no Controle, sem data de chegada: nao da para medir o tempo ate o CD (antes contava como 'a caminho' e atrasado)
-    const it = { x, encerrado:enc, protFonte, id:x.id, chave:x.chave, carr:x.carr, cri, prog, rcl, fim, fimTipo: exata ? 'exata' : (aprox ? 'aprox.' : null), chegou, estagio: chegou ? 'No CD' : enc ? 'Encerrado' : ((rec || x.coletaRealizada || rcl) ? 'A caminho do CD' : 'Aguardando coleta'),
-      diasAberto, diasTotal, diasCriProg: cri ? Math.max(0, daysBetween(cri, prog)) : null, diasProtColeta: rcl ? Math.max(0, daysBetween(prog, rcl)) : null, diasColetaCd: (rcl && fim) ? Math.max(0, daysBetween(rcl, fim)) : null,
-      diasCriFim: (cri && fim) ? Math.max(0, daysBetween(cri, fim)) : null };
+    const it = { x, encerrado:enc, protFonte, id:x.id, chave:x.chave, carr:x.carr, cri, prog, ini2, rcl, fim, fimTipo: exata ? 'exata' : (aprox ? 'aprox.' : null), chegou, estagio: chegou ? 'No CD' : enc ? 'Encerrado' : ((rec || x.coletaRealizada || rcl) ? 'A caminho do CD' : 'Aguardando coleta'),
+      diasAberto, diasTotal, diasCriProg: cri ? Math.max(0, dU(cri, prog)) : null, diasProtColeta: rcl ? Math.max(0, dU(ini2, rcl)) : null, diasColetaCd: (rcl && fim) ? Math.max(0, dU(rcl, fim)) : null,
+      diasCriFim: (cri && fim) ? Math.max(0, dU(cri, fim)) : null };
     it.atrasoProt = it.diasCriProg!=null ? Math.max(0, it.diasCriProg - CONFIG.PRAZO_PROTOCOLO_DIAS) : null;   // etapa 1
     it.atrasoCd = chegou ? (diasTotal!=null ? Math.max(0, diasTotal - SLA) : null) : (enc ? null : Math.max(0, diasAberto - SLA));   // etapa 2 (a caminho: dias ja passados alem do prazo)
     it.farol = chegou ? (diasTotal<=SLA ? 'Dentro do prazo' : 'Fora do prazo') : enc ? 'Encerrado' : (diasAberto>SLA ? 'Atrasado' : diasAberto>=SLA-CONFIG.RISCO_JANELA_DIAS ? 'Em risco' : 'No prazo');
@@ -3410,8 +3424,8 @@ function colslaCalcula(){
     if (it.chegou || it.encerrado) return;
     const inf = iso2d(it.x.previsao_coleta), mc = (medC.get(it.carr)||[]).length >= 3 ? medianaDe(medC.get(it.carr)) : null;
     if (inf){ it.prevData = inf; it.prevTipo = 'informada'; }
-    else { const base = mc!=null ? mc : (medG!=null ? medG : SLA); it.prevData = new Date(it.prog.getTime() + Math.round(base)*86400000); it.prevTipo = 'estimada'; it.prevBase = mc!=null ? 'transportadora' : (medG!=null ? 'geral' : 'prazo'); }
-    it.atrasoPrev = daysBetween(it.prevData, h0);
+    else { const base = mc!=null ? mc : (medG!=null ? medG : SLA); it.prevData = slaSomaDias(it.ini2, Math.round(base), true); it.prevTipo = 'estimada'; it.prevBase = mc!=null ? 'transportadora' : (medG!=null ? 'geral' : 'prazo'); }
+    it.atrasoPrev = it.prevData <= h0 ? slaDifDias(it.prevData, h0, true) : -slaDifDias(h0, it.prevData, true);
   });
   COLSLA = itens; COLSLA_MAP = new Map(itens.map(i => [i.chave, i]));
   COLSLA_CARR = new Map(); [...new Set(itens.map(i=>i.carr))].forEach(c => COLSLA_CARR.set(c, colslaAgg(itens.filter(i=>i.carr===c))));
@@ -3466,6 +3480,7 @@ function indSetMotivo(id, v){
 function renderInd(){
   if (!document.getElementById('panel-ind')) return;
   indCalcula();
+  const IND_ALL = IND_CTRL;   // a aba Controle mostra so os casos do arquivo 'depois de entregue' (e demais fluxos), sem as tratativas
   const anos = [...new Set(IND_ALL.map(x=>x.ano))].sort((a,b)=>b-a);
   if (!anos.includes(IND.ano)) IND.ano = anos[0] || new Date().getFullYear();
   const doAnoAll = IND_ALL.filter(x=>x.ano===IND.ano);
@@ -3506,7 +3521,7 @@ function renderInd(){
   document.getElementById('ind-fbody').innerHTML =
     `<div class="ind-fr"><b>Período</b><div><select class="fsel" onchange="indSet('ano',this.value)">${anos.map(a=>`<option${a===IND.ano?' selected':''}>${a}</option>`).join('')||'<option>—</option>'}</select>${indGrupo(antChip + meses12.map(m=>chip(IND.meses.has(m), `indSet('mes',${m})`, MESES[m-1], mesCont(m)[0], mesCont(m)[1])).join(''))}</div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${indGrupo(carrs.map(o=>chip(IND.carrs.has(o.c), `indSet('carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n, o.ab)).join(''))}</div></div>
-     <div class="ind-fr"><b>Canal</b><div>${chip(!IND.canal, "indSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Marketplace','Relacionamento','Logística'].map(c => { const k = cnt((c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c),['canal']); return chip(IND.canal===c, `indSet('canal','${c}')`, c, k[0], k[1]); }).join('')}<button type="button" class="ind-ch" onclick="indUsuarios()" title="Marketplace, Logística ou Relacionamento (padrão)">⚙ Definir usuários por canal</button></div></div>
+     <div class="ind-fr"><b>Equipe</b><div>${chip(!IND.canal, "indSet('canal','')", 'Todos', cnt(doAno,['canal'])[0], cnt(doAno,['canal'])[1])}${['Marketplace','Relacionamento','Logística'].map(c => { const k = cnt((c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c),['canal']); return chip(IND.canal===c, `indSet('canal','${c}')`, c, k[0], k[1]); }).join('')}<button type="button" class="ind-ch" onclick="indUsuarios()" title="Marketplace, Logística ou Relacionamento (padrão)">⚙ Definir usuários por canal</button></div></div>
      <div class="ind-fr"><b>Situação do caso</b><div>${indGrupo(sitChips)}</div></div>
      <div class="ind-fr"><b>Responsável</b><div>${usrSel}</div></div>
      <div class="ind-fr"><b>Estado</b><div>${chip(!IND.status, "indSet('status','')", 'Todas', nFin+nAb)}${chip(IND.status==='fin', "indSet('status','fin')", 'Atendidas', nFin)}${chip(IND.status==='aberto', "indSet('status','aberto')", 'Em aberto', nAb)}</div></div>
@@ -3532,7 +3547,7 @@ function renderInd(){
     return `<div class="ind-c${cl}${IND.carrs.has(c)?' on':''}" onclick="indSet('carr',this.dataset.c,1)" data-c="${esc(c)}"><h4>${esc(c)}<button class="ind-drill" type="button" title="Ver os casos desta transportadora" onclick="event.stopPropagation();abreDrill(${regDrill('Casos — '+c, () => arr)})">ver casos ↗</button></h4><div class="ind-m"><div><span>Total</span><b>${a.total}</b></div><div><span>% atend.</span><b class="${tcl}">${fmt1(a.taxa)}%</b></div><div><span>SLA médio</span><b>${a.sla==null?'—':fmt1(a.sla)+'d'}</b></div><div><span>Em aberto</span><b>${a.aberto}</b></div></div>${colslaLinha(c)}</div>`; }).join('') || '<div class="ind-sub">Nenhuma tarefa com esses filtros.</div>';
 
   // ---- por canal (Marketplace x Relacionamento) ----
-  document.getElementById('ind-canais-sub').textContent = 'Relacionamento e Marketplace pelo usuário responsável; Logística pela situação (atualizada pela Dayane). Clique para filtrar.';
+  document.getElementById('ind-canais-sub').textContent = 'Relacionamento e Marketplace pelo usuário responsável; Logística pela situação (atualizada pela Logística). Clique para filtrar.';
   document.getElementById('ind-canais').innerHTML = ['Marketplace','Relacionamento','Logística'].map(c => {
     const arr = (c==='Logística' ? doAnoAll : doAno).filter(x=>x.canal===c && f(x,['canal','status','motivo'])), a = indAgg(arr), tcl = a.taxa==null ? '' : a.taxa>=90 ? 'gg' : a.taxa>=75 ? 'aa' : 'rr';
     const us = [...arr.reduce((m,x)=>m.set(respDe(x),(m.get(respDe(x))||0)+1), new Map()).entries()].sort((p,q)=>q[1]-p[1]).slice(0,4).map(([u,n])=>esc(u)+' ('+n+')').join(' · ');
@@ -3547,6 +3562,14 @@ function renderInd(){
   const mesLbl = m => m===0 ? MESES[0]+'–'+MESES[IND_CORTE-2]+' (finalizados)' : MESES[m-1];
   const mediaDe = a => { const v = a.map(x => x.media != null ? x.media : x.dias).filter(n => n != null && isFinite(n)); return v.length ? v.reduce((p,q)=>p+q,0)/v.length : null; };
   const fd = v => v == null ? '—' : fmt1(v) + ' d';
+  { const PRAZO_ATEND = SLA, bar = p => p==null ? 'm' : p>=90 ? 'g' : p>=60 ? 'a' : 'r';
+    document.getElementById('mc-prazo').textContent = PRAZO_ATEND;
+    document.getElementById('ind-mcards').innerHTML = meses.map(m => {
+      const a = doCar.filter(noGrupo(m)), fin = a.filter(x=>x.fin), taxa = a.length ? Math.round(fin.length/a.length*100) : null, comDt = fin.filter(x=>x.slaDias!=null), noPz = comDt.filter(x=>x.slaDias<=PRAZO_ATEND).length, pz = comDt.length ? Math.round(noPz/comDt.length*100) : null;
+      return `<button type="button" class="mcard${IND.meses.has(m)?' on':''}" onclick="indSet('mes',${m},1)" title="Clique para ver os casos de ${esc(mesLbl(m))}"><div class="mc-h">${esc(mesLbl(m))}</div>
+        <div class="mc-row"><span>Tarefas criadas</span><b>${a.length}</b></div>
+        <div class="mc-row"><span>Atendimento</span><b>${taxa==null?'—':taxa+'%'}</b></div><div class="mc-bar ${bar(taxa)}"><i style="width:${taxa||0}%"></i></div>
+        <div class="mc-row"><span>Atendidas no prazo</span><b>${noPz}</b></div><div class="mc-bar ${bar(pz)}"><i style="width:${pz||0}%"></i></div><small>${pz==null?'sem atendidas com data':pz+'% das '+comDt.length+' atendidas com data'}</small></button>`; }).join('') || '<div class="pw-empty">Sem tarefas neste recorte.</div>'; }
   document.getElementById('tb-sla-mes').innerHTML = meses.map((m,i) => {
     const a = doCar.filter(noGrupo(m)), ag = indAgg(a), ab = a.filter(x=>!x.fin), mm = mediaDe(a), pm = (m>0 && i>0 && meses[i-1]>0) ? mediaDe(doCar.filter(noGrupo(meses[i-1]))) : null, dl = (mm!=null && pm!=null) ? mm-pm : null;
     return `<tr style="cursor:pointer" onclick="indSet('mes',${m})"><td><b>${esc(mesLbl(m))}</b></td><td>${ag.total}</td><td>${ag.fin}</td><td>${ag.taxa==null?'—':fmt1(ag.taxa)+'%'}</td><td>${ag.sla==null?'—':'<b>'+fd(ag.sla)+'</b> <span style="color:var(--tx3);font-size:10.5px">('+ag.nsla+')</span>'}</td><td><b>${fd(mm)}</b></td><td>${deltaH(dl)}</td><td>${ab.length}</td><td>${fd(mediaDe(ab))}</td></tr>`;
@@ -3574,13 +3597,13 @@ function renderInd(){
       const pReal = its.filter(i=>i.diasCriProg!=null && i.protFonte==='real'), pAp = its.filter(i=>i.diasCriProg!=null && i.protFonte!=='real');
       box.innerHTML = `<div class="ind-h" style="display:flex;align-items:center;gap:10px">SLA da coleta — transportadora <button class="btn-exp" type="button" onclick="ir('colsla')">Ver detalhes ↗</button></div>
         ${IND.alerta ? `<div class="slc-filtro">Filtro ativo: <b>${IND.alerta==='atrp' ? 'etapa 1 atrasada' : 'etapa 2 atrasada'}</b>, a aba inteira mostra só os casos em aberto que passaram do prazo (${IND.alerta==='atrp' ? nP : nC}). <button type="button" onclick="indSet('alerta','${IND.alerta}')">✕ limpar filtro</button></div>` : ''}<div class="slc-sub">Quanto tempo a coleta leva, em duas etapas: <b>1)</b> da criação da tarefa até incluirmos o protocolo de coleta e <b>2)</b> do protocolo até o produto chegar no CD. A barra mostra a parte dos casos que estourou o prazo.</div>
-        <div class="slc-grid">${card(1, 'Criação → Protocolo', `prazo máx. ${PP} dias`, p1, A2.protFora, A2.protN, [`<b>${A2.protFora}</b> de <b>${A2.protN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.protAtrasoMed)}</b>`, `Tempo médio até o protocolo: <b>${fm(A2.protMedia)}</b>`, `<b>${nP}</b> ainda em aberto agora`], 'atrp')}
-        ${card(2, 'Protocolo → Chegada no CD', `prazo ${SLA} dias corridos`, p2, A2.cdFora, A2.cdN, [`<b>${A2.cdFora}</b> de <b>${A2.cdN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.cdAtrasoMed)}</b>`, `Tempo médio até chegar: <b>${fm(A2.media)}</b> (<b>${A2.chegaram}</b> já chegaram)`, `<b>${nC}</b> a caminho e já atrasados agora`], 'atrcd')}
+        <div class="slc-grid">${card(1, 'Criação → Protocolo', `prazo máx. ${PP} dias úteis`, p1, A2.protFora, A2.protN, [`<b>${A2.protFora}</b> de <b>${A2.protN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.protAtrasoMed)}</b>`, `Tempo médio até o protocolo: <b>${fm(A2.protMedia)}</b>`, `<b>${nP}</b> ainda em aberto agora`], 'atrp')}
+        ${card(2, 'Protocolo → Chegada no CD', `prazo ${SLA} dias úteis`, p2, A2.cdFora, A2.cdN, [`<b>${A2.cdFora}</b> de <b>${A2.cdN}</b> casos passaram do prazo`, `Quando passam, atrasam em média <b>${fm(A2.cdAtrasoMed)}</b>`, `Tempo médio até chegar: <b>${fm(A2.media)}</b> (<b>${A2.chegaram}</b> já chegaram)`, `<b>${nC}</b> a caminho e já atrasados agora`], 'atrcd')}
         ${med('⌀', 'Média criação → protocolo', A2.protMedia, PP, `${A2.protN} casos medidos`, 'Tempo médio para incluirmos o protocolo de coleta')}
         ${med('⌀', 'Média protocolo → CD', A2.media, SLA, `${A2.chegaram} já chegaram no CD`, 'Tempo médio para o produto chegar no CD')}</div>
         <div class="slc-links"><button type="button" class="btn-exp" onclick="csVer('prot','',IND.ano)">Ver os ${A2.protFora} casos da etapa 1 fora do prazo ↗</button><button type="button" class="btn-exp" onclick="csVer('cd','',IND.ano)">Ver os ${A2.cdFora} casos da etapa 2 fora do prazo ↗</button>
           <span class="slc-obs">Na etapa 1, <b>${pReal.length}</b> casos têm a data real do protocolo (planilha de apontamentos) e <b>${pAp.length}</b> usam a data de programação como aproximação.</span></div>
-        <details class="slc-det"><summary>Como ler estes números</summary><p><b>Etapa 1</b> conta os dias entre criar a tarefa e a data em que o protocolo de coleta entra no sistema (máximo de ${PP} dias). <b>Etapa 2</b> conta os dias entre o protocolo e a chegada no CD (romaneio de entrada), com prazo de ${SLA} dias corridos; casos ainda a caminho contam os dias já passados. <b>Atraso médio</b> é quantos dias, em média, passaram do prazo só os casos que estouraram. ${encerrados ? `<b>${encerrados}</b> casos já finalizados no Controle e sem data de chegada ficam fora da etapa 2, porque não dá para medir. ` : ''}Clique num cartão para listar os casos em aberto que passaram do prazo.</p></details>`;
+        <details class="slc-det"><summary>Como ler estes números</summary><p>Todos os prazos contam <b>só dias úteis</b> (sem sábado, domingo e feriado). <b>Etapa 1</b> conta os dias úteis entre criar a tarefa e a data em que o protocolo de coleta entra no sistema (máximo de ${PP}). <b>Etapa 2</b> conta os dias úteis a partir da <b>programação</b> da planilha até a chegada no CD (romaneio de entrada), com prazo de ${SLA} dias úteis; casos ainda a caminho contam os dias já passados. <b>Atraso médio</b> é quantos dias, em média, passaram do prazo só os casos que estouraram. ${encerrados ? `<b>${encerrados}</b> casos já finalizados no Controle e sem data de chegada ficam fora da etapa 2, porque não dá para medir. ` : ''}Clique num cartão para listar os casos em aberto que passaram do prazo.</p></details>`;
     }
   }
   colsAplica(); indViewsRender();
@@ -3641,7 +3664,7 @@ function renderIndLog(doAnoAll, f){
   aberto.forEach(x => { const b = parseBR(x.sit_desde) || parseBR(x.ultimo_apontamento) || parseBR(x.data_programacao) || x.d; x.parado = b ? Math.max(0, daysBetween(b, hoje)) : null; });
   aberto.sort((a,b) => (b.parado||0)-(a.parado||0)); IND_LOG_LISTA = aberto;
   const semAnd = aberto.filter(x=>!x.andamento).length, maior = aberto.reduce((m,x)=>Math.max(m,x.parado||0),0);
-  document.getElementById('ind-log-sub').textContent = `Responsável: ${LOG_RESP} (Logística) — esses casos saem dos números acima e ficam aqui para a Logística demandar. ` + (aberto.length ? `${aberto.length} em aberto · ${semAnd} sem andamento · maior tempo parado: ${maior} dias.` : 'Nenhum caso em aberto nessas situações.');
+  document.getElementById('ind-log-sub').textContent = `Responsável: equipe de Logística — esses casos saem dos números acima e ficam aqui para a Logística demandar. ` + (aberto.length ? `${aberto.length} em aberto · ${semAnd} sem andamento · maior tempo parado: ${maior} dias.` : 'Nenhum caso em aberto nessas situações.');
   document.getElementById('cnt-ind-log').textContent = aberto.length + ' em aberto';
   const ativo = document.activeElement && document.activeElement.closest && document.activeElement.closest('#tb-ind-log');
   if (!ativo) document.getElementById('tb-ind-log').innerHTML = aberto.slice(0,CAP(300)).map(x => `<tr class="clickable" onclick="openDetailIdx(${regDetail(x)})"><td><span class="bdg b-dk" style="font-size:10px">${esc(x.sit)}</span></td><td class="td-nome">${esc(x.cliente)}</td><td class="td-nf">${esc(x.nf||'—')}</td>
@@ -4418,7 +4441,7 @@ function renderColSla(){
     (!CS.q || norm((it.x.cliente||'')+' '+(it.x.nf||'')+' '+(it.x.cpf||'')).includes(CS.q)); };
   const vis = todos.filter(i=>f(i)), A = colslaAgg(vis), pc = (a,b) => b ? Math.round(a/b*100)+'%' : '—';
   document.getElementById('bdg-colsla').textContent = todos.filter(i => !i.chegou && i.farol==='Atrasado').length;
-  document.getElementById('ph-cs').innerHTML = pwHero('Coleta Reversa', 'SLA da transportadora', todos.length ? `Prazo de ${SLA} dias corridos, contados da programação do protocolo até a chegada no CD (romaneio de entrada). Sem previsão informada, o painel estima pela mediana da transportadora.` : 'Ainda não há casos de Protocolo de Coleta / Recolhido no Cliente. Importe o Controle de Situações.',
+  document.getElementById('ph-cs').innerHTML = pwHero('Coleta Reversa', 'SLA da transportadora', todos.length ? `Prazo de ${SLA} dias úteis (sem sábados, domingos e feriados), contados da programação da planilha até a chegada no CD (romaneio de entrada). Sem previsão informada, o painel estima pela mediana da transportadora.` : 'Ainda não há casos de Protocolo de Coleta / Recolhido no Cliente. Importe o Controle de Situações.',
     [['Média protocolo → CD', A.media==null ? '—' : fmt1(A.media)+' dias', `${A.chegaram} que já chegaram · mediana ${A.mediana==null?'—':fmt1(A.mediana)}`], [`No prazo (${SLA} d)`, pc(A.dentro, A.chegaram), `${A.dentro} de ${A.chegaram} que chegaram`],
      ['A caminho / aguardando', A.transito, `${A.atrasados} além dos ${SLA} dias`], ['Com previsão informada', A.comPrevInf, `de ${A.transito} · o restante é estimado`], ['Além da previsão', A.atrasoPrev, 'passaram da data prevista no CD']], '');
   ligaStats('ph-cs', [['Casos do SLA', () => vis.map(i=>i.x)], ['Chegaram no CD', () => vis.filter(i=>i.chegou).map(i=>i.x)], ['A caminho / aguardando', () => vis.filter(i=>!i.chegou && !i.encerrado).map(i=>i.x)], ['Encerrados sem chegada', () => vis.filter(i=>i.encerrado).map(i=>i.x)], ['Atrasados', () => vis.filter(i=>i.farol==='Atrasado').map(i=>i.x)], ['Além da previsão', () => vis.filter(i=>i.atrasoPrev>0).map(i=>i.x)]]);
@@ -4533,7 +4556,7 @@ let LOG_USERS = (() => { try { const a = JSON.parse(localStorage.getItem('log_us
 function canalOf(u){ const n = norm(u||'').trim(); return LOG_USERS.some(k => n.startsWith(k)) ? 'Logística' : MKT_USERS.some(k => n.startsWith(k)) ? 'Marketplace' : 'Relacionamento'; }
 // roteamento automatico por situacao: estas situacoes sao da Logistica (quem acompanha: Dayane.Costa), qualquer que seja o usuario que aparece na planilha
 const LOG_SITS = new Set(['recol_p_acomp_cliente','recol_p_acomp_transportad','recol_p_acomp_transp_2','recol_acomp_c_reenvio_tra','cobranca_realizada','cobranca_realizada_2','mercadoria_danificada','mercadoria_danificada_2']);
-const LOG_RESP = 'Dayane.Costa';
+const LOG_RESP = 'Logística';   // a Logistica como um todo (nao uma pessoa)
 const ehLogSit = x => LOG_SITS.has(sitKey(x.sit || x.tipo_devolucao || ''));
 // situacao "Criada" aberta pela Logistica (ex.: Dayane.Costa) e para a Patrícia Maia seguir: entra no Relacionamento, nao na Logistica
 const RESP_CRIADA_LOG = 'Patrícia Maia';
@@ -4768,7 +4791,7 @@ function renderPerdas(scope){
     <div class="ind-f">
       <div class="ind-fr"><b>Ano</b><div><select class="pw-sel" onchange="pwSet('ano',this.value)" aria-label="Ano"><option value="all"${ano==='all'?' selected':''}>Todos os anos</option>${anos.map(a=>`<option value="${a}"${a===ano?' selected':''}>${a}</option>`).join('')}</select></div></div>
       <div class="ind-fr"><b>Mês</b><div class="pw-months">${monthChips}</div></div>
-      <div class="ind-fr"><b>Canal</b><div><div class="pw-seg no-print" role="group" aria-label="Canal"><button type="button" class="${!PF.canal?'on':''}" onclick="pwSet('canal',PF.canal)">Todos os canais <small>${canalBase.length}</small></button><button type="button" class="${PF.canal==='Marketplace'?'on':''}" onclick="pwSet('canal','Marketplace')" title="Usuários: Thairiny e João">Marketplace <small>${canalBase.filter(p=>p.canal==='Marketplace').length}</small></button><button type="button" class="${PF.canal==='Relacionamento'?'on':''}" onclick="pwSet('canal','Relacionamento')" title="Demais usuários">Relacionamento <small>${canalBase.filter(p=>p.canal==='Relacionamento').length}</small></button><button type="button" class="${PF.canal==='Logística'?'on':''}" onclick="pwSet('canal','Logística')">Logística <small>${canalBase.filter(p=>p.canal==='Logística').length}</small></button></div></div></div>
+      <div class="ind-fr"><b>Equipe</b><div><div class="pw-seg no-print" role="group" aria-label="Canal"><button type="button" class="${!PF.canal?'on':''}" onclick="pwSet('canal',PF.canal)">Todas as equipes <small>${canalBase.length}</small></button><button type="button" class="${PF.canal==='Marketplace'?'on':''}" onclick="pwSet('canal','Marketplace')" title="Usuários: Thairiny e João">Marketplace <small>${canalBase.filter(p=>p.canal==='Marketplace').length}</small></button><button type="button" class="${PF.canal==='Relacionamento'?'on':''}" onclick="pwSet('canal','Relacionamento')" title="Demais usuários">Relacionamento <small>${canalBase.filter(p=>p.canal==='Relacionamento').length}</small></button><button type="button" class="${PF.canal==='Logística'?'on':''}" onclick="pwSet('canal','Logística')">Logística <small>${canalBase.filter(p=>p.canal==='Logística').length}</small></button></div></div></div>
       <div class="ind-fr"><b>Métrica</b><div><div class="pw-seg no-print" role="group" aria-label="Métrica"><button type="button" class="${PF.metric!=='valor'?'on':''}" onclick="pwSet('metric','qtd')">Quantidade</button><button type="button" class="${PF.metric==='valor'?'on':''}" onclick="pwSet('metric','valor')">Valor R$</button></div><button class="chip no-print" type="button" onclick="pwClear()">Limpar filtros</button></div></div>
       ${pills?`<div class="ind-fr"><b>Filtros ativos</b><div class="pw-pills">${pills}</div></div>`:''}
     </div>

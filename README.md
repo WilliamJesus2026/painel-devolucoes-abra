@@ -311,3 +311,11 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - A transportadora do extravio pode ser escolhida por caso (Automática / Total 45 d.u. / Outra 60 d.u.), porque o "tipo de saída" (ex.: Hello - I9) nem sempre é quem acata o extravio.
 - Fluxo simplificado: acatamento -> data de cobrança (+45/+60 d.u.) -> aviso 5 d.u. antes e no dia. Removidos "Última cobrança" e "Cobrei hoje"; novo botão "✓ Liquidado" tira o caso dos avisos.
 - Casos duplicados (mesmo cliente como coleta e tratativa) agora aparecem uma vez só.
+
+## Arquivos separados, SLA em dias úteis e ajustes (18/11/2026)
+- **Cada arquivo no seu lugar:** o painel separa pela CLASSE do arquivo (`slaFluxoDe`). Aba **Controle de Situações** = casos do arquivo "Recolhimento depois de entregue" (e demais fluxos), `IND_CTRL`; aba **Tratativas** = só o arquivo "Tratativas", `IND_TRAT`. Antes as duas bases entravam juntas porque situações como "Criada" e "Perdas Cliente" existem nos dois arquivos. Dashboard, Média e Histórico continuam olhando tudo.
+- Aba Tratativas: removido o filtro por grupo. Controle: removidas as faixas de alertas (60+ dias, 30 a 59, sem andamento etc.).
+- Controle: novo bloco **Atendimento mês a mês** (criadas, % de atendimento, atendidas no prazo = finalizadas em até `SLA` dias); "SLA médio por mês de criação" ficou recolhido.
+- "Por canal de atendimento" virou **Por equipe responsável** (e "Canal" -> "Equipe" nos filtros); "Dayane" saiu dos textos e o responsável da Logística é a equipe (`LOG_RESP`).
+- Menu: títulos dos grupos (Visão geral, Coleta reversa, Controle...) com destaque.
+- **SLA da coleta em dias úteis** (sem sábado, domingo e feriado; `slaDifDias`), e a etapa 2 conta da **programação** da planilha (`ini2`), com o protocolo só como alternativa.
