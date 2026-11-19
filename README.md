@@ -321,3 +321,7 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - **SLA da coleta em dias úteis** (sem sábado, domingo e feriado; `slaDifDias`), e a etapa 2 conta da **programação** da planilha (`ini2`), com o protocolo só como alternativa.
 
 - Controle de Situacoes: removido o bloco "SLA da coleta" (cartoes, botoes "Ver os N casos" e "Como ler"); o SLA da coleta segue completo na aba SLA Transportadora.
+
+## Motivo Financeiro e caso que não some (19/11/2026)
+- Novo motivo **Financeiro**: andamento com "Total bloqueado" (ou "financeiro") vira pendência financeira automaticamente; "Fiscal" fica só para fiscal/NF-e. Aparece nas opções do motivo, nos quadradinhos "Em aberto por motivo" e nos filtros.
+- Ao mudar o motivo de um caso (Controle, Tratativas ou SLA de Apontamento), ele **continua na lista** mesmo com filtro de motivo ligado (`MOT_PIN`), até você mudar de filtro ou recarregar. Mudar o motivo nunca finaliza o caso: ele só sai da lista aberta quando for finalizado.

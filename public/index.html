@@ -1578,6 +1578,7 @@ const TF_GRUPOS = [['recolhimento','Recolhimento'], ['barrar','Barrar'], ['finan
 const tfGrupoNome = g => (TF_GRUPOS.find(a => a[0]===(g||'outros'))||[])[1] || g || 'Outros';
 let TF_LISTA = [], TF_LOG_LISTA = [];
 function tfSet(k, v){
+  MOT_PIN.clear();
   const tg = (set,x) => set.has(x) ? set.delete(x) : set.add(x);
   if (k==='ano'){ TF.ano = +v; TF.meses.clear(); }
   else if (k==='mes') tg(TF.meses, +v);
@@ -1604,7 +1605,7 @@ function indGrupo(html){
   return `<div class="ind-chs">${html}${nz ? `<button type="button" class="ind-mais" data-n="${nz}" onclick="indMais(this)">+ ${nz} sem casos</button>` : ''}</div>`;
 }
 function indMais(b){ const p = b.parentElement; p.classList.toggle('open'); b.textContent = p.classList.contains('open') ? 'ocultar sem casos' : '+ ' + b.dataset.n + ' sem casos'; }
-const MOT_FIXOS = ['No prazo','Relacionamento','Marketplace','Transporte','Logística'];
+const MOT_FIXOS = ['No prazo','Relacionamento','Marketplace','Transporte','Financeiro','Logística'];
 function renderTrat(){
   if (!document.getElementById('panel-trat')) return;
   indCalcula();
@@ -1617,7 +1618,7 @@ function renderTrat(){
     return (ign.includes('mes') || !TF.meses.size || TF.meses.has(x.mes)) &&
       (ign.includes('carr') || !TF.carrs.size || TF.carrs.has(x.carr)) &&
       (ign.includes('status') || !TF.status || (TF.status==='fin') === x.fin) &&
-      (ign.includes('motivo') || !TF.motivos.size || (!x.fin && TF.motivos.has(x.motivo))) &&
+      (ign.includes('motivo') || !TF.motivos.size || MOT_PIN.has(x.id) || (!x.fin && TF.motivos.has(x.motivo))) &&
       (ign.includes('canal') || !TF.canal || x.canal===TF.canal) &&
       (ign.includes('grupo') || !TF.grupo || (x.grupo||'outros')===TF.grupo) &&
       (ign.includes('and') || !TF.and || x.andRaw===TF.and) &&
@@ -1947,7 +1948,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261118-140000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261119-110000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2357,7 +2358,8 @@ function gravaCaso(id, campos){
   return true;
 }
 // ---- motivo da pendencia: preenchido sozinho (por andamento e situacao), editavel; igual em todas as abas ----
-const MOTIVOS_PEND = ['No prazo','Relacionamento','Marketplace','Transporte','Cliente','Fiscal','Logística','Esquecimento de apontamento','Problema no Innovaro','Outro'];
+const MOT_PIN = new Set();   // casos cujo motivo acabou de ser mudado: ficam na lista ate voce trocar de filtro (nao somem ao mudar o motivo)
+const MOTIVOS_PEND = ['No prazo','Relacionamento','Marketplace','Transporte','Cliente','Fiscal','Financeiro','Logística','Esquecimento de apontamento','Problema no Innovaro','Outro'];
 const MOT_LEGADO = { 'Aguardando cliente':'Cliente', 'Aguardando transportadora':'Transporte', 'Aguardando logística':'Logística', 'Aguardando fiscal / financeiro':'Fiscal', 'Esquecimento / falta de apontamento':'Esquecimento de apontamento', 'Problema no Innovaro':'Problema no Innovaro', 'Outro':'Outro' };
 function motivoAuto(x){
   const an = norm(x.andamento||''), sit = sitKey(x.sit || x.tipo_devolucao || '');
@@ -2366,9 +2368,10 @@ function motivoAuto(x){
     if (!/\b(nao|fora)\b.*\bprazo\b/.test(an) && /\bno prazo\b/.test(an)) return 'No prazo';
     if (/esquec/.test(an)) return 'Esquecimento de apontamento';
     if (/innovaro|sistema/.test(an)) return 'Problema no Innovaro';
+    if (/total.{0,15}bloquead|bloquead.{0,15}total|financeir/.test(an)) return 'Financeiro';   // ex.: Total bloqueado = pendencia financeira
     if (/(^|[^a-z])mp([^a-z]|$)|market ?place|(^|[^a-z])mkt([^a-z]|$)/.test(an)) return 'Marketplace';   // andamento "MP"/marketplace: o motivo automatico acompanha (e o SLA do Marketplace)
     if (/relacionamento|laureano/.test(an)) return 'Relacionamento';
-    if (/fiscal|nf-?e|financeiro/.test(an)) return 'Fiscal';
+    if (/fiscal|nf-?e/.test(an)) return 'Fiscal';
     if (/cliente/.test(an)) return 'Cliente';
     if (/logistic|dayane/.test(an)) return 'Logística';
     if (/transport|movvi|total|generoso|fedex|hello|i9|translovato|cobrad|retorno|coleta (agendada|realizada)|aguardando cd/.test(an)) return 'Transporte';
@@ -2466,6 +2469,7 @@ function statusSet(id, v){
   scheduleRender();
 }
 function motivoSet(id, v){
+  MOT_PIN.add(id);
   if (!gravaCaso(id, { motivo_pend:v||null, motivo_pend_em:isoNow(), motivo_pend_por:CUR_EMAIL||null, alt_hist:altHist(id, v ? 'Motivo da pendência: '+v : 'Motivo voltou ao automático') })) return;
   toast(v ? 'Motivo da pendência salvo.' : 'Motivo voltou para o automático.', {type:'ok', ms:1800});
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
@@ -3310,7 +3314,7 @@ const IND_MOTIVOS = ['No prazo','Relacionamento','Transporte','Cliente','Fiscal'
 const MOT_CANON = new Map();   // mesma frase com maiusculas/espacos diferentes conta como um motivo so
 const MOT_PAL = ['#06B6D4','#7C3AED','#F59E0B','#F43F5E','#10B981','#3B82F6','#EC4899','#84CC16','#F97316','#8B5CF6'];
 const escA = t => esc(t).replace(/"/g,'&quot;');
-const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Marketplace':'#A855F7', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'Fiscal':'#10B981', 'A classificar':'#64748B', 'Sem andamento':'#64748B', 'Logística':'#EAB308', 'Esquecimento de apontamento':'#EF4444', 'Problema no Innovaro':'#94A3B8', 'Outro':'#64748B' };
+const IND_COR = { 'No prazo':'#06B6D4', 'Relacionamento':'#7C3AED', 'Marketplace':'#A855F7', 'Transporte':'#F59E0B', 'Cliente':'#F43F5E', 'Fiscal':'#10B981', 'Financeiro':'#14B8A6', 'A classificar':'#64748B', 'Sem andamento':'#64748B', 'Logística':'#EAB308', 'Esquecimento de apontamento':'#EF4444', 'Problema no Innovaro':'#94A3B8', 'Outro':'#64748B' };
 const motCor = m => IND_COR[m] || MOT_PAL[[...String(m)].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0, 7) % MOT_PAL.length];
 const IND = { ano:null, meses:new Set(), carrs:new Set(), motivos:new Set(), status:'aberto', q:'', canal:'', sit:'', usuario:'', and:'', alerta:'' };
 const IND_INICIO = new Date(2026, 6, 1);   // pendencias criadas antes de 01/07/2026 contam como finalizadas; dai em diante a equipe vai sanando
@@ -3457,6 +3461,7 @@ function indIr(){   // rola ate a lista de casos do canal em foco (depois de ren
   setTimeout(() => { const id = IND.canal==='Marketplace' ? 'ind-lista-t-mp' : IND.canal==='Logística' ? 'ind-log-chips' : 'ind-lista-t', el = document.getElementById(id), alvo = el && (el.closest('.filters,.ind-f') || el); if (alvo) alvo.scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
 }
 function indSet(k,v,go){
+  MOT_PIN.clear();
   const tg = (set,x) => set.has(x) ? set.delete(x) : set.add(x);
   if (k==='ano'){ IND.ano = +v; IND.meses.clear(); }
   else if (k==='mes'){ if (+v===0){ const a = indAntigos(), todos = a.every(m=>IND.meses.has(m)); a.forEach(m => todos ? IND.meses.delete(m) : IND.meses.add(m)); } else tg(IND.meses, +v); }
@@ -3473,6 +3478,7 @@ function indSet(k,v,go){
   renderInd(); if (go) indIr();
 }
 function indSetMotivo(id, v){
+  MOT_PIN.add(id);
   const x = IND_ALL.find(y=>y.id===id); if (!x || !DB){ toast('Entre com sua conta para gravar o motivo.', {type:'warn'}); return; }
   DB.doc('cases/'+id).set({ motivo_pend:v||null, motivo_pend_em:isoNow() }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
   DB_CASES[id] = { ...(DB_CASES[id]||{}), motivo_pend:v||null }; scheduleRender();
@@ -3491,7 +3497,7 @@ function renderInd(){
     return (ign.includes('mes') || !IND.meses.size || IND.meses.has(x.mes)) &&
       (ign.includes('carr') || !IND.carrs.size || IND.carrs.has(x.carr)) &&
       (ign.includes('status') || !IND.status || (IND.status==='fin') === x.fin) &&
-      (ign.includes('motivo') || !IND.motivos.size || (!x.fin && IND.motivos.has(x.motivo))) &&
+      (ign.includes('motivo') || !IND.motivos.size || MOT_PIN.has(x.id) || (!x.fin && IND.motivos.has(x.motivo))) &&
       (ign.includes('canal') || !IND.canal || x.canal===IND.canal) &&
       (ign.includes('and') || !IND.and || x.andRaw===IND.and) &&
       (ign.includes('sit') || !IND.sit || sitKey(x.sit)===IND.sit) &&
@@ -3537,7 +3543,7 @@ function renderInd(){
     [['Tarefas no período', A.total, `criadas em ${IND.ano}`], ['Taxa de atendimento', fmt1(A.taxa)+'%', 'finalizadas ÷ total'], ['SLA médio (finalizadas)', A.sla==null ? '—' : fmt1(A.sla)+' dias', A.nsla ? A.nsla+' com data de finalização' : 'importe a planilha “Tarefas em aberto” (xlsx) para calcular'], ['Em aberto hoje', A.aberto, 'por motivo, logo abaixo']],
     undefined, (() => { const ab = doAnoAll.filter(x=>!x.fin && x.canal!=='Logística'), c = m => ab.filter(x=>x.motivo===m).length, nLog = doAnoAll.filter(x=>!x.fin && x.canal==='Logística').length;
       const t = (n, l, k, v, on) => `<button type="button" class="pw-mini${on ? ' on' : ''}" onclick="indSet('${k}','${v}',1)" title="${on ? 'Clique para tirar o filtro' : 'Clique para filtrar os casos em aberto: '+l}"><b>${n}</b> ${l}</button>`, mt = m => t(c(m), m, 'motivo', m, IND.motivos.has(m));
-      return `<div class="pw-minis"><span class="pw-minis-l">Em aberto por motivo</span>${mt('Marketplace')}${mt('Transporte')}${mt('Relacionamento')}${mt('No prazo')}${t(nLog, 'Logística', 'canal', 'Logística', IND.canal==='Logística')}${(IND.motivos.size || IND.canal==='Logística') ? `<button type="button" class="pw-mini lim" onclick="IND.motivos.clear();IND.canal='';renderInd()">✕ limpar</button>` : ''}</div>`; })());
+      return `<div class="pw-minis"><span class="pw-minis-l">Em aberto por motivo</span>${mt('Marketplace')}${mt('Transporte')}${mt('Financeiro')}${mt('Relacionamento')}${mt('No prazo')}${t(nLog, 'Logística', 'canal', 'Logística', IND.canal==='Logística')}${(IND.motivos.size || IND.canal==='Logística') ? `<button type="button" class="pw-mini lim" onclick="IND.motivos.clear();IND.canal='';renderInd()">✕ limpar</button>` : ''}</div>`; })());
 
   // ---- cards por transportadora (obedecem aos demais filtros; clicar liga/desliga a transportadora) ----
   const mesesAtivos = doAno.map(x=>x.mes), mi = Math.min(...mesesAtivos), ma = Math.max(...mesesAtivos);
@@ -3865,12 +3871,14 @@ function slaCalcula(){
   });
 }
 function slaSetMotivo(id, v){
+  MOT_PIN.add(id);
   if (!DB){ toast('Entre com sua conta para gravar o motivo.', {type:'warn'}); return; }
   DB.doc('cases/'+id).set({ motivo_apont:v||null, motivo_apont_em:isoNow() }, true).catch(err => toast('Falha ao salvar: '+(err.code||err.message), {type:'err'}));
   DB_CASES[id] = { ...(DB_CASES[id]||{}), motivo_apont:v||null }; scheduleRender();
 }
 function slaIr(key){ setTimeout(() => { const el = document.getElementById('sla-lista-'+key); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }, 120); }
 function slaSet(k, v){
+  MOT_PIN.clear();
   if (k==='fluxo'){ SLA_ST.fluxo = v; SLA_ST.sit = ''; SLA_ST.usuario = ''; }
   else if (k==='estado') SLA_ST.estado = v;
   else if (k==='sit'){ if (SLA_ST.sit===v) SLA_ST.sit = ''; else { SLA_ST.sit = v; SLA_ST.estado = 'todos'; } }
@@ -3901,7 +3909,7 @@ function renderSla(){
   const usuarios = [...new Set(doFluxo.filter(x=>x.estado==='ATRASO'||x.estado==='HOJE').map(respDe))].sort();
   const f = (x, ign) => { ign = ign||[]; return x.fluxo===SLA_ST.fluxo && passCC(x) && (ign.includes('sit') || !SLA_ST.sit || sitKey(x.sit)===SLA_ST.sit) &&
     (ign.includes('estado') || SLA_ST.estado==='todos' || (SLA_ST.estado==='atraso' && x.estado==='ATRASO') || (SLA_ST.estado==='hoje' && x.estado==='HOJE') || (SLA_ST.estado==='prazo' && x.estado==='PRAZO')) &&
-    (!SLA_ST.usuario || respDe(x)===SLA_ST.usuario) && (ign.includes('motivo') || !SLA_ST.motivo || motivoEf(x)===SLA_ST.motivo) && (!SLA_ST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(SLA_ST.q)); };
+    (!SLA_ST.usuario || respDe(x)===SLA_ST.usuario) && (ign.includes('motivo') || !SLA_ST.motivo || MOT_PIN.has(x.id) || motivoEf(x)===SLA_ST.motivo) && (!SLA_ST.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(SLA_ST.q)); };
   const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
   const nEst = e => base.filter(x => x.fluxo===SLA_ST.fluxo && (e==='todos' || x.estado===e) && (!SLA_ST.usuario || respDe(x)===SLA_ST.usuario)).length;
   const carrsSla = [...new Set(base.map(x=>x.carr))].filter(c=>c && !SEM_ANALISE.has(c)).map(c => ({ c, n:base.filter(x=>x.carr===c && x.fluxo===SLA_ST.fluxo && x.estado==='ATRASO').length })).sort((a,b)=>b.n-a.n);
