@@ -484,6 +484,11 @@ body.in-perdas .kpi-click:hover{border-color:#C4B5FD}
 .pw-sub:empty{display:none}
 .filters,.ind-f,.ind-h{scroll-margin-top:160px}
 .flash-caso{outline:2px solid #f59e0b;outline-offset:-2px;animation:flashc 1s ease-in-out 2}@keyframes flashc{50%{background:rgba(245,158,11,.25)}}
+.extr-passo{min-width:230px;font-size:11.5px}.extr-passo .extr-p{display:block;margin-bottom:6px;line-height:1.45}
+.extr-fluxo{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:10px 0}
+.extr-fluxo>div{flex:1 1 220px;background:var(--srf1);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;font-size:12px;color:var(--tx2);line-height:1.5}
+.extr-fluxo>div b{display:block;color:var(--tx);font-size:13px;margin-bottom:2px}
+.extr-fluxo>i{align-self:center;font-style:normal;color:var(--tx3);font-size:18px}
 .dash-fr{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
 .dash-fr label{display:flex;flex-direction:column;gap:3px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3)}
 .dash-fr .fsel{min-width:150px}
@@ -1262,7 +1267,7 @@ function andClasse(x){
   return '';
 }
 // Extravio: qualquer caso cujo andamento/situacao cita extravio (ou que ja tem data de acatamento) vive so na aba Extravios, seja qual for o responsavel/canal
-const ehExtravio = x => { if (!x || x.status_manual==='fin' || x.status_manual==='canc' || andClasse(x)) return false; if (x.extravio_acatado_em) return true;
+const ehExtravio = x => { if (!x || x.status_manual==='fin' || x.status_manual==='canc' || andClasse(x) || x.extravio_status==='encontrado') return false; if (x.extravio_acatado_em || x.extravio_inicio_em) return true;
   const t = norm((x.andamento||'')+' '+(x.tipo_devolucao||x.sit||'')); return /extravi/.test(t) && !/\b(nao|sem)\b.{0,25}extravi/.test(t); };
 // Andamento "No prazo": a equipe confirma que o caso esta dentro do prazo, entao nao conta como atraso de apontamento
 const andNoPrazo = x => { const a = norm(String(x.andamento||'')); return /\bno prazo\b/.test(a) && !/\b(nao|fora)\b.*\bprazo\b/.test(a); };
@@ -1273,7 +1278,8 @@ function rebuildData(){
   const tratMap = {};
   SEED_TRATATIVAS.forEach(t => tratMap[tratKey(t.chave)] = t);
   Object.entries(DB_CASES).forEach(([id, data]) => {
-    if (id.startsWith('coleta_')) coletaMap[id] = { ...(coletaMap[id]||{}), ...data };
+    if (id.startsWith('coleta_') && !/tratativ/i.test(data.classe||'')) coletaMap[id] = { ...(coletaMap[id]||{}), ...data };
+    else if (id.startsWith('coleta_')) tratMap[id] = { ...(tratMap[id]||{}), ...data, tipo_devolucao:data.tipo_devolucao || 'Protocolo de Coleta' };   // linha do arquivo 'Tratativas': nunca entra na Coleta Reversa
     else if (id.startsWith('trat_')) tratMap[id] = { ...(tratMap[id]||{}), ...data };
   });
 
@@ -1368,7 +1374,7 @@ const TITLES = {
   dash:'Dashboard', at:'Atrasadas', ri:'Em risco', em:'No prazo', rea:'Coleta realizada — aguardando CD',
   'col-all':'Coleta Reversa — Todos', trat:'Tratativas por grupo',
   regiao:'Atrasos por região', hist:'Histórico', tipos:'Tipos de devolução',
-  colsla:'SLA Transportadora — prazo de coleta até o CD', ind:'Controle de Situações', sla:'SLA de Apontamento', adm:'Usuários e acessos', media:'Média e cruzamento', 'nr-ap':'Transportadora a pagar', 'nr-nr':'Produto não retornou', extr:'Extravios — prazo de liquidação', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
+  colsla:'SLA Transportadora — prazo de coleta até o CD', ind:'Controle de Situações', sla:'SLA de Apontamento', adm:'Usuários e acessos', media:'Média e cruzamento', 'nr-ap':'Transportadora a pagar', 'nr-nr':'Produto não retornou', extr:'Extravios — busca e indenização', perdas:'Perdas — Panorama', 'p-cli':'Perdas Cliente', 'p-trp':'Perdas Transportadora'
 };
 function ir(id){
   if (!podeAba(id)){ toast('Você não tem acesso a esta aba.', {type:'warn'}); return; }
@@ -1948,7 +1954,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261119-110000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261119-160000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -2313,7 +2319,7 @@ function andCell(c, lista){
 function irmaosDe(id){ const ch = (DB_CASES[id]||{}).chave; return ch ? Object.keys(DB_CASES).filter(k => DB_CASES[k].chave===ch) : [id]; }
 // ---- desfazer: cada alteracao feita no painel (status, andamento, motivo, previsao, datas...) guarda o estado anterior; o botao do topo e o Ctrl+Z voltam passo a passo ----
 const UNDO = [], UNDO_MAX = 50; let UNDO_T = 0;
-const UNDO_ROTULOS = { andamento:'Andamento', status_manual:'Status do caso', motivo_pend:'Motivo da pendência', previsao_coleta:'Previsão de coleta', protocolo_hello:'Protocolo Hello', recebido_cd_em:'Chegada no CD', recolhido_em:'Coleta no cliente', extravio_acatado_em:'Extravio acatado em', extravio_cobrado_em:'Cobrança ao extravio', extravio_liquidado_em:'Extravio liquidado', extravio_transportadora:'Transportadora do extravio' };
+const UNDO_ROTULOS = { andamento:'Andamento', status_manual:'Status do caso', motivo_pend:'Motivo da pendência', previsao_coleta:'Previsão de coleta', protocolo_hello:'Protocolo Hello', recebido_cd_em:'Chegada no CD', recolhido_em:'Coleta no cliente', extravio_acatado_em:'Extravio acatado em', extravio_cobrado_em:'Cobrança ao extravio', extravio_inicio_em:'Extravio reportado em', extravio_status:'Situação do extravio', extravio_liquidado_em:'Extravio liquidado', extravio_transportadora:'Transportadora do extravio' };
 try { JSON.parse(localStorage.getItem('undo_stack')||'[]').filter(u => u && u.ids && Date.now()-u.em < 864e5).forEach(u => UNDO.push(u)); } catch(e){}
 function undoSalva(){ try { localStorage.setItem('undo_stack', JSON.stringify(UNDO.slice(-UNDO_MAX))); } catch(e){} }
 const undoMeus = () => UNDO.filter(u => !u.por || u.por===CUR_EMAIL);
@@ -2670,7 +2676,7 @@ function detectAndNormalize(rows){
     const cidade = cellAt(r, col.cidade) || null;
     const usuario = cellAt(r, col.usuario) || null;
     const descricao = cellAt(r, col.descricao) || null;
-    const ehColeta = /protocolo de coleta/i.test(tipoRaw);   // so a situacao Protocolo de Coleta vira coleta; Agendada, Em Atendimento, Realizado, Prod Recolhido... (Troca SP etc.) sao tratativas e mantem a propria situacao
+    const ehColeta = /protocolo de coleta/i.test(tipoRaw) && !/tratativ/i.test(cellAt(r, col.classe) || '');   // linha do arquivo 'Tratativas' nao vira coleta   // so a situacao Protocolo de Coleta vira coleta; Agendada, Em Atendimento, Realizado, Prod Recolhido... (Troca SP etc.) sao tratativas e mantem a propria situacao
     if (ehColeta){
       return { id:coletaKey(chave), origem:'coleta', chave, nf, cpf, cliente, status:casos,
         transportadora, uf, cidade, tipo_devolucao:'Protocolo de Coleta', classe: cellAt(r, col.classe) || null, andamento_arq: cellAt(r, col.andamento) || null,
@@ -3806,13 +3812,14 @@ Cancelada|0|sit|
 Cancelada 2|0|sit|` };
 const SLA_FLUXOS = [['rec','Recolhimento depois de entregue'], ['sp','Recolhimento SP cancelamento'], ['trat','Tratativas transportadora'], ['troca','Troca SP mesmo produto (rota emergencial)']];
 const NR_TIPOS = { produto_nao_retornou:'Produto não retornou', produto_nao_retornou_2:'Produto não retornou 2', transportadora_a_pagar:'Transportadora a pagar', transportadora_a_pagar_2:'Transportadora a pagar 2' };   // vivem na aba propria
+const nrKey = k => !!NR_TIPOS[k] || /transp_pg|transp_pag|transportadora_a_pagar/.test(k);   // Reenvio S Recol Transp Pg, Cli Canc Ped - Transp Pag, Transportadora a pagar...: tudo vive na aba Transportadora a pagar
 const SLA_LOGISTICA = new Set(['conferencia_expedicao','conferencia_expedicao_2']);   // etapa da logistica: visivel, mas nao conta atraso
 const SLA_MOTIVOS = ['Aguardando cliente','Aguardando transportadora','Aguardando logística','Aguardando fiscal / financeiro','Esquecimento / falta de apontamento','Problema no Innovaro','Outro'];
 const SLA_REGRAS = {};
 Object.keys(SLA_TXT).forEach(f => { SLA_REGRAS[f] = SLA_TXT[f].split('\n').map(l => { const [sit, pz, base, prox] = l.split('|'); const m = /^(\d+)([cu])?$/.exec(pz.trim());
   const key = sitKey(sit), lg = SLA_LOGISTICA.has(key);
   return { sit, key, n:(m && !lg) ? +m[1] : 0, logistica:lg, util: !!m && m[2]==='u', base:base.trim(), prox:(prox||'').split(';').map(t=>t.trim()).filter(Boolean) }; })
-  .filter(r => !/^perdas/.test(r.key) && !NR_TIPOS[r.key]); });   // perdas e a pagar/nao retornou tem aba propria
+  .filter(r => !/^perdas/.test(r.key) && !nrKey(r.key)); });   // perdas e a pagar/nao retornou tem aba propria
 const SLA_ST = { fluxo:'rec', estado:'atraso', sit:'', usuario:'', motivo:'', q:'', carrs:new Set(), canal:'' };
 let SLA_CLASSES = {}, SLA_LISTA = [], SLA_ITENS = [];
 try { const c = JSON.parse(localStorage.getItem('sla_classes')||'null'); if (c) SLA_CLASSES = c; } catch(e){}
@@ -3842,7 +3849,7 @@ function slaFonte(){
   const out = [];
   COL.concat(REA).forEach(c => out.push({ ...c, __tipo:'coleta', sit:'Protocolo de Coleta' }));
   TRAT_ALL.filter(t => !t.concluido_auto).forEach(t => out.push({ ...t, __tipo:'tratativa', sit:t.tipo_devolucao || '(sem situação)' }));
-  return out.filter(x => !/^perdas/.test(sitKey(x.sit)) && !NR_TIPOS[sitKey(x.sit)] && !andClasse(x) && !andNoPrazo(x) && x.status_manual!=='fin' && x.status_manual!=='canc' && !['Finalizada','Desconsiderar'].includes(sitClasseDe(x.sit)));   // finalizados, cancelados e perdas nao contam atraso de apontamento
+  return out.filter(x => !/^perdas/.test(sitKey(x.sit)) && !nrKey(sitKey(x.sit)) && !andClasse(x) && !andNoPrazo(x) && x.status_manual!=='fin' && x.status_manual!=='canc' && !['Finalizada','Desconsiderar'].includes(sitClasseDe(x.sit)));   // finalizados, cancelados e perdas nao contam atraso de apontamento
 }
 function slaCalcula(){
   if (_slaVer === DATA_VER) return; _slaVer = DATA_VER;
@@ -3967,10 +3974,10 @@ function slaExport(canal){
 }
 
 // ================= A PAGAR E NAO RETORNOU (aba propria, sem indice de atraso) =================
-const isNR = t => !!NR_TIPOS[sitKey(t.tipo_devolucao||'')];
+const isNR = t => nrKey(sitKey(t.tipo_devolucao||''));
 function deriveNR(t){
   const d = parseBR(t.data_solicitacao) || parseBR(t.data_programacao), key = sitKey(t.tipo_devolucao||'');
-  return { ...t, __tipo:'tratativa', sit:NR_TIPOS[key]||t.tipo_devolucao, kind: /pagar/.test(key) ? 'ap' : 'nr', d, ano:d?d.getFullYear():null, mes:d?d.getMonth()+1:null,
+  return { ...t, __tipo:'tratativa', sit:NR_TIPOS[key]||t.tipo_devolucao, kind: /pagar|transp_pg|transp_pag/.test(key) ? 'ap' : 'nr', d, ano:d?d.getFullYear():null, mes:d?d.getMonth()+1:null,
     dias: d ? daysBetween(d, new Date()) : null, valor_est: pwValores(t).valorEst || 0, carr: indNome(t.transportadora), canal: canalOf(t.usuario) };
 }
 const NR_PG = {
@@ -3995,80 +4002,99 @@ function nrSkeleton(sc){
     <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos</b><span class="fcnt" id="cnt-nr-${sc}"></span><button class="btn-exp" onclick="nrExport('${sc}')">Exportar CSV</button></div>
     <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Situação</th><th>Cliente</th><th>NF</th><th>Classe</th><th>Tipo de saída</th><th>Aberto em</th><th>Dias parado</th><th>Valor</th><th>Responsável</th><th>Andamento</th><th title="Data em que a equipe atualizou o andamento (não é data do Innovaro)">Andamento atualizado em<br><small style="font-weight:400">registro da equipe</small></th><th>Motivo da pendência</th></tr></thead><tbody id="tb-nr-${sc}"></tbody></table></div></div>`;
 }
-// ================= EXTRAVIO: prazo da transportadora para liquidar o valor (lembrete de cobranca) =================
-// A transportadora acata o extravio (data informada aqui) e tem 45 dias uteis (Total) ou 60 dias uteis (demais) para liquidar o valor.
-// No fim do prazo, se nao liquidou, cobramos. O painel avisa EXTR_AVISO dias uteis antes dessa data e de novo no dia.
-const EXTR_AVISO = 5;   // o lembrete comeca X dias uteis antes de chegar o prazo de cobranca
+// ================= EXTRAVIO: duas fases =================
+// 1) BUSCA: a transportadora tem EXTR_BUSCA_DU dias uteis para procurar a mercadoria e devolver/seguir o envio (voce aguarda e cobra posicionamento).
+//    Passou do prazo sem retorno: seguir com o processo indenizatorio. A mercadoria pode ser encontrada nesse meio tempo (caso volta ao fluxo normal).
+// 2) INDENIZACAO: quando a transportadora acata (data informada), ela tem EXTR_PAG_DU dias uteis (todas as transportadoras) para pagar e encerrar o caso.
+const EXTR_BUSCA_DU = 20, EXTR_PAG_DU = 60, EXTR_AVISO = 5;   // EXTR_AVISO: o lembrete comeca X dias uteis antes de cada prazo
 const EXTR_ST = { f:'', q:'' };
-const extrPrazo = (carr, ov) => { const n = ov==='total' ? 45 : ov==='outra' ? 60 : (/\btotal\b/.test(norm(carr||'')) ? 45 : 60); return { n, util:true, txt:n+' dias úteis' }; };
 // aceita ano com 2 digitos ("26" vira 2026) e ignora datas impossiveis (ex.: 0026 digitado sem querer)
 function extrData(v){ const m = v && /^(\d{4})-(\d{2})-(\d{2})/.exec(v); if (!m) return null; let y = +m[1]; if (y < 100) y += 2000; if (y < 2000 || y > 2100) return null; return new Date(y, +m[2]-1, +m[3]); }
 function extrItens(){
   const hj = new Date(), hoje = new Date(hj.getFullYear(), hj.getMonth(), hj.getDate()), out = [];
   (typeof EXTR_ALL==='undefined' ? [] : EXTR_ALL).forEach(t => {
-    const dc = (typeof DB_CASES!=='undefined' && DB_CASES[t.id]) || {}, man = dc.extravio_acatado_em || t.extravio_acatado_em || null, liq = dc.extravio_liquidado_em || t.extravio_liquidado_em || null, ov = dc.extravio_transportadora || t.extravio_transportadora || '';
-    const carr = indCarr(t), pz = extrPrazo(carr, ov), ini = extrData(man), venc = ini ? slaSomaDias(ini, pz.n, true) : null;   // so conta quando a data do acatamento foi informada
-    let estado = 'SEMDATA', dias = null;
-    if (liq) estado = 'LIQUIDADO';
-    else if (venc){
-      if (hoje >= venc){ estado = 'COBRAR'; dias = slaDifDias(venc, hoje, true); }
-      else { dias = slaDifDias(hoje, venc, true); estado = dias <= EXTR_AVISO ? 'RISCO' : 'PRAZO'; }
-    }
-    out.push({ t, id:t.id, carr, pz, ini, venc, estado, dias, man:man||'', ov });
+    const dc = (typeof DB_CASES!=='undefined' && DB_CASES[t.id]) || {}, g = k => dc[k] || t[k] || null;
+    const ini = extrData(g('extravio_inicio_em')), aca = extrData(g('extravio_acatado_em')), enc = g('extravio_status')==='pago';
+    const fimBusca = ini ? slaSomaDias(ini, EXTR_BUSCA_DU, true) : null, vencPag = aca ? slaSomaDias(aca, EXTR_PAG_DU, true) : null;
+    let estado = 'SEMDATA', dias = null, fase = 0;
+    if (enc){ estado = 'ENCERRADO'; fase = 3; }
+    else if (aca){ fase = 2; if (hoje >= vencPag){ estado = 'COBRAR'; dias = slaDifDias(vencPag, hoje, true); } else { dias = slaDifDias(hoje, vencPag, true); estado = dias <= EXTR_AVISO ? 'RISCO' : 'PAG'; } }
+    else if (ini){ fase = 1; if (hoje >= fimBusca){ estado = 'AGIR'; dias = slaDifDias(fimBusca, hoje, true); } else { dias = slaDifDias(hoje, fimBusca, true); estado = dias <= EXTR_AVISO ? 'BUSCA_RISCO' : 'BUSCA'; } }
+    out.push({ t, id:t.id, carr:indCarr(t), ini, aca, fimBusca, vencPag, estado, dias, fase, iniIso:g('extravio_inicio_em')||'', acaIso:g('extravio_acatado_em')||'' });
   });
-  const ord = { COBRAR:0, RISCO:1, PRAZO:2, SEMDATA:3, LIQUIDADO:4 };
-  return out.sort((a,b) => ord[a.estado]-ord[b.estado] || (a.estado==='COBRAR' ? (b.dias||0)-(a.dias||0) : (a.dias||0)-(b.dias||0)));
+  const ord = { AGIR:0, COBRAR:0, BUSCA_RISCO:1, RISCO:1, BUSCA:2, PAG:3, SEMDATA:4, ENCERRADO:5 };
+  return out.sort((a,b) => ord[a.estado]-ord[b.estado] || (a.estado==='AGIR'||a.estado==='COBRAR' ? (b.dias||0)-(a.dias||0) : (a.dias||0)-(b.dias||0)));
 }
+const EXTR_GRUPO = { agir:['AGIR','COBRAR'], chegando:['BUSCA_RISCO','RISCO'], busca:['BUSCA'], pag:['PAG'], sem:['SEMDATA'], enc:['ENCERRADO'] };
 function extrBadge(){
-  const its = extrItens(), nc = its.filter(i => i.estado==='COBRAR').length, nr = its.filter(i => i.estado==='RISCO').length, n = nc + nr, b = document.getElementById('bdg-extr');
-  if (b){ b.textContent = n; b.classList.toggle('red', n>0); }
-  window._tit0 = window._tit0 || document.title.replace(/^🔔 \(\d+\) /, ''); document.title = (n ? '🔔 ('+n+') ' : '') + window._tit0;
+  const its = extrItens(), n = k => its.filter(i => EXTR_GRUPO[k].includes(i.estado)).length, nBusca = its.filter(i => i.estado==='AGIR').length, nPag = its.filter(i => i.estado==='COBRAR').length, nCh = n('chegando'), tot = nBusca + nPag + nCh, b = document.getElementById('bdg-extr');
+  if (b){ b.textContent = tot; b.classList.toggle('red', tot>0); }
+  window._tit0 = window._tit0 || document.title.replace(/^🔔 \(\d+\) /, ''); document.title = (tot ? '🔔 ('+tot+') ' : '') + window._tit0;
+  const partes = [nBusca ? `<b>${nBusca}</b> com a busca vencida (seguir com o processo indenizatório)` : '', nPag ? `<b>${nPag}</b> com o prazo de pagamento vencido (cobrar a transportadora)` : '', nCh ? `<b>${nCh}</b> com prazo chegando (em até ${EXTR_AVISO} dias úteis)` : ''].filter(Boolean);
   const bn = document.getElementById('extr-banner');
-  if (bn){ if (n && podeAba('extr')){ bn.style.display = ''; bn.innerHTML = `🔔 ${nc ? `<b>${nc} extravio${nc>1?'s':''}</b> para cobrar a transportadora agora` : ''}${nc && nr ? ' · ' : ''}${nr ? `<b>${nr}</b> com a data de cobrança chegando (em até ${EXTR_AVISO} dias úteis)` : ''}. <button type="button" class="btn-exp" onclick="ir('extr')">Abrir Extravios ↗</button>`; } else bn.style.display = 'none'; }
-  if (n && typeof DB!=='undefined' && DB && podeAba('extr')){
+  if (bn){ if (tot && podeAba('extr')){ bn.style.display = ''; bn.innerHTML = `🔔 Extravios: ${partes.join(' · ')}. <button type="button" class="btn-exp" onclick="ir('extr')">Abrir Extravios ↗</button>`; } else bn.style.display = 'none'; }
+  if (tot && typeof DB!=='undefined' && DB && podeAba('extr')){
     const k = isoD(new Date()); let ja = false;
     try { ja = localStorage.getItem('extr_lembrete')===k; if (!ja) localStorage.setItem('extr_lembrete', k); } catch(e){ ja = !!window._extrLemb; window._extrLemb = true; }
-    if (!ja) toast(`Lembrete de extravios: ${nc ? nc+' para cobrar agora' : ''}${nc && nr ? ' e ' : ''}${nr ? nr+' com a data de cobrança chegando' : ''}.`, { type:'warn', ms:10000, actionLabel:'Ver', onAction:() => ir('extr') });
+    if (!ja) toast(`Lembrete de extravios: ${tot} caso${tot>1?'s':''} para agir ou com prazo chegando.`, { type:'warn', ms:10000, actionLabel:'Ver', onAction:() => ir('extr') });
   }
 }
 function extrSet(k, v){ if (k==='f') EXTR_ST.f = (EXTR_ST.f===v ? '' : v); else if (k==='q'){ EXTR_ST.q = norm(v).trim(); clearTimeout(_qT); _qT = setTimeout(renderExtr, 180); return; } renderExtr(); }
-function extrSetData(id, v){
-  if (v){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v); let y = m ? +m[1] : 0; if (m && y < 100) y += 2000;
-    if (!m || y < 2024 || y > 2035){ toast('Data inválida. Digite o ano completo (ex.: 04/11/2026).', {type:'warn'}); renderExtr(); return; }
-    v = y + '-' + m[2] + '-' + m[3]; }
-  if (gravaCaso(id, { extravio_acatado_em: v || null })){ toast(v ? 'Data do acatamento salva. A data de cobrança já foi calculada.' : 'Data removida.', {type:'ok'}); scheduleRender(); }
+function extrValidaData(v){ if (!v) return ''; const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v); let y = m ? +m[1] : 0; if (m && y < 100) y += 2000; if (!m || y < 2024 || y > 2035) return null; return y + '-' + m[2] + '-' + m[3]; }
+function extrSetCampo(id, campo, v, okMsg){
+  const val = extrValidaData(v); if (val===null){ toast('Data inválida. Digite o ano completo (ex.: 04/11/2026).', {type:'warn'}); renderExtr(); return; }
+  if (gravaCaso(id, { [campo]: val || null })){ toast(val ? okMsg : 'Data removida.', {type:'ok'}); scheduleRender(); }
 }
-function extrSetTransp(id, v){ if (gravaCaso(id, { extravio_transportadora: v || null })){ toast('Transportadora do extravio atualizada: o prazo foi recalculado.', {type:'ok'}); scheduleRender(); } }
-function extrLiquidar(id, on){ if (gravaCaso(id, { extravio_liquidado_em: on ? isoD(new Date()) : null })){ toast(on ? 'Extravio marcado como liquidado: não será mais cobrado.' : 'Extravio reaberto.', {type:'ok'}); scheduleRender(); } }
+const extrSetInicio = (id, v) => extrSetCampo(id, 'extravio_inicio_em', v, 'Data do extravio salva: o prazo de busca já está contando.');
+const extrSetData = (id, v) => extrSetCampo(id, 'extravio_acatado_em', v, 'Acatamento salvo: o prazo de pagamento já está contando.');
+async function extrEncontrada(id){
+  const ok = await askConfirm('Mercadoria encontrada', '<p>O caso sai da aba Extravios e volta para o fluxo normal (Controle, Tratativas…). Você pode desfazer logo em seguida com o botão Desfazer.</p>', 'Confirmar');
+  if (!ok) return; if (gravaCaso(id, { extravio_status:'encontrado' })){ toast('Caso devolvido ao fluxo normal.', {type:'ok'}); scheduleRender(); }
+}
+function extrPago(id, on){ if (gravaCaso(id, { extravio_status: on ? 'pago' : null })){ toast(on ? 'Pagamento recebido: caso encerrado na aba Extravios.' : 'Caso reaberto.', {type:'ok'}); scheduleRender(); } }
 function renderExtr(){
   const el = document.getElementById('panel-extr'); if (!el) return;
   const ae = document.activeElement; if (ae && el.contains(ae) && /^(INPUT|TEXTAREA)$/.test(ae.tagName) && ae.type!=='button') return;   // nao refaz a tela enquanto digita
-  const todos = extrItens(), c = e => todos.filter(i => i.estado===e).length;
-  const q = EXTR_ST.q, vis = todos.filter(i => (!EXTR_ST.f || i.estado===EXTR_ST.f) && (!q || norm((i.t.cliente||'')+' '+(i.t.nf||'')+' '+(i.t.cpf||'')+' '+i.carr).includes(q)));
-  const hero = pwHero('Transportadora', 'Extravios — prazo de liquidação', 'Quando a transportadora acata o extravio, ela tem 45 dias úteis (Total) ou 60 dias úteis (demais) para liquidar o valor. No fim do prazo, se ainda não liquidou, é hora de cobrar. O painel avisa antes.',
-    [['Cobrar agora', c('COBRAR'), 'a data de cobrança chegou ou passou', "extrSet('f','COBRAR')"], [`Cobrar em até ${EXTR_AVISO} dias úteis`, c('RISCO'), 'lembrete: data de cobrança chegando', "extrSet('f','RISCO')"], ['Aguardando prazo', c('PRAZO'), 'transportadora ainda dentro do prazo', "extrSet('f','PRAZO')"], ['Sem data de acatamento', c('SEMDATA'), 'informe a data quando a transportadora acatar', "extrSet('f','SEMDATA')"], ['Liquidados', c('LIQUIDADO'), 'valor já pago pela transportadora', "extrSet('f','LIQUIDADO')"]], '');
-  const NOM = { COBRAR:'Cobrar', RISCO:'Cobrar em breve', PRAZO:'Aguardando prazo', SEMDATA:'Sem data', LIQUIDADO:'Liquidado' };
-  const chip = (e) => `<button type="button" class="ind-ch${EXTR_ST.f===e?' on':''}${c(e)===0?' zero':''}" onclick="extrSet('f','${e}')">${NOM[e]}<small>${c(e)}</small></button>`;
-  const st = i => ({ COBRAR: i.dias ? `<span class="bdg b-red">Cobrar · passou há ${i.dias} d.u.</span>` : '<span class="bdg b-red">Cobrar hoje</span>', RISCO:`<span class="bdg b-amb">Cobrar em ${i.dias} d.u.</span>`, PRAZO:`<span class="bdg b-grn">Aguardando · ${i.dias} d.u.</span>`, SEMDATA:'<span class="bdg b-dk">Informe a data</span>', LIQUIDADO:'<span class="bdg b-dk">Liquidado</span>' })[i.estado];
+  const todos = extrItens(), c = k => todos.filter(i => EXTR_GRUPO[k].includes(i.estado)).length;
+  const q = EXTR_ST.q, vis = todos.filter(i => (!EXTR_ST.f || EXTR_GRUPO[EXTR_ST.f].includes(i.estado)) && (!q || norm((i.t.cliente||'')+' '+(i.t.nf||'')+' '+(i.t.cpf||'')+' '+i.carr).includes(q)));
+  const hero = pwHero('Transportadora', 'Extravios — busca e indenização', `Mercadoria extraviada: a transportadora tem ${EXTR_BUSCA_DU} dias úteis para achar o produto e devolver ou seguir o envio. Sem retorno, seguimos com o processo indenizatório; quando ela acata, são ${EXTR_PAG_DU} dias úteis para pagar e encerrar o caso.`,
+    [['Agir agora', c('agir'), 'busca vencida ou pagamento vencido', "extrSet('f','agir')"], [`Prazo chegando (${EXTR_AVISO} d.u.)`, c('chegando'), 'lembrete: busca ou pagamento', "extrSet('f','chegando')"], [`Em busca (${EXTR_BUSCA_DU} d.u.)`, c('busca'), 'aguardar e cobrar posicionamento', "extrSet('f','busca')"], [`Aguardando pagamento (${EXTR_PAG_DU} d.u.)`, c('pag'), 'transportadora acatou', "extrSet('f','pag')"], ['Sem data', c('sem'), 'informe quando o extravio foi reportado', "extrSet('f','sem')"], ['Encerrados', c('enc'), 'pagamento recebido', "extrSet('f','enc')"]], '');
+  const NOM = { agir:'Agir agora', chegando:'Prazo chegando', busca:'Em busca', pag:'Aguardando pagamento', sem:'Sem data', enc:'Encerrados' };
+  const chip = k => `<button type="button" class="ind-ch${EXTR_ST.f===k?' on':''}${c(k)===0?' zero':''}" onclick="extrSet('f','${k}')">${NOM[k]}<small>${c(k)}</small></button>`;
+  const du = i => `${i.dias} d.u.`;
+  const st = i => ({ AGIR: i.dias ? `<span class="bdg b-red">Busca venceu há ${du(i)}</span>` : '<span class="bdg b-red">Busca vence hoje</span>', COBRAR: i.dias ? `<span class="bdg b-red">Cobrar pagamento · venceu há ${du(i)}</span>` : '<span class="bdg b-red">Cobrar pagamento hoje</span>',
+    BUSCA_RISCO:`<span class="bdg b-amb">Busca termina em ${du(i)}</span>`, RISCO:`<span class="bdg b-amb">Pagamento vence em ${du(i)}</span>`, BUSCA:`<span class="bdg b-grn">Em busca · ${du(i)}</span>`, PAG:`<span class="bdg b-grn">Aguardando pagamento · ${du(i)}</span>`, SEMDATA:'<span class="bdg b-dk">Informe a data</span>', ENCERRADO:'<span class="bdg b-dk">Encerrado</span>' })[i.estado];
   const idq = i => esc(String(i.id));
-  const linha = i => `<tr><td>${st(i)}</td><td class="td-nome clickable" onclick="openDetailIdx(${regDetail(i.t)})">${esc(i.t.cliente||'—')}</td><td class="td-nf">${esc(i.t.nf||'—')}</td><td style="font-size:11px">${esc(i.t.tipo_devolucao||'—')}</td>
-    <td style="font-size:11px">${esc(i.carr||'—')}</td>
-    <td><select class="fsel" onchange="extrSetTransp('${idq(i)}', this.value)" title="Quem acatou o extravio: define o prazo (Total 45 d.u., demais 60 d.u.)"><option value=""${!i.ov?' selected':''}>Automática (${i.pz.n} d.u.)</option><option value="total"${i.ov==='total'?' selected':''}>Total (45 d.u.)</option><option value="outra"${i.ov==='outra'?' selected':''}>Outra (60 d.u.)</option></select></td>
-    <td><input type="date" class="fsel" min="2024-01-01" max="2035-12-31" value="${i.man}" onchange="extrSetData('${idq(i)}', this.value)" title="Data em que a transportadora acatou o extravio (digite o ano completo)"></td>
-    <td>${i.venc ? '<b>'+fmtD2(i.venc)+'</b><br><small style="color:var(--tx3)">acatamento + '+i.pz.n+' d.u.</small>' : '—'}</td>
-    <td>${i.estado==='LIQUIDADO' ? `<button class="btn-exp" type="button" onclick="extrLiquidar('${idq(i)}', false)">Reabrir</button>` : `<button class="btn-exp" type="button" onclick="extrLiquidar('${idq(i)}', true)" title="A transportadora já pagou o extravio">✓ Liquidado</button>`}</td>
-    <td style="font-size:11px;max-width:260px">${esc(String(i.t.andamento||'—').slice(0,140))}</td></tr>`;
+  const passo = i => {
+    const enc = `<button class="btn-exp" type="button" onclick="extrEncontrada('${idq(i)}')">✓ Mercadoria encontrada</button>`;
+    switch (i.estado){
+      case 'SEMDATA': return '<span class="extr-p">Informe em <b>Extravio reportado em</b> a data do extravio: a busca de ' + EXTR_BUSCA_DU + ' dias úteis começa a contar.</span>';
+      case 'BUSCA': case 'BUSCA_RISCO': return `<span class="extr-p">Aguarde e cobre um posicionamento até <b>${fmtD2(i.fimBusca)}</b>.</span>${enc}`;
+      case 'AGIR': return `<span class="extr-p"><b>Prazo de busca acabou.</b> Siga com o processo indenizatório; quando a transportadora acatar, informe a data em <b>Acatou em</b>.</span>${enc}`;
+      case 'PAG': case 'RISCO': return `<span class="extr-p">Aguarde o pagamento até <b>${fmtD2(i.vencPag)}</b>.</span><button class="btn-exp" type="button" onclick="extrPago('${idq(i)}', true)">✓ Pagamento recebido</button>`;
+      case 'COBRAR': return `<span class="extr-p"><b>Cobre o pagamento da transportadora.</b> Prazo era ${fmtD2(i.vencPag)}.</span><button class="btn-exp" type="button" onclick="extrPago('${idq(i)}', true)">✓ Pagamento recebido</button>`;
+      default: return `<button class="btn-exp" type="button" onclick="extrPago('${idq(i)}', false)">Reabrir</button>`;
+    }
+  };
+  const linha = i => `<tr><td>${st(i)}</td><td class="td-nome clickable" onclick="openDetailIdx(${regDetail(i.t)})">${esc(i.t.cliente||'—')}</td><td class="td-nf">${esc(i.t.nf||'—')}</td><td style="font-size:11px">${esc(i.t.tipo_devolucao||'—')}</td><td style="font-size:11px">${esc(i.carr||'—')}</td>
+    <td><input type="date" class="fsel" min="2024-01-01" max="2035-12-31" value="${i.iniIso}" onchange="extrSetInicio('${idq(i)}', this.value)" title="Data em que o extravio foi reportado (início da busca)"></td>
+    <td>${i.fimBusca ? '<b>'+fmtD2(i.fimBusca)+'</b>' : '—'}</td>
+    <td><input type="date" class="fsel" min="2024-01-01" max="2035-12-31" value="${i.acaIso}" onchange="extrSetData('${idq(i)}', this.value)" title="Data em que a transportadora acatou o processo indenizatório"></td>
+    <td>${i.vencPag ? '<b>'+fmtD2(i.vencPag)+'</b>' : '—'}</td>
+    <td class="extr-passo">${passo(i)}</td><td style="font-size:11px;max-width:220px">${esc(String(i.t.andamento||'—').slice(0,120))}</td></tr>`;
   el.innerHTML = `<div class="pworld" id="ph-extr">${hero}</div>
     <div class="ind-f"><div class="ind-f-top"><input id="extr-q" placeholder="Buscar cliente, NF ou transportadora..." value="${esc(EXTR_ST.q)}" oninput="extrSet('q',this.value)"><button class="btn-exp" type="button" onclick="EXTR_ST.f='';EXTR_ST.q='';renderExtr()" style="visibility:${(EXTR_ST.f||EXTR_ST.q)?'visible':'hidden'}">Limpar filtros</button></div>
-      <div class="ind-fr"><b>Situação do prazo</b><div>${['COBRAR','RISCO','PRAZO','SEMDATA','LIQUIDADO'].map(chip).join('')}</div></div></div>
-    <div class="ind-sub" style="margin:8px 0">Entra aqui <b>qualquer caso</b> cujo andamento ou situação cita extravio, seja do Relacionamento, Marketplace ou Logística: ele sai das outras abas e passa a ser acompanhado só aqui. Quando a transportadora acatar, preencha <b>Extravio acatado em</b>: o painel calcula a data de cobrança (+45 d.u. para a Total, +60 d.u. para as demais) e avisa <b>${EXTR_AVISO} dias úteis antes</b> e no dia (faixa vermelha no topo, número no menu, 🔔 no título da aba e lembrete ao abrir). Se a transportadora liquidar o valor, clique em <b>✓ Liquidado</b>. Se o caso for da Total e o painel mostrar outra transportadora, escolha "Total" na coluna do prazo.</div>
+      <div class="ind-fr"><b>Etapa</b><div>${['agir','chegando','busca','pag','sem','enc'].map(chip).join('')}</div></div></div>
+    <div class="extr-fluxo"><div><b>1 · Busca</b><span>${EXTR_BUSCA_DU} dias úteis para a transportadora achar a mercadoria. Você aguarda e cobre um posicionamento. Se achar: <i>Mercadoria encontrada</i>.</span></div><i>→</i><div><b>2 · Indenização</b><span>Sem retorno, seguimos o processo indenizatório. Quando ela acatar, informe <i>Acatou em</i>.</span></div><i>→</i><div><b>3 · Pagamento</b><span>${EXTR_PAG_DU} dias úteis (todas as transportadoras) para pagar. Pagou: <i>Pagamento recebido</i>.</span></div></div>
+    <div class="ind-sub" style="margin:8px 0">Entra aqui <b>qualquer caso</b> cujo andamento ou situação cita extravio, de qualquer equipe: ele sai das outras abas e é acompanhado só aqui. O painel avisa ${EXTR_AVISO} dias úteis antes de cada prazo e quando ele vence (faixa vermelha no topo, número no menu, 🔔 no título da aba e lembrete ao abrir). Casos que já têm a data de acatamento entram direto na etapa de pagamento.</div>
     <div class="filters" style="margin:6px 0 8px"><b style="font-size:13px">Casos</b><span class="fcnt">${vis.length} caso${vis.length!==1?'s':''}</span><button class="btn-exp" onclick="extrExport()">Exportar CSV</button></div>
-    <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Status</th><th>Cliente</th><th>NF</th><th>Situação</th><th>Transportadora (tipo de saída)</th><th>Prazo da transportadora</th><th>Extravio acatado em</th><th>Cobrar a transportadora em</th><th></th><th>Andamento</th></tr></thead><tbody>${vis.length ? vis.map(linha).join('') : '<tr><td colspan="10" style="padding:18px;color:var(--tx3)">Nenhum caso de extravio neste filtro.</td></tr>'}</tbody></table></div></div>`;
-  ligaStats('ph-extr', [['Cobrar agora', () => todos.filter(i=>i.estado==='COBRAR').map(i=>i.t)], [`Cobrar em até ${EXTR_AVISO} dias úteis`, () => todos.filter(i=>i.estado==='RISCO').map(i=>i.t)], ['Aguardando prazo', () => todos.filter(i=>i.estado==='PRAZO').map(i=>i.t)], ['Sem data de acatamento', () => todos.filter(i=>i.estado==='SEMDATA').map(i=>i.t)], ['Liquidados', () => todos.filter(i=>i.estado==='LIQUIDADO').map(i=>i.t)]]);
+    <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Status</th><th>Cliente</th><th>NF</th><th>Situação</th><th>Transportadora</th><th>Extravio reportado em</th><th>Busca até</th><th>Acatou em</th><th>Pagamento até</th><th>Próximo passo</th><th>Andamento</th></tr></thead><tbody>${vis.length ? vis.map(linha).join('') : '<tr><td colspan="11" style="padding:18px;color:var(--tx3)">Nenhum caso de extravio neste filtro.</td></tr>'}</tbody></table></div></div>`;
+  const dr = k => () => todos.filter(i => EXTR_GRUPO[k].includes(i.estado)).map(i=>i.t);
+  ligaStats('ph-extr', [['Agir agora', dr('agir')], ['Prazo chegando', dr('chegando')], ['Em busca', dr('busca')], ['Aguardando pagamento', dr('pag')], ['Sem data', dr('sem')], ['Encerrados', dr('enc')]]);
 }
 function extrExport(){
   const l = extrItens(); if (!l.length){ toast('Nada para exportar.', {type:'warn'}); return; }
-  exportCSV(l.map(i => ({ 'Status':i.estado, 'Cliente':i.t.cliente||'', 'NF':i.t.nf||'', 'Situação':i.t.tipo_devolucao||'', 'Transportadora':i.carr, 'Prazo':i.pz.txt, 'Extravio acatado em':i.ini ? fmtD2(i.ini) : '', 'Cobrar a transportadora em':i.venc ? fmtD2(i.venc) : '', 'Dias úteis':i.dias==null ? '' : i.dias, 'Andamento':i.t.andamento||'' })), 'extravios_prazo');
+  exportCSV(l.map(i => ({ 'Status':i.estado, 'Cliente':i.t.cliente||'', 'NF':i.t.nf||'', 'Situação':i.t.tipo_devolucao||'', 'Transportadora':i.carr, 'Extravio reportado em':i.ini ? fmtD2(i.ini) : '', 'Busca até':i.fimBusca ? fmtD2(i.fimBusca) : '', 'Acatou em':i.aca ? fmtD2(i.aca) : '', 'Pagamento até':i.vencPag ? fmtD2(i.vencPag) : '', 'Dias úteis':i.dias==null ? '' : i.dias, 'Andamento':i.t.andamento||'' })), 'extravios_prazo');
 }
 function renderNR(){ ['ap','nr'].forEach(renderNRp); }
 function renderNRp(sc){
@@ -4085,7 +4111,7 @@ function renderNRp(sc){
   const chip = (on, oc, label, n) => `<button type="button" class="ind-ch${on?' on':''}${n===0?' zero':''}" onclick="${oc}">${label}${n==null?'':`<small>${n}</small>`}</button>`;
   const carrs = [...new Set(todos.map(x=>x.carr))].map(c => ({ c, n:todos.filter(x=>x.carr===c && f(x,['carr'])).length })).sort((a,b)=>b.n-a.n);
   document.getElementById('nr-fbody-'+sc).innerHTML =
-    `<div class="ind-fr"><b>Situação</b><div>${pg.sits.map(k => chip(st.sit===k, `nrSet('${sc}','sit','${k}')`, NR_TIPOS[k], todos.filter(x=>sitKey(x.sit)===k && f(x,['sit'])).length)).join('')}</div></div>
+    `<div class="ind-fr"><b>Situação</b><div>${[...new Map(todos.map(x => [sitKey(x.sit), x.sit])).entries()].map(([k,nome]) => chip(st.sit===k, `nrSet('${sc}','sit','${k}')`, esc(nome), todos.filter(x=>sitKey(x.sit)===k && f(x,['sit'])).length)).join('')}</div></div>
      <div class="ind-fr"><b>Andamento</b><div>${chip(!st.and, `nrSet('${sc}','and','')`, 'Todos', todos.filter(x=>f(x,['and'])).length)}${chip(st.and==='sem', `nrSet('${sc}','and','sem')`, 'Sem andamento', todos.filter(x=>!x.andamento && f(x,['and'])).length)}${chip(st.and==='com', `nrSet('${sc}','and','com')`, 'Com andamento', todos.filter(x=>!!x.andamento && f(x,['and'])).length)}</div></div>
      <div class="ind-fr"><b>Transportadora</b><div>${carrs.map(o => chip(st.carrs.has(o.c), `nrSet('${sc}','carr',this.dataset.c)" data-c="${esc(o.c)}`, esc(o.c), o.n)).join('')}</div></div>`;
   document.getElementById('nr-limpar-'+sc).style.visibility = (st.sit || st.carrs.size || st.and || st.q) ? 'visible' : 'hidden';
