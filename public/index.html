@@ -1313,7 +1313,7 @@ function rebuildData(){
   const outrasTrat = allTrat.filter(t => t.grupo!=='perdas' && !isNR(t) && !(ehExtravio(t) && !t.concluido_auto));
   TRAT_ALL = outrasTrat; ALL_TRAT = allTrat;
   // painel de tratativas: so o que esta pendente (Finalizada / Desconsiderar saem; seguem nos indicadores)
-  TRAT = outrasTrat.filter(t => !t.concluido_auto && sitClasseDe(t.tipo_devolucao||'')==='Pendente' && !andClasse(t));
+  TRAT = outrasTrat.filter(t => !t.concluido_auto && sitClasseDe(t.tipo_devolucao||'')==='Pendente' && !andClasse(t) && slaFluxoDe(t)==='trat');   // so o arquivo 'Tratativas'
   TRAT_HIST = outrasTrat.filter(t => t.concluido_auto);
 
   AT = COL.filter(c=>c.prazo_status==='ATRASADO');
@@ -1954,7 +1954,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261119-160000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261119-181000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -3831,7 +3831,13 @@ function slaSomaDias(d, n, util){ const r = new Date(d.getFullYear(), d.getMonth
 function slaDifDias(a, b, util){ if (!util) return daysBetween(a,b); let k=0; const r = new Date(a.getFullYear(), a.getMonth(), a.getDate()); while (r<b){ r.setDate(r.getDate()+1); if (ehUtil(r)) k++; } return k; }
 const slaPrazoTxt = r => !r.n ? (r.logistica ? 'Sem SLA (logística)' : 'Sem SLA (0)') : r.n+(r.util ? (r.n>1?' dias úteis':' dia útil') : (r.n>1?' dias corridos':' dia corrido'))+({data:' · da criação', prog:' · da programação', sit:''})[r.base];
 
+// Situacoes de cada arquivo (as listas do filtro de SITUACAO de cada planilha). A situacao manda; so as que existem nos dois arquivos (Criada, Perdas...) seguem a CLASSE.
+const TRAT_RX = /^(cobranca_realizada|de_acordo|fora_de_perfil|mercadoria_danificada|perdas_transportadora|prod_entreg|produto_nao_retornou|recol_acomp|recol_p_acomp|reenvio_s_recol|transp_pg|transportadora_a_pagar|cli_canc_ped|barrar_entrega|conferencia_expedicao|canc_proc|mercadoria_conferida)/;   // arquivo "Tratativas"
+const DEPOIS_RX = /^(protocolo_de_coleta|prod_recolhido_no_cliente|nf_e_emitida|recolhimento_p_cancelamen|recol_p_troca)/;   // arquivo "Recolhimento depois de entregue"
 function slaFluxoDe(x){
+  const k0 = sitKey(x.sit || x.tipo_devolucao || '');
+  if (TRAT_RX.test(k0)) return 'trat';
+  if (DEPOIS_RX.test(k0)) return 'rec';
   const k = norm(x.classe||'').trim();
   if (k && SLA_CLASSES[k]) return SLA_CLASSES[k];
   if (/tratativ/.test(k)) return 'trat';

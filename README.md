@@ -330,3 +330,11 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
 - **Transportadora a pagar:** qualquer situação com "Transp Pg" / "Transp Pag" / "Transportadora a pagar" (inclui Reenvio S Recol Transp Pg e Cli Canc Ped - Transp Pag) vai para essa aba (`nrKey`). Saem das outras abas e do SLA de Apontamento.
 - **Extravios, nova lógica:** fase 1 **Busca** (20 dias úteis; "Extravio reportado em" -> "Busca até"); se a mercadoria for encontrada, botão "Mercadoria encontrada" devolve o caso ao fluxo normal; sem retorno, segue a indenização; quando a transportadora acata ("Acatou em"), fase 2 **Pagamento** (60 dias úteis, todas as transportadoras); "Pagamento recebido" encerra. Casos que já tinham a data de acatamento entram direto na fase 2. Aviso 5 d.u. antes de cada prazo e no vencimento (faixa, menu, 🔔, lembrete). Constantes: `EXTR_BUSCA_DU`, `EXTR_PAG_DU`, `EXTR_AVISO`. Campos: `extravio_inicio_em`, `extravio_acatado_em`, `extravio_status` (encontrado/pago).
 - **Arquivos separados:** o arquivo "Tratativas" não gera mais coletas (linha com CLASSE Tratativas e situação Protocolo de Coleta fica na aba Tratativas); a Coleta Reversa e o Controle vêm do arquivo "depois de entregue".
+
+## Cada situação no arquivo certo (19/11/2026, fim da tarde)
+- A **situação** manda no destino, mesmo que a coluna CLASSE venha igual nos dois arquivos (`TRAT_RX` / `DEPOIS_RX`):
+  - Arquivo "depois de entregue": Protocolo de Coleta, Prod Recolhido no Cliente, NF-e Emitida, Recolhimento P/Cancelamento, Recol P/ Troca -> Controle e Coleta Reversa.
+  - Arquivo "Tratativas": Cobrança Realizada, De Acordo, Fora de Perfil, Mercadoria Danificada, Prod Entreg Cli Seg Rec, Recol Acomp C/Reenvio, Recol P/ Acomp (Cliente/Transportadora), Barrar Entrega, Conferência Expedição… -> aba Tratativas.
+  - Situações que existem nos dois arquivos (Criada, Perdas Cliente) seguem a CLASSE; Perdas vão para as abas de Perdas.
+  - Transp Pg / Transportadora a pagar -> aba Transportadora a pagar; Produto Não Retornou -> sua aba; extravio -> aba Extravios.
+- O Dashboard passou a contar "Tratativas pendentes" só com o arquivo Tratativas.
