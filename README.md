@@ -338,3 +338,10 @@ Limites: a restrição por aba, editar e importar vale na tela; o banco bloqueia
   - Situações que existem nos dois arquivos (Criada, Perdas Cliente) seguem a CLASSE; Perdas vão para as abas de Perdas.
   - Transp Pg / Transportadora a pagar -> aba Transportadora a pagar; Produto Não Retornou -> sua aba; extravio -> aba Extravios.
 - O Dashboard passou a contar "Tratativas pendentes" só com o arquivo Tratativas.
+
+## Busca até o caso, previsão da planilha, perfil Relacionamento, conferência (25/11/2026)
+- **Busca (Ctrl+K e campos das abas):** leva até a **aba onde o caso está** (Coleta Reversa, Controle, Tratativas, Transportadora a pagar, Extravios, Histórico, Perdas), filtra por NF/CPF/nome e destaca a linha. O painel lateral só abre ao clicar na linha (`irAoCaso`). Quando não há acesso à aba, abre o painel lateral.
+- **Previsão de coleta pela planilha:** o importador lê a coluna de previsão (título com "PREVIS…" ou coluna sem título logo ao lado do "Em andamento") e grava em `previsao_coleta` (origem `planilha`). O que for digitado no painel (`previsao_origem: 'manual'`) não é sobrescrito. O resumo da importação informa quantos casos receberam previsão.
+- **Perfil "Relacionamento"** (Adm > Perfil rápido): vê Dashboard, Coleta Reversa, Controle, Média, SLA de Apontamento, Tratativas e Perdas; não vê Análise (região, histórico, tipos), Extravios/a pagar nem Adm; **edita andamento, motivo e previsão só em Coleta Reversa, Tratativas e SLA de Apontamento** (`editarAbas`, `EDIT_ABAS_REL`).
+- **Janeiro a novembro:** clicar num mês (gráficos, cartões, tabela) passa o filtro para "Todas", mostrando também os casos já finalizados do mês.
+- **Aba Tratativas:** caixa "Conferência: para onde foi cada caso do arquivo Tratativas" (pendências, Logística, finalizados, a pagar, não retornou, extravios, perdas, arquivo "depois"), para explicar qualquer número que pareça zerado.

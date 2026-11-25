@@ -975,6 +975,7 @@ body.natal #dash-hero{margin-top:46px}
 
     <div class="panel" id="panel-trat">
       <div class="pworld" id="ph-trat"></div>
+      <details class="ind-f" id="trat-conf" style="margin-bottom:12px"><summary style="cursor:pointer;font-size:12.5px;font-weight:700;color:var(--tx)">Conferência: para onde foi cada caso do arquivo Tratativas</summary><div id="trat-conf-b" style="margin-top:10px"></div></details>
       <div class="ind-f"><div class="ind-f-top"><input id="trat-q" placeholder="Buscar cliente, NF ou CPF..." oninput="tfSet('q',this.value)"><button class="btn-exp" type="button" id="trat-limpar" onclick="tfSet('limpar')">Limpar filtros</button></div><div id="trat-fbody"></div><div class="ind-f-res" id="trat-fres"></div></div>
       <div class="ind-h">Por equipe responsável</div><div class="ind-sub" id="trat-canais-sub"></div>
       <div class="ind-cars" id="trat-canais" style="margin-bottom:6px"></div>
@@ -1587,7 +1588,7 @@ function tfSet(k, v){
   MOT_PIN.clear();
   const tg = (set,x) => set.has(x) ? set.delete(x) : set.add(x);
   if (k==='ano'){ TF.ano = +v; TF.meses.clear(); }
-  else if (k==='mes') tg(TF.meses, +v);
+  else if (k==='mes'){ tg(TF.meses, +v); if (TF.meses.size && TF.status==='aberto') TF.status = ''; }
   else if (k==='carr') tg(TF.carrs, v);
   else if (k==='motivo'){ tg(TF.motivos, v); if (TF.motivos.size) TF.status = 'aberto'; }
   else if (k==='status'){ TF.status = v; if (v==='fin') TF.motivos.clear(); }
@@ -1633,6 +1634,29 @@ function renderTrat(){
       (!TF.q || norm((x.cliente||'')+' '+(x.nf||'')+' '+(x.cpf||'')).includes(TF.q)); };
   const base = doAno.filter(x => f(x,['status','motivo'])), A = indAgg(base);
   document.getElementById('bdg-trat').textContent = todos.filter(x => !x.fin && x.canal!=='Logística').length;
+  { const b = document.getElementById('trat-conf-b'); if (b){
+      const porChave = new Map(IND_TRAT.map(x => [x.chave, x])), cnt = { perdas:0, extr:0, ap:0, nr:0, fin:0, log:0, pend:0, depois:0, saiu:0 }, extrCh = new Set(EXTR_ALL.map(x=>x.chave));
+      ALL_TRAT.forEach(t => {
+        if (t.concluido_auto){ if (slaFluxoDe(t)==='trat') cnt.saiu++; return; }
+        if (t.grupo==='perdas') cnt.perdas++;
+        else if (extrCh.has(t.chave)) cnt.extr++;
+        else if (nrKey(sitKey(t.tipo_devolucao||''))) { /pagar|transp_pg|transp_pag/.test(sitKey(t.tipo_devolucao||'')) ? cnt.ap++ : cnt.nr++; }
+        else if (porChave.has(t.chave)){ const x = porChave.get(t.chave); x.fin ? cnt.fin++ : (x.canal==='Logística' ? cnt.log++ : cnt.pend++); }
+        else cnt.depois++;
+      });
+      const tot = Object.values(cnt).reduce((a,v)=>a+v,0) - cnt.saiu, lin = (n, q, ir_, nota) => `<tr><td><b>${n}</b>${nota ? `<br><small style="color:var(--tx3)">${nota}</small>` : ''}</td><td style="text-align:right;font-variant-numeric:tabular-nums"><b>${q}</b></td><td>${ir_ ? `<button class="btn-exp" type="button" onclick="ir('${ir_}')">Abrir ↗</button>` : ''}</td></tr>`;
+      b.innerHTML = `<div class="ind-sub" style="margin-bottom:8px">Cada caso que está no último arquivo vai para <b>um único</b> lugar. A aba Tratativas (números e lista principal) mostra só as <b>pendências abertas de Relacionamento e Marketplace</b>; o resto aparece nos outros destinos abaixo.</div>
+        <table class="tbl"><thead><tr><th>Destino</th><th style="text-align:right">Casos</th><th></th></tr></thead><tbody>
+        ${lin('Pendências abertas nesta aba', cnt.pend, '', 'Relacionamento e Marketplace')}
+        ${lin('Logística (bloco no fim desta aba)', cnt.log, '', 'Recol P/ Acomp, Cobrança Realizada, Mercadoria Danificada…: não entram nos números da aba')}
+        ${lin('Finalizados / desconsiderados', cnt.fin, '', 'andamento finalizado, criados antes de 01/07/2026 ou situação finalizada')}
+        ${lin('Transportadora a pagar', cnt.ap, 'nr-ap', 'Transp Pg, Transportadora a pagar')}
+        ${lin('Produto não retornou', cnt.nr, 'nr-nr')}
+        ${lin('Extravios', cnt.extr, 'extr')}
+        ${lin('Perdas', cnt.perdas, 'perdas')}
+        ${lin('Arquivo "depois" (Controle)', cnt.depois, 'ind', 'casos que não são do arquivo Tratativas')}
+        <tr><td><b>Total no arquivo</b></td><td style="text-align:right"><b>${tot}</b></td><td></td></tr></tbody></table>
+        ${cnt.saiu ? `<div class="ind-sub" style="margin-top:6px">${cnt.saiu} caso(s) saíram do arquivo e foram concluídos automaticamente (não entram na conta acima).</div>` : ''}`; } }
 
   // ---- barra de filtros (igual a do Controle) ----
   const chip = (on, onclick, label, n, ab, fixo) => chipHtml(on, onclick, label, n, ab, fixo, TF.status==='aberto');
@@ -1954,7 +1978,7 @@ function mostrarOcultos(){
      <p style="margin-top:10px;color:var(--tx3)">Regras: status começando com "OK", contendo "conferida/conferência", "cancel/canc" ou "cobrança realizada".</p>`, 'Fechar');
 }
 let AUTH_DONE = false;
-const BUILD = '20261119-181000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
+const BUILD = '20261125-150000';   // trocado a cada publicacao; abas abertas avisam quando ha versao nova
 let CUR_EMAIL = '', CUR_UID = '';
 const SUPER_ADMINS = ['admin1@abracadabra.com.br'];   // administradores de origem (tambem nas regras do banco)
 let PERFIL = null, USUARIOS = [], _perfilSub = false, _admSub = false;
@@ -1963,12 +1987,18 @@ const podeAba = id => { if (id==='adm') return souAdmin(); if (!PERFIL || souAdm
 const SLA_CANAIS = [['Relacionamento','rel'], ['Marketplace','mp'], ['Logística','log']];   // a Logistica fica por ultimo
 const SLA_SUB = { 'Relacionamento':'Situações atualizadas pelo Relacionamento, inclusive as “Criadas” abertas pela Logística (a Patrícia Maia atualiza).', 'Marketplace':'Casos do canal Marketplace. O responsável é quem está no caso; quem assumir o Marketplace passa a atualizar aqui.', 'Logística':'Situações que só a Logística atualiza: Cobrança Realizada, Recol P/ Acomp Cliente, Recol P/ Acomp Transportadora, Mercadoria Danificada e Recol Acomp C/ Reenvio.' };
 const podeSecaoSla = c => { if (!PERFIL || souAdmin()) return true; const a = PERFIL.abas || ['*'], k = (SLA_CANAIS.find(x => x[0]===c)||[])[1]; return a.includes('*') || a.includes('sla') || (!!k && a.includes('sla-'+k)); };
-const podeEditar = () => souAdmin() || !PERFIL || PERFIL.editar!==false;
+const podeEditar = () => {
+  if (souAdmin() || !PERFIL) return true; if (PERFIL.editar===false) return false;
+  if (Array.isArray(PERFIL.editarAbas) && PERFIL.editarAbas.length){ const id = ((document.querySelector('.panel.on')||{id:''}).id||'').replace(/^panel-/,''); return PERFIL.editarAbas.includes(id) || PERFIL.editarAbas.includes('*'); }
+  return true;
+};
+const msgSemEdicao = () => (PERFIL && PERFIL.editar!==false && Array.isArray(PERFIL.editarAbas)) ? 'Seu acesso permite editar só nas abas Coleta Reversa, Tratativas e SLA de Apontamento.' : 'Seu acesso é somente de consulta: não é possível editar.';
 const podeImportar = () => souAdmin() || !PERFIL || PERFIL.importar!==false;
 const ABAS_CAT = [['dash','Dashboard','Visão geral'],['at','Atrasados','Coleta Reversa'],['ri','Em risco','Coleta Reversa'],['em','No prazo','Coleta Reversa'],['rea','Coleta realizada','Coleta Reversa'],['col-all','Todos os protocolos','Coleta Reversa'],['colsla','SLA Transportadora','Coleta Reversa'],
   ['trat','Tratativas por grupo','Tratativas'],['ind','Controle de Situações','Controle'],['sla','SLA de Apontamento (todos os setores)','Controle'],['sla-log','SLA de Apontamento · só Logística','Controle'],['sla-rel','SLA de Apontamento · só Relacionamento','Controle'],['sla-mp','SLA de Apontamento · só Marketplace','Controle'],['media','Média e cruzamento','Controle'],['nr-ap','Transportadora a pagar','Transportadora'],['nr-nr','Produto não retornou','Transportadora'],['extr','Extravios (cobrança)','Transportadora'],
   ['perdas','Perdas — Panorama','Perdas'],['p-cli','Perdas Cliente','Perdas'],['p-trp','Perdas Transportadora','Perdas'],['regiao','Atrasos por região','Análise'],['hist','Histórico','Análise'],['tipos','Tipos de devolução','Análise']];
-const PRESETS = { total:{ abas:['*'], editar:true, importar:true }, logistica:{ abas:['dash','at','ri','em','rea','col-all','colsla','trat','ind','sla'], editar:true, importar:false },
+const EDIT_ABAS_REL = ['at','ri','em','rea','col-all','trat','sla'];   // onde o time de Relacionamento pode mudar andamento, motivo e previsao
+const PRESETS = { relacionamento:{ abas:['dash','at','ri','em','rea','col-all','colsla','ind','sla','media','trat','perdas','p-cli','p-trp'], editar:true, importar:false, soAbas:true }, total:{ abas:['*'], editar:true, importar:true }, logistica:{ abas:['dash','at','ri','em','rea','col-all','colsla','trat','ind','sla'], editar:true, importar:false },
   perdas:{ abas:['dash','perdas','p-cli','p-trp','nr-ap','nr-nr','extr'], editar:true, importar:false }, consulta:{ abas:['*'], editar:false, importar:false } };
 let NOMES = {};   // e-mail -> nome de exibicao (config/usuarios)
 const nomeKey = e => String(e||'').toLowerCase().replace(/\./g,'_');
@@ -2150,8 +2180,10 @@ function renderPalette(q){
   } else {
     PAL_CMDS.filter(([t])=>norm(t).includes(nq)).forEach(([t,fn])=>out.push({h:'Comandos', t, s:'', fn}));
     const dq = nq.replace(/\D/g,'');   // CPF/NF digitados com ou sem pontos e tracos
-    const src = [].concat(EXTR_ALL.map(x=>({...x,__tipo:x.__tipo||'tratativa',__extr:true})), [...AT,...RI,...EM,...REA,...COL].map(c=>({...c,__tipo:'coleta'})), NR.map(x=>({...x,__nr:true})),
-      histItens().filter(h=>h.__tipo!=='perda'), TRAT_ALL.map(t=>({...t,__tipo:'tratativa'})), (typeof IND_ALL!=='undefined' ? IND_ALL : []).map(x=>({...x,__tipo:x.__tipo||'tratativa'})), PERDAS);
+    const D = (arr, dest, fx) => arr.map(c => ({ ...c, ...(fx||{}), __dest: typeof dest==='function' ? dest(c) : dest }));
+    const src = [].concat(D(EXTR_ALL, 'extr', {__extr:true}), D(AT,'at',{__tipo:'coleta'}), D(RI,'ri',{__tipo:'coleta'}), D(EM,'em',{__tipo:'coleta'}), D(REA,'rea',{__tipo:'coleta'}), D(COL,'col-all',{__tipo:'coleta'}),
+      D(NR, c => c.kind==='ap' ? 'nr-ap' : 'nr-nr', {__nr:true}), D(histItens().filter(h=>h.__tipo!=='perda'), 'hist'), D(TRAT_ALL, c => slaFluxoDe(c)==='trat' ? 'trat' : 'ind', {__tipo:'tratativa'}),
+      D(typeof IND_ALL!=='undefined' ? IND_ALL : [], c => c.fluxo==='trat' ? 'trat' : 'ind'), D(PERDAS, 'perdas'));
     const seen = new Set(); let n = 0;
     for (const c of src){
       const key = String(c.chave || ((c.nf||'')+'|'+(c.cliente||'')));
@@ -2160,7 +2192,7 @@ function renderPalette(q){
       if (!(hay.includes(nq) || (dq.length>=4 && hayRaw.replace(/\D/g,'').includes(dq)))) continue;
       seen.add(key);
       const tag = c.__extr ? 'Extravio' : c.__nr ? 'Transportadora a pagar / não retornou' : c.__tipo==='perda' ? 'Perda · '+c.motivo : c.__tipo==='tratativa' ? 'Tratativa' : (c.cancelada||c.realizada ? 'Histórico' : (c.prazo_status==='ATRASADO'?'Atrasado':c.prazo_status==='RISCO'?'Em risco':c.prazo_status==='REALIZADA'?'Coleta realizada':'No prazo'));
-      out.push({h:'Casos', t:(c.cliente||'—')+(c.nf?'  ·  NF '+c.nf:''), s:tag+' · '+(c.transportadora||'')+' '+(c.uf||''), fn:()=>openDetail(c)});
+      out.push({h:'Casos', t:(c.cliente||'—')+(c.nf?'  ·  NF '+c.nf:''), s:tag+' · '+(c.transportadora||'')+' '+(c.uf||'')+' → '+(TITLES[c.__dest]||c.__dest), fn:()=>irAoCaso(c, c.__dest)});
       if (++n>=40) break;
     }
   }
@@ -2180,6 +2212,31 @@ function palMove(d){
   document.querySelectorAll('#pal-list .pal-it').forEach(el=>el.classList.toggle('on', +el.dataset.i===palSel));
   const on = document.querySelector('#pal-list .pal-it.on'); if (on) on.scrollIntoView({block:'nearest'});
 }
+// leva ate a aba onde o caso esta, filtra pelo NF/CPF/nome e destaca a linha; o painel lateral abre quando voce clicar nela
+function irAoCaso(c, dest){
+  dest = dest || 'dash';
+  if (!podeAba(dest)){ toast('Esse caso está numa aba a que você não tem acesso (' + (TITLES[dest]||dest) + ').', {type:'warn'}); openDetail(c); return; }
+  const termo = String(c.nf || c.cpf || c.cliente || '').trim();
+  try {
+    if (dest==='ind'){ indSet('limpar'); IND.status = ''; if (c.ano) IND.ano = c.ano; }
+    else if (dest==='trat'){ tfSet('limpar'); TF.status = ''; if (c.ano) TF.ano = c.ano; }
+    else if (dest==='colsla') csSet('limpar');
+    else if (dest==='extr'){ EXTR_ST.f = ''; EXTR_ST.q = ''; }
+  } catch(e){}
+  ir(dest);
+  setTimeout(() => {
+    const panel = document.getElementById('panel-'+dest) || document.querySelector('.panel.on');
+    const inp = panel && panel.querySelector('input[placeholder^="Buscar"], input.fsearch');
+    if (inp && termo){ inp.value = termo; inp.dispatchEvent(new Event('input', { bubbles:true })); }
+    setTimeout(() => destacaCaso(panel, termo), 900);
+  }, 250);
+}
+function destacaCaso(panel, termo){
+  if (!panel) return; const t = norm(termo);
+  const r = [...panel.querySelectorAll('tbody tr')].filter(x => x.offsetParent !== null && norm(x.innerText).includes(t))[0];
+  if (!r){ toast('Abri a aba do caso, mas não achei a linha: confira os filtros.', {type:'warn'}); return; }
+  r.scrollIntoView({ block:'center', behavior:'smooth' }); r.classList.add('flash-caso'); setTimeout(() => r.classList.remove('flash-caso'), 3500);
+}
 function palRun(i){ const it = palItems[i]; if (!it) return; closePalette(); it.fn(); }
 document.getElementById('pal-in').addEventListener('input', e=>renderPalette(e.target.value));
 // ---- buscas dentro das abas: Enter vai ao primeiro caso; CPF/NF/nome com um unico resultado abre o caso sozinho ----
@@ -2187,7 +2244,7 @@ document.getElementById('pal-in').addEventListener('input', e=>renderPalette(e.t
   const linhas = () => [...document.querySelectorAll('.panel.on tbody tr[onclick*="openDetailIdx"]')].filter(r => r.offsetParent !== null);
   function vaiAoCaso(inp, auto){
     const rs = linhas(); if (!rs.length) return;
-    if (rs.length===1){ rs[0].scrollIntoView({ block:'center', behavior:'smooth' }); setTimeout(() => rs[0].click(), 250); return; }
+    if (rs.length===1){ rs[0].scrollIntoView({ block:'center', behavior:'smooth' }); rs[0].classList.add('flash-caso'); setTimeout(() => rs[0].classList.remove('flash-caso'), 3500); return; }   // so leva ate a linha: o painel lateral abre ao clicar
     if (!auto){ rs[0].scrollIntoView({ block:'center', behavior:'smooth' }); rs[0].classList.add('flash-caso'); setTimeout(() => rs[0].classList.remove('flash-caso'), 2200); }
   }
   const ehBusca = e => e.target && e.target.tagName==='INPUT' && /^buscar/i.test(e.target.placeholder||'') && e.target.closest('.panel');
@@ -2331,7 +2388,7 @@ function undoAtualiza(){
   b.title = u ? 'Desfazer: ' + u.rotulo + ' (Ctrl+Z)' : 'Nada para desfazer';
 }
 function desfazer(){
-  if (!podeEditar()){ toast('Seu acesso é somente de consulta: não é possível editar.', {type:'warn'}); return; }
+  if (!podeEditar()){ toast(msgSemEdicao(), {type:'warn'}); return; }
   let i = UNDO.length - 1; while (i >= 0 && UNDO[i].por && UNDO[i].por!==CUR_EMAIL) i--;
   if (i < 0 || !DB){ toast('Não há nada para desfazer.', {type:'warn', ms:2500}); undoAtualiza(); return; }
   const u = UNDO.splice(i, 1)[0]; UNDO_T = 0;
@@ -2349,7 +2406,7 @@ document.addEventListener('keydown', e => {
 });
 setTimeout(undoAtualiza, 1500);
 function gravaCaso(id, campos){
-  if (!podeEditar()){ toast('Seu acesso é somente de consulta: não é possível editar.', {type:'warn'}); return false; }
+  if (!podeEditar()){ toast(msgSemEdicao(), {type:'warn'}); return false; }
   if (!DB){ toast('Entre com sua conta para gravar.', {type:'warn'}); return false; }
   const ids = [...new Set([id, ...irmaosDe(id)])], antes = {};
   ids.forEach(k => { const c = DB_CASES[k] || {}; antes[k] = {}; Object.keys(campos).forEach(f => { antes[k][f] = c[f] === undefined ? null : c[f]; }); });
@@ -2504,7 +2561,7 @@ function prevCell(c){
   return `<td onclick="event.stopPropagation()" style="white-space:nowrap" title="Data que a transportadora informou para realizar a coleta">${c.id ? `<input type="date" class="prev-in" data-id="${esc(c.id)}" value="${esc(v)}" onchange="prevSet(this.dataset.id,this.value)" style="padding:3px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--srf);color:var(--tx);font-size:11.5px">` : '—'}<br><small style="color:${cor}">${rel}</small></td>`;
 }
 function prevSet(id, v){
-  if (!gravaCaso(id, { previsao_coleta:v||null, previsao_coleta_em:isoNow() })) return;
+  if (!gravaCaso(id, { previsao_coleta:v||null, previsao_coleta_em:isoNow(), previsao_origem:'manual' })) return;
   toast(v ? 'Previsão de coleta salva.' : 'Previsão removida.', {type:'ok', ms:1800});
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   scheduleRender();
@@ -2643,10 +2700,12 @@ function detectAndNormalize(rows){
     nf: findCol(header,'NUMERO DA NOTA'), valor: findCol(header,'VALOR DA NOTA'), romaneio: findCol(header,'ROMANEIO_ENTRADA'),
     tiposaida: findCol(header,'TIPOSAIDA'), uf: findCol(header,'UF'), cidade: findCol(header,'CIDADE'),
     usuario: findCol(header,'USUARIO'), descricao: findCol(header,'DESCRICAO'), classe: findCol(header,'CLASSE'), andamento: findCol(header,'EM ANDAMENTO','ANDAMENTO',/ANDAMENTO/),
+    previsao: findCol(header, /PREVIS/, /^PREV\b/, /DATA PREV/, /DT PREV/, /COLETA PREV/),
     tagraw: findCol(header,'NUMERO'), transpnova: findCol(header,'TIPO_SAIDA_NOVA_SAIDA'),
     valortit: findCol(header,'VALOR_TITULO'), notapeca: findCol(header,'NUMERO_NOTA_PECA'),
     vnota: findCol(header,'VALOR_NOTA_SAIDA'), vunit: findCol(header,'VALOR UNITARIO'), qtdev: findCol(header,'QUANTIDADE DEVOLVIDA'),
   };
+  if (col.previsao===-1 && col.andamento>-1 && col.andamento+1 < header.length && !header[col.andamento+1]) col.previsao = col.andamento+1;   // coluna sem titulo logo ao lado do andamento
   if (col.chave===-1 || col.situacao===-1){
     return { error:'Não reconheci a estrutura de colunas deste arquivo (faltam CHAVE e/ou SITUACAO). Confirme se é um export do Innovaro.' };
   }
@@ -2679,11 +2738,11 @@ function detectAndNormalize(rows){
     const ehColeta = /protocolo de coleta/i.test(tipoRaw) && !/tratativ/i.test(cellAt(r, col.classe) || '');   // linha do arquivo 'Tratativas' nao vira coleta   // so a situacao Protocolo de Coleta vira coleta; Agendada, Em Atendimento, Realizado, Prod Recolhido... (Troca SP etc.) sao tratativas e mantem a propria situacao
     if (ehColeta){
       return { id:coletaKey(chave), origem:'coleta', chave, nf, cpf, cliente, status:casos,
-        transportadora, uf, cidade, tipo_devolucao:'Protocolo de Coleta', classe: cellAt(r, col.classe) || null, andamento_arq: cellAt(r, col.andamento) || null,
+        transportadora, uf, cidade, tipo_devolucao:'Protocolo de Coleta', classe: cellAt(r, col.classe) || null, andamento_arq: cellAt(r, col.andamento) || null, previsao_arq: cellAt(r, col.previsao) || null,
         data_solicitacao:dt, data_programacao:prog, recebido_cd: !!romaneio,
         valor, usuario, descricao };
     }
-    return { id:tratKey(chave), origem:'tratativa', chave, nf, cpf, cliente, status:casos, classe: cellAt(r, col.classe) || null, andamento_arq: cellAt(r, col.andamento) || null,
+    return { id:tratKey(chave), origem:'tratativa', chave, nf, cpf, cliente, status:casos, classe: cellAt(r, col.classe) || null, andamento_arq: cellAt(r, col.andamento) || null, previsao_arq: cellAt(r, col.previsao) || null,
       tipo_devolucao:tipoRaw, grupo:groupOf(tipoRaw), transportadora, uf, cidade,
       data_solicitacao:dt, data_programacao:prog, valor, usuario, descricao, recebido_cd: !!romaneio,
       tag_raw: cellAt(r, col.tagraw) || null, transp_nova: cellAt(r, col.transpnova) || null,
@@ -2822,7 +2881,7 @@ async function importFile(file){
     say(`Salvando ${result.rows.length} linhas...`);
     const importId = 'imp_' + Date.now();
     const now = isoNow();
-    const ops = [], AND = { upd:0, conf:0, vazio:0 };
+    const ops = [], AND = { upd:0, conf:0, vazio:0, prev:0 };
     result.rows.forEach(r => {
       const prev = DB_CASES[r.id];
       // data em que o caso entrou na situacao atual (so sabemos quando a situacao MUDA entre duas importacoes)
@@ -2849,6 +2908,10 @@ async function importFile(file){
             AND.upd++;
           } else if (ANDAMENTO_REVALIDA){ r.andamento_em = now; r.andamento_por = CUR_EMAIL || pv.andamento_por || null; AND.conf++; }
         } else AND.vazio++; }
+      // coluna de previsao da planilha: vira a "Previsao de coleta" do caso (nao sobrescreve o que foi digitado no painel)
+      { const pa = r.previsao_arq; delete r.previsao_arq;
+        if (pa){ const t = String(pa).trim(), m = /^(\d{4})-(\d{2})-(\d{2})/.exec(t), dp = m ? new Date(+m[1], +m[2]-1, +m[3]) : parseBR(t), pv0 = prev || {};
+          if (dp && !isNaN(dp)){ r.previsao_arq_ult = isoD(dp); if (!pv0.previsao_coleta || pv0.previsao_origem==='planilha'){ r.previsao_coleta = isoD(dp); r.previsao_origem = 'planilha'; AND.prev++; } } } }
       const ehFin = o => o.origem==='coleta' ? !!o.recebido_cd : sitClasseDe(o.tipo_devolucao||'')==='Finalizada';
       if (prev && !prev.finalizado_em && !ehFin(prev) && ehFin(r)){ const n = new Date(); r.finalizado_em = String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear(); }
       const prevHistory = prev && Array.isArray(prev.history) ? prev.history : [];
@@ -2856,7 +2919,7 @@ async function importFile(file){
       ops.push({ type:'set', merge:true, path:'cases/'+r.id, data:{ ...r, history, concluido_auto:false, concluidoEm:null, updatedAt: now, lastImportId: importId } });
     });
     toClose.forEach(id => ops.push({ type:'update', path:'cases/'+id, data:{ concluido_auto:true, concluidoEm: now, concluidoPorImport: importId } }));
-    const andTxt = ` · Andamento: ${AND.upd} atualizados pela planilha` + (AND.conf ? `, ${AND.conf} reconfirmados com a data de hoje` : '') + (AND.vazio ? `, ${AND.vazio} sem texto na planilha` : '');
+    const andTxt = ` · Andamento: ${AND.upd} atualizados pela planilha` + (AND.conf ? `, ${AND.conf} reconfirmados com a data de hoje` : '') + (AND.vazio ? `, ${AND.vazio} sem texto na planilha` : '') + (AND.prev ? ` · Previsão de coleta lida da planilha em ${AND.prev} casos` : '');
     await DB.batchCommit(ops);
 
     await DB.collection('imports').doc(importId).set({
@@ -3470,7 +3533,7 @@ function indSet(k,v,go){
   MOT_PIN.clear();
   const tg = (set,x) => set.has(x) ? set.delete(x) : set.add(x);
   if (k==='ano'){ IND.ano = +v; IND.meses.clear(); }
-  else if (k==='mes'){ if (+v===0){ const a = indAntigos(), todos = a.every(m=>IND.meses.has(m)); a.forEach(m => todos ? IND.meses.delete(m) : IND.meses.add(m)); } else tg(IND.meses, +v); }
+  else if (k==='mes'){ if (+v===0){ const a = indAntigos(), todos = a.every(m=>IND.meses.has(m)); a.forEach(m => todos ? IND.meses.delete(m) : IND.meses.add(m)); } else tg(IND.meses, +v); if (IND.meses.size && IND.status==='aberto') IND.status = ''; }
   else if (k==='carr') tg(IND.carrs, v);
   else if (k==='motivo'){ tg(IND.motivos, v); if (IND.motivos.size) IND.status = 'aberto'; }
   else if (k==='status'){ IND.status = v; if (v==='fin') IND.motivos.clear(); }
@@ -4205,12 +4268,13 @@ const admLerAbas = root => { const b = [...root.querySelectorAll('input[data-aba
 function admPreset(root, k){
   const p = PRESETS[k]; if (!p) return;
   root.querySelectorAll('input[data-aba]').forEach(b => { b.checked = p.abas.includes('*') || p.abas.includes(b.dataset.aba); });
-  const e = root.querySelector('[data-f=editar]'), i = root.querySelector('[data-f=importar]'); if (e) e.checked = p.editar; if (i) i.checked = p.importar;
+  const e = root.querySelector('[data-f=editar]'), i = root.querySelector('[data-f=importar]'), sa = root.querySelector('[data-f=soAbas]'); if (e) e.checked = p.editar; if (i) i.checked = p.importar; if (sa) sa.checked = !!p.soAbas;
 }
 const admOpcoes = (u) => `<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:8px 0">
-    <label>Perfil rápido <select class="fsel" onchange="admPreset(this.closest('[data-root]'),this.value)"><option value="">— escolher —</option><option value="total">Acesso total</option><option value="logistica">Logística</option><option value="perdas">Perdas / Financeiro</option><option value="consulta">Somente consulta</option></select></label>
+    <label>Perfil rápido <select class="fsel" onchange="admPreset(this.closest('[data-root]'),this.value)"><option value="">— escolher —</option><option value="total">Acesso total</option><option value="logistica">Logística</option><option value="perdas">Perdas / Financeiro</option><option value="relacionamento">Relacionamento</option><option value="consulta">Somente consulta</option></select></label>
     <label>Papel <select class="fsel" data-f="papel"><option value="usuario"${u && u.papel==='admin' ? '' : ' selected'}>Usuário</option><option value="admin"${u && u.papel==='admin' ? ' selected' : ''}>Administrador</option></select></label>
     <label><input type="checkbox" data-f="editar"${!u || u.editar!==false ? ' checked' : ''}> Pode editar andamento, motivo e previsão</label>
+    <label><input type="checkbox" data-f="soAbas"${u && Array.isArray(u.editarAbas) ? ' checked' : ''}> Editar só em Coleta Reversa, Tratativas e SLA de Apontamento</label>
     <label><input type="checkbox" data-f="importar"${!u || u.importar!==false ? ' checked' : ''}> Pode importar planilhas</label></div>${admChecks(u ? u.abas : ['*'])}`;
 let _admOk = false;
 function admSkeleton(){
@@ -4254,7 +4318,7 @@ async function admCriar(){
     const cred = await authMod.createUserWithEmailAndPassword(secAuth, email, senha), uid = cred.user.uid;
     let enviado = false; if (enviar){ try { await authMod.sendPasswordResetEmail(secAuth, email); enviado = true; } catch(e){ console.warn('e-mail de senha', e); } }
     await authMod.signOut(secAuth);
-    await DB.doc('usuarios/'+uid).set({ email, nome, papel, ativo:true, abas, editar, importar, criadoPor:CUR_EMAIL, criadoEm:isoNow() });
+    await DB.doc('usuarios/'+uid).set({ email, nome, papel, ativo:true, abas, editar, importar, editarAbas: root.querySelector('[data-f=soAbas]').checked ? EDIT_ABAS_REL : null, criadoPor:CUR_EMAIL, criadoEm:isoNow() });
     NOMES[nomeKey(email)] = nome; DB.doc('config/usuarios').set({ nomes:{ [nomeKey(email)]: nome }, updatedAt:isoNow() }, true).catch(()=>{});
     root.querySelector('#adm-nome').value = ''; root.querySelector('#adm-email').value = '';
     await askConfirm('Usuário criado', `<p><b>${esc(nome)}</b> já pode entrar com <b>${esc(email)}</b>.</p><p style="margin-top:8px">Senha provisória (aparece só agora): <code style="font-size:14px;background:var(--srf1);padding:3px 8px;border-radius:6px;user-select:all">${esc(senha)}</code></p><p style="margin-top:8px;font-size:11.5px;color:var(--tx3)">${enviado ? 'Também enviamos um e-mail com o link para a pessoa criar a própria senha.' : 'Passe a senha à pessoa e peça para trocar em "Trocar senha" no menu.'}</p>`, 'Ok');
@@ -4269,7 +4333,7 @@ async function admEditar(uid){
   if (!ok) return;
   const root = document.querySelector('#confirmModal .cm-body [data-root]'), abas = admLerAbas(root); if (!abas.length){ toast('Marque ao menos uma aba.', {type:'warn'}); return; }
   let papel = root.querySelector('[data-f=papel]').value; if (uid===CUR_UID && u.papel==='admin') papel = 'admin';   // ninguem tira o proprio acesso de administrador
-  await DB.doc('usuarios/'+uid).set({ papel, abas, editar:root.querySelector('[data-f=editar]').checked, importar:root.querySelector('[data-f=importar]').checked, alteradoPor:CUR_EMAIL, alteradoEm:isoNow() }, true);
+  await DB.doc('usuarios/'+uid).set({ papel, abas, editar:root.querySelector('[data-f=editar]').checked, importar:root.querySelector('[data-f=importar]').checked, editarAbas: root.querySelector('[data-f=soAbas]').checked ? EDIT_ABAS_REL : null, alteradoPor:CUR_EMAIL, alteradoEm:isoNow() }, true);
   toast('Acessos de ' + (u.nome||u.email) + ' atualizados.', {type:'ok'});
 }
 async function admToggle(uid){
